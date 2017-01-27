@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:style w:type="paragraph" w:customStyle="1" w:styleId="BoxCaption" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" >
+  <w:basedOn w:val="Box"/>
+  <w:name w:val="Box Caption"/>
+  <w:pPr>
+    <w:contextualSpacing/>
+    <w:spacing w:before="240" w:after="0"/>
+  </w:pPr>
+</w:style>

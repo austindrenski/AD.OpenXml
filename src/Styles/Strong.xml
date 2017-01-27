@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:style w:type="character" w:default="1" w:styleId="Strong" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:basedOn w:val="DefaultParagraphFont"/>
+  <w:locked/>
+  <w:name w:val="Strong"/>
+  <w:qFormat/>
+  <w:rPr>
+    <w:b/>
+  </w:rPr>
+</w:style>

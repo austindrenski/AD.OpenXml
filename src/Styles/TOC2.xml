@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:style w:type="paragraph" w:styleId="TOC2"  xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" >
+  <w:basedOn w:val="TOC1"/>
+  <w:locked/>
+  <w:name w:val="toc 2"/>
+  <w:next w:val="Normal"/>
+  <w:pPr>
+    <w:ind w:left="245"/>
+    <w:spacing w:after="0"/>
+  </w:pPr>
+  <w:rPr>
+    <w:b w:val="0"/>
+    <w:color w:val="auto"/>
+    <w:sz w:val="24"/>
+  </w:rPr>
+</w:style>

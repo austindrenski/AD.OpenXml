@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{16A300C9-1B25-4D68-9F97-05B8CA2766C9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AD.OpenXml</RootNamespace>
+    <AssemblyName>AD.OpenXml</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AD.IO">
+      <HintPath>AD.OpenXml.Tests\packages\AD.IO.1.1.0.2\lib\net461\AD.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="AD.Xml">
+      <HintPath>AD.OpenXml.Tests\packages\AD.Xml.1.1.0.2\lib\net461\AD.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Annotations">
+      <HintPath>AD.OpenXml.Tests\packages\JetBrains.Annotations.10.2.1\lib\net\JetBrains.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="src\ConvertOpenXmlToXml.cs" />
+    <Compile Include="src\Documents\AddAltChunkToDocumentRelationships.cs" />
+    <Compile Include="src\Documents\AddDefaultExtensionsToContentTypes.cs" />
+    <Compile Include="src\Documents\AddFooters.cs" />
+    <Compile Include="src\Documents\AddHeaders.cs" />
+    <Compile Include="src\Documents\AddStyles.cs" />
+    <Compile Include="src\Documents\ModifyBarChartStyles.cs" />
+    <Compile Include="src\Documents\ModifyLineChartStyles.cs" />
+    <Compile Include="src\Documents\PositionChartsInline.cs" />
+    <Compile Include="src\Documents\PositionChartsInner.cs" />
+    <Compile Include="src\Documents\PositionChartsOuter.cs" />
+    <Compile Include="src\Elements\AddAltChunk.cs" />
+    <Compile Include="src\Elements\AddFigureCaption.cs" />
+    <Compile Include="src\Elements\AddLineBreakToHeadings.cs" />
+    <Compile Include="src\Elements\AddTableCaption.cs" />
+    <Compile Include="src\Elements\ChangeBoldToStrong.cs" />
+    <Compile Include="src\Elements\ChangeItalicToEmphasis.cs" />
+    <Compile Include="src\Elements\ChangeSubscriptToSubscript.cs" />
+    <Compile Include="src\Elements\ChangeSuperscriptToReference.cs" />
+    <Compile Include="src\Elements\ChangeUnderlineToFigureCaption.cs" />
+    <Compile Include="src\Elements\ChangeUnderlineToSourceNote.cs" />
+    <Compile Include="src\Elements\ChangeUnderlineToTableCaption.cs" />
+    <Compile Include="src\Elements\HighlightInsertRequests.cs" />
+    <Compile Include="src\Elements\MergeRuns.cs" />
+    <Compile Include="src\Elements\RemoveRsidAttributes.cs" />
+    <Compile Include="src\Elements\RemoveRunPropertiesFromParagraphProperties.cs" />
+    <Compile Include="src\Elements\SetTableStyles.cs" />
+    <Compile Include="src\Elements\TransferCharts.cs" />
+    <Compile Include="src\Packaging\EnumerateChartPaths.cs" />
+    <Compile Include="src\Process508From.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\[Content_Types].xml" />
+    <None Include="Resources\app.xml" />
+    <None Include="Resources\core.xml" />
+    <None Include="Resources\document.xml" />
+    <None Include="Resources\document.xml.rels.xml" />
+    <None Include="Resources\footer1.xml" />
+    <None Include="Resources\footer2.xml" />
+    <None Include="Resources\header1.xml" />
+    <None Include="Resources\header2.xml" />
+    <None Include="Resources\rels.xml" />
+    <None Include="Resources\settings.xml" />
+    <None Include="Resources\styles.xml" />
+    <None Include="Resources\theme1.xml" />
+    <Content Include="src\Styles\Appendix.xml" />
+    <Content Include="src\Styles\Bibliography.xml" />
+    <Content Include="src\Styles\Box.xml" />
+    <Content Include="src\Styles\BoxCaption.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="src\Styles\BoxListBullet.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="src\Styles\BoxSourceNote.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="src\Styles\CaptionFigure.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="src\Styles\CaptionTable.xml" />
+    <Content Include="src\Styles\DocDefaults.xml" />
+    <Content Include="src\Styles\Emphasis.xml" />
+    <Content Include="src\Styles\ExecutiveSummary1stParagraph.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="src\Styles\ExecutiveSummaryHighlights.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="src\Styles\ExecutiveSummarySidebars.xml" />
+    <Content Include="src\Styles\FigureTableSourceNote.xml" />
+    <Content Include="src\Styles\FootnoteReference.xml" />
+    <Content Include="src\Styles\FootnoteText.xml" />
+    <Content Include="src\Styles\Heading1.xml" />
+    <Content Include="src\Styles\Heading2.xml" />
+    <Content Include="src\Styles\Heading3.xml" />
+    <Content Include="src\Styles\Heading4.xml" />
+    <Content Include="src\Styles\Heading5.xml" />
+    <Content Include="src\Styles\Heading6.xml" />
+    <Content Include="src\Styles\Heading7.xml" />
+    <Content Include="src\Styles\Heading8.xml" />
+    <Content Include="src\Styles\Heading9.xml" />
+    <Content Include="src\Styles\Hyperlink.xml" />
+    <Content Include="src\Styles\ListBullet.xml" />
+    <Content Include="src\Styles\Normal.xml" />
+    <Content Include="src\Styles\Numbering.xml" />
+    <Content Include="src\Styles\PreHeading.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="src\Styles\Strong.xml" />
+    <Content Include="src\Styles\StyleNotImplemented.xml" />
+    <Content Include="src\Styles\Styles.xml" />
+    <Content Include="src\Styles\Subscript.xml" />
+    <Content Include="src\Styles\Superscript.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="src\Styles\TableOfFigures.xml" />
+    <Content Include="src\Styles\TOC1.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="src\Styles\TOC2.xml" />
+    <Content Include="src\Styles\TOC3.xml" />
+    <Content Include="src\Styles\TOC4.xml" />
+    <Content Include="src\Styles\TOCHeading.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="src\Templates\app.xml" />
+    <Content Include="src\Templates\core.xml" />
+    <Content Include="src\Templates\document.xml" />
+    <Content Include="src\Templates\document.xml.rels.xml" />
+    <Content Include="src\Templates\footer1.xml" />
+    <Content Include="src\Templates\footer2.xml" />
+    <Content Include="src\Templates\header1.xml" />
+    <Content Include="src\Templates\header2.xml" />
+    <Content Include="src\Templates\rels.xml" />
+    <Content Include="src\Templates\settings.xml" />
+    <Content Include="src\Templates\styles.xml" />
+    <Content Include="src\Templates\theme1.xml" />
+    <Content Include="src\Templates\[Content_Types].xml" />
+    <None Include="packages.config" />
+    <None Include="src\Styles\BlueTableBasic.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
