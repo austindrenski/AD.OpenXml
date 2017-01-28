@@ -35,8 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AD.IO">
-      <HintPath>AD.OpenXml.Tests\packages\AD.IO.1.1.0.2\lib\net461\AD.IO.dll</HintPath>
+    <Reference Include="AD.IO, Version=1.1.0.3, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>AD.OpenXml.Tests\packages\AD.IO.1.1.0.3\lib\net461\AD.IO.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="AD.Xml">
       <HintPath>AD.OpenXml.Tests\packages\AD.Xml.1.1.0.2\lib\net461\AD.Xml.dll</HintPath>
