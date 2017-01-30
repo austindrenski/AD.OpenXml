@@ -35,12 +35,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AD.IO, Version=1.1.0.3, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>AD.OpenXml.Tests\packages\AD.IO.1.1.0.3\lib\net461\AD.IO.dll</HintPath>
+    <Reference Include="AD.IO, Version=1.1.0.5, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>AD.OpenXml.Tests\packages\AD.IO.1.1.0.5\lib\net461\AD.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="AD.Xml, Version=1.1.0.3, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>AD.OpenXml.Tests\packages\AD.Xml.1.1.0.3\lib\net461\AD.Xml.dll</HintPath>
+    <Reference Include="AD.Xml, Version=1.1.0.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>AD.OpenXml.Tests\packages\AD.Xml.1.1.0.4\lib\net461\AD.Xml.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="JetBrains.Annotations">
@@ -189,6 +189,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>"$(ProjectDir)nuget.exe" pack "$(ProjectDir)$(ProjectFileName)" -Properties Configuration=Release -OutputDirectory "$(ProjectDir.TrimEnd('\'))"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
