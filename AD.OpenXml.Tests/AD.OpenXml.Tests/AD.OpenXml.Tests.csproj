@@ -35,8 +35,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AD.IO, Version=1.1.0.5, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AD.IO.1.1.0.5\lib\net461\AD.IO.dll</HintPath>
+    <Reference Include="AD.IO, Version=1.1.0.7, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.IO.1.1.0.7\lib\net461\AD.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="AD.Xml, Version=1.1.0.4, Culture=neutral, processorArchitecture=MSIL">
