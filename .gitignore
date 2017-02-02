@@ -9,3 +9,4 @@
 /nuget.exe
 *.DotSettings.user
 *.suo
+*.vspscc
