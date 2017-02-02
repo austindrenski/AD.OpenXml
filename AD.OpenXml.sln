@@ -5,7 +5,14 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AD.OpenXml.Tests", "AD.OpenXml.Tests\AD.OpenXml.Tests.csproj", "{05BAB84C-75DB-41D6-9C56-E1BE7501581A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AD.OpenXml", "..\AD.OpenXml.csproj", "{16A300C9-1B25-4D68-9F97-05B8CA2766C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AD.OpenXml", "AD.OpenXml\AD.OpenXml.csproj", "{16A300C9-1B25-4D68-9F97-05B8CA2766C9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4367FC6A-7073-4479-B59B-8A5FA72D5FF8}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		AD.OpenXml.nuspec = AD.OpenXml.nuspec
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

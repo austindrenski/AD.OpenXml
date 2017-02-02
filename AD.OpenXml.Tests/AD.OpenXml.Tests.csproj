@@ -35,11 +35,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AD.IO">
-      <HintPath>..\packages\AD.IO.1.1.0.7\lib\net461\AD.IO.dll</HintPath>
+    <Reference Include="AD.IO, Version=1.1.0.8, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.IO.1.1.0.8\lib\net461\AD.IO.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="AD.Xml, Version=1.1.0.4, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AD.Xml.1.1.0.4\lib\net461\AD.Xml.dll</HintPath>
+    <Reference Include="AD.Xml, Version=1.1.0.6, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.Xml.1.1.0.6\lib\net461\AD.Xml.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="JetBrains.Annotations, Version=10.2.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
@@ -63,9 +64,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Demo.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="src\Demo.cs" />
+    <Compile Include="src\Program.cs" />
+    <Compile Include="src\UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -73,7 +74,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\AD.OpenXml.csproj">
+    <ProjectReference Include="..\AD.OpenXml\AD.OpenXml.csproj">
       <Project>{16a300c9-1b25-4d68-9f97-05b8ca2766c9}</Project>
       <Name>AD.OpenXml</Name>
     </ProjectReference>
