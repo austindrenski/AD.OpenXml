@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AD.Collections</name>
+    </assembly>
+    <members>
+        <member name="T:AD.Collections.FlattenExtensions">
+            <summary>
+            Extension methods to flatten enumerables into one-dimensional arrays.
+            </summary>
+        </member>
+        <member name="M:AD.Collections.FlattenExtensions.Flatten``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Converts an enumerable of enumerables into a one-dimensional array (e.g. T[]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting one-dimensional array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables to flatten.</param>
+            <returns>An array of type T[].</returns>
+        </member>
+        <member name="M:AD.Collections.FlattenExtensions.Flatten``1(``0[])">
+            <summary>
+            Converts an enumerable of enumerables into a one-dimensional array (e.g. T[]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting one-dimensional array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables to flatten.</param>
+            <returns>An array of type T[].</returns>
+        </member>
+        <member name="M:AD.Collections.FlattenExtensions.Flatten``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}})">
+            <summary>
+            Converts an enumerable of enumerables into a one-dimensional array (e.g. T[]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting one-dimensional array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables to flatten.</param>
+            <returns>An array of type T[].</returns>
+        </member>
+        <member name="M:AD.Collections.FlattenExtensions.Flatten``1(``0[][])">
+            <summary>
+            Converts an enumerable of enumerables into a one-dimensional array (e.g. T[]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting one-dimensional array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables to flatten.</param>
+            <returns>An array of type T[].</returns>
+        </member>
+        <member name="M:AD.Collections.FlattenExtensions.Flatten``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}}})">
+            <summary>
+            Converts an enumerable of enumerables into a one-dimensional array (e.g. T[]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting one-dimensional array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables to flatten.</param>
+            <returns>An array of type T[].</returns>
+        </member>
+        <member name="M:AD.Collections.FlattenExtensions.Flatten``1(``0[][][])">
+            <summary>
+            Converts an enumerable of enumerables into a one-dimensional array (e.g. T[]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting one-dimensional array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables to flatten.</param>
+            <returns>An array of type T[].</returns>
+        </member>
+        <member name="M:AD.Collections.FlattenExtensions.Flatten``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}}}})">
+            <summary>
+            Converts an enumerable of enumerables into a one-dimensional array (e.g. T[]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting one-dimensional array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables to flatten.</param>
+            <returns>An array of type T[].</returns>
+        </member>
+        <member name="M:AD.Collections.FlattenExtensions.Flatten``1(``0[][][][])">
+            <summary>
+            Converts an enumerable of enumerables into a one-dimensional array (e.g. T[]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting one-dimensional array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables to flatten.</param>
+            <returns>An array of type T[].</returns>
+        </member>
+        <member name="T:AD.Collections.ToJaggedArrayExtensions">
+            <summary>
+            Extension methods to convert enumerables into jagged arrays.
+            </summary>
+        </member>
+        <member name="M:AD.Collections.ToJaggedArrayExtensions.ToJaggedArray``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Converts an enumerable of enumerables of type T into a two-dimensional jagged array (e.g. T[][]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting jagged array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables to convert into a jagged array.</param>
+            <returns>A jagged array of type T[][].</returns>
+        </member>
+        <member name="M:AD.Collections.ToJaggedArrayExtensions.ToJaggedArray``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}})">
+            <summary>
+            Converts an enumerable of enumerables of type T into a two-dimensional jagged array (e.g. T[][]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting jagged array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables to convert into a jagged array.</param>
+            <returns>A jagged array of type T[][].</returns>
+        </member>
+        <member name="M:AD.Collections.ToJaggedArrayExtensions.ToJaggedArray``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}}})">
+            <summary>
+            Converts an enumerable of enumerables of type T into a three-dimensional jagged array (e.g. T[][][]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting jagged array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables of enumerables to convert into a jagged array.</param>
+            <returns>A jagged array of type T[][][].</returns>
+        </member>
+        <member name="M:AD.Collections.ToJaggedArrayExtensions.ToJaggedArray``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}}}})">
+            <summary>
+            Converts an enumerable of enumerables of type T into a four-dimensional jagged array (e.g. T[][][][]).
+            </summary>
+            <typeparam name="T">The type of the inner elements and the resulting jagged array.</typeparam>
+            <param name="enumerable">An enumerable of enumerables of enumerables of enumerables to convert into a jagged array.</param>
+            <returns>A jagged array of type T[][][][].</returns>
+        </member>
+    </members>
+</doc>

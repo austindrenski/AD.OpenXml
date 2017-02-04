@@ -1032,6 +1032,18 @@
             <exception cref="T:System.IO.PathTooLongException"/>
             <exception cref="T:System.UnauthorizedAccessException"/>
         </member>
+        <member name="T:AD.IO.ReadDataExtensions">
+            <summary>
+            Extension methods to import files as XML nodes.
+            </summary>
+        </member>
+        <member name="M:AD.IO.ReadDataExtensions.ReadData(AD.IO.DelimitedFilePath)">
+            <summary>
+            Read the delimited file as a dictionary of columns whose values are doubles.
+            </summary>
+            <param name="delimitedFilePath">The file to read.</param>
+            <returns>An IDictionary where each column from the delimited file is stored as a key entry.</returns>
+        </member>
         <member name="T:AD.IO.ParseExtensions">
             <summary>
             Parses <see cref="T:System.Collections.Generic.IEnumerator`1"/> as numbers.
