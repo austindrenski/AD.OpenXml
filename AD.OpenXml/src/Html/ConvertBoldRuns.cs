@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 
-namespace AjdExtensions.Html
+namespace AD.OpenXml.Html
 {
     [PublicAPI]
     public static class ConvertBoldRunsExtensions

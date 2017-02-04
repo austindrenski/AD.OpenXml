@@ -2,7 +2,7 @@
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AjdExtensions.Html
+namespace AD.OpenXml.Html
 {
     [PublicAPI]
     public static class ConvertTextNodesExtensions

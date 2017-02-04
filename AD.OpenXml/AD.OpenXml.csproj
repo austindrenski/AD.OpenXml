@@ -64,10 +64,10 @@
     </Compile>
     <Compile Include="src\Html\BodyToHtml.cs" />
     <Compile Include="src\Html\ConvertBoldRuns.cs" />
-    <Compile Include="src\CHtml\onvertFootnoteReferences.cs" />
+    <Compile Include="src\Html\ConvertFootnoteReferences.cs" />
     <Compile Include="src\Html\ConvertHeadings.cs" />
     <Compile Include="src\Html\ConvertItalicRuns.cs" />
-    <Compile Include="src\Html\ConvertOpenXmlToXml.cs" />
+    <Compile Include="src\ConvertOpenXmlToXml.cs" />
     <Compile Include="src\Html\ConvertSimpleRuns.cs" />
     <Compile Include="src\Html\ConvertStyleToClass.cs" />
     <Compile Include="src\Html\ConvertTableCaptions.cs" />

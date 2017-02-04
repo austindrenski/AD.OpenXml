@@ -1,10 +1,13 @@
 ﻿using AD.IO;
 using AD.OpenXml.Documents;
+using JetBrains.Annotations;
 
 namespace AD.OpenXml.Tests
 {
+    [UsedImplicitly]
     public static class DemoProgram
     {
+        [UsedImplicitly]
         public static void Demo()
         {
             // Declare working directory

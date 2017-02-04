@@ -1,10 +1,14 @@
 ﻿using AD.IO;
 using AD.OpenXml.Documents;
+using AD.OpenXml.Html;
+using JetBrains.Annotations;
 
 namespace AD.OpenXml.Tests
 {
+    [UsedImplicitly]
     public static class Program
     {
+        [UsedImplicitly]
         public static void Main()
         {
             // Declare working directory
@@ -50,6 +54,11 @@ namespace AD.OpenXml.Tests
             // Write document.xml to XML file
             XmlFilePath xml = XmlFilePath.Create(path + "TestWordDocument_out.xml");
             result.ReadAsXml().Elements().WriteXml(xml);
+
+
+            // Write document.xml to HTML file
+            HtmlFilePath html = HtmlFilePath.Create(path + "TestWordDocument_out.html");
+            result.ReadAsXml().ProcessHtml().WriteHtml(html);
         }
     }
 }

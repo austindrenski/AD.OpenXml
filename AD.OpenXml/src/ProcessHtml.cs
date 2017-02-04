@@ -2,7 +2,7 @@
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AjdExtensions.Html
+namespace AD.OpenXml.Html
 {
     /// <summary>
     /// Performs a variety of processing to transform the XML node into a well-formed HTML document.

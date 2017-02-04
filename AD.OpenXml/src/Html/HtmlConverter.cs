@@ -15,7 +15,7 @@
 ////using DocumentFormat.OpenXml.Wordprocessing;
 ////using M = DocumentFormat.OpenXml.Math;
 
-//namespace AjdExtensions.Html
+//namespace AD.OpenXml.Html
 //{
 //    internal class HtmlConverter
 //    {
