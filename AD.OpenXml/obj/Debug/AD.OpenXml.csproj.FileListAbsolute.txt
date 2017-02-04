@@ -1,3 +1,0 @@
-C:\Users\austin.drenski\Source\Repos\AD.OpenXml\obj\Debug\AD.OpenXml.csprojResolveAssemblyReference.cache
-C:\Users\austin.drenski\Source\Repos\AD.OpenXml\obj\Debug\AD.OpenXml.Properties.Resources.resources
-C:\Users\austin.drenski\Source\Repos\AD.OpenXml\obj\Debug\AD.OpenXml.csproj.GenerateResource.Cache

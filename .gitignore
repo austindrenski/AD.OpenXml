@@ -2,11 +2,11 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/bin/Debug
-/obj/Debug
+**/bin
+**/obj
 *.DotSettings
-*.nupkg
-/nuget.exe
 *.DotSettings.user
+*.exe
+*.nupkg
 *.suo
 *.vspscc

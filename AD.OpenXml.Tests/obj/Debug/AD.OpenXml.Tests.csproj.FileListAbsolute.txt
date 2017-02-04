@@ -1,6 +1,0 @@
-C:\Users\austin.drenski\Source\Repos\AD.OpenXml\AD.OpenXml.Tests\AD.OpenXml.Tests\bin\Debug\AD.OpenXml.Tests.dll
-C:\Users\austin.drenski\Source\Repos\AD.OpenXml\AD.OpenXml.Tests\AD.OpenXml.Tests\bin\Debug\AD.OpenXml.Tests.pdb
-C:\Users\austin.drenski\Source\Repos\AD.OpenXml\AD.OpenXml.Tests\AD.OpenXml.Tests\bin\Debug\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
-C:\Users\austin.drenski\Source\Repos\AD.OpenXml\AD.OpenXml.Tests\AD.OpenXml.Tests\obj\Debug\AD.OpenXml.Tests.csprojResolveAssemblyReference.cache
-C:\Users\austin.drenski\Source\Repos\AD.OpenXml\AD.OpenXml.Tests\AD.OpenXml.Tests\obj\Debug\AD.OpenXml.Tests.dll
-C:\Users\austin.drenski\Source\Repos\AD.OpenXml\AD.OpenXml.Tests\AD.OpenXml.Tests\obj\Debug\AD.OpenXml.Tests.pdb
