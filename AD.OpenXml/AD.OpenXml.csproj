@@ -62,18 +62,18 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="src\BodyToHtml.cs" />
-    <Compile Include="src\ConvertBoldRuns.cs" />
-    <Compile Include="src\ConvertFootnoteReferences.cs" />
-    <Compile Include="src\ConvertHeadings.cs" />
-    <Compile Include="src\ConvertItalicRuns.cs" />
-    <Compile Include="src\ConvertOpenXmlToXml.cs" />
-    <Compile Include="src\ConvertSimpleRuns.cs" />
-    <Compile Include="src\ConvertStyleToClass.cs" />
-    <Compile Include="src\ConvertTableCaptions.cs" />
-    <Compile Include="src\ConvertTableCells.cs" />
-    <Compile Include="src\ConvertTables.cs" />
-    <Compile Include="src\ConvertTextNodes.cs" />
+    <Compile Include="src\Html\BodyToHtml.cs" />
+    <Compile Include="src\Html\ConvertBoldRuns.cs" />
+    <Compile Include="src\CHtml\onvertFootnoteReferences.cs" />
+    <Compile Include="src\Html\ConvertHeadings.cs" />
+    <Compile Include="src\Html\ConvertItalicRuns.cs" />
+    <Compile Include="src\Html\ConvertOpenXmlToXml.cs" />
+    <Compile Include="src\Html\ConvertSimpleRuns.cs" />
+    <Compile Include="src\Html\ConvertStyleToClass.cs" />
+    <Compile Include="src\Html\ConvertTableCaptions.cs" />
+    <Compile Include="src\Html\ConvertTableCells.cs" />
+    <Compile Include="src\Html\ConvertTables.cs" />
+    <Compile Include="src\Html\ConvertTextNodes.cs" />
     <Compile Include="src\Documents\AddAltChunkToDocumentRelationships.cs" />
     <Compile Include="src\Documents\AddDefaultExtensionsToContentTypes.cs" />
     <Compile Include="src\Documents\AddFooters.cs" />
@@ -101,7 +101,7 @@
     <Compile Include="src\Elements\RemoveRunPropertiesFromParagraphProperties.cs" />
     <Compile Include="src\Elements\SetTableStyles.cs" />
     <Compile Include="src\Elements\TransferCharts.cs" />
-    <Compile Include="src\HtmlConverter.cs" />
+    <Compile Include="src\Html\HtmlConverter.cs" />
     <Compile Include="src\Packaging\EnumerateChartPaths.cs" />
     <Compile Include="src\Process508From.cs" />
     <Compile Include="src\ProcessHtml.cs" />
