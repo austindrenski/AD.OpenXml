@@ -41,18 +41,20 @@
       <HintPath>..\packages\AD.Collections.1.1.0.1\lib\net461\AD.Collections.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="AD.IO, Version=1.1.0.10, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AD.IO.1.1.0.10\lib\net461\AD.IO.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="AD.IO, Version=1.1.0.16, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.IO.1.1.0.16\lib\net461\AD.IO.dll</HintPath>
     </Reference>
-    <Reference Include="AD.Xml, Version=1.1.0.7, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AD.Xml.1.1.0.7\lib\net461\AD.Xml.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="AD.Xml, Version=1.1.0.13, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.Xml.1.1.0.13\lib\net461\AD.Xml.dll</HintPath>
     </Reference>
-    <Reference Include="JetBrains.Annotations">
-      <HintPath>..\packages\JetBrains.Annotations.10.2.1\lib\net\JetBrains.Annotations.dll</HintPath>
+    <Reference Include="JetBrains.Annotations, Version=10.4.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetBrains.Annotations.10.4.0\lib\net\JetBrains.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=1.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.1.3.1\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
@@ -205,11 +207,13 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"$(ProjectDir)..\nuget.exe" pack "$(ProjectDir)$(ProjectFileName)" -Properties Configuration=Release -OutputDirectory "$(ProjectDir).."</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

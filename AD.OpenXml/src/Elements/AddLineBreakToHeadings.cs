@@ -23,7 +23,7 @@ namespace AD.OpenXml.Elements
             {
                 item.AddAfterSelf(
                     new XElement(W + "r",
-                        new XElement(W + "br")));   
+                        new XElement(W + "br")));
             }
 
             return element;

@@ -52,7 +52,6 @@ namespace AD.OpenXml.Elements
                 }
                 item.Element(W + "pPr")?.AddFirst(new XElement(W + "pStyle", new XAttribute(W + "val", "CaptionTable")));
             }
-            paragraphs.Descendants(W + "u").Remove();
             return element;
         }
     }

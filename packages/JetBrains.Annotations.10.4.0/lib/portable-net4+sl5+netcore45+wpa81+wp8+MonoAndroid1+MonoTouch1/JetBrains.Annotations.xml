@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>JetBrains.Annotations.NetStandard</name>
+        <name>JetBrains.Annotations</name>
     </assembly>
     <members>
         <member name="T:JetBrains.Annotations.CanBeNullAttribute">

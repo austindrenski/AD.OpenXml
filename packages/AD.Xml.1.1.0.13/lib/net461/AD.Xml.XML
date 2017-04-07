@@ -728,6 +728,45 @@
             <param name="predicate">The predicate that is satisfied by the elements to be removed from each <see cref="T:System.Xml.Linq.XElement"/>.</param>
             <returns>A reference to the existing <see cref="T:System.Linq.ParallelQuery`1"/>. This is returned for use with fluent syntax calls.</returns>
         </member>
+        <member name="T:AD.Xml.RemoveByAllIfEmptyExtensions">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:AD.Xml.RemoveByAllIfEmptyExtensions.RemoveByAllIfEmpty(System.Xml.Linq.XElement,System.Xml.Linq.XName)">
+            <summary>
+            
+            </summary>
+            <param name="element"></param>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+        <member name="T:AD.Xml.RemoveNamespacesExtensions">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:AD.Xml.RemoveNamespacesExtensions.RemoveNamespaces(System.Xml.Linq.XElement)">
+            <summary>
+            
+            </summary>
+            <param name="element"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AD.Xml.RemoveNamespacesExtensions.RemoveNamespaces(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement})">
+            <summary>
+            
+            </summary>
+            <param name="elements"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AD.Xml.RemoveNamespacesExtensions.RemoveNamespaces(System.Linq.ParallelQuery{System.Xml.Linq.XElement})">
+            <summary>
+            
+            </summary>
+            <param name="elements"></param>
+            <returns></returns>
+        </member>
         <member name="T:AD.Xml.ReplaceExtensions">
             <summary>
             Extension methods to replace nodes in an XML tree.
@@ -744,6 +783,19 @@
             <param name="content">The content of the replacement node.</param>
             <returns>A reference to the existing <see cref="T:System.Xml.Linq.XElement"/>. This is returned for use with fluent syntax calls.</returns>
             <exception cref="T:System.ArgumentNullException"/>
+        </member>
+        <member name="T:AD.Xml.SetAttributeValuesExtensions">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:AD.Xml.SetAttributeValuesExtensions.SetAttributeValues(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},System.Xml.Linq.XName,System.Object)">
+            <summary>
+            
+            </summary>
+            <param name="elements"></param>
+            <param name="name"></param>
+            <param name="value"></param>
         </member>
         <member name="T:AD.Xml.SiblingExtensions">
             <summary>
@@ -843,12 +895,14 @@
             Extension methods to convert objects to XElements.
             </summary> 
         </member>
-        <member name="F:AD.Xml.ToXElementExensions.SpecialFields">
-            <summary>
-            Fields that should be flagged in XDocuments consumed by Getdata applications.
-            </summary>
-        </member>
         <member name="M:AD.Xml.ToXElementExensions.ToXElement(System.Collections.IEnumerable)">
+            <summary>
+            Returns a single XElement named root whose content are the converted elements of the enumerable collection.
+            </summary>
+            <param name="enumerable">The enumerable collection that will become the elements of the root XElement.</param>
+            <returns>An XElement named root that contains the enumerable as elements.</returns>
+        </member>
+        <member name="M:AD.Xml.ToXElementExensions.ToXElement(System.Linq.IQueryable)">
             <summary>
             Returns a single XElement named root whose content are the converted elements of the enumerable collection.
             </summary>
@@ -887,6 +941,15 @@
             </summary>
             <param name="elements">The enumerable collection to convert.</param>
             <returns>The indented XML string form of the enumerable collection.</returns>
+        </member>
+        <member name="M:AD.Xml.ToXmlStringExtensions.ToXmlString(System.Collections.Immutable.IImmutableList{System.Object},System.String,System.String)">
+            <summary>
+            Returns the XML string representation of an immutable array.
+            </summary>
+            <param name="records">The immutable collection to convert.</param>
+            <param name="indent">The indent string applied during serialization.</param>
+            <param name="line">The delimiting string applied between nodes.</param>
+            <returns>The indented XML string form of the immutable collection.</returns>
         </member>
         <member name="T:AD.Xml.ToXNameExtensions">
             <summary>

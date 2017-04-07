@@ -22,24 +22,31 @@ namespace AD.OpenXml.Documents
         {
             // Modify [Content_Types].xml
             XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");
+
             packageRelation.Descendants(C + "Override")
                            .Where(x => x.Attribute("PartName")?.Value.StartsWith("/word/footer") ?? false)
                            .Remove();
+
             packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
 
             // Modify document.xml.rels and grab the current header id number
             XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
+
             documentRelation.Descendants(R + "Relationship")
                             .Where(x => x.Attribute("Target")?.Value.Contains("footer") ?? false)
                             .Remove();
+
             int currentFooterId = documentRelation.Elements().Attributes("Id").Select(x => int.Parse(x.Value.Substring(3))).DefaultIfEmpty(0).Max();
+
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
             // Modify document.xml
             XElement document = toFilePath.ReadAsXml("word/document.xml");
+
             document.Descendants(W + "sectPr")
                     .Elements(W + "footerReference")
                     .Remove();
+
             document.WriteInto(toFilePath, "word/document.xml");
 
             // Add footers
@@ -63,7 +70,7 @@ namespace AD.OpenXml.Documents
             XElement document = toFilePath.ReadAsXml("word/document.xml");
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
-                sectionProperties.AddFirst(
+                sectionProperties.Add(
                     new XElement(W + "footerReference",
                         new XAttribute(W + "type", "even"),
                         new XAttribute(S + "id", footerId)));
@@ -84,21 +91,25 @@ namespace AD.OpenXml.Documents
             element.WriteInto(toFilePath, "word/footer2.xml");
 
             XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
+
             documentRelation.Add(
                 new XElement(R + "Relationship",
                     new XAttribute("Id", footerId),
                     new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
                     new XAttribute("Target", "footer2.xml")));
+
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
             XElement document = toFilePath.ReadAsXml("word/document.xml");
+
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
-                sectionProperties.AddFirst(
+                sectionProperties.Add(
                     new XElement(W + "footerReference",
                         new XAttribute(W + "type", "default"),
                         new XAttribute(S + "id", footerId)));
             }
+
             document.WriteInto(toFilePath, "word/document.xml");
 
             XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");

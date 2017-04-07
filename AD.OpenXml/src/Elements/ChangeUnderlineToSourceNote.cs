@@ -39,6 +39,7 @@ namespace AD.OpenXml.Elements
                                 || (x.Previous()?.DescendantsAndSelf(W + "u").Any() ?? false)
                                 || (x.Previous()?.Value.Contains('{') ?? false))
                        .ToArray();
+
             foreach (XElement item in paragraphs)
             {
                 item.RemoveBy(W + "pStyle");
@@ -48,7 +49,6 @@ namespace AD.OpenXml.Elements
                 }
                 item.Element(W + "pPr")?.AddFirst(new XElement(W + "pStyle", new XAttribute(W + "val", "FiguresTablesSourceNote")));
             }
-            paragraphs.Descendants(W + "u").Remove();
             return element;
         }
     }

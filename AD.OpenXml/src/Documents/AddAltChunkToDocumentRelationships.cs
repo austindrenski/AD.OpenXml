@@ -5,6 +5,9 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class AddAltChunkToDocumentRelationshipsExtensions
     {

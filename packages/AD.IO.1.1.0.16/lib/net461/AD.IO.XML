@@ -388,6 +388,12 @@
             </summary>
             <exception cref="T:System.ArgumentException"/>
         </member>
+        <member name="M:AD.IO.DelimitedFilePath.Create(System.String)">
+            <summary>
+            Creates a delimited file along the path if one does not exist.
+            </summary>
+            <exception cref="T:System.ArgumentException"/>
+        </member>
         <member name="M:AD.IO.DelimitedFilePath.AD#IO#IPath#Create(System.String)">
             <summary>
             Explicit IPath implementation.
@@ -1057,6 +1063,30 @@
             <param name="enumerable">The source enumerable.</param>
             <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as an integer.</returns>
         </member>
+        <member name="M:AD.IO.ParseExtensions.ParseShort(System.Collections.Generic.IEnumerable{System.Char})">
+            <summary>
+            Filters an enumerable of characters for the numeric component, 
+            concatenates the characters, and then parses the string as an integer.
+            </summary>
+            <param name="enumerable">The source enumerable.</param>
+            <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as an integer.</returns>
+        </member>
+        <member name="M:AD.IO.ParseExtensions.ParseInt(System.Collections.Generic.IEnumerable{System.Char})">
+            <summary>
+            Filters an enumerable of characters for the numeric component, 
+            concatenates the characters, and then parses the string as an integer.
+            </summary>
+            <param name="enumerable">The source enumerable.</param>
+            <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as an integer.</returns>
+        </member>
+        <member name="M:AD.IO.ParseExtensions.ParseLong(System.Collections.Generic.IEnumerable{System.Char})">
+            <summary>
+            Filters an enumerable of characters for the numeric component, 
+            concatenates the characters, and then parses the string as a long.
+            </summary>
+            <param name="enumerable">The source enumerable.</param>
+            <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a long.</returns>
+        </member>
         <member name="M:AD.IO.ParseExtensions.ParseDouble(System.Collections.Generic.IEnumerable{System.Char})">
             <summary>
             Filters an enumerable of characters for the numeric component, 
@@ -1117,6 +1147,14 @@
             <summary>
             Extension methods to create delimited strings from various collections.
             </summary>
+        </member>
+        <member name="M:AD.IO.ToDelimitedExtensions.MakeSafeString(System.String,System.String)">
+            <summary>
+            Provides safe handling for string components.
+            </summary>
+            <param name="value">The string value.</param>
+            <param name="delimiter">The string delimiter.</param>
+            <returns>The original string, an empty string, or the original string wrapped in double quotes.</returns>
         </member>
         <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.String},System.String)">
             <summary>
@@ -1183,7 +1221,23 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.Linq.ParallelQuery{System.String}},System.String)">
+            <summary>
+            Appends the elements of the enumerable collection by a delimiter.
+            </summary>
+            <param name="enumerable">A collection to be delimited.</param>
+            <param name="delimiter">The delimiter used to delimit the collection.</param>
+            <returns>A string delimited by the delimiter.</returns>
+        </member>
         <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Linq.ParallelQuery{System.Collections.Generic.IEnumerable{System.String}},System.String)">
+            <summary>
+            Appends the elements of the enumerable collection by a delimiter.
+            </summary>
+            <param name="enumerable">A collection to be delimited.</param>
+            <param name="delimiter">The delimiter used to delimit the collection.</param>
+            <returns>A string delimited by the delimiter.</returns>
+        </member>
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Linq.ParallelQuery{System.Linq.ParallelQuery{System.String}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1199,7 +1253,31 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Collections.Generic.IEnumerable{System.Linq.ParallelQuery{``0}},System.String)">
+            <summary>
+            Appends the elements of the enumerable collection by a delimiter.
+            </summary>
+            <param name="enumerable">A collection to be delimited.</param>
+            <param name="delimiter">The delimiter used to delimit the collection.</param>
+            <returns>A string delimited by the delimiter.</returns>
+        </member>
         <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Linq.ParallelQuery{System.Collections.Generic.IEnumerable{``0}},System.String)">
+            <summary>
+            Appends the elements of the enumerable collection by a delimiter.
+            </summary>
+            <param name="enumerable">A collection to be delimited.</param>
+            <param name="delimiter">The delimiter used to delimit the collection.</param>
+            <returns>A string delimited by the delimiter.</returns>
+        </member>
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Linq.ParallelQuery{System.Linq.ParallelQuery{``0}},System.String)">
+            <summary>
+            Appends the elements of the enumerable collection by a delimiter.
+            </summary>
+            <param name="enumerable">A collection to be delimited.</param>
+            <param name="delimiter">The delimiter used to delimit the collection.</param>
+            <returns>A string delimited by the delimiter.</returns>
+        </member>
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Collections.Immutable.ImmutableArray{System.Collections.Immutable.ImmutableArray{``0}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1214,12 +1292,29 @@
             <param name="document">An XDocument to be transformed into a delimited string.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
-            <exception cref="T:System.ArgumentException"/>
         </member>
         <member name="T:AD.IO.WriteDelimitedExtensions">
             <summary>
             Extension methods to write an <see cref="T:System.Collections.Generic.IEnumerable`1"/> to a delimited file.
             </summary>
+        </member>
+        <member name="M:AD.IO.WriteDelimitedExtensions.WriteDelimited``1(System.Collections.Generic.IEnumerable{``0},AD.IO.DelimitedFilePath,System.String,System.Boolean)">
+            <summary>
+            Writes the <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a delimited file.
+            </summary>
+            <param name="elements">The source enumerable.</param>
+            <param name="filePath">The file to which the content is written.</param>
+            <param name="delimiter">The character used to delimit values.</param>
+            <param name="overwrite">True to overwrite an existing file.</param>
+        </member>
+        <member name="M:AD.IO.WriteDelimitedExtensions.WriteDelimited``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}},AD.IO.DelimitedFilePath,System.String,System.Boolean)">
+            <summary>
+            Writes the <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a delimited file.
+            </summary>
+            <param name="elements">The source enumerable.</param>
+            <param name="filePath">The file to which the content is written.</param>
+            <param name="delimiter">The character used to delimit values.</param>
+            <param name="overwrite">True to overwrite an existing file.</param>
         </member>
         <member name="M:AD.IO.WriteDelimitedExtensions.WriteDelimited(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.DelimitedFilePath,System.String,System.Boolean)">
             <summary>

@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Linq;
+using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Elements;
 using AD.Xml;
@@ -44,14 +45,22 @@ namespace AD.OpenXml
                             .ChangeUnderlineToSourceNote()
                             .ChangeSuperscriptToReference()
                             .HighlightInsertRequests()
-                            .AddLineBreakToHeadings()
+                            //.AddLineBreakToHeadings()
                             .SetTableStyles()
                             .RemoveByAllIfEmpty(W + "rPr")
                             .RemoveByAllIfEmpty(W + "pPr")
                             .RemoveByAllIfEmpty(W + "t")
                             .RemoveByAllIfEmpty(W + "r")
                             .RemoveByAllIfEmpty(W + "p")
+                            .RemoveByAll(W + "rFonts")
+                            .RemoveByAll(W + "sz")
+                            .RemoveByAll(W + "szCs")
+                            .RemoveByAll(W + "u")
                             .TransferCharts(fromFilePath, toFilePath);
+
+            element.Descendants(W + "p").Attributes().Remove();
+            element.Descendants(W + "tr").Attributes().Remove();
+            element.Descendants().SelectMany(x => x.Attributes(W + "pStyle").Skip(1)).Remove();
 
             element.WriteInto(toFilePath, "word/document.xml");
         }
