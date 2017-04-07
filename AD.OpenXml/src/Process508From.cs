@@ -60,7 +60,16 @@ namespace AD.OpenXml
 
             element.Descendants(W + "p").Attributes().Remove();
             element.Descendants(W + "tr").Attributes().Remove();
-            element.Descendants().SelectMany(x => x.Attributes(W + "pStyle").Skip(1)).Remove();
+            element.Descendants().SelectMany(x => x.Elements().Where(y => y.Name == W + "pStyle").Skip(1)).Remove();
+            element.Descendants(W + "hideMark").Remove();
+            element.Descendants(W + "noWrap").Remove();
+            if (element.Element(W + "body")?.Elements().First().Name == W + "sectPr")
+            {
+                element.Element(W + "body")?.Elements().First().Remove();
+            }
+            element.Descendants(W + "footnoteReference").Remove();
+            element.Descendants(W + "footerReference").Remove();
+            element.Descendants(W + "hyperlink").Remove();
 
             element.WriteInto(toFilePath, "word/document.xml");
         }
