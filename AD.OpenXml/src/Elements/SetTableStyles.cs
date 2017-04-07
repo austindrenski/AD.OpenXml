@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Linq;
+using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -18,7 +19,10 @@ namespace AD.OpenXml.Elements
                     new XElement(W + "tblStyle",
                         new XAttribute(W + "val", "BlueTableBasic")),
                     new XElement(W + "tblW",
-                        new XAttribute(W + "type", "auto")),
+                        new XAttribute(W + "type", "dxa"),
+                        new XAttribute(W + "w", "9360")),
+                    new XElement(W + "tblLayout",
+                        new XAttribute(W + "type", "autofit")),
                     new XElement(W + "tblLook",
                         new XAttribute(W + "val", "04A0"),
                         new XAttribute(W + "firstRow", "1"),
@@ -28,6 +32,10 @@ namespace AD.OpenXml.Elements
                         new XAttribute(W + "noHBand", "0"),
                         new XAttribute(W + "noVBand", "1")));
             }
+            element.Descendants(W + "tcPr").Descendants().Where(x => x.Name != W + "vAlign").Remove();
+            element.Descendants(W + "trPr").Remove();
+            element.Descendants(W + "gridCol").Attributes(W + "w").Remove();
+
             return element;
         }
     }

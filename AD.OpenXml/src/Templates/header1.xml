@@ -7,17 +7,17 @@
     <w:r>
       <w:t xml:space="preserve">Chapter </w:t>
     </w:r>
-    <w:fldSimple w:instr=" STYLEREF  &quot;Heading 1&quot; \s \* MERGEFORMAT ">
+    <w:fldSimple w:instr=" STYLEREF  &quot;heading 1&quot; \s \* MERGEFORMAT ">
       <w:r>
-        <w:t></w:t>
+        <w:t/>
       </w:r>
     </w:fldSimple>
     <w:r>
       <w:t xml:space="preserve">: </w:t>
     </w:r>
-    <w:fldSimple w:instr=" STYLEREF  &quot;Heading 1&quot;  \* MERGEFORMAT ">
+    <w:fldSimple w:instr=" STYLEREF  &quot;heading 1&quot; \* MERGEFORMAT ">
       <w:r>
-        <w:t></w:t>
+        <w:t/>
       </w:r>
     </w:fldSimple>
   </w:p>

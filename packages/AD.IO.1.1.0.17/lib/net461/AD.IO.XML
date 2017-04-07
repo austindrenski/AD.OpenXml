@@ -63,14 +63,6 @@
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot; ?&gt;
             &lt;w:document xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
               &lt;w:body&gt;
-                &lt;w:p&gt;
-                &lt;/w:p&gt;
-                &lt;w:sectPr&gt;
-                  &lt;w:pgSz w:w=&quot;12240&quot; w:h=&quot;15840&quot;/&gt;
-                  &lt;w:pgMar w:top=&quot;1440&quot; w:right=&quot;1440&quot; w:bottom=&quot;1440&quot; w:left=&quot;1440&quot; w:header=&quot;720&quot; w:footer=&quot;720&quot; w:gutter=&quot;0&quot;/&gt;
-                  &lt;w:cols w:space=&quot;720&quot;/&gt;
-                  &lt;w:docGrid w:linePitch=&quot;360&quot;/&gt;
-                &lt;/w:sectPr&gt;
               &lt;/w:body&gt;
             &lt;/w:document&gt;.
              </summary>
@@ -135,15 +127,15 @@
                 &lt;w:r&gt;
                   &lt;w:t xml:space=&quot;preserve&quot;&gt;Chapter &lt;/w:t&gt;
                 &lt;/w:r&gt;
-                &lt;w:fldSimple w:instr=&quot; STYLEREF  &amp;quot;Heading 1&amp;quot; \s \* MERGEFORMAT &quot;&gt;
+                &lt;w:fldSimple w:instr=&quot; STYLEREF  &amp;quot;heading 1&amp;quot; \s \* &quot;&gt;
                   &lt;w:r&gt;
-                    &lt;w:t&gt;&lt;/w:t&gt;
+                    &lt;w:t/&gt;
                   &lt;/w:r&gt;
                 &lt;/w:fldSimple&gt;
                 &lt;w:r&gt;
                   &lt;w:t xml:space=&quot;preserve&quot;&gt;: &lt;/w:t&gt;
                 &lt;/w:r&gt;
-                &lt;w:fldSimple w:i [rest of string was truncated]&quot;;.
+                &lt;w:fldSimple w:instr=&quot; STYLEREF   [rest of string was truncated]&quot;;.
              </summary>
         </member>
         <member name="P:AD.IO.Properties.Resources.header2">

@@ -56,7 +56,8 @@ namespace AD.OpenXml
                             .RemoveByAll(W + "sz")
                             .RemoveByAll(W + "szCs")
                             .RemoveByAll(W + "u")
-                            .TransferCharts(fromFilePath, toFilePath);
+                            .TransferCharts(fromFilePath, toFilePath)
+                            .TransferFootnotes(fromFilePath, toFilePath);
 
             element.Descendants(W + "p").Attributes().Remove();
             element.Descendants(W + "tr").Attributes().Remove();
@@ -67,8 +68,8 @@ namespace AD.OpenXml
             {
                 element.Element(W + "body")?.Elements().First().Remove();
             }
-            element.Descendants(W + "footnoteReference").Remove();
-            element.Descendants(W + "footerReference").Remove();
+            //element.Descendants(W + "footnoteReference").Remove();
+            //element.Descendants(W + "footerReference").Remove();
             element.Descendants(W + "hyperlink").Remove();
 
             element.WriteInto(toFilePath, "word/document.xml");

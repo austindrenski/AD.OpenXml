@@ -2,12 +2,11 @@
 <w:docDefaults xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" >
   <w:pPrDefault>
     <w:pPr>
-      <w:spacing w:after="200" w:line="276" w:lineRule="auto"/>
+      <w:spacing w:after="200" w:before="0" w:line="276" w:lineRule="auto"/>
     </w:pPr>
   </w:pPrDefault>
   <w:rPrDefault>
     <w:rPr>
-      <w:lang w:val="en-US"/>
       <w:rFonts w:ascii="Calibri"/>
       <w:sz w:val="24"/>
     </w:rPr>

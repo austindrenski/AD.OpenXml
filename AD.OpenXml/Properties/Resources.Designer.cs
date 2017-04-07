@@ -127,7 +127,7 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:pPr&gt;
         ///    &lt;w:contextualSpacing/&gt;
         ///    &lt;w:ind w:left=&quot;720&quot; w:hanging=&quot;720&quot;/&gt;
-        ///    &lt;w:spacing w:after=&quot;240&quot;/&gt;
+        ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
         ///  &lt;/w:pPr&gt;
         ///&lt;/w:style&gt;.
         /// </summary>
@@ -290,13 +290,11 @@ namespace AD.OpenXml.Properties {
         ///&lt;w:docDefaults xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot; &gt;
         ///  &lt;w:pPrDefault&gt;
         ///    &lt;w:pPr&gt;
-        ///      &lt;w:spacing w:after=&quot;200&quot; w:line=&quot;276&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///      &lt;w:spacing w:after=&quot;200&quot; w:before=&quot;0&quot; w:line=&quot;276&quot; w:lineRule=&quot;auto&quot;/&gt;
         ///    &lt;/w:pPr&gt;
         ///  &lt;/w:pPrDefault&gt;
         ///  &lt;w:rPrDefault&gt;
         ///    &lt;w:rPr&gt;
-        ///      &lt;w:lang w:val=&quot;en-US&quot;/&gt;
-        ///      &lt;w:rFonts w:ascii=&quot;Calibri&quot;/&gt;
         ///      &lt;w:sz w:val=&quot;24&quot;/&gt;
         ///    &lt;/w:rPr&gt;
         ///  &lt;/w:rPrDefault&gt;
@@ -312,14 +310,6 @@ namespace AD.OpenXml.Properties {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot; ?&gt;
         ///&lt;w:document xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
         ///  &lt;w:body&gt;
-        ///    &lt;w:p&gt;
-        ///    &lt;/w:p&gt;
-        ///    &lt;w:sectPr&gt;
-        ///      &lt;w:pgSz w:w=&quot;12240&quot; w:h=&quot;15840&quot;/&gt;
-        ///      &lt;w:pgMar w:top=&quot;1440&quot; w:right=&quot;1440&quot; w:bottom=&quot;1440&quot; w:left=&quot;1440&quot; w:header=&quot;720&quot; w:footer=&quot;720&quot; w:gutter=&quot;0&quot;/&gt;
-        ///      &lt;w:cols w:space=&quot;720&quot;/&gt;
-        ///      &lt;w:docGrid w:linePitch=&quot;360&quot;/&gt;
-        ///    &lt;/w:sectPr&gt;
         ///  &lt;/w:body&gt;
         ///&lt;/w:document&gt;.
         /// </summary>
@@ -531,15 +521,15 @@ namespace AD.OpenXml.Properties {
         ///    &lt;w:r&gt;
         ///      &lt;w:t xml:space=&quot;preserve&quot;&gt;Chapter &lt;/w:t&gt;
         ///    &lt;/w:r&gt;
-        ///    &lt;w:fldSimple w:instr=&quot; STYLEREF  &amp;quot;Heading 1&amp;quot; \s \* MERGEFORMAT &quot;&gt;
+        ///    &lt;w:fldSimple w:instr=&quot; STYLEREF  &amp;quot;heading 1&amp;quot; \s \* MERGEFORMAT &quot;&gt;
         ///      &lt;w:r&gt;
-        ///        &lt;w:t&gt;&lt;/w:t&gt;
+        ///        &lt;w:t/&gt;
         ///      &lt;/w:r&gt;
         ///    &lt;/w:fldSimple&gt;
         ///    &lt;w:r&gt;
         ///      &lt;w:t xml:space=&quot;preserve&quot;&gt;: &lt;/w:t&gt;
         ///    &lt;/w:r&gt;
-        ///    &lt;w:fldSimple w:i [rest of string was truncated]&quot;;.
+        ///    &lt;w:fldSimple w:instr= [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string header1 {
             get {
@@ -939,9 +929,9 @@ namespace AD.OpenXml.Properties {
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:color w:val=&quot;A52A2A&quot;/&gt;
-        ///    &lt;w:highlight w:val=&quot;yellow&quot;/&gt;
         ///    &lt;w:sz w:val=&quot;22&quot;/&gt;
-        ///  &lt;/w:rPr&gt; [rest of string was truncated]&quot;;.
+        ///  &lt;/w:rPr&gt;
+        ///&lt;/w:style&gt;.
         /// </summary>
         internal static string StyleNotImplemented {
             get {

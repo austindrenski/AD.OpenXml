@@ -7,7 +7,7 @@
     <w:r>
       <w:t xml:space="preserve">Chapter </w:t>
     </w:r>
-    <w:fldSimple w:instr=" STYLEREF  &quot;heading 1&quot; \s  \* ">
+    <w:fldSimple w:instr=" STYLEREF  &quot;heading 1&quot; \s \* ">
       <w:r>
         <w:t/>
       </w:r>
