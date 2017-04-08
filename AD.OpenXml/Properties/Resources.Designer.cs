@@ -295,6 +295,7 @@ namespace AD.OpenXml.Properties {
         ///  &lt;/w:pPrDefault&gt;
         ///  &lt;w:rPrDefault&gt;
         ///    &lt;w:rPr&gt;
+        ///      &lt;w:rFonts w:ascii=&quot;Calibri&quot;/&gt;
         ///      &lt;w:sz w:val=&quot;24&quot;/&gt;
         ///    &lt;/w:rPr&gt;
         ///  &lt;/w:rPrDefault&gt;
@@ -487,6 +488,22 @@ namespace AD.OpenXml.Properties {
         internal static string FootnoteReference {
             get {
                 return ResourceManager.GetString("FootnoteReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+        ///&lt;w:footnotes
+        ///  xmlns:wpc=&quot;http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas&quot;
+        ///  xmlns:cx=&quot;http://schemas.microsoft.com/office/drawing/2014/chartex&quot;
+        ///  xmlns:cx1=&quot;http://schemas.microsoft.com/office/drawing/2015/9/8/chartex&quot;
+        ///  xmlns:cx2=&quot;http://schemas.microsoft.com/office/drawing/2015/10/21/chartex&quot;
+        ///  xmlns:cx3=&quot;http://schemas.microsoft.com/office/drawing/2016/5/9/chartex&quot;
+        ///  xmlns:cx4=&quot;http://schemas.microsoft.com/office/drawing/2 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string footnotes {
+            get {
+                return ResourceManager.GetString("footnotes", resourceCulture);
             }
         }
         

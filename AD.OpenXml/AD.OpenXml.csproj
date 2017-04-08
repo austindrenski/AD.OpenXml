@@ -69,6 +69,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="src\Documents\AddFootnotes.cs" />
+    <Compile Include="src\Elements\TransferFootnotes.cs" />
     <Compile Include="src\Html\BodyToHtml.cs" />
     <Compile Include="src\Html\ConvertBoldRuns.cs" />
     <Compile Include="src\Html\ConvertFootnoteReferences.cs" />
@@ -195,6 +196,8 @@
     <Content Include="src\Templates\document.xml.rels.xml" />
     <Content Include="src\Templates\footer1.xml" />
     <Content Include="src\Templates\footer2.xml" />
+    <Content Include="Resources\footnotes.xml" />
+    <Content Include="src\Templates\footnotes.xml" />
     <Content Include="src\Templates\header1.xml" />
     <Content Include="src\Templates\header2.xml" />
     <Content Include="src\Templates\rels.xml" />
