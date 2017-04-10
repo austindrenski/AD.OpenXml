@@ -35,7 +35,7 @@ namespace AD.OpenXml.Elements
             element.Descendants(W + "tcPr").Descendants().Where(x => x.Name != W + "vAlign").Remove();
             element.Descendants(W + "trPr").Remove();
             element.Descendants(W + "gridCol").Attributes(W + "w").Remove();
-
+            
             return element;
         }
     }
