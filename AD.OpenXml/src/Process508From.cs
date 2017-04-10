@@ -72,6 +72,14 @@ namespace AD.OpenXml
                    .Elements(W + "spacing")
                    .Remove();
 
+            element.Descendants(W + "rPr")
+                   .Where(x => x.Elements(W + "rStyle").Count() > 1)
+                   .Select(x => x.Elements(W + "rStyle"))
+                   .Where(x => x.Select(y => y.Attribute(W + "val")?.Value).Any(y => y == "FootnoteReference"))
+                   .SelectMany(x => x.Where(y => y.Attribute(W + "val")?.Value != "FootnoteReference").Select(y => y))
+                   .Remove();
+
+
             if (element.Element(W + "body")?.Elements().First().Name == W + "sectPr")
             {
                 element.Element(W + "body")?.Elements().First().Remove();
