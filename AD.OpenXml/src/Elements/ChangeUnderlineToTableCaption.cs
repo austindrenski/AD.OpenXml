@@ -35,14 +35,16 @@ namespace AD.OpenXml.Elements
                        .Select(x => x.Parent)
                        .Where(x => x?.Name == W + "p")
                        .Where(x => x.Next()?.Name == W + "tbl" || (x.Next()?.Value.Contains('{')  ?? false))
+                       .Distinct()
                        .ToArray();
+
             foreach (XElement item in paragraphs)
             {
                 item.AddTableCaption();
                 item.RemoveBy(W + "pStyle");
                 if (!item.Elements(W + "pPr").Any())
                 {
-                    item.AddFirst(W + "pPr");
+                    item.AddFirst(new XElement(W + "pPr"));
                 }
                 else
                 {

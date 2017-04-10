@@ -28,7 +28,7 @@ namespace AD.OpenXml.Tests
             // Add footnotes file
             result.AddFootnotes();
 
-            foreach (string file in Directory.GetFiles(workingDirectory).Where(x => x.EndsWith(".docx")).Skip(7).Take(1))
+            foreach (string file in Directory.GetFiles(workingDirectory).Where(x => x.EndsWith(".docx")))
             {
                 Combine(file, result);
             }
