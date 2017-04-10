@@ -19,16 +19,16 @@ namespace AD.OpenXml.Tests
             // Declare working directory
             //const string path = @"c:\users\adren\desktop\508 work\";
             //const string path = @"g:\data\austin d\508 programming\508 work\";
-            //const string workingDirectory = "g:\\data\\austin d\\508 programming\\otap 2016\\ch5";
-            const string workingDirectory = "c:\\users\\adren\\desktop\\otap 2016\\ch5";
-            
+            //const string workingDirectory = "c:\\users\\adren\\desktop\\otap 2016\\ch5";
+            const string workingDirectory = "g:\\data\\austin d\\508 programming\\otap 2016\\ch5";
+
             // Create result file
             DocxFilePath result = DocxFilePath.Create($"{workingDirectory}\\output\\OTAP_2016_v1_0.docx", true);
 
             // Add footnotes file
             result.AddFootnotes();
 
-            foreach (string file in Directory.GetFiles(workingDirectory).Where(x => x.EndsWith(".docx")).Take(2))
+            foreach (string file in Directory.GetFiles(workingDirectory).Where(x => x.EndsWith(".docx")))
             {
                 Combine(file, result);
             }

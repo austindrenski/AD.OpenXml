@@ -24,7 +24,15 @@ namespace AD.OpenXml.Elements
         /// <returns></returns>
         public static XElement TransferFootnotes(this XElement element, DocxFilePath fromFilePath, DocxFilePath toFilePath)
         {
-            XElement sourceFootnotes = fromFilePath.ReadAsXml("word/footnotes.xml");
+            XElement sourceFootnotes;
+            try
+            {
+                sourceFootnotes = fromFilePath.ReadAsXml("word/footnotes.xml");
+            }
+            catch
+            {
+                return element;
+            }
 
             XElement resultFootnotes = toFilePath.ReadAsXml("word/footnotes.xml");
 
