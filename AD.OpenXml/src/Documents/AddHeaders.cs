@@ -43,11 +43,11 @@ namespace AD.OpenXml.Documents
             document.WriteInto(toFilePath, "word/document.xml");
             
             // Add headers
-            toFilePath.AddEvenPageHeader($"rId{++currentHeaderId}");
-            toFilePath.AddOddPageHeader($"rId{++currentHeaderId}", title);
+            toFilePath.AddOddageHeader($"rId{++currentHeaderId}");
+            toFilePath.AddEvenPageHeader($"rId{++currentHeaderId}", title);
         }
 
-        private static void AddEvenPageHeader(this DocxFilePath toFilePath, string headerId)
+        private static void AddOddageHeader(this DocxFilePath toFilePath, string headerId)
         {
             XElement element = XElement.Parse(Resources.header1);
             element.WriteInto(toFilePath, "word/header1.xml");
@@ -78,7 +78,7 @@ namespace AD.OpenXml.Documents
             packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
         }
 
-        private static void AddOddPageHeader(this DocxFilePath toFilePath, string headerId, string title)
+        private static void AddEvenPageHeader(this DocxFilePath toFilePath, string headerId, string title)
         {
             XElement element = XElement.Parse(string.Format(Resources.header2, title));
             element.WriteInto(toFilePath, "word/header2.xml");

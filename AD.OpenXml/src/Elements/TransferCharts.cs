@@ -30,17 +30,18 @@ namespace AD.OpenXml.Elements
                           .DefaultIfEmpty(0)
                           .Max();
 
-            IEnumerable<string> fromChartIds = 
-                element.Descendants(C + "chart")
-                       .Attributes(R + "id")
-                       .Select(x => x.Value)
-                       .ToArray();
-            
-            foreach (string item in fromChartIds)
+            IEnumerable<string> fromChartIds =
+                fromFilePath.ReadAsXml()
+                            .Descendants(C + "chart")
+                            .Attributes(R + "id")
+                            .Select(x => x.Value)
+                            .ToArray();
+
+            foreach (string fromId in fromChartIds)
             {
                 string chartId = $"rId{++nextChartId}";
-                element.ChangeXAttributeValues(C + "chart", R + "id", item, chartId);
-                TransferChart(fromFilePath, toFilePath, item, chartId);
+                element.ChangeXAttributeValues(C + "chart", R + "id", fromId, chartId);
+                TransferChart(fromFilePath, toFilePath, fromId, chartId);
             }
 
             return element;
@@ -81,12 +82,27 @@ namespace AD.OpenXml.Elements
             }
 
             int nextEmbeddingNumber;
+            bool isXml = false;
             using (ZipArchive archive = ZipFile.OpenRead(toFilePath))
             {
-                nextEmbeddingNumber = 
+                nextEmbeddingNumber =
                     archive.Entries
                            .Where(x => x.FullName.StartsWith("word/embeddings/"))
-                           .Select(x => x.FullName.Replace("word/embeddings/Microsoft_Excel_Worksheet", null).Replace(".xlsx", null))
+                           .Select(
+                               x =>
+                               {
+                                   string name = null;
+                                   if (x.FullName.Contains(".xlsx"))
+                                   {
+                                       name = x.FullName.Replace("word/embeddings/Microsoft_Excel_Worksheet", null).Replace(".xlsx", null);
+                                       isXml = true;
+                                   }
+                                   else if (x.FullName.Contains(".bin"))
+                                   {
+                                       name = x.FullName.Replace("word/embeddings/oleObject", null).Replace(".bin", null);
+                                   }
+                                   return name;
+                               })
                            .Select(int.Parse)
                            .DefaultIfEmpty(0)
                            .Max() + 1;
@@ -99,12 +115,21 @@ namespace AD.OpenXml.Elements
                     new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml")));
             contentTypes.WriteInto(toFilePath, "[Content_Types].xml");
 
-            XElement chartRelation = 
+            XElement chartRelation =
                 new XElement(P + "Relationships",
                     new XElement(P + "Relationship",
                         new XAttribute("Id", "rId1"),
-                        new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/package"),
-                        new XAttribute("Target", $"../embeddings/Microsoft_Excel_Worksheet{nextEmbeddingNumber}.xlsx")));
+                        new XAttribute(
+                            "Type",
+                            isXml
+                                ? "http://schemas.openxmlformats.org/officeDocument/2006/relationships/package"
+                                : "http://schemas.openxmlformats.org/officeDocument/2006/relationships/oleObject"),
+                        new XAttribute(
+                            "Target",
+                            isXml
+                                ? $"../embeddings/Microsoft_Excel_Worksheet{nextEmbeddingNumber}.xlsx"
+                                : $"../embeddings/oleObject{nextEmbeddingNumber}.bin")));
+            
             chartRelation.WriteInto(toFilePath, $"word/charts/_rels/chart{nextChartNumber}.xml.rels");
 
             XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
@@ -117,7 +142,12 @@ namespace AD.OpenXml.Elements
                            
             fromFilePath.WriteInto(toFilePath, $"word/charts/{inputName}", $"word/charts/chart{nextChartNumber}.xml");
 
-            fromFilePath.WriteInto(toFilePath, $"word/embeddings/{inputEmbeddingName}", $"word/embeddings/Microsoft_Excel_Worksheet{nextEmbeddingNumber}.xlsx");
+            fromFilePath.WriteInto(
+                toFilePath,
+                $"word/embeddings/{inputEmbeddingName}",
+                isXml
+                    ? $"word/embeddings/Microsoft_Excel_Worksheet{nextEmbeddingNumber}.xlsx"
+                    : $"word/embeddings/oleObject{nextEmbeddingNumber}.bin");
         }
     }
 }

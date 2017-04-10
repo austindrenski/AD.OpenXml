@@ -70,6 +70,8 @@ namespace AD.OpenXml.Elements
 
                 footnote.Descendants(W + "p").Attributes().Remove();
 
+                footnote.Descendants(W + "hyperlink").Remove();
+
                 footnote.RemoveRsidAttributes();
 
                 resultFootnotes.Add(footnote);
