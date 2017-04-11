@@ -32,9 +32,10 @@ namespace AD.OpenXml.Documents
             }
 
             element.Element(C + "chart")?.Element(C + "title")?.Remove();
-            
-            element.RemoveByAll(C + "spPr");
-            element.RemoveByAll(C + "txPr");
+
+            element =
+                element.RemoveByAll(C + "spPr")
+                       .RemoveByAll(C + "txPr");
 
             element.Descendants(C + "legend").Remove();
             element.Descendants(C + "numfmt").Remove();
@@ -43,7 +44,7 @@ namespace AD.OpenXml.Documents
             element.Descendants(C + "overlap").Remove();
             element.Descendants(C + "autoTitleDeleted").Remove();
             element.Descendants(C + "noMultiLvlLbl").Remove();
-            
+
             element.Descendants(C + "varyColors").SetAttributeValues("val", "0");
             element.Descendants(C + "gapWidth").SetAttributeValues("val", "150");
             element.Descendants(C + "majorTickMark").SetAttributeValues("val", "out");

@@ -45,8 +45,8 @@
     <Reference Include="AD.IO, Version=1.1.0.18, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AD.IO.1.1.0.18\lib\net461\AD.IO.dll</HintPath>
     </Reference>
-    <Reference Include="AD.Xml, Version=1.1.0.13, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AD.Xml.1.1.0.13\lib\net461\AD.Xml.dll</HintPath>
+    <Reference Include="AD.Xml, Version=1.1.0.17, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.Xml.1.1.0.17\lib\net461\AD.Xml.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Annotations, Version=10.4.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\packages\JetBrains.Annotations.10.4.0\lib\net\JetBrains.Annotations.dll</HintPath>

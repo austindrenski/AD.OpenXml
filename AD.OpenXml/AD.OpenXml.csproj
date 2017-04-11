@@ -26,6 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\AD.OpenXml.XML</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -35,6 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\AD.OpenXml.XML</DocumentationFile>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AD.Collections, Version=1.1.0.1, Culture=neutral, processorArchitecture=MSIL">
@@ -44,8 +46,8 @@
     <Reference Include="AD.IO, Version=1.1.0.18, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AD.IO.1.1.0.18\lib\net461\AD.IO.dll</HintPath>
     </Reference>
-    <Reference Include="AD.Xml, Version=1.1.0.13, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AD.Xml.1.1.0.13\lib\net461\AD.Xml.dll</HintPath>
+    <Reference Include="AD.Xml, Version=1.1.0.17, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.Xml.1.1.0.17\lib\net461\AD.Xml.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Annotations, Version=10.4.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\packages\JetBrains.Annotations.10.4.0\lib\net\JetBrains.Annotations.dll</HintPath>
@@ -62,6 +64,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Documents\MergeInto.cs" />
+    <Compile Include="Documents\RemoveDuplicateSectionProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -108,7 +112,7 @@
     <Compile Include="Elements\RemoveRsidAttributes.cs" />
     <Compile Include="Elements\RemoveRunPropertiesFromParagraphProperties.cs" />
     <Compile Include="Elements\SetTableStyles.cs" />
-    <Compile Include="Elements\TransferCharts.cs" />
+    <Compile Include="Elements\TransferChartsInto.cs" />
     <Compile Include="Html\HtmlConverter.cs" />
     <Compile Include="Packaging\EnumerateChartPaths.cs" />
     <Compile Include="Process508From.cs" />

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Properties;
@@ -7,6 +8,9 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
+    /// <summary>
+    /// Extension methods to add the styles part to a Word document.
+    /// </summary>
     [PublicAPI]
     public static class AddStylesExtensions
     {
@@ -16,14 +20,29 @@ namespace AD.OpenXml.Documents
 
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        public static void AddStyles(this DocxFilePath toFilePath)
+        /// <summary>
+        /// Adds the styles part to a Word document.
+        /// </summary>
+        /// <param name="toFilePath">The file to which styles are added.</param>
+        /// <exception cref="ArgumentNullException"/>
+        public static void AddStyles([NotNull] this DocxFilePath toFilePath)
         {
+            if (toFilePath is null)
+            {
+                throw new ArgumentNullException(nameof(toFilePath));
+            }
+
             toFilePath.CreateStyles();
             toFilePath.CreateNumbering();
         }
         
-        private static void CreateStyles(this DocxFilePath toFilePath)
+        private static void CreateStyles([NotNull] this DocxFilePath toFilePath)
         {
+            if (toFilePath is null)
+            {
+                throw new ArgumentNullException(nameof(toFilePath));
+            }
+
             XElement styles = toFilePath.ReadAsXml("word/styles.xml");
             styles.RemoveAll();
 
@@ -72,8 +91,13 @@ namespace AD.OpenXml.Documents
             styles.WriteInto(toFilePath, "word/styles.xml");
         }
 
-        private static void CreateNumbering(this DocxFilePath toFilePath)
+        private static void CreateNumbering([NotNull] this DocxFilePath toFilePath)
         {
+            if (toFilePath is null)
+            {
+                throw new ArgumentNullException(nameof(toFilePath));
+            }
+
             XElement numbering = XElement.Parse(Resources.Numbering);
             numbering.WriteInto(toFilePath, "word/numbering.xml");
 

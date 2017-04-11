@@ -40,7 +40,7 @@ namespace AD.OpenXml.Elements
             foreach (string fromId in fromChartIds)
             {
                 string chartId = $"rId{++nextChartId}";
-                element.ChangeXAttributeValues(C + "chart", R + "id", fromId, chartId);
+                element = element.ChangeXAttributeValues(C + "chart", R + "id", fromId, chartId);
                 TransferChart(fromFilePath, toFilePath, fromId, chartId);
             }
 

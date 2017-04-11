@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Documents;
-using AD.OpenXml.Elements;
 using AD.OpenXml.Html;
 using JetBrains.Annotations;
 
@@ -28,7 +25,7 @@ namespace AD.OpenXml.Tests
             // Add footnotes file
             result.AddFootnotes();
 
-            string[] files =
+            DocxFilePath[] files =
                 Directory.GetFiles(workingDirectory, "*.docx", SearchOption.TopDirectoryOnly)
                          .OrderBy(
                              x =>
@@ -41,11 +38,12 @@ namespace AD.OpenXml.Tests
                                                 .FirstOrDefault();
                                  return double.Parse(a ?? "0");
                              })
+                         .Select(x => (DocxFilePath) x)
                          .ToArray();
 
-            foreach (string file in files)
+            foreach (DocxFilePath file in files)
             {
-                Combine(file, result);
+                file.MergeInto(result);
             }
 
             // Create custom styles
@@ -73,7 +71,7 @@ namespace AD.OpenXml.Tests
             result.ModifyLineChartStyles();
 
             // Remove duplicate section properties
-            result.RemoveDuplicateSections();
+            result.RemoveDuplicateSectionProperties();
 
             // Write document.xml to XML file
             XmlFilePath xml = XmlFilePath.Create($"{workingDirectory}\\TestWordDocument_out.xml");
@@ -82,50 +80,6 @@ namespace AD.OpenXml.Tests
             // Write document.xml to HTML file
             HtmlFilePath html = HtmlFilePath.Create($"{workingDirectory}\\TestWordDocument_out.html");
             result.ReadAsXml().ProcessHtml().WriteHtml(html);
-        }
-
-        private static void Combine(DocxFilePath source, DocxFilePath result)
-        {
-            DocxFilePath tempSource = DocxFilePath.Create($"{source}_temp.docx", true);
-            tempSource.AddFootnotes();
-            tempSource.Process508From(source);
-
-            XElement sourceDocument =
-                tempSource.ReadAsXml("word/document.xml")
-                          .TransferFootnotes(source, result)
-                          .TransferCharts(source, result);
-            
-            XElement resultDocument = result.ReadAsXml();
-
-            XElement sourceBody =
-                sourceDocument.Elements()
-                              .Single(x => x.Name.LocalName.Equals("body"));
-
-            IEnumerable<XElement> sourceContent =
-                sourceBody.Elements();
-
-            resultDocument.Elements().First().Add(sourceContent);
-
-            resultDocument.WriteInto(result, "word/document.xml");
-
-            File.Delete(tempSource);
-        }
-
-        private static void RemoveDuplicateSections(this DocxFilePath result)
-        {
-            XElement resultDocument = result.ReadAsXml();
-
-            XElement[] sections =
-                resultDocument.Descendants()
-                              .Where(x => x.Name.LocalName == "sectPr")
-                              .ToArray();
-
-            for (int i = 0; i < sections.Length - 1; i++)
-            {
-                sections[i].Remove();
-            }
-
-            resultDocument.WriteInto(result, "word/document.xml");
         }
     }
 }

@@ -77,11 +77,12 @@ namespace AD.OpenXml.Elements
             {
                 string toId = $"{currentDocumentId + fromId}";
 
-                element.ChangeXAttributeValues(
-                    W + "footnoteReference",
-                    W + "id",
-                    $"{fromId}",
-                    toId);
+                element =
+                    element.ChangeXAttributeValues(
+                        W + "footnoteReference",
+                        W + "id",
+                        $"{fromId}",
+                        toId);
                 
                 XElement footnote =
                     sourceFootnotes.Elements()

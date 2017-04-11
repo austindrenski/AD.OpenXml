@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Elements;
@@ -26,10 +27,19 @@ namespace AD.OpenXml
         /// <param name="fromFilePath">The document whose body is the target of the corrections.</param>
         /// <param name="toFilePath">The document to which the modified body is saved.</param>
         /// <returns>A reference to the existing <see cref="XElement"/>. This is returned for use with fluent syntax calls.</returns>
-        /// <exception cref="System.ArgumentException"/>
-        /// <exception cref="System.ArgumentNullException"/>
-        public static void Process508From(this DocxFilePath toFilePath, DocxFilePath fromFilePath)
+        /// <exception cref="ArgumentException"/>
+        /// <exception cref="ArgumentNullException"/>
+        public static void Process508From([NotNull] this DocxFilePath toFilePath, [NotNull] DocxFilePath fromFilePath)
         {
+            if (toFilePath is null)
+            {
+                throw new ArgumentNullException(nameof(toFilePath));
+            }
+            if (fromFilePath is null)
+            {
+                throw new ArgumentNullException(nameof(fromFilePath));
+            }
+
             XElement element =
                 fromFilePath.ReadAsXml()
                             .RemoveRsidAttributes()
