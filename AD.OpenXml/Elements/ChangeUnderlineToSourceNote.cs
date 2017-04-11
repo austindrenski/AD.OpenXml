@@ -38,6 +38,7 @@ namespace AD.OpenXml.Elements
                                 || (x.Previous()?.DescendantsAndSelf(W + "drawing").Any() ?? false)
                                 || (x.Previous()?.DescendantsAndSelf(W + "u").Any() ?? false)
                                 || (x.Previous()?.Value.Contains('{') ?? false))
+                       .Distinct()
                        .ToArray();
 
             foreach (XElement item in paragraphs)

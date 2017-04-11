@@ -45,45 +45,32 @@ namespace AD.OpenXml
                             .ChangeUnderlineToSourceNote()
                             .ChangeSuperscriptToReference()
                             .HighlightInsertRequests()
-                            //.AddLineBreakToHeadings()
+                            .AddLineBreakToHeadings()
                             .SetTableStyles()
+                            .RemoveByAll(W + "rFonts")
+                            .RemoveByAll(W + "sz")
+                            .RemoveByAll(W + "szCs")
+                            .RemoveByAll(W + "u")
+                            .RemoveByAll(x => x.Name.LocalName == "p" && !x.HasElements)
                             .RemoveByAllIfEmpty(W + "rPr")
                             .RemoveByAllIfEmpty(W + "pPr")
                             .RemoveByAllIfEmpty(W + "t")
                             .RemoveByAllIfEmpty(W + "r")
-                            .RemoveByAllIfEmpty(W + "p")
-                            .RemoveByAll(W + "rFonts")
-                            .RemoveByAll(W + "sz")
-                            .RemoveByAll(W + "szCs")
-                            .RemoveByAll(W + "u");
-                            //.TransferCharts(fromFilePath, toFilePath);
+                            .RemoveByAllIfEmpty(W + "p");
 
             element.Descendants(W + "p").Attributes().Remove();
             element.Descendants(W + "tr").Attributes().Remove();
-            element.Descendants().SelectMany(x => x.Elements().Where(y => y.Name == W + "pStyle").Skip(1)).Remove();
             element.Descendants(W + "hideMark").Remove();
             element.Descendants(W + "noWrap").Remove();
+            element.Descendants(W + "pPr").Where(x => !x.HasElements).Remove();
             element.Descendants(W + "rPr").Where(x => !x.HasElements).Remove();
-
-
-            element.Element(W + "body")?
-                   .Elements(W + "p")
-                   .Elements(W + "pPr")
-                   .Elements(W + "spacing")
-                   .Remove();
-
-            element.Descendants(W + "rPr")
-                   .Where(x => x.Elements(W + "rStyle").Count() > 1)
-                   .Select(x => x.Elements(W + "rStyle"))
-                   .Where(x => x.Select(y => y.Attribute(W + "val")?.Value).Any(y => y == "FootnoteReference"))
-                   .SelectMany(x => x.Where(y => y.Attribute(W + "val")?.Value != "FootnoteReference").Select(y => y))
-                   .Remove();
-
-
+            element.Descendants(W + "spacing").Remove();
+            
             if (element.Element(W + "body")?.Elements().First().Name == W + "sectPr")
             {
                 element.Element(W + "body")?.Elements().First().Remove();
             }
+
             element.Descendants(W + "hyperlink").Remove();
 
             element.WriteInto(toFilePath, "word/document.xml");

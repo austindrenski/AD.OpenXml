@@ -417,6 +417,35 @@
             <exception cref="T:System.ArgumentNullException"/>
             <exception cref="T:System.OperationCanceledException"/>
         </member>
+        <member name="T:AD.Xml.CloneExtensions">
+            <summary>
+            Extension methods to clone <see cref="T:System.Xml.Linq.XElement"/> and <see cref="T:System.Xml.Linq.XAttribute"/> objects.
+            </summary>
+        </member>
+        <member name="M:AD.Xml.CloneExtensions.Clone(System.Xml.Linq.XElement)">
+            <summary>
+            Returns a deep copy of the source element.
+            </summary>
+            <exception cref="T:System.ArgumentNullException"/>
+        </member>
+        <member name="M:AD.Xml.CloneExtensions.Clone(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement})">
+            <summary>
+            Returns a deep copy of the source element.
+            </summary>
+            <exception cref="T:System.ArgumentNullException"/>
+        </member>
+        <member name="M:AD.Xml.CloneExtensions.Clone(System.Xml.Linq.XAttribute)">
+            <summary>
+            Returns a deep copy of the source attribute.
+            </summary>
+            <exception cref="T:System.ArgumentNullException"/>
+        </member>
+        <member name="M:AD.Xml.CloneExtensions.Clone(System.Collections.Generic.IEnumerable{System.Xml.Linq.XAttribute})">
+            <summary>
+            Returns a deep copy of the source attritube.
+            </summary>
+            <exception cref="T:System.ArgumentNullException"/>
+        </member>
         <member name="T:AD.Xml.ConcatExtensions">
             <summary>
             Concatenates items of enumerable collections.
@@ -730,16 +759,38 @@
         </member>
         <member name="T:AD.Xml.RemoveByAllIfEmptyExtensions">
             <summary>
-            
+            Extension methods to remove empty descendant elements.
             </summary>
         </member>
-        <member name="M:AD.Xml.RemoveByAllIfEmptyExtensions.RemoveByAllIfEmpty(System.Xml.Linq.XElement,System.Xml.Linq.XName)">
+        <member name="M:AD.Xml.RemoveByAllIfEmptyExtensions.RemoveByAllIfEmpty(System.Xml.Linq.XElement,System.Xml.Linq.XName,System.Boolean,System.Boolean)">
             <summary>
-            
+            Removes descendants with the given name where the value is null or empty.
             </summary>
-            <param name="element"></param>
-            <param name="name"></param>
-            <returns></returns>
+            <param name="element">The source element.</param>
+            <param name="name">The namespace-qualified name of the descendants to remove.</param>
+            <param name="removeElements">True to remove only if there are no child elements.</param>
+            <param name="removeAttributes">True to remove only if there are no attributes.</param>
+            <returns>A reference to the existing <see cref="T:System.Xml.Linq.XElement"/>. This is returned for use with fluent syntax calls.</returns>
+        </member>
+        <member name="M:AD.Xml.RemoveByAllIfEmptyExtensions.RemoveByAllIfEmpty(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},System.Xml.Linq.XName,System.Boolean,System.Boolean)">
+            <summary>
+            Removes descendants with the given name where the value is null or empty from each item in the collection.
+            </summary>
+            <param name="elements">The source collection.</param>
+            <param name="name">The namespace-qualified name of the descendants to remove.</param>
+            <param name="removeElements">True to remove only if there are no child elements.</param>
+            <param name="removeAttributes">True to remove only if there are no attributes.</param>
+            <returns>A reference to the existing <see cref="T:System.Xml.Linq.XElement"/>. This is returned for use with fluent syntax calls.</returns>
+        </member>
+        <member name="M:AD.Xml.RemoveByAllIfEmptyExtensions.RemoveByAllIfEmpty(System.Linq.ParallelQuery{System.Xml.Linq.XElement},System.Xml.Linq.XName,System.Boolean,System.Boolean)">
+            <summary>
+            Removes descendants with the given name where the value is null or empty from each item in the collection.
+            </summary>
+            <param name="elements">The source collection.</param>
+            <param name="name">The namespace-qualified name of the descendants to remove.</param>
+            <param name="removeElements">True to remove only if there are no child elements.</param>
+            <param name="removeAttributes">True to remove only if there are no attributes.</param>
+            <returns>A reference to the existing <see cref="T:System.Xml.Linq.XElement"/>. This is returned for use with fluent syntax calls.</returns>
         </member>
         <member name="T:AD.Xml.RemoveNamespacesExtensions">
             <summary>
@@ -786,16 +837,16 @@
         </member>
         <member name="T:AD.Xml.SetAttributeValuesExtensions">
             <summary>
-            
+            Extension methods to set attribute values in <see cref="T:System.Xml.Linq.XElement"/> colelctions.
             </summary>
         </member>
         <member name="M:AD.Xml.SetAttributeValuesExtensions.SetAttributeValues(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},System.Xml.Linq.XName,System.Object)">
             <summary>
-            
+            Returns an <see cref="T:System.Xml.Linq.XElement"/> collection where the attributes of the specified name are set to the sepcified value.
             </summary>
-            <param name="elements"></param>
-            <param name="name"></param>
-            <param name="value"></param>
+            <param name="elements">The source collection.</param>
+            <param name="name">The namespace-qualified name of the attribute.</param>
+            <param name="value">The value to which the attributes will be set.</param>
         </member>
         <member name="T:AD.Xml.SiblingExtensions">
             <summary>

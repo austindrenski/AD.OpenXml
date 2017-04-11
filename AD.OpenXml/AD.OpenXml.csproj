@@ -44,8 +44,8 @@
     <Reference Include="AD.IO, Version=1.1.0.18, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AD.IO.1.1.0.18\lib\net461\AD.IO.dll</HintPath>
     </Reference>
-    <Reference Include="AD.Xml, Version=1.1.0.13, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AD.Xml.1.1.0.13\lib\net461\AD.Xml.dll</HintPath>
+    <Reference Include="AD.Xml, Version=1.1.0.14, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.Xml.1.1.0.14\lib\net461\AD.Xml.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Annotations, Version=10.4.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\packages\JetBrains.Annotations.10.4.0\lib\net\JetBrains.Annotations.dll</HintPath>
@@ -68,51 +68,51 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="src\Documents\AddFootnotes.cs" />
-    <Compile Include="src\Elements\TransferFootnotes.cs" />
-    <Compile Include="src\Html\BodyToHtml.cs" />
-    <Compile Include="src\Html\ConvertBoldRuns.cs" />
-    <Compile Include="src\Html\ConvertFootnoteReferences.cs" />
-    <Compile Include="src\Html\ConvertHeadings.cs" />
-    <Compile Include="src\Html\ConvertItalicRuns.cs" />
-    <Compile Include="src\ConvertOpenXmlToXml.cs" />
-    <Compile Include="src\Html\ConvertSimpleRuns.cs" />
-    <Compile Include="src\Html\ConvertStyleToClass.cs" />
-    <Compile Include="src\Html\ConvertTableCaptions.cs" />
-    <Compile Include="src\Html\ConvertTableCells.cs" />
-    <Compile Include="src\Html\ConvertTables.cs" />
-    <Compile Include="src\Html\ConvertTextNodes.cs" />
-    <Compile Include="src\Documents\AddAltChunkToDocumentRelationships.cs" />
-    <Compile Include="src\Documents\AddDefaultExtensionsToContentTypes.cs" />
-    <Compile Include="src\Documents\AddFooters.cs" />
-    <Compile Include="src\Documents\AddHeaders.cs" />
-    <Compile Include="src\Documents\AddStyles.cs" />
-    <Compile Include="src\Documents\ModifyBarChartStyles.cs" />
-    <Compile Include="src\Documents\ModifyLineChartStyles.cs" />
-    <Compile Include="src\Documents\PositionChartsInline.cs" />
-    <Compile Include="src\Documents\PositionChartsInner.cs" />
-    <Compile Include="src\Documents\PositionChartsOuter.cs" />
-    <Compile Include="src\Elements\AddAltChunk.cs" />
-    <Compile Include="src\Elements\AddFigureCaption.cs" />
-    <Compile Include="src\Elements\AddLineBreakToHeadings.cs" />
-    <Compile Include="src\Elements\AddTableCaption.cs" />
-    <Compile Include="src\Elements\ChangeBoldToStrong.cs" />
-    <Compile Include="src\Elements\ChangeItalicToEmphasis.cs" />
-    <Compile Include="src\Elements\ChangeSubscriptToSubscript.cs" />
-    <Compile Include="src\Elements\ChangeSuperscriptToReference.cs" />
-    <Compile Include="src\Elements\ChangeUnderlineToFigureCaption.cs" />
-    <Compile Include="src\Elements\ChangeUnderlineToSourceNote.cs" />
-    <Compile Include="src\Elements\ChangeUnderlineToTableCaption.cs" />
-    <Compile Include="src\Elements\HighlightInsertRequests.cs" />
-    <Compile Include="src\Elements\MergeRuns.cs" />
-    <Compile Include="src\Elements\RemoveRsidAttributes.cs" />
-    <Compile Include="src\Elements\RemoveRunPropertiesFromParagraphProperties.cs" />
-    <Compile Include="src\Elements\SetTableStyles.cs" />
-    <Compile Include="src\Elements\TransferCharts.cs" />
-    <Compile Include="src\Html\HtmlConverter.cs" />
-    <Compile Include="src\Packaging\EnumerateChartPaths.cs" />
-    <Compile Include="src\Process508From.cs" />
-    <Compile Include="src\ProcessHtml.cs" />
+    <Compile Include="Documents\AddFootnotes.cs" />
+    <Compile Include="Elements\TransferFootnotes.cs" />
+    <Compile Include="Html\BodyToHtml.cs" />
+    <Compile Include="Html\ConvertBoldRuns.cs" />
+    <Compile Include="Html\ConvertFootnoteReferences.cs" />
+    <Compile Include="Html\ConvertHeadings.cs" />
+    <Compile Include="Html\ConvertItalicRuns.cs" />
+    <Compile Include="ConvertOpenXmlToXml.cs" />
+    <Compile Include="Html\ConvertSimpleRuns.cs" />
+    <Compile Include="Html\ConvertStyleToClass.cs" />
+    <Compile Include="Html\ConvertTableCaptions.cs" />
+    <Compile Include="Html\ConvertTableCells.cs" />
+    <Compile Include="Html\ConvertTables.cs" />
+    <Compile Include="Html\ConvertTextNodes.cs" />
+    <Compile Include="Documents\AddAltChunkToDocumentRelationships.cs" />
+    <Compile Include="Documents\AddDefaultExtensionsToContentTypes.cs" />
+    <Compile Include="Documents\AddFooters.cs" />
+    <Compile Include="Documents\AddHeaders.cs" />
+    <Compile Include="Documents\AddStyles.cs" />
+    <Compile Include="Documents\ModifyBarChartStyles.cs" />
+    <Compile Include="Documents\ModifyLineChartStyles.cs" />
+    <Compile Include="Documents\PositionChartsInline.cs" />
+    <Compile Include="Documents\PositionChartsInner.cs" />
+    <Compile Include="Documents\PositionChartsOuter.cs" />
+    <Compile Include="Elements\AddAltChunk.cs" />
+    <Compile Include="Elements\AddFigureCaption.cs" />
+    <Compile Include="Elements\AddLineBreakToHeadings.cs" />
+    <Compile Include="Elements\AddTableCaption.cs" />
+    <Compile Include="Elements\ChangeBoldToStrong.cs" />
+    <Compile Include="Elements\ChangeItalicToEmphasis.cs" />
+    <Compile Include="Elements\ChangeSubscriptToSubscript.cs" />
+    <Compile Include="Elements\ChangeSuperscriptToReference.cs" />
+    <Compile Include="Elements\ChangeUnderlineToFigureCaption.cs" />
+    <Compile Include="Elements\ChangeUnderlineToSourceNote.cs" />
+    <Compile Include="Elements\ChangeUnderlineToTableCaption.cs" />
+    <Compile Include="Elements\HighlightInsertRequests.cs" />
+    <Compile Include="Elements\MergeRuns.cs" />
+    <Compile Include="Elements\RemoveRsidAttributes.cs" />
+    <Compile Include="Elements\RemoveRunPropertiesFromParagraphProperties.cs" />
+    <Compile Include="Elements\SetTableStyles.cs" />
+    <Compile Include="Elements\TransferCharts.cs" />
+    <Compile Include="Html\HtmlConverter.cs" />
+    <Compile Include="Packaging\EnumerateChartPaths.cs" />
+    <Compile Include="Process508From.cs" />
+    <Compile Include="ProcessHtml.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\[Content_Types].xml" />
@@ -128,85 +128,85 @@
     <None Include="Resources\settings.xml" />
     <None Include="Resources\styles.xml" />
     <None Include="Resources\theme1.xml" />
-    <Content Include="src\Styles\Appendix.xml" />
-    <Content Include="src\Styles\Bibliography.xml" />
-    <Content Include="src\Styles\Box.xml" />
-    <Content Include="src\Styles\BoxCaption.xml">
+    <Content Include="Styles\Appendix.xml" />
+    <Content Include="Styles\Bibliography.xml" />
+    <Content Include="Styles\Box.xml" />
+    <Content Include="Styles\BoxCaption.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="src\Styles\BoxListBullet.xml">
+    <Content Include="Styles\BoxListBullet.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="src\Styles\BoxSourceNote.xml">
+    <Content Include="Styles\BoxSourceNote.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="src\Styles\CaptionFigure.xml">
+    <Content Include="Styles\CaptionFigure.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="src\Styles\CaptionTable.xml" />
-    <Content Include="src\Styles\DocDefaults.xml" />
-    <Content Include="src\Styles\Emphasis.xml" />
-    <Content Include="src\Styles\ExecutiveSummary1stParagraph.xml">
+    <Content Include="Styles\CaptionTable.xml" />
+    <Content Include="Styles\DocDefaults.xml" />
+    <Content Include="Styles\Emphasis.xml" />
+    <Content Include="Styles\ExecutiveSummary1stParagraph.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="src\Styles\ExecutiveSummaryHighlights.xml">
+    <Content Include="Styles\ExecutiveSummaryHighlights.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="src\Styles\ExecutiveSummarySidebars.xml" />
-    <Content Include="src\Styles\FigureTableSourceNote.xml" />
-    <Content Include="src\Styles\FootnoteReference.xml" />
-    <Content Include="src\Styles\FootnoteText.xml" />
-    <Content Include="src\Styles\Heading1.xml" />
-    <Content Include="src\Styles\Heading2.xml" />
-    <Content Include="src\Styles\Heading3.xml" />
-    <Content Include="src\Styles\Heading4.xml" />
-    <Content Include="src\Styles\Heading5.xml" />
-    <Content Include="src\Styles\Heading6.xml" />
-    <Content Include="src\Styles\Heading7.xml" />
-    <Content Include="src\Styles\Heading8.xml" />
-    <Content Include="src\Styles\Heading9.xml" />
-    <Content Include="src\Styles\Hyperlink.xml" />
-    <Content Include="src\Styles\ListBullet.xml" />
-    <Content Include="src\Styles\ListParagraph.xml" />
-    <Content Include="src\Styles\Normal.xml" />
-    <Content Include="src\Styles\Numbering.xml" />
-    <Content Include="src\Styles\PreHeading.xml">
+    <Content Include="Styles\ExecutiveSummarySidebars.xml" />
+    <Content Include="Styles\FigureTableSourceNote.xml" />
+    <Content Include="Styles\FootnoteReference.xml" />
+    <Content Include="Styles\FootnoteText.xml" />
+    <Content Include="Styles\Heading1.xml" />
+    <Content Include="Styles\Heading2.xml" />
+    <Content Include="Styles\Heading3.xml" />
+    <Content Include="Styles\Heading4.xml" />
+    <Content Include="Styles\Heading5.xml" />
+    <Content Include="Styles\Heading6.xml" />
+    <Content Include="Styles\Heading7.xml" />
+    <Content Include="Styles\Heading8.xml" />
+    <Content Include="Styles\Heading9.xml" />
+    <Content Include="Styles\Hyperlink.xml" />
+    <Content Include="Styles\ListBullet.xml" />
+    <Content Include="Styles\ListParagraph.xml" />
+    <Content Include="Styles\Normal.xml" />
+    <Content Include="Styles\Numbering.xml" />
+    <Content Include="Styles\PreHeading.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="src\Styles\Strong.xml" />
-    <Content Include="src\Styles\StyleNotImplemented.xml" />
-    <Content Include="src\Styles\Styles.xml" />
-    <Content Include="src\Styles\Subscript.xml" />
-    <Content Include="src\Styles\Superscript.xml">
+    <Content Include="Styles\Strong.xml" />
+    <Content Include="Styles\StyleNotImplemented.xml" />
+    <Content Include="Styles\Styles.xml" />
+    <Content Include="Styles\Subscript.xml" />
+    <Content Include="Styles\Superscript.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="src\Styles\TableOfFigures.xml" />
-    <Content Include="src\Styles\TOC1.xml">
+    <Content Include="Styles\TableOfFigures.xml" />
+    <Content Include="Styles\TOC1.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="src\Styles\TOC2.xml" />
-    <Content Include="src\Styles\TOC3.xml" />
-    <Content Include="src\Styles\TOC4.xml" />
-    <Content Include="src\Styles\TOCHeading.xml">
+    <Content Include="Styles\TOC2.xml" />
+    <Content Include="Styles\TOC3.xml" />
+    <Content Include="Styles\TOC4.xml" />
+    <Content Include="Styles\TOCHeading.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="src\Templates\app.xml" />
-    <Content Include="src\Templates\core.xml" />
-    <Content Include="src\Templates\document.xml" />
-    <Content Include="src\Templates\document.xml.rels.xml" />
-    <Content Include="src\Templates\footer1.xml" />
-    <Content Include="src\Templates\footer2.xml" />
+    <Content Include="Templates\app.xml" />
+    <Content Include="Templates\core.xml" />
+    <Content Include="Templates\document.xml" />
+    <Content Include="Templates\document.xml.rels.xml" />
+    <Content Include="Templates\footer1.xml" />
+    <Content Include="Templates\footer2.xml" />
     <Content Include="Resources\footnotes.xml" />
-    <Content Include="src\Templates\footnotes.xml" />
-    <Content Include="src\Templates\header1.xml" />
-    <Content Include="src\Templates\header2.xml" />
-    <Content Include="src\Templates\rels.xml" />
-    <Content Include="src\Templates\settings.xml" />
-    <Content Include="src\Templates\styles.xml" />
-    <Content Include="src\Templates\theme1.xml" />
-    <Content Include="src\Templates\[Content_Types].xml" />
+    <Content Include="Templates\footnotes.xml" />
+    <Content Include="Templates\header1.xml" />
+    <Content Include="Templates\header2.xml" />
+    <Content Include="Templates\rels.xml" />
+    <Content Include="Templates\settings.xml" />
+    <Content Include="Templates\styles.xml" />
+    <Content Include="Templates\theme1.xml" />
+    <Content Include="Templates\[Content_Types].xml" />
     <None Include="packages.config" />
-    <None Include="src\Styles\BlueTableBasic.xml" />
+    <None Include="Styles\BlueTableBasic.xml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

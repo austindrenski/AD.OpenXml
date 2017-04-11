@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
@@ -52,6 +53,26 @@ namespace AD.OpenXml.Elements
                                .Select(int.Parse)
                                .ToArray();
 
+            IEnumerable<XElement> footnoteReferenceRunProperties =
+                element.Descendants(W + "rPr")
+                       .Where(
+                           x =>
+                               x.Elements(W + "rStyle")
+                                .Attributes(W + "val")
+                                .Any(y => y.Value.Equals("FootnoteReference", StringComparison.OrdinalIgnoreCase)))
+                       .ToArray();
+
+            foreach (XElement runProperty in footnoteReferenceRunProperties)
+            {
+                runProperty.RemoveAll();
+                runProperty.Add(
+                    new XElement(
+                        W + "rStyle",
+                        new XAttribute(
+                            W + "val",
+                            "FootnoteReference")));
+            }
+
             foreach (int fromId in fromFootnoteIds.OrderByDescending(x => x))
             {
                 string toId = $"{currentDocumentId + fromId}";
@@ -61,7 +82,7 @@ namespace AD.OpenXml.Elements
                     W + "id",
                     $"{fromId}",
                     toId);
-
+                
                 XElement footnote =
                     sourceFootnotes.Elements()
                                    .Single(x => x.Attribute(W + "id")?.Value == $"{fromId}");
