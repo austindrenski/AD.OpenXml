@@ -51,7 +51,6 @@ namespace AD.OpenXml
                             .RemoveByAll(W + "sz")
                             .RemoveByAll(W + "szCs")
                             .RemoveByAll(W + "u")
-                            .RemoveByAll(x => x.Name.LocalName == "p" && !x.HasElements)
                             .RemoveByAllIfEmpty(W + "rPr")
                             .RemoveByAllIfEmpty(W + "pPr")
                             .RemoveByAllIfEmpty(W + "t")

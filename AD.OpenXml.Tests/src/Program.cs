@@ -28,7 +28,22 @@ namespace AD.OpenXml.Tests
             // Add footnotes file
             result.AddFootnotes();
 
-            foreach (string file in Directory.GetFiles(workingDirectory).Where(x => x.EndsWith(".docx")))
+            string[] files =
+                Directory.GetFiles(workingDirectory, "*.docx", SearchOption.TopDirectoryOnly)
+                         .OrderBy(
+                             x =>
+                             {
+                                 string a = Path.GetFileName(x)?
+                                                .TakeWhile(y => char.IsNumber(y) || char.IsPunctuation(y))
+                                                .Where(char.IsNumber)
+                                                .Aggregate(default(string), (current, next) => current + next)
+                                                .Split('-')
+                                                .FirstOrDefault();
+                                 return double.Parse(a ?? "0");
+                             })
+                         .ToArray();
+
+            foreach (string file in files)
             {
                 Combine(file, result);
             }
