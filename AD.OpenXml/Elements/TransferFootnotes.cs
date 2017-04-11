@@ -20,22 +20,22 @@ namespace AD.OpenXml.Elements
         /// 
         /// </summary>
         /// <param name="element"></param>
-        /// <param name="fromFilePath"></param>
-        /// <param name="toFilePath"></param>
+        /// <param name="source"></param>
+        /// <param name="result"></param>
         /// <returns></returns>
-        public static XElement TransferFootnotes(this XElement element, DocxFilePath fromFilePath, DocxFilePath toFilePath)
+        public static XElement TransferFootnotes(this XElement element, DocxFilePath source, DocxFilePath result)
         {
             XElement sourceFootnotes;
             try
             {
-                sourceFootnotes = fromFilePath.ReadAsXml("word/footnotes.xml");
+                sourceFootnotes = source.ReadAsXml("word/footnotes.xml");
             }
             catch
             {
                 return element;
             }
 
-            XElement resultFootnotes = toFilePath.ReadAsXml("word/footnotes.xml");
+            XElement resultFootnotes = result.ReadAsXml("word/footnotes.xml");
 
             int currentDocumentId =
                 resultFootnotes.Descendants(W + "footnote")
@@ -99,7 +99,7 @@ namespace AD.OpenXml.Elements
                 resultFootnotes.Add(footnote);
             }
 
-            resultFootnotes.WriteInto(toFilePath, "word/footnotes.xml");
+            resultFootnotes.WriteInto(result, "word/footnotes.xml");
 
             return element;
         }

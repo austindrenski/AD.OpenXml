@@ -33,12 +33,12 @@ namespace AD.OpenXml.Documents
 
             DocxFilePath tempSource = DocxFilePath.Create($"{source}_temp.docx", true);
             tempSource.AddFootnotes();
-            tempSource.Process508From(source);
 
             XElement sourceDocument =
-                tempSource.ReadAsXml("word/document.xml")
-                          .TransferFootnotes(source, result)
-                          .TransferCharts(source, result);
+                source.ReadAsXml()
+                      .Process508From()
+                      .TransferFootnotes(source, result)
+                      .TransferCharts(source, result);
 
             XElement resultDocument = result.ReadAsXml();
 

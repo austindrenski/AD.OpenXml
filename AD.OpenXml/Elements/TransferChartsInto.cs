@@ -8,6 +8,9 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Elements
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class TransferChartsExtensions
     {
@@ -19,8 +22,15 @@ namespace AD.OpenXml.Elements
 
         private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="fromFilePath"></param>
+        /// <param name="toFilePath"></param>
+        /// <returns></returns>
         public static XElement TransferCharts(this XElement element, DocxFilePath fromFilePath, DocxFilePath toFilePath)
-        {
+        {           
             int nextChartId =
                 toFilePath.ReadAsXml("word/_rels/document.xml.rels")
                           .Elements()

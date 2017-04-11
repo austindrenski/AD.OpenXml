@@ -26,7 +26,7 @@ namespace AD.OpenXml.Tests
             //DocxFilePath result = DocxFilePath.Create(path + "Result - Testing example.docx", true);
 
             // Clean document.xml
-            result.Process508From(source);
+            source.WriteInto(result, "word/document.xml");
 
             // Create custom styles
             result.AddStyles();

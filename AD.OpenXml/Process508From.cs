@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.OpenXml.Elements;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -24,48 +23,54 @@ namespace AD.OpenXml
         /// Performs a variety of 508-compliance corrections.
         /// This method works on the existing <see cref="XElement"/> and returns a reference to it for a fluent syntax.
         /// </summary>
-        /// <param name="fromFilePath">The document whose body is the target of the corrections.</param>
-        /// <param name="toFilePath">The document to which the modified body is saved.</param>
+        /// <param name="source">The document whose body is the target of the corrections.</param>
         /// <returns>A reference to the existing <see cref="XElement"/>. This is returned for use with fluent syntax calls.</returns>
         /// <exception cref="ArgumentException"/>
         /// <exception cref="ArgumentNullException"/>
-        public static void Process508From([NotNull] this DocxFilePath toFilePath, [NotNull] DocxFilePath fromFilePath)
+        public static XElement Process508From([NotNull] this XElement source)
         {
-            if (toFilePath is null)
+            if (source is null)
             {
-                throw new ArgumentNullException(nameof(toFilePath));
-            }
-            if (fromFilePath is null)
-            {
-                throw new ArgumentNullException(nameof(fromFilePath));
+                throw new ArgumentNullException(nameof(source));
             }
 
             XElement element =
-                fromFilePath.ReadAsXml()
-                            .RemoveRsidAttributes()
-                            .RemoveRunPropertiesFromParagraphProperties()
-                            .RemoveByAll(W + "proofErr")
-                            .RemoveByAll(W + "bookmarkStart")
-                            .RemoveByAll(W + "bookmarkEnd")
-                            .MergeRuns()
-                            .ChangeBoldToStrong()
-                            .ChangeItalicToEmphasis()
-                            .ChangeUnderlineToTableCaption()
-                            .ChangeUnderlineToFigureCaption()
-                            .ChangeUnderlineToSourceNote()
-                            .ChangeSuperscriptToReference()
-                            .HighlightInsertRequests()
-                            .AddLineBreakToHeadings()
-                            .SetTableStyles()
-                            .RemoveByAll(W + "rFonts")
-                            .RemoveByAll(W + "sz")
-                            .RemoveByAll(W + "szCs")
-                            .RemoveByAll(W + "u")
-                            .RemoveByAllIfEmpty(W + "rPr")
-                            .RemoveByAllIfEmpty(W + "pPr")
-                            .RemoveByAllIfEmpty(W + "t")
-                            .RemoveByAllIfEmpty(W + "r")
-                            .RemoveByAllIfEmpty(W + "p");
+                source.RemoveRsidAttributes()
+                      .RemoveRunPropertiesFromParagraphProperties()
+                      .RemoveByAll(W + "proofErr")
+                      .RemoveByAll(W + "bookmarkStart")
+                      .RemoveByAll(W + "bookmarkEnd")
+                      .MergeRuns()
+                      .ChangeBoldToStrong()
+                      .ChangeItalicToEmphasis()
+                      .ChangeUnderlineToTableCaption()
+                      .ChangeUnderlineToFigureCaption()
+                      .ChangeUnderlineToSourceNote()
+                      .ChangeSuperscriptToReference()
+                      .HighlightInsertRequests()
+                      .AddLineBreakToHeadings()
+                      .SetTableStyles()
+                      .RemoveByAll(W + "rFonts")
+                      .RemoveByAll(W + "sz")
+                      .RemoveByAll(W + "szCs")
+                      .RemoveByAll(W + "u")
+                      .RemoveByAllIfEmpty(W + "rPr")
+                      .RemoveByAllIfEmpty(W + "pPr")
+                      .RemoveByAllIfEmpty(W + "t")
+                      .RemoveByAllIfEmpty(W + "r")
+                      .RemoveByAllIfEmpty(W + "p");
+
+            element.Descendants(W + "rPr")
+                   .Where(
+                       x =>
+                           x.Elements(W + "rStyle")
+                            .Attributes(W + "val")
+                            .Any(y => y.Value.Equals("FootnoteReference")))
+                   .SelectMany(
+                       x =>
+                           x.Descendants()
+                            .Where(y => !y.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false))
+                   .Remove();
 
             element.Descendants(W + "p").Attributes().Remove();
             element.Descendants(W + "tr").Attributes().Remove();
@@ -82,7 +87,7 @@ namespace AD.OpenXml
 
             element.Descendants(W + "hyperlink").Remove();
 
-            element.WriteInto(toFilePath, "word/document.xml");
+            return element;
         }
     }
 }
