@@ -42,9 +42,9 @@ namespace AD.OpenXml.Tests
 
             OpenXmlContainer container = new OpenXmlContainer(result);
 
-            container.MergeDocuments(files);
+            OpenXmlContainer mergedContainer = container.MergeDocuments(files);
 
-            container.Save(result);
+            mergedContainer.Save(result);
 
             // Create custom styles
             result.AddStyles();
