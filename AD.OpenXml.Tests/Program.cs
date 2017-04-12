@@ -13,19 +13,33 @@ namespace AD.OpenXml.Tests
         public static void Main()
         {
             // Declare working directory
-            //const string path = @"c:\users\adren\desktop\508 work\";
-            //const string path = @"g:\data\austin d\508 programming\508 work\";
-            //const string workingDirectory = "c:\\users\\adren\\desktop\\otap 2016\\ch2";
-            const string workingDirectory = "g:\\data\\austin d\\508 programming\\otap 2016\\ch2";
+            const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\content review";
+
+            // Declare version
+            const string version = "6_1";
+
+            // Process chapters
+            ProcessChapter(version, $"{workingDirectory}\\ch2");
+            ProcessChapter(version, $"{workingDirectory}\\ch3");
+            ProcessChapter(version, $"{workingDirectory}\\ch4");
+            ProcessChapter(version, $"{workingDirectory}\\ch5");
+            ProcessChapter(version, $"{workingDirectory}\\ch6");
+        }
+
+        private static void ProcessChapter(string version, string workingDirectory)
+        {
+            // Create output directory
+            Directory.CreateDirectory($"{workingDirectory}\\output");
 
             // Create result file
-            DocxFilePath result = DocxFilePath.Create($"{workingDirectory}\\output\\OTAP_2016_v1_0.docx", true);
+            DocxFilePath result = DocxFilePath.Create($"{workingDirectory}\\output\\OTAP_2016_v_{version}.docx", true);
 
             // Add footnotes file
             result.AddFootnotes();
 
             DocxFilePath[] files =
                 Directory.GetFiles(workingDirectory, "*.docx", SearchOption.TopDirectoryOnly)
+                         .Where(x => !x.Contains('~'))
                          .OrderBy(
                              x =>
                              {
@@ -37,13 +51,16 @@ namespace AD.OpenXml.Tests
                                                 .FirstOrDefault();
                                  return double.Parse(a ?? "0");
                              })
-                         .Select(x => (DocxFilePath) x)
+                         .Select(x => (DocxFilePath)x)
                          .ToArray();
 
+            // Create container to encapsulate volatile operations
             OpenXmlContainer container = new OpenXmlContainer(result);
 
+            // Merge files into container
             OpenXmlContainer mergedContainer = container.MergeDocuments(files);
 
+            // Save container to result path
             mergedContainer.Save(result);
 
             // Create custom styles
@@ -74,11 +91,11 @@ namespace AD.OpenXml.Tests
             result.RemoveDuplicateSectionProperties();
 
             // Write document.xml to XML file
-            XmlFilePath xml = XmlFilePath.Create($"{workingDirectory}\\TestWordDocument_out.xml");
+            XmlFilePath xml = XmlFilePath.Create($"{workingDirectory}\\output\\OTAP_2016_v_{version}.xml");
             result.ReadAsXml().Elements().WriteXml(xml);
 
             // Write document.xml to HTML file
-            HtmlFilePath html = HtmlFilePath.Create($"{workingDirectory}\\TestWordDocument_out.html");
+            HtmlFilePath html = HtmlFilePath.Create($"{workingDirectory}\\output\\OTAP_2016_v_{version}.html");
             result.ReadAsXml().ProcessHtml().WriteHtml(html);
         }
     }

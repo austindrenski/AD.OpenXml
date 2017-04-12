@@ -65,7 +65,7 @@ namespace AD.OpenXml.Documents
             {
                 sectionProperties.AddFirst(
                     new XElement(W + "headerReference",
-                        new XAttribute(W + "type", "even"),
+                        new XAttribute(W + "type", "default"),
                         new XAttribute(S + "id", headerId)));
             }
             document.WriteInto(toFilePath, "word/document.xml");
@@ -96,7 +96,7 @@ namespace AD.OpenXml.Documents
             {
                 sectionProperties.AddFirst(
                     new XElement(W + "headerReference",
-                        new XAttribute(W + "type", "default"),
+                        new XAttribute(W + "type", "even"),
                         new XAttribute(S + "id", headerId)));
             }
             document.WriteInto(toFilePath, "word/document.xml");

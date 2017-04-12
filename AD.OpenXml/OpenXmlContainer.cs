@@ -215,7 +215,7 @@ namespace AD.OpenXml
                     .ChangeUnderlineToSourceNote()
                     .ChangeSuperscriptToReference()
                     .HighlightInsertRequests()
-                    .AddLineBreakToHeadings()
+                    //.AddLineBreakToHeadings()
                     .SetTableStyles()
                     .RemoveByAll(W + "rFonts")
                     .RemoveByAll(W + "sz")
