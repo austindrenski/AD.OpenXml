@@ -167,9 +167,7 @@ namespace AD.OpenXml
                     _document.Name,
                     _document.Attributes(),
                     _document.Elements(),
-                    chartAndFootnoteModifiedSourceContent
-                               .Element(W + "body")?
-                               .Elements());
+                    chartAndFootnoteModifiedSourceContent.Element(W + "body")?.Elements());
 
             XElement mergedFootnotes =
                 new XElement(
