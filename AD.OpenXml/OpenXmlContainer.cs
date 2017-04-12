@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
@@ -54,14 +53,8 @@ namespace AD.OpenXml
         /// <summary>
         /// word/charts/chart#.xml
         /// </summary>
-        private readonly IImmutableList<XElement> _sourceCharts;
-        private XElement[] _charts;
-
-        /// <summary>
-        /// word/charts/_rels/chart#.xml.rels
-        /// </summary>
-        private readonly IImmutableList<XElement> _sourceChartRelations;
-        private XElement[] _chartRelations;
+        private readonly IImmutableList<Tuple<string, XElement>> _sourceCharts;
+        private List<Tuple<string, XElement>> _charts;
 
         /// <summary>
         /// Returns the numeric value of the highest footnote identifier of the form 'w:id="#"'.
@@ -108,22 +101,16 @@ namespace AD.OpenXml
 
             _sourceDocumentRelations = result.ReadAsXml("word/_rels/document.xml.rels");
             _documentRelations = _sourceDocumentRelations.Clone();
-            
+
             _sourceCharts =
                 _documentRelations.Elements()
                                   .Select(x => x.Attribute("Target")?.Value)
                                   .Where(x => x?.StartsWith("charts/") ?? false)
-                                  .Select(x => result.ReadAsXml($"word/{x}"))
+                                  .Select(x => Tuple.Create(x, result.ReadAsXml($"word/{x}")))
                                   .ToImmutableArray();
-            _charts = _sourceCharts.Clone().ToArray();
-
-            _sourceChartRelations =
-                _documentRelations.Elements()
-                                  .Select(x => x.Attribute("Target")?.Value)
-                                  .Where(x => x?.StartsWith("charts/") ?? false)
-                                  .Select(x => result.ReadAsXml($"word/charts/_rels/{x}.rels"))
-                                  .ToImmutableArray();
-            _chartRelations = _sourceChartRelations.Clone().ToArray();
+            _charts =
+                _sourceCharts.Select(x => Tuple.Create(x.Item1, x.Item2.Clone()))
+                             .ToList();
         }
 
         /// <summary>
@@ -144,9 +131,16 @@ namespace AD.OpenXml
             {
                 _contentTypes.WriteInto(resultPath, "[Content_Types].xml");
             }
-            if (!XNode.DeepEquals(_documentRelations, _documentRelations))
+            if (!XNode.DeepEquals(_sourceDocumentRelations, _documentRelations))
             {
                 _documentRelations.WriteInto(resultPath, "word/_rels/document.xml.rels");
+            }
+            if (!_sourceCharts.Select(x => x.Item2).SequenceEqual(_charts.Select(x => x.Item2), XNode.EqualityComparer))
+            {
+                foreach (Tuple<string, XElement> chart in _charts)
+                {
+                    chart.Item2.WriteInto(resultPath, $"word/{chart.Item1}");
+                }
             }
         }
 
@@ -271,55 +265,41 @@ namespace AD.OpenXml
                       .Select(
                           x => new
                           {
-                              SourceIdNumeric = x.Attribute("Id")?.Value.ParseInt().GetValueOrDefault() ?? 0,
                               SourceId = x.Attribute("Id")?.Value,
-                              ResultId = $"rId{CurrentDocumentRelationId + x.Attribute("Id")?.Value.ParseInt().GetValueOrDefault()}",
-                              SourceName = x.Attribute("Target")?.Value.Replace("charts/", null)
+                              SourceIdNumeric = x.Attribute("Id")?.Value.ParseInt().GetValueOrDefault() ?? 0,
+                              SourceName = x.Attribute("Target")?.Value
+                          })
+                      .Select(
+                          x => new
+                          {
+                              x.SourceId,
+                              x.SourceName,
+                              ResultId = $"rId{CurrentDocumentRelationId + x.SourceIdNumeric}",
+                              ResultName = $"charts/chart{CurrentDocumentRelationId + x.SourceIdNumeric}.xml"
                           })
                       .ToArray();
 
             foreach (var map in chartMapping)
             {
                 sourceContent = sourceContent.ChangeXAttributeValues(C + "chart", R + "id", map.SourceId, map.ResultId);
-                TransferChart(source, result, map.SourceId, map.ResultId, map.SourceName, chartMapping.Max(x => x.SourceIdNumeric));
+
+                _contentTypes.Add(new XElement(T + "Override",
+                    new XAttribute("PartName", $"/word/{map.ResultName}"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml")));
+
+                _documentRelations.Add(
+                    new XElement(P + "Relationship",
+                        new XAttribute("Id", map.ResultId),
+                        new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart"),
+                        new XAttribute("Target", $"{map.ResultName}")));
+
+                XElement chart = source.ReadAsXml($"word/{map.SourceName}");
+                chart.Descendants(C + "externalData").Remove();
+                _charts.Add(Tuple.Create(map.ResultName, chart));
+                //chart.WriteInto(result, $"word/charts/{map.ResultName}");
             }
 
             return sourceContent;
-        }
-
-        internal static void TransferChart(DocxFilePath source, DocxFilePath result, string fromId, string toId, string inputName, int currentMaxId)
-        {
-            int nextChartNumber;
-            using (ZipArchive archive = ZipFile.OpenRead(result))
-            {
-                nextChartNumber =
-                    archive.Entries
-                           .Where(x => x.FullName.StartsWith("word/charts/chart"))
-                           .Select(x => x.FullName.Replace("word/charts/chart", null).Replace(".xml", null))
-                           .Select(int.Parse)
-                           .DefaultIfEmpty(0)
-                           .Max() + 1;
-            }
-
-            XElement contentTypes = result.ReadAsXml("[Content_Types].xml");
-            contentTypes.Add(
-                new XElement(T + "Override",
-                    new XAttribute("PartName", $"/word/charts/chart{nextChartNumber}.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml")));
-            contentTypes.WriteInto(result, "[Content_Types].xml");
-
-            XElement documentRelation = result.ReadAsXml("word/_rels/document.xml.rels");
-            documentRelation.Add(
-                new XElement(P + "Relationship",
-                    new XAttribute("Id", toId),
-                    new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart"),
-                    new XAttribute("Target", $"charts/chart{nextChartNumber}.xml")));
-            documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
-
-            XElement chart =
-                source.ReadAsXml($"word/charts/{inputName}");
-            chart.Descendants(C + "externalData").Remove();
-            chart.WriteInto(result, $"word/charts/chart{nextChartNumber}.xml");
         }
     }
 }
