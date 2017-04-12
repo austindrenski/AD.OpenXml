@@ -72,8 +72,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="src\Demo.cs" />
-    <Compile Include="src\Program.cs" />
+    <Compile Include="Demo.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
@@ -264,25 +265,61 @@ namespace AD.OpenXml
             }
 
             var chartMapping =
-                source.ReadAsXml("word/document.xml")
-                      .Descendants(C + "chart")
-                      .Attributes(R + "id")
-                      .Select(x => x.Value.ParseInt().GetValueOrDefault())
+                source.ReadAsXml("word/_rels/document.xml.rels")
+                      .Descendants(P + "Relationship")
+                      .Where(x => x.Attribute("Target")?.Value.StartsWith("charts/") ?? false)
                       .Select(
                           x => new
                           {
-                              oldId = $"rId{x}",
-                              newId = $"rId{CurrentDocumentRelationId + x}"
+                              SourceIdNumeric = x.Attribute("Id")?.Value.ParseInt().GetValueOrDefault() ?? 0,
+                              SourceId = x.Attribute("Id")?.Value,
+                              ResultId = $"rId{CurrentDocumentRelationId + x.Attribute("Id")?.Value.ParseInt().GetValueOrDefault()}",
+                              SourceName = x.Attribute("Target")?.Value.Replace("charts/", null)
                           })
                       .ToArray();
 
             foreach (var map in chartMapping)
             {
-                sourceContent = sourceContent.ChangeXAttributeValues(C + "chart", R + "id", map.oldId, map.newId);
-                TransferChartsExtensions.TransferChart(source, result, map.oldId, map.newId);
+                sourceContent = sourceContent.ChangeXAttributeValues(C + "chart", R + "id", map.SourceId, map.ResultId);
+                TransferChart(source, result, map.SourceId, map.ResultId, map.SourceName, chartMapping.Max(x => x.SourceIdNumeric));
             }
 
             return sourceContent;
+        }
+
+        internal static void TransferChart(DocxFilePath source, DocxFilePath result, string fromId, string toId, string inputName, int currentMaxId)
+        {
+            int nextChartNumber;
+            using (ZipArchive archive = ZipFile.OpenRead(result))
+            {
+                nextChartNumber =
+                    archive.Entries
+                           .Where(x => x.FullName.StartsWith("word/charts/chart"))
+                           .Select(x => x.FullName.Replace("word/charts/chart", null).Replace(".xml", null))
+                           .Select(int.Parse)
+                           .DefaultIfEmpty(0)
+                           .Max() + 1;
+            }
+
+            XElement contentTypes = result.ReadAsXml("[Content_Types].xml");
+            contentTypes.Add(
+                new XElement(T + "Override",
+                    new XAttribute("PartName", $"/word/charts/chart{nextChartNumber}.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml")));
+            contentTypes.WriteInto(result, "[Content_Types].xml");
+
+            XElement documentRelation = result.ReadAsXml("word/_rels/document.xml.rels");
+            documentRelation.Add(
+                new XElement(P + "Relationship",
+                    new XAttribute("Id", toId),
+                    new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart"),
+                    new XAttribute("Target", $"charts/chart{nextChartNumber}.xml")));
+            documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
+
+            XElement chart =
+                source.ReadAsXml($"word/charts/{inputName}");
+            chart.Descendants(C + "externalData").Remove();
+            chart.WriteInto(result, $"word/charts/chart{nextChartNumber}.xml");
         }
     }
 }
