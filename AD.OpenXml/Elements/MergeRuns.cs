@@ -27,7 +27,7 @@ namespace AD.OpenXml.Elements
                 IEnumerable<XElement> runs = paragraph.Elements(W + "r").ToArray();
                 foreach (XElement run in runs)
                 {
-                    if (run.Element(W + "t") == null)
+                    if (run.Element(W + "t") is null)
                     {
                         continue;
                     }
@@ -47,6 +47,13 @@ namespace AD.OpenXml.Elements
                     if (xElement != null)
                     {
                         xElement.Value = run.Value + xElement.Value;
+
+                        xElement.Value = xElement.Value.Replace("  ", null);
+
+                        if (xElement.Value.Length != xElement.Value.Trim().Length)
+                        {
+                            xElement.SetAttributeValue(XNamespace.Xml + "space", "preserve");
+                        }
                     }
                     run.Remove();
                 }

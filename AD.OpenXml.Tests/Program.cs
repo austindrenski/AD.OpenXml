@@ -24,6 +24,19 @@ namespace AD.OpenXml.Tests
             ProcessChapter(version, $"{workingDirectory}\\ch4");
             ProcessChapter(version, $"{workingDirectory}\\ch5");
             ProcessChapter(version, $"{workingDirectory}\\ch6");
+
+            // Copy outputs to report folder
+            string[] chapters = new string[] { "ch2", "ch3", "ch4", "ch5", "ch6" };
+            foreach (string chapter in chapters)
+            {
+                foreach (string file in Directory.GetFiles($"{workingDirectory}\\{chapter}", "*.docx", SearchOption.TopDirectoryOnly))
+                {
+                    File.Copy(file, $"{workingDirectory}\\_Report\\{Path.GetFileName(file)}", true);
+                }
+            }
+
+            // Process report
+            ProcessChapter(version, $"{workingDirectory}\\_Report");
         }
 
         private static void ProcessChapter(string version, string workingDirectory)

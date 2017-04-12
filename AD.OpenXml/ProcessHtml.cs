@@ -21,7 +21,7 @@ namespace AD.OpenXml
             return element.RemoveAttributesBy(XNamespace.Xml + "space")
                           .RemoveNamespaces()
                           .Element("body")
-                          .BodyToHtml("Word to HTML Testing", "USITC332.css")
+                          .BodyToHtml("Word to HTML Testing", "..\\..\\USITC332.css")
                           .AddToAll(
                                x => x.Name == "head",
                               "script",

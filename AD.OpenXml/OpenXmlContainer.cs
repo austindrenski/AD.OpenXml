@@ -162,12 +162,13 @@ namespace AD.OpenXml
             (XElement chartAndFootnoteModifiedSourceContent, XElement modifiedDocumentRelations, XElement modifiedContentTypes, IEnumerable<(string Name, XElement Chart)> modifiedCharts) =
                 MergeChartsFrom(file, footnoteModifiedSourceContent, _contentTypes, _documentRelations, _charts);
 
-            XElement mergedContent = 
+            XElement mergedContent =
                 new XElement(
                     _document.Name,
                     _document.Attributes(),
-                    _document.Elements(),
-                    chartAndFootnoteModifiedSourceContent.Element(W + "body")?.Elements());
+                    new XElement(W + "body",
+                        _document.Element(W + "body")?.Elements(),
+                        chartAndFootnoteModifiedSourceContent.Element(W + "body")?.Elements()));
 
             XElement mergedFootnotes =
                 new XElement(
@@ -221,11 +222,14 @@ namespace AD.OpenXml
                     .RemoveByAll(W + "sz")
                     .RemoveByAll(W + "szCs")
                     .RemoveByAll(W + "u")
+                    .RemoveByAll(W + "lang")
+                    .RemoveByAll(W + "spacing")
+                    .RemoveByAllIfEmpty(W + "tcPr")
                     .RemoveByAllIfEmpty(W + "rPr")
                     .RemoveByAllIfEmpty(W + "pPr")
                     .RemoveByAllIfEmpty(W + "t")
                     .RemoveByAllIfEmpty(W + "r")
-                    .RemoveByAllIfEmpty(W + "p");
+                    .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false));
 
             source.Descendants(W + "rPr")
                   .Where(
@@ -239,13 +243,29 @@ namespace AD.OpenXml
                            .Where(y => !y.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false))
                   .Remove();
 
+
+            source.Descendants(W + "pStyle")
+                  .Where(x => x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false)
+                  .Remove();
+
+            source.Descendants(W + "lastRenderedPageBreak")
+                  .Where(x => x.Ancestors(W + "table").Any())
+                  .Remove();
+
+            source.Descendants(W + "spacing").Remove();
+            source.Descendants(W + "lang").Remove();
+
             source.Descendants(W + "p").Attributes().Remove();
+
             source.Descendants(W + "tr").Attributes().Remove();
+
             source.Descendants(W + "hideMark").Remove();
             source.Descendants(W + "noWrap").Remove();
-            source.Descendants(W + "pPr").Where(x => !x.HasElements).Remove();
+            source.Descendants(W + "rPr").Descendants(W + "color").Attributes().Remove();
             source.Descendants(W + "rPr").Where(x => !x.HasElements).Remove();
-            source.Descendants(W + "spacing").Remove();
+            
+
+            source.Descendants(W + "pPr").Where(x => !x.HasElements).Remove();
 
             if (source.Element(W + "body")?.Elements().First().Name == W + "sectPr")
             {
