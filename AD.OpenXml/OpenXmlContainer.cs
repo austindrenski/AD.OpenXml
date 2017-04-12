@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
@@ -16,44 +15,50 @@ namespace AD.OpenXml
     [PublicAPI]
     public class OpenXmlContainer
     {
+        [NotNull]
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
+        [NotNull]
         private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
+        [NotNull]
         private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
+        [NotNull]
         private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
 
+        [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
-        /// word/document.xml
+        /// Active version of 'word/document.xml'.
         /// </summary>
-        private readonly XElement _sourceDocument;
+        [NotNull]
         private XElement _document;
 
         /// <summary>
-        /// [Content_Types].xml
+        /// Active version of '[Content_Types].xml'.
         /// </summary>
-        private readonly XElement _sourceContentTypes;
+        [NotNull]
         private XElement _contentTypes;
-        
+
         /// <summary>
-        /// word/footnotes.xml
+        /// Active version of 'word/footnotes.xml'.
         /// </summary>
-        private readonly XElement _sourceFootnotes;
+        [NotNull]
         private XElement _footnotes;
-        
+
         /// <summary>
-        /// word/_rels/document.xml.rels
+        /// Active version of 'word/_rels/document.xml.rels'.
         /// </summary>
-        private readonly XElement _sourceDocumentRelations;
+        [NotNull]
         private XElement _documentRelations;
-        
+
         /// <summary>
-        /// word/charts/chart#.xml
+        /// Active version of word/charts/chart#.xml.
         /// </summary>
-        private readonly IImmutableList<Tuple<string, XElement>> _sourceCharts;
+        [NotNull]
+        [ItemNotNull]
         private List<Tuple<string, XElement>> _charts;
 
         /// <summary>
@@ -87,30 +92,42 @@ namespace AD.OpenXml
         /// <summary>
         /// Initializes an <see cref="OpenXmlContainer"/> by reading document parts into memory.
         /// </summary>
-        /// <param name="result"></param>
-        public OpenXmlContainer(DocxFilePath result)
+        /// <param name="result">The file to which changes can be saved.</param>
+        public OpenXmlContainer([NotNull] DocxFilePath result)
         {
-            _sourceDocument = result.ReadAsXml("word/document.xml");
-            _document = _sourceDocument.Clone();
+            _document = result.ReadAsXml("word/document.xml");
 
-            _sourceContentTypes = result.ReadAsXml("[Content_Types].xml");
-            _contentTypes = _sourceContentTypes.Clone();
+            _contentTypes = result.ReadAsXml("[Content_Types].xml");
 
-            _sourceFootnotes = result.ReadAsXml("word/footnotes.xml");
-            _footnotes = _sourceFootnotes.Clone();
+            _footnotes = result.ReadAsXml("word/footnotes.xml");
 
-            _sourceDocumentRelations = result.ReadAsXml("word/_rels/document.xml.rels");
-            _documentRelations = _sourceDocumentRelations.Clone();
+            _documentRelations = result.ReadAsXml("word/_rels/document.xml.rels");
 
-            _sourceCharts =
+            _charts =
                 _documentRelations.Elements()
                                   .Select(x => x.Attribute("Target")?.Value)
                                   .Where(x => x?.StartsWith("charts/") ?? false)
                                   .Select(x => Tuple.Create(x, result.ReadAsXml($"word/{x}")))
-                                  .ToImmutableArray();
-            _charts =
-                _sourceCharts.Select(x => Tuple.Create(x.Item1, x.Item2.Clone()))
-                             .ToList();
+                                  .ToList();
+        }
+
+        private OpenXmlContainer(
+            [NotNull] XElement document,
+            [NotNull] XElement contentTypes,
+            [NotNull] XElement footnotes,
+            [NotNull] XElement documentRelations,
+            [NotNull][ItemNotNull] IEnumerable<Tuple<string, XElement>> charts
+            )
+        {
+            _document = document.Clone();
+
+            _contentTypes = contentTypes.Clone();
+
+            _footnotes = footnotes.Clone();
+
+            _documentRelations = documentRelations.Clone();
+
+            _charts = charts.Select(x => Tuple.Create(x.Item1, x.Item2.Clone())).ToList();
         }
 
         /// <summary>
@@ -119,55 +136,56 @@ namespace AD.OpenXml
         /// <param name="resultPath">The path to which modified parts are written.</param>
         public void Save([NotNull] DocxFilePath resultPath)
         {
-            if (!XNode.DeepEquals(_sourceDocument, _document))
+            _document.WriteInto(resultPath, "word/document.xml");
+            _footnotes.WriteInto(resultPath, "word/footnotes.xml");
+            _contentTypes.WriteInto(resultPath, "[Content_Types].xml");
+            _documentRelations.WriteInto(resultPath, "word/_rels/document.xml.rels");
+            foreach (Tuple<string, XElement> chart in _charts)
             {
-                _document.WriteInto(resultPath, "word/document.xml");
-            }
-            if (!XNode.DeepEquals(_sourceFootnotes, _footnotes))
-            {
-                _footnotes.WriteInto(resultPath, "word/footnotes.xml");
-            }
-            if (!XNode.DeepEquals(_sourceContentTypes, _contentTypes))
-            {
-                _contentTypes.WriteInto(resultPath, "[Content_Types].xml");
-            }
-            if (!XNode.DeepEquals(_sourceDocumentRelations, _documentRelations))
-            {
-                _documentRelations.WriteInto(resultPath, "word/_rels/document.xml.rels");
-            }
-            if (!_sourceCharts.Select(x => x.Item2).SequenceEqual(_charts.Select(x => x.Item2), XNode.EqualityComparer))
-            {
-                foreach (Tuple<string, XElement> chart in _charts)
-                {
-                    chart.Item2.WriteInto(resultPath, $"word/{chart.Item1}");
-                }
+                chart.Item2.WriteInto(resultPath, $"word/{chart.Item1}");
             }
         }
 
         /// <summary>
         /// Merges the source document into the result document.
         /// </summary>
-        /// <param name="source">The file from which content is copied.</param>
-        /// <param name="result"></param> // TODO: get rid of this parameter in favor of a transform that isn't disk-dependent.
-        public void MergeDocuments([NotNull] DocxFilePath source, [NotNull] DocxFilePath result)
+        /// <param name="files">The files from which content is copied.</param>
+        public void MergeDocuments([NotNull][ItemNotNull] IEnumerable<DocxFilePath> files)
         {
-            if (source is null)
+            if (files is null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw new ArgumentNullException(nameof(files));
             }
 
-            XElement sourceDocument =
-                source.ReadAsXml("word/document.xml")
-                      .Process508From();
+            foreach (DocxFilePath file in files)
+            {
+                MergeDocuments(file);
+            }
+        }
 
-            sourceDocument = MergeFootnotesFrom(source, sourceDocument);
+        /// <summary>
+        /// Merges the source document into the result document.
+        /// </summary>
+        /// <param name="file">The file from which content is copied.</param>
+        public void MergeDocuments([NotNull] DocxFilePath file)
+        {
+            if (file is null)
+            {
+                throw new ArgumentNullException(nameof(file));
+            }
 
-            sourceDocument = MergeChartsFrom(source, result, sourceDocument);
+            XElement source = file.ReadAsXml("word/document.xml");
+
+            source = MarshalContentFrom(source);
+
+            source = MergeFootnotesFrom(file, source);
+
+            source = MergeChartsFrom(file, source);
 
             IEnumerable<XElement> sourceContent =
-                sourceDocument.Elements()
-                              .Single()
-                              .Elements();
+                source.Elements()
+                      .Single()
+                      .Elements();
 
             _document.Elements()
                      .First()
@@ -175,25 +193,98 @@ namespace AD.OpenXml
         }
 
         /// <summary>
+        /// Marshal content from the source document to be added into the container.
+        /// </summary>
+        /// <param name="sourceContent">The document node of the source file containing any modifications made to this point.</param>
+        /// <returns>The updated document node of the source file.</returns>
+        [NotNull]
+        [MustUseReturnValue]
+        private XElement MarshalContentFrom([NotNull] XElement sourceContent)
+        {
+            if (sourceContent is null)
+            {
+                throw new ArgumentNullException(nameof(sourceContent));
+            }
+
+            XElement source =
+                sourceContent.RemoveRsidAttributes()
+                             .RemoveRunPropertiesFromParagraphProperties()
+                             .RemoveByAll(W + "proofErr")
+                             .RemoveByAll(W + "bookmarkStart")
+                             .RemoveByAll(W + "bookmarkEnd")
+                             .MergeRuns()
+                             .ChangeBoldToStrong()
+                             .ChangeItalicToEmphasis()
+                             .ChangeUnderlineToTableCaption()
+                             .ChangeUnderlineToFigureCaption()
+                             .ChangeUnderlineToSourceNote()
+                             .ChangeSuperscriptToReference()
+                             .HighlightInsertRequests()
+                             .AddLineBreakToHeadings()
+                             .SetTableStyles()
+                             .RemoveByAll(W + "rFonts")
+                             .RemoveByAll(W + "sz")
+                             .RemoveByAll(W + "szCs")
+                             .RemoveByAll(W + "u")
+                             .RemoveByAllIfEmpty(W + "rPr")
+                             .RemoveByAllIfEmpty(W + "pPr")
+                             .RemoveByAllIfEmpty(W + "t")
+                             .RemoveByAllIfEmpty(W + "r")
+                             .RemoveByAllIfEmpty(W + "p");
+
+            source.Descendants(W + "rPr")
+                  .Where(
+                      x =>
+                          x.Elements(W + "rStyle")
+                           .Attributes(W + "val")
+                           .Any(y => y.Value.Equals("FootnoteReference")))
+                  .SelectMany(
+                      x =>
+                          x.Descendants()
+                           .Where(y => !y.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false))
+                  .Remove();
+
+            source.Descendants(W + "p").Attributes().Remove();
+            source.Descendants(W + "tr").Attributes().Remove();
+            source.Descendants(W + "hideMark").Remove();
+            source.Descendants(W + "noWrap").Remove();
+            source.Descendants(W + "pPr").Where(x => !x.HasElements).Remove();
+            source.Descendants(W + "rPr").Where(x => !x.HasElements).Remove();
+            source.Descendants(W + "spacing").Remove();
+
+            if (source.Element(W + "body")?.Elements().First().Name == W + "sectPr")
+            {
+                source.Element(W + "body")?.Elements().First().Remove();
+            }
+
+            source.Descendants(W + "hyperlink").Remove();
+
+            return source;
+        }
+
+        /// <summary>
         /// Merge footnotes from the source document into the container.
         /// </summary>
-        /// <param name="source">The file from which content is copied.</param>
-        /// <param name="sourceContent">The document node of the source file.</param>
-        private XElement MergeFootnotesFrom([NotNull] DocxFilePath source, [NotNull] XElement sourceContent)
+        /// <param name="file">The file from which content is copied.</param>
+        /// <param name="sourceContent">The document node of the source file containing any modifications made to this point.</param>
+        /// <returns>The updated document node of the source file.</returns>
+        [NotNull]
+        [MustUseReturnValue]
+        private XElement MergeFootnotesFrom([NotNull] DocxFilePath file, [NotNull] XElement sourceContent)
         {
-            if (source is null)
+            if (file is null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw new ArgumentNullException(nameof(file));
             }
             if (sourceContent is null)
             {
                 throw new ArgumentNullException(nameof(sourceContent));
             }
 
-            // TODO: Make the return type of ReadAsXml() a nulalble singleton.
+            // TODO: Make the return type of ReadAsXml() a nullable singleton.
             try
             {
-                source.ReadAsXml("word/footnotes.xml");
+                file.ReadAsXml("word/footnotes.xml");
             }
             catch
             {
@@ -201,10 +292,10 @@ namespace AD.OpenXml
             }
 
             IEnumerable<XElement> sourceFootnotes =
-                source.ReadAsXml("word/footnotes.xml")
-                      .Elements(W + "footnote")
-                      .RemoveRsidAttributes()
-                      .ToArray();
+                file.ReadAsXml("word/footnotes.xml")
+                    .Elements(W + "footnote")
+                    .RemoveRsidAttributes()
+                    .ToArray();
 
             sourceFootnotes.Descendants(W + "p")
                            .Attributes()
@@ -245,9 +336,11 @@ namespace AD.OpenXml
         /// Merge footnotes from the source document into the container.
         /// </summary>
         /// <param name="source">The file from which content is copied.</param>
-        /// <param name="result">The into which content is copied.</param>
-        /// <param name="sourceContent"></param>
-        private XElement MergeChartsFrom([NotNull] DocxFilePath source, DocxFilePath result, XElement sourceContent)
+        /// <param name="sourceContent">The document node of the source file containing any modifications made to this point.</param>
+        /// <returns>The updated document node of the source file.</returns>
+        [NotNull]
+        [MustUseReturnValue]
+        private static (XElement, XElement, XElement, List<Tuple<string, XElement>>) MergeChartsFrom([NotNull] DocxFilePath source, [NotNull] XElement sourceContent, int currentDocumentRelationId, XElement documentRelations, XElement contentTypes, List<Tuple<string, XElement>> charts)
         {
             if (source is null)
             {
@@ -274,20 +367,33 @@ namespace AD.OpenXml
                           {
                               x.SourceId,
                               x.SourceName,
-                              ResultId = $"rId{CurrentDocumentRelationId + x.SourceIdNumeric}",
-                              ResultName = $"charts/chart{CurrentDocumentRelationId + x.SourceIdNumeric}.xml"
+                              ResultId = $"rId{currentDocumentRelationId + x.SourceIdNumeric}",
+                              ResultName = $"charts/chart{currentDocumentRelationId + x.SourceIdNumeric}.xml"
                           })
                       .ToArray();
+
+
+            XElement modifiedContentTypes =
+                new XElement(
+                    contentTypes.Name,
+                    contentTypes.Attributes(),
+                    contentTypes.Elements(),
+                    chartMapping.Select(
+                        x =>
+                            new XElement(T + "Override",
+                                new XAttribute("PartName", $"/word/{x.ResultName}"),
+                                new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml")));
 
             foreach (var map in chartMapping)
             {
                 sourceContent = sourceContent.ChangeXAttributeValues(C + "chart", R + "id", map.SourceId, map.ResultId);
 
-                _contentTypes.Add(new XElement(T + "Override",
-                    new XAttribute("PartName", $"/word/{map.ResultName}"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml")));
+                contentTypes.Add(
+                    new XElement(T + "Override",
+                        new XAttribute("PartName", $"/word/{map.ResultName}"),
+                        new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml")));
 
-                _documentRelations.Add(
+                documentRelations.Add(
                     new XElement(P + "Relationship",
                         new XAttribute("Id", map.ResultId),
                         new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart"),
@@ -296,7 +402,6 @@ namespace AD.OpenXml
                 XElement chart = source.ReadAsXml($"word/{map.SourceName}");
                 chart.Descendants(C + "externalData").Remove();
                 _charts.Add(Tuple.Create(map.ResultName, chart));
-                //chart.WriteInto(result, $"word/charts/{map.ResultName}");
             }
 
             return sourceContent;

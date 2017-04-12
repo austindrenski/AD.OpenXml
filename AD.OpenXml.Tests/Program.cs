@@ -2,7 +2,6 @@
 using System.Linq;
 using AD.IO;
 using AD.OpenXml.Documents;
-using AD.OpenXml.Html;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Tests
@@ -43,11 +42,9 @@ namespace AD.OpenXml.Tests
 
             OpenXmlContainer container = new OpenXmlContainer(result);
 
-            foreach (DocxFilePath file in files)
-            {
-                container.MergeDocuments(file, result);
-                container.Save(result);
-            }
+            container.MergeDocuments(files);
+
+            container.Save(result);
 
             // Create custom styles
             result.AddStyles();

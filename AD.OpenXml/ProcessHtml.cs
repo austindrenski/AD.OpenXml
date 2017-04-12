@@ -1,8 +1,9 @@
 ﻿using System.Xml.Linq;
+using AD.OpenXml.Html;
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Html
+namespace AD.OpenXml
 {
     /// <summary>
     /// Performs a variety of processing to transform the XML node into a well-formed HTML document.
@@ -26,7 +27,7 @@ namespace AD.OpenXml.Html
                               "script",
                               new XAttribute("type", "text/javascript"),
                               new XAttribute("src", "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=MML_CHTML"),
-                              "")
+                              " ")
                           .ConvertFootnoteReferences()
                           .ConvertTableCells()
                           .ConvertTables()
