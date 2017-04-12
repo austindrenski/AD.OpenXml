@@ -255,6 +255,8 @@ namespace AD.OpenXml
             source.Descendants(W + "spacing").Remove();
             source.Descendants(W + "lang").Remove();
 
+            source.Descendants(W + "numPr").Remove();
+
             source.Descendants(W + "p").Attributes().Remove();
 
             source.Descendants(W + "tr").Attributes().Remove();
