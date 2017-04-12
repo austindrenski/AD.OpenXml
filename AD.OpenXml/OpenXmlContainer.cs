@@ -62,20 +62,6 @@ namespace AD.OpenXml
         private readonly IImmutableList<(string Name, XElement Chart)> _charts;
 
         /// <summary>
-        /// Returns the numeric component of the las document relation identifier currently in use by the container.
-        /// </summary>
-        private int CurrentDocumentRelationId
-        {
-            get
-            {
-                return _documentRelations.Elements(R + "Relationship")
-                                         .Attributes("Id")
-                                         .Select(x => x.Value.ParseInt().GetValueOrDefault())
-                                         .Max();
-            }
-        }
-
-        /// <summary>
         /// Returns the last footnote identifier currently in use by the container.
         /// </summary>
         private readonly int _currentFootnoteId;
@@ -119,8 +105,7 @@ namespace AD.OpenXml
             _documentRelations = documentRelations.Clone();
             _contentTypes = contentTypes.Clone();
             _footnotes = footnotes.Clone();
-            _charts = charts.Select(x => (Name: x.Name, Chart: x.Chart.Clone()))
-                            .ToImmutableArray();
+            _charts = charts.Select(x => (Name: x.Name, Chart: x.Chart.Clone())).ToImmutableArray();
         }
 
         /// <summary>
@@ -143,8 +128,8 @@ namespace AD.OpenXml
         /// Merges the source document into the result document.
         /// </summary>
         /// <param name="files">The files from which content is copied.</param>
+        [Pure]
         [NotNull]
-        [MustUseReturnValue]
         public OpenXmlContainer MergeDocuments([NotNull][ItemNotNull] IEnumerable<DocxFilePath> files)
         {
             if (files is null)
@@ -159,8 +144,8 @@ namespace AD.OpenXml
         /// Merges the source document into the result document.
         /// </summary>
         /// <param name="file">The file from which content is copied.</param>
+        [Pure]
         [NotNull]
-        [MustUseReturnValue]
         public OpenXmlContainer MergeDocuments([NotNull] DocxFilePath file)
         {
             if (file is null)
@@ -171,7 +156,7 @@ namespace AD.OpenXml
             XElement modifiedSourceContent = 
                 MarshalContentFrom(file);
 
-            (XElement footnoteModifiedSourceContent, XElement modifiedSourceFootnotes, int newCurrentFootnoteId) = 
+            (XElement footnoteModifiedSourceContent, XElement modifiedSourceFootnotes, int updatedFootnoteId) = 
                 MergeFootnotesFrom(file, modifiedSourceContent, _currentFootnoteId);
 
             (XElement chartAndFootnoteModifiedSourceContent, XElement modifiedDocumentRelations, XElement modifiedContentTypes, IEnumerable<(string Name, XElement Chart)> modifiedCharts) =
@@ -199,7 +184,7 @@ namespace AD.OpenXml
                 modifiedContentTypes,
                 mergedFootnotes,
                 modifiedCharts,
-                newCurrentFootnoteId);
+                updatedFootnoteId);
 
         }
 
@@ -208,8 +193,8 @@ namespace AD.OpenXml
         /// </summary>
         /// <param name="file">The file from which content is copied.</param>
         /// <returns>The updated document node of the source file.</returns>
+        [Pure]
         [NotNull]
-        [MustUseReturnValue]
         private static XElement MarshalContentFrom([NotNull] DocxFilePath file)
         {
             if (file is null)
@@ -281,8 +266,8 @@ namespace AD.OpenXml
         /// <param name="sourceContent">The document node of the source file containing any modifications made to this point.</param>
         /// <param name="currentFootnoteId">The last footnote number currently in use by the container.</param>
         /// <returns>The updated document node of the source file.</returns>
-        [MustUseReturnValue]
-        private static (XElement SourceContent, XElement SourceFootnotes, int NewFootnoteId) MergeFootnotesFrom([NotNull] DocxFilePath file, [NotNull] XElement sourceContent, int currentFootnoteId)
+        [Pure]
+        private static (XElement SourceContent, XElement SourceFootnotes, int UpdatedFootnoteId) MergeFootnotesFrom([NotNull] DocxFilePath file, [NotNull] XElement sourceContent, int currentFootnoteId)
         {
             if (file is null)
             {
@@ -300,7 +285,7 @@ namespace AD.OpenXml
             }
             catch
             {
-                return (SourceContent: sourceContent, SourceFootnotes: null, NewFootnoteId: currentFootnoteId);
+                return (SourceContent: sourceContent, SourceFootnotes: null, UpdatedFootnoteId: currentFootnoteId);
             }
 
             XElement sourceFootnotes =
@@ -339,7 +324,7 @@ namespace AD.OpenXml
                     sourceFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
             }
 
-            return (SourceContent: sourceContent, SourceFootnotes: sourceFootnotes, NewFootnoteId: footnoteMapping.Max(x => x.newNumericId));
+            return (SourceContent: sourceContent, SourceFootnotes: sourceFootnotes, UpdatedFootnoteId: footnoteMapping.Max(x => x.newNumericId));
         }
 
         /// <summary>
@@ -351,13 +336,29 @@ namespace AD.OpenXml
         /// <param name="documentRelations"></param>
         /// <param name="charts"></param>
         /// <returns>The updated document node of the source file.</returns>
-        [MustUseReturnValue]
+        [Pure]
         private static (XElement SourceContent, XElement DocumentRelations, XElement ContentTypes, IEnumerable<(string Name, XElement Chart)> Charts) 
             MergeChartsFrom([NotNull] DocxFilePath source, XElement sourceContent, XElement contentTypes, XElement documentRelations, IEnumerable<(string Name, XElement Chart)> charts)
         {
             if (source is null)
             {
                 throw new ArgumentNullException(nameof(source));
+            }
+            if (sourceContent is null)
+            {
+                throw new ArgumentNullException(nameof(sourceContent));
+            }
+            if (contentTypes is null)
+            {
+                throw new ArgumentNullException(nameof(contentTypes));
+            }
+            if (documentRelations is null)
+            {
+                throw new ArgumentNullException(nameof(documentRelations));
+            }
+            if (charts is null)
+            {
+                throw new ArgumentNullException(nameof(charts));
             }
 
             int currentDocumentRelationId =
@@ -386,8 +387,7 @@ namespace AD.OpenXml
                               ResultName = $"charts/chart{currentDocumentRelationId + x.SourceIdNumeric}.xml"
                           })
                       .ToArray();
-
-
+            
             XElement modifiedContentTypes =
                 new XElement(
                     contentTypes.Name,
