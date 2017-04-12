@@ -57,7 +57,7 @@ namespace AD.OpenXml.Elements
             return element;
         }
 
-        private static void TransferChart(DocxFilePath fromFilePath, DocxFilePath toFilePath, string fromId, string toId)
+        internal static void TransferChart(DocxFilePath fromFilePath, DocxFilePath toFilePath, string fromId, string toId)
         {
             string inputName =
                     fromFilePath.ReadAsXml("word/_rels/document.xml.rels")

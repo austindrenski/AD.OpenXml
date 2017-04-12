@@ -16,8 +16,8 @@ namespace AD.OpenXml.Tests
             // Declare working directory
             //const string path = @"c:\users\adren\desktop\508 work\";
             //const string path = @"g:\data\austin d\508 programming\508 work\";
-            //const string workingDirectory = "c:\\users\\adren\\desktop\\otap 2016\\ch5";
-            const string workingDirectory = "g:\\data\\austin d\\508 programming\\otap 2016\\ch2";
+            const string workingDirectory = "c:\\users\\adren\\desktop\\otap 2016\\ch2";
+            //const string workingDirectory = "g:\\data\\austin d\\508 programming\\otap 2016\\ch2";
 
             // Create result file
             DocxFilePath result = DocxFilePath.Create($"{workingDirectory}\\output\\OTAP_2016_v1_0.docx", true);
@@ -41,9 +41,12 @@ namespace AD.OpenXml.Tests
                          .Select(x => (DocxFilePath) x)
                          .ToArray();
 
+            OpenXmlContainer container = new OpenXmlContainer(result);
+
             foreach (DocxFilePath file in files)
             {
-                file.MergeInto(result);
+                container.MergeDocuments(file, result);
+                container.Save(result);
             }
 
             // Create custom styles
