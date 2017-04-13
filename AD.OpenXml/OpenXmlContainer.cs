@@ -218,8 +218,14 @@ namespace AD.OpenXml
 
             XElement source =
                 file.ReadAsXml("word/document.xml")
+                    
+                // Remove editing attributes.
                     .RemoveRsidAttributes()
+                
+                // Remove run properties from the paragraph scope.
                     .RemoveRunPropertiesFromParagraphProperties()
+
+                // Remove elements that should never exist in-line.
                     .RemoveByAll(W + "proofErr")
                     .RemoveByAll(W + "bookmarkStart")
                     .RemoveByAll(W + "bookmarkEnd")
@@ -238,18 +244,27 @@ namespace AD.OpenXml
                     .RemoveByAll(W + "lastRenderedPageBreak")
                     .RemoveByAll(W + "keepNext")
                     .RemoveByAll(W + "noProof")
+
+                // Remove elements that should almost never exist.
                     .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
                     .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
                     .RemoveByAll(x => x.Name.Equals(W + "jc") && !x.Ancestors(W + "table").Any())
+                
+                // Alter bold, italic, and underline elements.
                     .ChangeBoldToStrong()
                     .ChangeItalicToEmphasis()
                     .ChangeUnderlineToTableCaption()
                     .ChangeUnderlineToFigureCaption()
                     .ChangeUnderlineToSourceNote()
                     .ChangeSuperscriptToReference()
+                
+                // Mark insert requests for the production team.
                     .HighlightInsertRequests()
-                    //.AddLineBreakToHeadings()
+
+                // Set table styles.
                     .SetTableStyles()
+
+                // Remove elements used above, but not needed in the output.
                     .RemoveByAll(W + "u")
                     .RemoveByAllIfEmpty(W + "tcPr")
                     .RemoveByAllIfEmpty(W + "rPr")
@@ -257,8 +272,11 @@ namespace AD.OpenXml
                     .RemoveByAllIfEmpty(W + "t")
                     .RemoveByAllIfEmpty(W + "r")
                     .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false))
+                
+                // Tidy up the XML for review.
                     .MergeRuns();
 
+            // There shouldn't be more than one paragraph style.
             foreach (XElement paragraphProperties in source.Descendants(W + "pPr").Where(x => x.Elements(W + "pStyle").Count() > 1))
             {
                 IEnumerable<XElement> styles = paragraphProperties.Elements(W + "pStyle").ToArray();
@@ -266,6 +284,7 @@ namespace AD.OpenXml
                 paragraphProperties.AddFirst(styles.Distinct());
             }
 
+            // There shouldn't be more than one run style.
             foreach (XElement runProperties in source.Descendants(W + "rPr").Where(x => x.Elements(W + "rStyle").Count() > 1))
             {
                 IEnumerable<XElement> styles = runProperties.Elements(W + "rStyle").ToArray();

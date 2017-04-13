@@ -36,7 +36,9 @@ namespace AD.OpenXml.Elements
                        .Where(x => x?.Name == W + "p")
                        .Where(x => (x.Next()?.DescendantsAndSelf().Any(y => y.Name == W + "drawing") ?? false)
                                 || (x.Next()?.Value.Contains('{') ?? false))
+                       .Distinct()
                        .ToArray();
+
             foreach (XElement item in paragraphs)
             {
                 item.AddFigureCaption();

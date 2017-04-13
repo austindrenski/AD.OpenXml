@@ -41,7 +41,11 @@ namespace AD.OpenXml.Elements
                     }
                     if (run.Element(W + "fldChar") != null)
                     {
-                        
+                        continue;
+                    }
+                    if (run.Next()?.Element(W + "fldChar") != null)
+                    {
+                        continue;
                     }
                     if (!run.Next()?.Elements(W + "t").Any() ?? false)
                     {
