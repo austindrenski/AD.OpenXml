@@ -59,8 +59,8 @@ namespace AD.OpenXml.Tests
                              x =>
                                  Path.GetFileNameWithoutExtension(x)
                                      .TakeWhile(y => char.IsNumber(y) || char.IsPunctuation(y))
-                                     .Where(char.IsNumber)
-                                     .Aggregate(default(string), (current, next) => current + next))
+                                     .Aggregate(default(string), (current, next) => current + next)
+                                     .ParseInt())
                          .Select(
                              x => (DocxFilePath) x)
                          .ToArray();
