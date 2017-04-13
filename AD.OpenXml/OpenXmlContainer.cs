@@ -69,7 +69,7 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull]
         private readonly XElement _footnotes;
-        
+
         /// <summary>
         /// Active version of word/charts/chart#.xml.
         /// </summary>
@@ -167,15 +167,15 @@ namespace AD.OpenXml
             {
                 throw new ArgumentNullException(nameof(file));
             }
-           
-            XElement modifiedSourceContent = 
+
+            XElement modifiedSourceContent =
                 MarshalContentFrom(file);
 
-            (XElement footnoteModifiedSourceContent, XElement modifiedSourceFootnotes, int updatedFootnoteId) = 
-                MergeFootnotesFrom(file, modifiedSourceContent, _currentFootnoteId);
+            (XElement footnoteModifiedSourceContent, XElement modifiedSourceFootnotes, int updatedFootnoteId) =
+                MarshalFootnotesFrom(file, modifiedSourceContent, _currentFootnoteId);
 
             (XElement chartAndFootnoteModifiedSourceContent, XElement modifiedDocumentRelations, XElement modifiedContentTypes, IEnumerable<(string Name, XElement Chart)> modifiedCharts) =
-                MergeChartsFrom(file, footnoteModifiedSourceContent, _contentTypes, _documentRelations, _charts);
+                MarshalChartsFrom(file, footnoteModifiedSourceContent, _contentTypes, _documentRelations, _charts);
 
             XElement mergedContent =
                 new XElement(
@@ -207,6 +207,7 @@ namespace AD.OpenXml
         /// </summary>
         /// <param name="file">The file from which content is copied.</param>
         /// <returns>The updated document node of the source file.</returns>
+        /// <remarks>This method delegates its work to the <see cref="MarshalContentFromExtensions.MarshalContentFrom(DocxFilePath)"/> extension method.</remarks>
         [Pure]
         [NotNull]
         private static XElement MarshalContentFrom([NotNull] DocxFilePath file)
@@ -215,111 +216,19 @@ namespace AD.OpenXml
             {
                 throw new ArgumentNullException(nameof(file));
             }
-
-            XElement source =
-                file.ReadAsXml("word/document.xml")
-                    
-                // Remove editing attributes.
-                    .RemoveRsidAttributes()
-                
-                // Remove run properties from the paragraph scope.
-                    .RemoveRunPropertiesFromParagraphProperties()
-
-                // Remove elements that should never exist in-line.
-                    .RemoveByAll(W + "proofErr")
-                    .RemoveByAll(W + "bookmarkStart")
-                    .RemoveByAll(W + "bookmarkEnd")
-                    .RemoveByAll(W + "tblPrEx")
-                    .RemoveByAll(W + "spacing")
-                    .RemoveByAll(W + "lang")
-                    .RemoveByAll(W + "numPr")
-                    .RemoveByAll(W + "hideMark")
-                    .RemoveByAll(W + "noWrap")
-                    .RemoveByAll(W + "rFonts")
-                    .RemoveByAll(W + "sz")
-                    .RemoveByAll(W + "szCs")
-                    .RemoveByAll(W + "bCs")
-                    .RemoveByAll(W + "iCs")
-                    .RemoveByAll(W + "color")
-                    .RemoveByAll(W + "lastRenderedPageBreak")
-                    .RemoveByAll(W + "keepNext")
-                    .RemoveByAll(W + "noProof")
-
-                // Remove elements that should almost never exist.
-                    .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name.Equals(W + "jc") && !x.Ancestors(W + "table").Any())
-                
-                // Alter bold, italic, and underline elements.
-                    .ChangeBoldToStrong()
-                    .ChangeItalicToEmphasis()
-                    .ChangeUnderlineToTableCaption()
-                    .ChangeUnderlineToFigureCaption()
-                    .ChangeUnderlineToSourceNote()
-                    .ChangeSuperscriptToReference()
-                
-                // Mark insert requests for the production team.
-                    .HighlightInsertRequests()
-
-                // Set table styles.
-                    .SetTableStyles()
-
-                // Remove elements used above, but not needed in the output.
-                    .RemoveByAll(W + "u")
-                    .RemoveByAllIfEmpty(W + "tcPr")
-                    .RemoveByAllIfEmpty(W + "rPr")
-                    .RemoveByAllIfEmpty(W + "pPr")
-                    .RemoveByAllIfEmpty(W + "t")
-                    .RemoveByAllIfEmpty(W + "r")
-                    .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false))
-                
-                // Tidy up the XML for review.
-                    .MergeRuns();
-
-            // There shouldn't be more than one paragraph style.
-            foreach (XElement paragraphProperties in source.Descendants(W + "pPr").Where(x => x.Elements(W + "pStyle").Count() > 1))
-            {
-                IEnumerable<XElement> styles = paragraphProperties.Elements(W + "pStyle").ToArray();
-                styles.Remove();
-                paragraphProperties.AddFirst(styles.Distinct());
-            }
-
-            // There shouldn't be more than one run style.
-            foreach (XElement runProperties in source.Descendants(W + "rPr").Where(x => x.Elements(W + "rStyle").Count() > 1))
-            {
-                IEnumerable<XElement> styles = runProperties.Elements(W + "rStyle").ToArray();
-                styles.Remove();
-                IEnumerable<XElement> distinct = styles.Distinct().ToArray();
-                if (distinct.Any(x => x.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false))
-                {
-                    distinct = distinct.Where(x => x.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false);
-                }
-                runProperties.AddFirst(distinct);
-            }
-
-            source.Descendants(W + "p").Attributes().Remove();
-
-            source.Descendants(W + "tr").Attributes().Remove();
-
-            if (source.Element(W + "body")?.Elements().First().Name == W + "sectPr")
-            {
-                source.Element(W + "body")?.Elements().First().Remove();
-            }
-
-            source.Descendants(W + "hyperlink").Remove();
-
-            return source;
+            return file.MarshalContentFrom();
         }
 
         /// <summary>
-        /// Merge footnotes from the source document into the container.
+        /// Marshal footnotes from the source document into the container.
         /// </summary>
         /// <param name="file">The file from which content is copied.</param>
         /// <param name="sourceContent">The document node of the source file containing any modifications made to this point.</param>
         /// <param name="currentFootnoteId">The last footnote number currently in use by the container.</param>
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
-        private static (XElement SourceContent, XElement SourceFootnotes, int UpdatedFootnoteId) MergeFootnotesFrom([NotNull] DocxFilePath file, [NotNull] XElement sourceContent, int currentFootnoteId)
+        private static (XElement SourceContent, XElement SourceFootnotes, int UpdatedFootnoteId) 
+            MarshalFootnotesFrom([NotNull] DocxFilePath file, [NotNull] XElement sourceContent, int currentFootnoteId)
         {
             if (file is null)
             {
@@ -376,11 +285,13 @@ namespace AD.OpenXml
                     sourceFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
             }
 
-            return (SourceContent: sourceContent, SourceFootnotes: sourceFootnotes, UpdatedFootnoteId: footnoteMapping.Max(x => x.newNumericId));
+            int newCurrentId = footnoteMapping.Any() ? footnoteMapping.Max(x => x.newNumericId) : currentFootnoteId;
+
+            return (SourceContent: sourceContent, SourceFootnotes: sourceFootnotes, UpdatedFootnoteId: newCurrentId);
         }
 
         /// <summary>
-        /// Merge footnotes from the source document into the container.
+        /// Marshal footnotes from the source document into the container.
         /// </summary>
         /// <param name="source">The file from which content is copied.</param>
         /// <param name="sourceContent">The document node of the source file containing any modifications made to this point.</param>
@@ -389,8 +300,8 @@ namespace AD.OpenXml
         /// <param name="charts"></param>
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
-        private static (XElement SourceContent, XElement DocumentRelations, XElement ContentTypes, IEnumerable<(string Name, XElement Chart)> Charts) 
-            MergeChartsFrom([NotNull] DocxFilePath source, XElement sourceContent, XElement contentTypes, XElement documentRelations, IEnumerable<(string Name, XElement Chart)> charts)
+        private static (XElement SourceContent, XElement DocumentRelations, XElement ContentTypes, IEnumerable<(string Name, XElement Chart)> Charts)
+            MarshalChartsFrom([NotNull] DocxFilePath source, XElement sourceContent, XElement contentTypes, XElement documentRelations, IEnumerable<(string Name, XElement Chart)> charts)
         {
             if (source is null)
             {
@@ -439,7 +350,7 @@ namespace AD.OpenXml
                               ResultName = $"charts/chart{currentDocumentRelationId + x.SourceIdNumeric}.xml"
                           })
                       .ToArray();
-            
+
             XElement modifiedContentTypes =
                 new XElement(
                     contentTypes.Name,
