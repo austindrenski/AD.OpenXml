@@ -16,18 +16,33 @@ namespace AD.OpenXml
     [PublicAPI]
     public class OpenXmlContainer
     {
+        /// <summary>
+        /// Represents the 'c:' prefix seen in the markup for chart[#].xml
+        /// </summary>
         [NotNull]
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
+        /// <summary>
+        /// Represents the 'r:' prefix seen in the markup of [Content_Types].xml
+        /// </summary>
         [NotNull]
         private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
+        /// <summary>
+        /// Represents the 'r:' prefix seen in the markup of document.xml.
+        /// </summary>
         [NotNull]
         private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
+        /// <summary>
+        /// The namespace declared on the [Content_Types].xml
+        /// </summary>
         [NotNull]
         private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
 
+        /// <summary>
+        /// Represents the 'w:' prefix seen in raw OpenXML documents.
+        /// </summary>
         [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -208,6 +223,19 @@ namespace AD.OpenXml
                     .RemoveByAll(W + "proofErr")
                     .RemoveByAll(W + "bookmarkStart")
                     .RemoveByAll(W + "bookmarkEnd")
+                    .RemoveByAll(W + "tblPrEx")
+                    .RemoveByAll(W + "spacing")
+                    .RemoveByAll(W + "lang")
+                    .RemoveByAll(W + "numPr")
+                    .RemoveByAll(W + "hideMark")
+                    .RemoveByAll(W + "noWrap")
+                    .RemoveByAll(W + "rFonts")
+                    .RemoveByAll(W + "sz")
+                    .RemoveByAll(W + "szCs")
+                    .RemoveByAll(W + "color")
+                    .RemoveByAll(W + "lastRenderedPageBreak")
+                    .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
+                    .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
                     .MergeRuns()
                     .ChangeBoldToStrong()
                     .ChangeItalicToEmphasis()
@@ -218,12 +246,7 @@ namespace AD.OpenXml
                     .HighlightInsertRequests()
                     //.AddLineBreakToHeadings()
                     .SetTableStyles()
-                    .RemoveByAll(W + "rFonts")
-                    .RemoveByAll(W + "sz")
-                    .RemoveByAll(W + "szCs")
                     .RemoveByAll(W + "u")
-                    .RemoveByAll(W + "lang")
-                    .RemoveByAll(W + "spacing")
                     .RemoveByAllIfEmpty(W + "tcPr")
                     .RemoveByAllIfEmpty(W + "rPr")
                     .RemoveByAllIfEmpty(W + "pPr")
@@ -231,43 +254,28 @@ namespace AD.OpenXml
                     .RemoveByAllIfEmpty(W + "r")
                     .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false));
 
-            source.Descendants(W + "rPr")
-                  .Where(
-                      x =>
-                          x.Elements(W + "rStyle")
-                           .Attributes(W + "val")
-                           .Any(y => y.Value.Equals("FootnoteReference")))
-                  .SelectMany(
-                      x =>
-                          x.Descendants()
-                           .Where(y => !y.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false))
-                  .Remove();
+            foreach (XElement paragraphProperties in source.Descendants(W + "pPr").Where(x => x.Elements(W + "pStyle").Count() > 1))
+            {
+                IEnumerable<XElement> styles = paragraphProperties.Elements(W + "pStyle").ToArray();
+                styles.Remove();
+                paragraphProperties.AddFirst(styles.Distinct());
+            }
 
-
-            source.Descendants(W + "pStyle")
-                  .Where(x => x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false)
-                  .Remove();
-
-            source.Descendants(W + "lastRenderedPageBreak")
-                  .Where(x => x.Ancestors(W + "table").Any())
-                  .Remove();
-
-            source.Descendants(W + "spacing").Remove();
-            source.Descendants(W + "lang").Remove();
-
-            source.Descendants(W + "numPr").Remove();
+            foreach (XElement runProperties in source.Descendants(W + "rPr").Where(x => x.Elements(W + "rStyle").Count() > 1))
+            {
+                IEnumerable<XElement> styles = runProperties.Elements(W + "rStyle").ToArray();
+                styles.Remove();
+                IEnumerable<XElement> distinct = styles.Distinct().ToArray();
+                if (distinct.Any(x => x.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false))
+                {
+                    distinct = distinct.Where(x => x.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false);
+                }
+                runProperties.AddFirst(distinct);
+            }
 
             source.Descendants(W + "p").Attributes().Remove();
 
             source.Descendants(W + "tr").Attributes().Remove();
-
-            source.Descendants(W + "hideMark").Remove();
-            source.Descendants(W + "noWrap").Remove();
-            source.Descendants(W + "rPr").Descendants(W + "color").Attributes().Remove();
-            source.Descendants(W + "rPr").Where(x => !x.HasElements).Remove();
-            
-
-            source.Descendants(W + "pPr").Where(x => !x.HasElements).Remove();
 
             if (source.Element(W + "body")?.Elements().First().Name == W + "sectPr")
             {

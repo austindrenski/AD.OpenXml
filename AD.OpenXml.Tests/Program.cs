@@ -16,9 +16,10 @@ namespace AD.OpenXml.Tests
             const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\content review";
 
             // Declare version
-            const string version = "6_1";
+            const string version = "6_2";
 
             // Process chapters
+            ProcessChapter(version, $"{workingDirectory}\\ch0");
             ProcessChapter(version, $"{workingDirectory}\\ch2");
             ProcessChapter(version, $"{workingDirectory}\\ch3");
             ProcessChapter(version, $"{workingDirectory}\\ch4");
@@ -26,7 +27,7 @@ namespace AD.OpenXml.Tests
             ProcessChapter(version, $"{workingDirectory}\\ch6");
 
             // Copy outputs to report folder
-            string[] chapters = new string[] { "ch2", "ch3", "ch4", "ch5", "ch6" };
+            string[] chapters = new string[] { "ch0", "ch2", "ch3", "ch4", "ch5", "ch6" };
             foreach (string chapter in chapters)
             {
                 foreach (string file in Directory.GetFiles($"{workingDirectory}\\{chapter}", "*.docx", SearchOption.TopDirectoryOnly))
@@ -52,19 +53,16 @@ namespace AD.OpenXml.Tests
 
             DocxFilePath[] files =
                 Directory.GetFiles(workingDirectory, "*.docx", SearchOption.TopDirectoryOnly)
-                         .Where(x => !x.Contains('~'))
+                         .Where(
+                             x => !x.Contains('~'))
                          .OrderBy(
                              x =>
-                             {
-                                 string a = Path.GetFileName(x)?
-                                                .TakeWhile(y => char.IsNumber(y) || char.IsPunctuation(y))
-                                                .Where(char.IsNumber)
-                                                .Aggregate(default(string), (current, next) => current + next)
-                                                .Split('-')
-                                                .FirstOrDefault();
-                                 return double.Parse(a ?? "0");
-                             })
-                         .Select(x => (DocxFilePath)x)
+                                 Path.GetFileNameWithoutExtension(x)
+                                     .TakeWhile(y => char.IsNumber(y) || char.IsPunctuation(y))
+                                     .Where(char.IsNumber)
+                                     .Aggregate(default(string), (current, next) => current + next))
+                         .Select(
+                             x => (DocxFilePath) x)
                          .ToArray();
 
             // Create container to encapsulate volatile operations
