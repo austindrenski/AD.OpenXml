@@ -241,7 +241,6 @@ namespace AD.OpenXml
                     .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
                     .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
                     .RemoveByAll(x => x.Name.Equals(W + "jc") && !x.Ancestors(W + "table").Any())
-                    .MergeRuns()
                     .ChangeBoldToStrong()
                     .ChangeItalicToEmphasis()
                     .ChangeUnderlineToTableCaption()
@@ -257,7 +256,8 @@ namespace AD.OpenXml
                     .RemoveByAllIfEmpty(W + "pPr")
                     .RemoveByAllIfEmpty(W + "t")
                     .RemoveByAllIfEmpty(W + "r")
-                    .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false));
+                    .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false))
+                    .MergeRuns();
 
             foreach (XElement paragraphProperties in source.Descendants(W + "pPr").Where(x => x.Elements(W + "pStyle").Count() > 1))
             {

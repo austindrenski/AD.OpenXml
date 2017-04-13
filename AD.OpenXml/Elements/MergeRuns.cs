@@ -39,6 +39,10 @@ namespace AD.OpenXml.Elements
                     {
                         continue;
                     }
+                    if (run.Element(W + "fldChar") != null)
+                    {
+                        
+                    }
                     if (!run.Next()?.Elements(W + "t").Any() ?? false)
                     {
                         run.Next()?.Add(new XElement(W + "t"));
