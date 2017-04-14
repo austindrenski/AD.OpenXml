@@ -10,7 +10,7 @@ using JetBrains.Annotations;
 namespace AD.OpenXml
 {
     /// <summary>
-    /// Marshal content from the 'document.xml' file of a Word document as an idiomatic XML object.
+    /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
     [PublicAPI]
     public static class MarshalContentFromExtensions
@@ -22,7 +22,7 @@ namespace AD.OpenXml
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
-        /// Marshal content from the source document to be added into the container.
+        /// Marshals content from the source document to be added into the container.
         /// </summary>
         /// <param name="file">The file from which content is copied.</param>
         /// <returns>The updated document node of the source file.</returns>

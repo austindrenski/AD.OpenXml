@@ -69,7 +69,9 @@
   <ItemGroup>
     <Compile Include="Documents\MergeInto.cs" />
     <Compile Include="Documents\RemoveDuplicateSectionProperties.cs" />
+    <Compile Include="MarshalChartsFrom.cs" />
     <Compile Include="MarshalContentFrom.cs" />
+    <Compile Include="MarshalFootnotesFrom.cs" />
     <Compile Include="OpenXmlContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

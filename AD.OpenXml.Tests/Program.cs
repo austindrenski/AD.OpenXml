@@ -20,6 +20,7 @@ namespace AD.OpenXml.Tests
 
             // Process chapters
             ProcessChapter(version, $"{workingDirectory}\\ch0");
+            ProcessChapter(version, $"{workingDirectory}\\ch1");
             ProcessChapter(version, $"{workingDirectory}\\ch2");
             ProcessChapter(version, $"{workingDirectory}\\ch3");
             ProcessChapter(version, $"{workingDirectory}\\ch4");
