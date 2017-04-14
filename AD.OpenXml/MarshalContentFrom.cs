@@ -95,6 +95,13 @@ namespace AD.OpenXml
                     // Tidy up the XML for review.
                     .MergeRuns();
 
+
+            // There shouldn't be section properties without orientations.
+            foreach (XElement sectionProperties in source.Descendants(W + "sectPr").Where(x => !x.Descendants().Attributes(W + "orient").Any()).ToArray())
+            {
+                sectionProperties.Element(W + "pgSz")?.SetAttributeValue(W + "orient", "portrait");
+            }
+
             // There shouldn't be section properties in paragraph properties.
             foreach (XElement sectionProperties in source.Descendants(W + "sectPr").Where(x => x.Ancestors(W + "pPr").Any()).ToArray())
             {
