@@ -35,7 +35,7 @@ namespace AD.OpenXml.Tests
             }
 
             // Copy new files into report folder
-            foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", /*"ch7"*/ })
+            foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7" })
             {
                 foreach (string file in Directory.GetFiles($"{workingDirectory}\\{chapter}", "*.docx", SearchOption.TopDirectoryOnly).Where(x => !x.Contains("~")))
                 {
