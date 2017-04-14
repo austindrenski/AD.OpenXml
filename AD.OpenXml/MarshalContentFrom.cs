@@ -67,6 +67,7 @@ namespace AD.OpenXml
                     // Remove elements that should almost never exist.
                     .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
                     .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
+                    .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("Default", StringComparison.OrdinalIgnoreCase) ?? false))
                     .RemoveByAll(x => x.Name.Equals(W + "jc") && !x.Ancestors(W + "table").Any())
 
                     // Alter bold, italic, and underline elements.
@@ -95,11 +96,28 @@ namespace AD.OpenXml
                     // Tidy up the XML for review.
                     .MergeRuns();
 
+            // Set page size.
+            foreach (XElement pageSize in source.Descendants(W + "pgSz"))
+            {
+                pageSize.Element(W + "pgSz")?.SetAttributeValue(W + "w", "12240");
+                pageSize.Element(W + "pgSz")?.SetAttributeValue(W + "h", "15840");
+            }
 
             // There shouldn't be section properties without orientations.
             foreach (XElement sectionProperties in source.Descendants(W + "sectPr").Where(x => !x.Descendants().Attributes(W + "orient").Any()).ToArray())
             {
                 sectionProperties.Element(W + "pgSz")?.SetAttributeValue(W + "orient", "portrait");
+            }
+
+            // There shouldn't be section properties type=nextPage.
+            foreach (XElement sectionProperties in source.Descendants(W + "sectPr").Where(x => x.Element(W + "type")?.Value != "nextPage").ToArray())
+            {
+                XElement type = sectionProperties.Element(W + "type");
+                if (type is null)
+                {
+                    sectionProperties.Add(new XElement(W + "type"));
+                }
+                sectionProperties.Element(W + "type")?.SetAttributeValue(W + "val", "nextPage");
             }
 
             // There shouldn't be section properties in paragraph properties.
