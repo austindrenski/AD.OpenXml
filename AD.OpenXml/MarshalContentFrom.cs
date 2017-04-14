@@ -95,6 +95,18 @@ namespace AD.OpenXml
                     // Tidy up the XML for review.
                     .MergeRuns();
 
+            // There shouldn't be section properties in paragraph properties.
+            foreach (XElement sectionProperties in source.Descendants(W + "sectPr").Where(x => x.Ancestors(W + "pPr").Any()).ToArray())
+            {
+                XElement ancestorParagraph = sectionProperties.Ancestors(W + "p").FirstOrDefault();
+                if (ancestorParagraph is null)
+                {
+                    continue;
+                }
+                sectionProperties.Remove();
+                ancestorParagraph.AddAfterSelf(sectionProperties);
+            }
+            
             // There shouldn't be more than one paragraph style.
             foreach (XElement paragraphProperties in source.Descendants(W + "pPr").Where(x => x.Elements(W + "pStyle").Count() > 1))
             {
@@ -115,6 +127,8 @@ namespace AD.OpenXml
                 }
                 runProperties.AddFirst(distinct);
             }
+
+            source.Descendants(W + "sectPr").Attributes().Remove();
 
             source.Descendants(W + "p").Attributes().Remove();
 

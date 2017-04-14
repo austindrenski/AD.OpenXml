@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
+using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
@@ -12,6 +13,12 @@ namespace AD.OpenXml.Documents
     [PublicAPI]
     public static class RemoveDuplicateSectionPropertiesExtensions
     {
+        /// <summary>
+        /// Represents the 'w:' prefix seen in raw OpenXML documents.
+        /// </summary>
+        [NotNull]
+        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
         /// <summary>
         /// Removes section properties elements when they are sequential duplicates. 
         /// </summary>
@@ -26,14 +33,26 @@ namespace AD.OpenXml.Documents
             XElement resultDocument = result.ReadAsXml();
 
             XElement[] sections =
-                resultDocument.Descendants()
-                              .Where(x => x.Name.LocalName == "sectPr")
+                resultDocument.Elements(W + "body")
+                              .Elements(W + "sectPr")
                               .ToArray();
 
-            for (int i = 0; i < sections.Length - 1; i++)
+            for (int i = 1; i < sections.Length; i++)
             {
-                sections[i].Remove();
+                string previous = sections[i - 1].Element(W + "pgSz")?.Attribute(W + "orient")?.Value;
+                string current = sections[i].Element(W + "pgSz")?.Attribute(W + "orient")?.Value;
+
+                if (previous == current)
+                {
+                    sections[i - 1].Remove();
+                }
             }
+
+            //for (int i = 0; i < sections.Length - 1; i++)
+            //{
+            //    sections[i].Remove();
+            //}
+
 
             resultDocument.WriteInto(result, "word/document.xml");
         }

@@ -7,6 +7,9 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
+    /// <summary>
+    /// Modifies line chart styling in the target document.
+    /// </summary>
     [PublicAPI]
     public static class ModifyLineChartStylesExtensions
     {
@@ -14,6 +17,10 @@ namespace AD.OpenXml.Documents
 
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
+        /// <summary>
+        /// Modifies line chart styling in the target document.
+        /// </summary>
+        /// <param name="toFilePath"></param>
         public static void ModifyLineChartStyles(this DocxFilePath toFilePath)
         {
             foreach (string item in toFilePath.EnumerateChartPaths())
@@ -30,6 +37,10 @@ namespace AD.OpenXml.Documents
             {
                 return element;
             }
+
+            element.Descendants(C + "userShapes").Remove();
+            element.Descendants(C + "clrMapOvr").Remove();
+            element.Descendants().Where(x => x.Name.LocalName == "docPr").Remove();
 
             element.Element(C + "chart")?.Element(C + "title")?.Remove();
 
@@ -54,50 +65,50 @@ namespace AD.OpenXml.Documents
             element.Descendants(C + "lblAlgn").SetAttributeValues("val", "ctr");
             element.Descendants(C + "lblOffset").SetAttributeValues("val", "100");
 
-            element.Add(
-                        new XElement(C + "spPr",
-                            new XElement(A + "ln",
-                                new XElement(A + "noFill"))));
+            //element.Add(
+            //            new XElement(C + "spPr",
+            //                new XElement(A + "ln",
+            //                    new XElement(A + "noFill"))));
 
-            element.Element(C + "chart")?
-                   .Add(
-                        new XElement(C + "legend",
-                            new XElement(C + "legendPos",
-                                new XAttribute("val", "b")),
-                            new XElement(C + "overlay",
-                                new XAttribute("val", "0"))));
+            //element.Element(C + "chart")?
+            //       .Add(
+            //            new XElement(C + "legend",
+            //                new XElement(C + "legendPos",
+            //                    new XAttribute("val", "b")),
+            //                new XElement(C + "overlay",
+            //                    new XAttribute("val", "0"))));
 
-            element.Element(C + "chart")?
-                   .Element(C + "plotArea")?
-                   .Add(
-                        new XElement(C + "spPr",
-                            new XElement(A + "noFill"),
-                            new XElement(A + "ln",
-                                new XElement(A + "solidFill",
-                                    new XElement(A + "prstClr",
-                                        new XAttribute("val", "black"))))));
+            //element.Element(C + "chart")?
+            //       .Element(C + "plotArea")?
+            //       .Add(
+            //            new XElement(C + "spPr",
+            //                new XElement(A + "noFill"),
+            //                new XElement(A + "ln",
+            //                    new XElement(A + "solidFill",
+            //                        new XElement(A + "prstClr",
+            //                            new XAttribute("val", "black"))))));
 
-            element.Element(C + "chart")?
-                   .Element(C + "plotArea")?
-                   .Element(C + "valAx")?
-                   .AddFirst(
-                        new XElement(C + "spPr",
-                            new XElement(A + "noFill"),
-                            new XElement(A + "ln",
-                                new XElement(A + "solidFill",
-                                    new XElement(A + "prstClr",
-                                        new XAttribute("val", "black"))))));
+            //element.Element(C + "chart")?
+            //       .Element(C + "plotArea")?
+            //       .Element(C + "valAx")?
+            //       .AddFirst(
+            //            new XElement(C + "spPr",
+            //                new XElement(A + "noFill"),
+            //                new XElement(A + "ln",
+            //                    new XElement(A + "solidFill",
+            //                        new XElement(A + "prstClr",
+            //                            new XAttribute("val", "black"))))));
 
-            element.Element(C + "chart")?
-                   .Element(C + "plotArea")?
-                   .Element(C + "catAx")?
-                   .AddFirst(
-                        new XElement(C + "spPr",
-                            new XElement(A + "noFill"),
-                            new XElement(A + "ln",
-                                new XElement(A + "solidFill",
-                                    new XElement(A + "prstClr",
-                                        new XAttribute("val", "black"))))));
+            //element.Element(C + "chart")?
+            //       .Element(C + "plotArea")?
+            //       .Element(C + "catAx")?
+            //       .AddFirst(
+            //            new XElement(C + "spPr",
+            //                new XElement(A + "noFill"),
+            //                new XElement(A + "ln",
+            //                    new XElement(A + "solidFill",
+            //                        new XElement(A + "prstClr",
+            //                            new XAttribute("val", "black"))))));
 
             foreach (XElement dataLabels in element.Descendants(C + "dLbls"))
             {

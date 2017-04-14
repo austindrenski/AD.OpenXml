@@ -7,6 +7,9 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
+    /// <summary>
+    /// Modifies bar chart styling in the target document.
+    /// </summary>
     [PublicAPI]
     public static class ModifyBarChartStylesExtensions
     {
@@ -14,6 +17,10 @@ namespace AD.OpenXml.Documents
 
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
+        /// <summary>
+        /// Modifies bar chart styling in the target document.
+        /// </summary>
+        /// <param name="toFilePath"></param>
         public static void ModifyBarChartStyles(this DocxFilePath toFilePath)
         {
             foreach (string item in toFilePath.EnumerateChartPaths())

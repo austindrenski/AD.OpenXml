@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
-using AD.OpenXml.Elements;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -189,8 +188,10 @@ namespace AD.OpenXml
                 new XElement(
                     _footnotes.Name,
                     _footnotes.Attributes(),
-                    _footnotes.Elements(),
-                    modifiedSourceFootnotes?.Elements());
+                    _footnotes.Elements()
+                              .Union(
+                                  modifiedSourceFootnotes?.Elements() ?? Enumerable.Empty<XElement>(),
+                                  XNode.EqualityComparer));
 
             return new OpenXmlContainer(
                 mergedContent,

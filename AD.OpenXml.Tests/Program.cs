@@ -16,7 +16,7 @@ namespace AD.OpenXml.Tests
             const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\content review";
 
             // Declare version
-            const string version = "6_2";
+            const string version = "6_4";
 
             // Process chapters
             ProcessChapter(version, $"{workingDirectory}\\ch0");
@@ -26,12 +26,18 @@ namespace AD.OpenXml.Tests
             ProcessChapter(version, $"{workingDirectory}\\ch4");
             ProcessChapter(version, $"{workingDirectory}\\ch5");
             ProcessChapter(version, $"{workingDirectory}\\ch6");
+            ProcessChapter(version, $"{workingDirectory}\\ch7");
 
-            // Copy outputs to report folder
-            string[] chapters = new string[] { "ch0", "ch2", "ch3", "ch4", "ch5", "ch6" };
-            foreach (string chapter in chapters)
+            // Delete old files in report folder
+            foreach (string section in Directory.GetFiles($"{workingDirectory}\\_Report", "*.docx", SearchOption.TopDirectoryOnly))
             {
-                foreach (string file in Directory.GetFiles($"{workingDirectory}\\{chapter}", "*.docx", SearchOption.TopDirectoryOnly))
+                File.Delete(section);
+            }
+
+            // Copy new files into report folder
+            foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", /*"ch7"*/ })
+            {
+                foreach (string file in Directory.GetFiles($"{workingDirectory}\\{chapter}", "*.docx", SearchOption.TopDirectoryOnly).Where(x => !x.Contains("~")))
                 {
                     File.Copy(file, $"{workingDirectory}\\_Report\\{Path.GetFileName(file)}", true);
                 }
@@ -61,7 +67,7 @@ namespace AD.OpenXml.Tests
                                  Path.GetFileNameWithoutExtension(x)
                                      .TakeWhile(y => char.IsNumber(y) || char.IsPunctuation(y))
                                      .Aggregate(default(string), (current, next) => current + next)
-                                     .ParseInt())
+                                     .ParseDouble())
                          .Select(
                              x => (DocxFilePath) x)
                          .ToArray();

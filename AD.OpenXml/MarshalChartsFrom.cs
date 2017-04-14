@@ -129,12 +129,11 @@ namespace AD.OpenXml
                                             Name = x.ResultName,
                                             Chart = file.ReadAsXml($"word/{x.SourceName}")
                                         })
-                                    .Select(
-                                        x =>
-                                        {
-                                            x.Chart.Descendants(C + "externalData").Remove();
-                                            return (Name: x.Name, Chart: x.Chart);
-                                        }));
+                                    .Select(x =>
+                                    {
+                                        x.Chart.Descendants(C + "externalData").Remove();
+                                        return (Name: x.Name, Chart: x.Chart);
+                                    }));
 
             XElement modifiedSourceContent = sourceContent.Clone();
 
