@@ -33,8 +33,7 @@ namespace AD.OpenXml.Documents
             XElement resultDocument = result.ReadAsXml();
 
             XElement[] sections =
-                resultDocument.Elements(W + "body")
-                              .Elements(W + "sectPr")
+                resultDocument.Descendants(W + "sectPr")
                               .ToArray();
 
             for (int i = 1; i < sections.Length; i++)
