@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Properties;
@@ -7,22 +8,53 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
+    /// <summary>
+    /// Add headers to a Word document.
+    /// </summary>
     [PublicAPI]
     public static class AddHeadersExtensions
     {
-        private static readonly XNamespace C = XNamespaces.OpenXmlPackageContentTypes;
+        /// <summary>
+        /// The namespace declared on the [Content_Types].xml
+        /// </summary>
+        [NotNull]
+        private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
 
-        private static readonly XNamespace R = XNamespaces.OpenXmlPackageRelationships;
+        /// <summary>
+        /// Represents the 'r:' prefix seen in the markup of [Content_Types].xml
+        /// </summary>
+        [NotNull]
+        private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
-        private static readonly XNamespace S = XNamespaces.OpenXmlOfficeDocumentRelationships;
+        /// <summary>
+        /// Represents the 'r:' prefix seen in the markup of document.xml.
+        /// </summary>
+        [NotNull]
+        private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
+        /// <summary>
+        /// Represents the 'w:' prefix seen in raw OpenXML documents.
+        /// </summary>
+        [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        public static void AddHeaders(this DocxFilePath toFilePath, string title)
+        /// <summary>
+        /// Add headers to a Word document.
+        /// </summary>
+        public static void AddHeaders([NotNull] this DocxFilePath toFilePath, [NotNull] string title)
         {
+            if (toFilePath is null)
+            {
+                throw new ArgumentNullException(nameof(toFilePath));
+            }
+            if (title is null)
+            {
+                throw new ArgumentNullException(nameof(title));
+            }
+
             // Modify [Content_Types].xml
             XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");
-            packageRelation.Descendants(C + "Override")
+            packageRelation.Descendants(T + "Override")
                            .Where(x => x.Attribute("PartName")?.Value.StartsWith("/word/header") ?? false)
                            .Remove();
             packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
@@ -47,8 +79,17 @@ namespace AD.OpenXml.Documents
             toFilePath.AddEvenPageHeader($"rId{++currentHeaderId}", title);
         }
 
-        private static void AddOddageHeader(this DocxFilePath toFilePath, string headerId)
+        private static void AddOddageHeader([NotNull] this DocxFilePath toFilePath, [NotNull] string headerId)
         {
+            if (toFilePath is null)
+            {
+                throw new ArgumentNullException(nameof(toFilePath));
+            }
+            if (headerId is null)
+            {
+                throw new ArgumentNullException(nameof(headerId));
+            }
+
             XElement element = XElement.Parse(Resources.header1);
             element.WriteInto(toFilePath, "word/header1.xml");
 
@@ -66,20 +107,33 @@ namespace AD.OpenXml.Documents
                 sectionProperties.AddFirst(
                     new XElement(W + "headerReference",
                         new XAttribute(W + "type", "default"),
-                        new XAttribute(S + "id", headerId)));
+                        new XAttribute(R + "id", headerId)));
             }
             document.WriteInto(toFilePath, "word/document.xml");
 
             XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");
             packageRelation.Add(
-                new XElement(C + "Override",
+                new XElement(T + "Override",
                     new XAttribute("PartName", "/word/header1.xml"),
                     new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
             packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
         }
 
-        private static void AddEvenPageHeader(this DocxFilePath toFilePath, string headerId, string title)
+        private static void AddEvenPageHeader([NotNull] this DocxFilePath toFilePath, [NotNull]  string headerId, [NotNull] string title)
         {
+            if (toFilePath is null)
+            {
+                throw new ArgumentNullException(nameof(toFilePath));
+            }
+            if (headerId is null)
+            {
+                throw new ArgumentNullException(nameof(headerId));
+            }
+            if (title is null)
+            {
+                throw new ArgumentNullException(nameof(title));
+            }
+
             XElement element = XElement.Parse(string.Format(Resources.header2, title));
             element.WriteInto(toFilePath, "word/header2.xml");
 
@@ -97,13 +151,13 @@ namespace AD.OpenXml.Documents
                 sectionProperties.AddFirst(
                     new XElement(W + "headerReference",
                         new XAttribute(W + "type", "even"),
-                        new XAttribute(S + "id", headerId)));
+                        new XAttribute(R + "id", headerId)));
             }
             document.WriteInto(toFilePath, "word/document.xml");
 
             XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");
             packageRelation.Add(
-                new XElement(C + "Override",
+                new XElement(T + "Override",
                     new XAttribute("PartName", "/word/header2.xml"),
                     new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
             packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
