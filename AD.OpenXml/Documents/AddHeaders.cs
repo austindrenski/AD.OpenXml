@@ -95,7 +95,7 @@ namespace AD.OpenXml.Documents
 
             XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
             documentRelation.Add(
-                new XElement(R + "Relationship",
+                new XElement(P + "Relationship",
                     new XAttribute("Id", headerId),
                     new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"),
                     new XAttribute("Target", "header1.xml")));
@@ -139,7 +139,7 @@ namespace AD.OpenXml.Documents
 
             XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
             documentRelation.Add(
-                new XElement(R + "Relationship",
+                new XElement(P + "Relationship",
                     new XAttribute("Id", headerId),
                     new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"),
                     new XAttribute("Target", "header2.xml")));
