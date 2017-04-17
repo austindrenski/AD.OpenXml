@@ -13,16 +13,42 @@ namespace AD.OpenXml.Elements
 
         public static XElement HighlightInsertRequests(this XElement element)
         {
-            IEnumerable<XElement> inserts = 
+            IEnumerable<XElement> appendices =
                 element.Descendants(W + "p")
-                       .Where(x => x.Value.Contains('{'));
+                       .Where(x => x.Value.Contains("{APPENDIX}"));
+
+            foreach (XElement item in appendices.Descendants(W + "r"))
+            {
+                if (item.Parent?.Element(W + "pPr") is null)
+                {
+                    item.Parent?.AddFirst(new XElement(W + "pPr"));
+                }
+                if (item.Parent?.Element(W + "pPr")?.Element(W + "pStyle") is null)
+                {
+                    item.Parent?.Element(W + "pPr")?.AddFirst(new XElement(W + "pStyle"));
+                }
+
+                item.Parent?
+                    .Element(W + "pPr")?
+                    .Element(W + "pStyle")?.SetAttributeValue(W + "val", "Appendix");
+
+                XElement text = item.Element(W + "t");
+                text.Value = text.Value.Replace("{", null);
+                text.Value = text.Value.Replace("APPENDIX", null);
+                text.Value = text.Value.Replace("}", null);
+            }
+            
+            IEnumerable<XElement> inserts =
+                element.Descendants(W + "p")
+                       .Where(x => x.Value.Contains('{') && !x.Value.Contains("{APPENDIX}"));
 
             foreach (XElement item in inserts.Descendants(W + "r"))
             {
-                if (!item.Descendants(W + "rPr").Any())
+                if (item.Element(W + "rPr") is null)
                 {
                     item.AddFirst(new XElement(W + "rPr"));
                 }
+
                 item.Element(W + "rPr")?
                     .Add(
                         new XElement(W + "color", 

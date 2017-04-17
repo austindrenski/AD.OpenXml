@@ -68,7 +68,7 @@ namespace AD.OpenXml
                     .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
                     .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
                     .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("Default", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name.Equals(W + "jc") && !x.Ancestors(W + "table").Any())
+                    .RemoveByAll(x => x.Name.Equals(W + "jc") && !x.Ancestors(W + "tbl").Any())
 
                     // Alter bold, italic, and underline elements.
                     .ChangeBoldToStrong()
@@ -79,6 +79,7 @@ namespace AD.OpenXml
                     .ChangeSuperscriptToReference()
 
                     // Mark insert requests for the production team.
+                    .MergeRuns()
                     .HighlightInsertRequests()
 
                     // Set table styles.

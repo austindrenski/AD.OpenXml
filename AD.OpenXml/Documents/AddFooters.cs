@@ -82,7 +82,7 @@ namespace AD.OpenXml.Documents
             toFilePath.AddOddPageFooter($"rId{++currentFooterId}");
         }
 
-        private static void AddEvenPageFooter([NotNull] this DocxFilePath toFilePath, [NotNull] string footerId)
+        private static void AddOddPageFooter([NotNull] this DocxFilePath toFilePath, [NotNull] string footerId)
         {
             if (toFilePath is null)
             {
@@ -109,7 +109,7 @@ namespace AD.OpenXml.Documents
             {
                 sectionProperties.Add(
                     new XElement(W + "footerReference",
-                        new XAttribute(W + "type", "even"),
+                        new XAttribute(W + "type", "default"),
                         new XAttribute(R + "id", footerId)));
             }
             document.WriteInto(toFilePath, "word/document.xml");
@@ -122,7 +122,7 @@ namespace AD.OpenXml.Documents
             packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
         }
 
-        private static void AddOddPageFooter([NotNull] this DocxFilePath toFilePath, [NotNull] string footerId)
+        private static void AddEvenPageFooter([NotNull] this DocxFilePath toFilePath, [NotNull] string footerId)
         {
             if (toFilePath is null)
             {
@@ -152,7 +152,7 @@ namespace AD.OpenXml.Documents
             {
                 sectionProperties.Add(
                     new XElement(W + "footerReference",
-                        new XAttribute(W + "type", "default"),
+                        new XAttribute(W + "type", "even"),
                         new XAttribute(R + "id", footerId)));
             }
 

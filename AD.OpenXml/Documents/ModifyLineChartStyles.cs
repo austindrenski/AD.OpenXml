@@ -44,8 +44,9 @@ namespace AD.OpenXml.Documents
 
             element.Element(C + "chart")?.Element(C + "title")?.Remove();
 
-            element.RemoveByAll(C + "spPr");
-            element.RemoveByAll(C + "txPr");
+            element =
+                element.RemoveByAll(C + "spPr")
+                       .RemoveByAll(C + "txPr");
 
             element.Descendants(C + "legend").Remove();
             element.Descendants(C + "numfmt").Remove();

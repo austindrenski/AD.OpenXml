@@ -3,10 +3,23 @@
   <w:p>
     <w:pPr>
       <w:pStyle w:val="Header"/>
-      <w:jc w:val="right"/>
+      <w:jc w:val="left"/>
     </w:pPr>
     <w:r>
-      <w:t>{0}</w:t>
+      <w:t xml:space="preserve">Chapter </w:t>
     </w:r>
+    <w:fldSimple w:instr=" STYLEREF  &quot;heading 1&quot; \s \* ">
+      <w:r>
+        <w:t/>
+      </w:r>
+    </w:fldSimple>
+    <w:r>
+      <w:t xml:space="preserve">: </w:t>
+    </w:r>
+    <w:fldSimple w:instr=" STYLEREF  &quot;heading 1&quot;  \* ">
+      <w:r>
+        <w:t/>
+      </w:r>
+    </w:fldSimple>
   </w:p>
 </w:hdr>

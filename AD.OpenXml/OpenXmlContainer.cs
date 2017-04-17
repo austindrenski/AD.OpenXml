@@ -68,6 +68,12 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull]
         private readonly XElement _footnotes;
+        
+        /// <summary>
+        /// Active version of 'word/_rels/footnotes.xml.rels'.
+        /// </summary>
+        [NotNull]
+        private readonly XElement _footnoteRelations;
 
         /// <summary>
         /// Active version of word/charts/chart#.xml.
@@ -79,6 +85,11 @@ namespace AD.OpenXml
         /// Returns the last footnote identifier currently in use by the container.
         /// </summary>
         private readonly int _currentFootnoteId;
+
+        /// <summary>
+        /// Returns the last footnote hyperlink identifier currently in use by the container.
+        /// </summary>
+        private readonly int _currentFootnoteRelationId;
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlContainer"/> by reading document parts into memory.
@@ -96,7 +107,7 @@ namespace AD.OpenXml
                             .Where(x => x?.StartsWith("charts/") ?? false)
                             .Select(x => (Name: x, Chart: result.ReadAsXml($"word/{x}")))
                             .ToImmutableList();
-
+            
             _currentFootnoteId =
                 _footnotes.Elements(W + "footnote")
                           .Attributes(W + "id")
@@ -173,6 +184,7 @@ namespace AD.OpenXml
             (XElement footnoteModifiedSourceContent, XElement modifiedSourceFootnotes, int updatedFootnoteId) =
                 MarshalFootnotesFrom(file, modifiedSourceContent, _currentFootnoteId);
 
+
             (XElement chartAndFootnoteModifiedSourceContent, XElement modifiedDocumentRelations, XElement modifiedContentTypes, IEnumerable<(string Name, XElement Chart)> modifiedCharts) =
                 MarshalChartsFrom(file, footnoteModifiedSourceContent, _contentTypes, _documentRelations, _charts);
 
@@ -192,6 +204,8 @@ namespace AD.OpenXml
                               .Union(
                                   modifiedSourceFootnotes?.Elements() ?? Enumerable.Empty<XElement>(),
                                   XNode.EqualityComparer));
+
+            XElement mergedFootnoteRelations = new XElement("a");
 
             return new OpenXmlContainer(
                 mergedContent,
@@ -217,6 +231,7 @@ namespace AD.OpenXml
             {
                 throw new ArgumentNullException(nameof(file));
             }
+
             return file.MarshalContentFrom();
         }
 

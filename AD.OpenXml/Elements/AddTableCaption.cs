@@ -13,6 +13,8 @@ namespace AD.OpenXml.Elements
 
         public static void AddTableCaption(this XElement element)
         {
+            string style = element.Value.Contains("[APPENDIX]") ? "Appendix" : "1";
+
             XElement runProperies =
                 new XElement(W + "rPr",
                     new XElement(W + "rStyle",
@@ -39,7 +41,7 @@ namespace AD.OpenXml.Elements
             XElement label2 =
                 new XElement(W + "r",
                     runProperies,
-                    new XElement(W + "instrText", preserve, " STYLEREF 1 \\s "));
+                    new XElement(W + "instrText", preserve, $" STYLEREF {style} \\s "));
             XElement label3 =
                 new XElement(W + "r",
                     runProperies,
@@ -94,6 +96,13 @@ namespace AD.OpenXml.Elements
                 label10,
                 label11,
                 label12);
+
+            foreach (XElement text in element.Descendants(W + "t"))
+            {
+                text.Value = text.Value.Replace("[", null);
+                text.Value = text.Value.Replace("APPENDIX", null);
+                text.Value = text.Value.Replace("]", null);
+            }
         }
     }
 }

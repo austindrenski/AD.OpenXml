@@ -16,7 +16,7 @@ namespace AD.OpenXml.Tests
             const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\content review";
 
             // Declare version
-            const string version = "6_6";
+            const string version = "7_3";
 
             // Process chapters
             ProcessChapter(version, $"{workingDirectory}\\ch0");
@@ -27,13 +27,7 @@ namespace AD.OpenXml.Tests
             ProcessChapter(version, $"{workingDirectory}\\ch5");
             ProcessChapter(version, $"{workingDirectory}\\ch6");
             ProcessChapter(version, $"{workingDirectory}\\ch7");
-
-            // Delete old files in report folder
-            foreach (string section in Directory.GetFiles($"{workingDirectory}\\_Report", "*.docx", SearchOption.TopDirectoryOnly))
-            {
-                File.Delete(section);
-            }
-
+            
             // Copy new files into report folder
             foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7" })
             {
@@ -45,6 +39,12 @@ namespace AD.OpenXml.Tests
 
             // Process report
             ProcessChapter(version, $"{workingDirectory}\\_Report");
+
+            // Delete old files in report folder
+            foreach (string section in Directory.GetFiles($"{workingDirectory}\\_Report", "*.docx", SearchOption.TopDirectoryOnly))
+            {
+                File.Delete(section);
+            }
         }
 
         private static void ProcessChapter(string version, string workingDirectory)
@@ -104,6 +104,9 @@ namespace AD.OpenXml.Tests
 
             // Set the style of line chart objects
             result.ModifyLineChartStyles();
+            
+            // Set the style of area chart objects
+            result.ModifyAreaChartStyles();
 
             // Remove duplicate section properties
             result.RemoveDuplicateSectionProperties();

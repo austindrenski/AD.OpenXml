@@ -107,10 +107,11 @@ namespace AD.OpenXml.Properties {
         ///    &lt;w:outlineLvl w:val=&quot;0&quot;/&gt;
         ///    &lt;w:pageBreakBefore/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
-        ///    &lt;w:color w:val=&quot;00 [rest of string was truncated]&quot;;.
+        ///    [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Appendix {
             get {
@@ -143,16 +144,16 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:name w:val=&quot;Blue Table (basic)&quot; /&gt;
         ///  &lt;w:locked/&gt;
         ///  &lt;w:pPr&gt;
-        ///    &lt;w:spacing w:after=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot; /&gt;
+        ///    &lt;w:spacing w:before=&quot;0&quot; w:after=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot; /&gt;
         ///    &lt;w:contextualSpacing /&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
-        ///    &lt;w:sz w:val=&quot;16&quot; /&gt;
-        ///    &lt;w:szCs w:val=&quot;20&quot; /&gt;
+        ///    &lt;w:sz w:val=&quot;20&quot; /&gt;
         ///  &lt;/w:rPr&gt;
         ///  &lt;w:tblPr&gt;
         ///    &lt;w:tblStyleRowBandSize w:val=&quot;1&quot; /&gt;
-        ///    &lt;w:tblBord [rest of string was truncated]&quot;;.
+        ///    &lt;w:tb [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string BlueTableBasic {
             get {
@@ -534,6 +535,7 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:p&gt;
         ///    &lt;w:pPr&gt;
         ///      &lt;w:pStyle w:val=&quot;Header&quot;/&gt;
+        ///      &lt;w:jc w:val=&quot;left&quot;/&gt;
         ///    &lt;/w:pPr&gt;
         ///    &lt;w:r&gt;
         ///      &lt;w:t xml:space=&quot;preserve&quot;&gt;Chapter &lt;/w:t&gt;
@@ -545,8 +547,7 @@ namespace AD.OpenXml.Properties {
         ///    &lt;/w:fldSimple&gt;
         ///    &lt;w:r&gt;
         ///      &lt;w:t xml:space=&quot;preserve&quot;&gt;: &lt;/w:t&gt;
-        ///    &lt;/w:r&gt;
-        ///    &lt;w:fldSimple w:instr= [rest of string was truncated]&quot;;.
+        ///    &lt;/w:r [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string header1 {
             get {
@@ -587,10 +588,11 @@ namespace AD.OpenXml.Properties {
         ///    &lt;w:outlineLvl w:val=&quot;0&quot;/&gt;
         ///    &lt;w:pageBreakBefore/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
-        ///    &lt;w:color w:val=&quot; [rest of string was truncated]&quot;;.
+        ///  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Heading1 {
             get {
@@ -607,14 +609,13 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:pPr&gt;
         ///    &lt;w:outlineLvl w:val=&quot;1&quot;/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
         ///    &lt;w:color w:val=&quot;A58329&quot;/&gt;
         ///    &lt;w:rFonts w:ascii=&quot;Tahoma&quot;/&gt;
-        ///    &lt;w:sz w:val=&quot;40&quot;/&gt;
-        ///  &lt;/w:rPr&gt;
-        ///&lt;/w:s [rest of string was truncated]&quot;;.
+        ///    &lt;w:sz w:val=&quot;40&quot;/&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Heading2 {
             get {
@@ -631,14 +632,13 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:pPr&gt;
         ///    &lt;w:outlineLvl w:val=&quot;2&quot;/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
         ///    &lt;w:color w:val=&quot;005070&quot;/&gt;
         ///    &lt;w:rFonts w:ascii=&quot;Tahoma&quot;/&gt;
-        ///    &lt;w:sz w:val=&quot;36&quot;/&gt;
-        ///  &lt;/w:rPr&gt;
-        ///&lt;/w:s [rest of string was truncated]&quot;;.
+        ///    &lt;w:sz w:val=&quot;36&quot;/&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Heading3 {
             get {
@@ -655,14 +655,13 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:pPr&gt;
         ///    &lt;w:outlineLvl w:val=&quot;3&quot;/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
         ///    &lt;w:color w:val=&quot;A58329&quot;/&gt;
         ///    &lt;w:rFonts w:ascii=&quot;Tahoma&quot;/&gt;
-        ///    &lt;w:sz w:val=&quot;28&quot;/&gt;
-        ///  &lt;/w:rPr&gt;
-        ///&lt;/w:s [rest of string was truncated]&quot;;.
+        ///    &lt;w:sz w:val=&quot;28&quot;/&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Heading4 {
             get {
@@ -679,14 +678,13 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:pPr&gt;
         ///    &lt;w:outlineLvl w:val=&quot;4&quot;/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
         ///    &lt;w:color w:val=&quot;005070&quot;/&gt;
         ///    &lt;w:rFonts w:ascii=&quot;Tahoma&quot;/&gt;
-        ///    &lt;w:sz w:val=&quot;24&quot;/&gt;
-        ///  &lt;/w:rPr&gt;
-        ///&lt;/w:s [rest of string was truncated]&quot;;.
+        ///    &lt;w:sz w:val=&quot;24&quot;/&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Heading5 {
             get {
@@ -703,14 +701,13 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:pPr&gt;
         ///    &lt;w:outlineLvl w:val=&quot;5&quot;/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
         ///    &lt;w:color w:val=&quot;A58329&quot;/&gt;
         ///    &lt;w:rFonts w:ascii=&quot;Tahoma&quot;/&gt;
-        ///    &lt;w:sz w:val=&quot;24&quot;/&gt;
-        ///  &lt;/w:rPr&gt;
-        ///&lt;/w:s [rest of string was truncated]&quot;;.
+        ///    &lt;w:sz w:val=&quot;24&quot;/&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Heading6 {
             get {
@@ -727,14 +724,13 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:pPr&gt;
         ///    &lt;w:outlineLvl w:val=&quot;6&quot;/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
         ///    &lt;w:color w:val=&quot;005070&quot;/&gt;
         ///    &lt;w:rFonts w:ascii=&quot;Tahoma&quot;/&gt;
-        ///    &lt;w:sz w:val=&quot;24&quot;/&gt;
-        ///  &lt;/w:rPr&gt;
-        ///&lt;/w:s [rest of string was truncated]&quot;;.
+        ///    &lt;w:sz w:val=&quot;24&quot;/&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Heading7 {
             get {
@@ -751,14 +747,13 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:pPr&gt;
         ///    &lt;w:outlineLvl w:val=&quot;7&quot;/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
         ///    &lt;w:color w:val=&quot;A58329&quot;/&gt;
         ///    &lt;w:rFonts w:ascii=&quot;Tahoma&quot;/&gt;
-        ///    &lt;w:sz w:val=&quot;24&quot;/&gt;
-        ///  &lt;/w:rPr&gt;
-        ///&lt;/w:s [rest of string was truncated]&quot;;.
+        ///    &lt;w:sz w:val=&quot;24&quot;/&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Heading8 {
             get {
@@ -775,14 +770,13 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:pPr&gt;
         ///    &lt;w:outlineLvl w:val=&quot;8&quot;/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepNext/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
         ///    &lt;w:color w:val=&quot;005070&quot;/&gt;
         ///    &lt;w:rFonts w:ascii=&quot;Tahoma&quot;/&gt;
-        ///    &lt;w:sz w:val=&quot;24&quot;/&gt;
-        ///  &lt;/w:rPr&gt;
-        ///&lt;/w:s [rest of string was truncated]&quot;;.
+        ///    &lt;w:sz w:val=&quot;24&quot;/&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Heading9 {
             get {

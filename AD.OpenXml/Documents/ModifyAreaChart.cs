@@ -8,32 +8,32 @@ using JetBrains.Annotations;
 namespace AD.OpenXml.Documents
 {
     /// <summary>
-    /// Modifies bar chart styling in the target document.
+    /// Modifies area chart styling in the target document.
     /// </summary>
     [PublicAPI]
-    public static class ModifyBarChartStylesExtensions
+    public static class ModifyAreaChartStylesExtensions
     {
         private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
 
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
         /// <summary>
-        /// Modifies bar chart styling in the target document.
+        /// Modifies area chart styling in the target document.
         /// </summary>
         /// <param name="toFilePath"></param>
-        public static void ModifyBarChartStyles(this DocxFilePath toFilePath)
+        public static void ModifyAreaChartStyles(this DocxFilePath toFilePath)
         {
             foreach (string item in toFilePath.EnumerateChartPaths())
             {
                 XElement element = toFilePath.ReadAsXml(item);
-                XElement result = element.ModifyBarChartStyles();
+                XElement result = element.ModifyAreaChartStyles();
                 result.WriteInto(toFilePath, item);
             }
         }
 
-        private static XElement ModifyBarChartStyles(this XElement element)
+        private static XElement ModifyAreaChartStyles(this XElement element)
         {
-            if (!element.Descendants(C + "barChart").Any())
+            if (!element.Descendants(C + "areaChart").Any())
             {
                 return element;
             }
