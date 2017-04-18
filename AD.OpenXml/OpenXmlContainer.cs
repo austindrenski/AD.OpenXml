@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
@@ -82,6 +83,11 @@ namespace AD.OpenXml
         private readonly IImmutableList<(string Name, XElement Chart)> _charts;
 
         /// <summary>
+        /// Returns the last document relation identifier in use by the container.
+        /// </summary>
+        private readonly int _currentDocumentRelationId;
+
+        /// <summary>
         /// Returns the last footnote identifier currently in use by the container.
         /// </summary>
         private readonly int _currentFootnoteId;
@@ -97,22 +103,48 @@ namespace AD.OpenXml
         /// <param name="result">The file to which changes can be saved.</param>
         public OpenXmlContainer([NotNull] DocxFilePath result)
         {
-            _document = result.ReadAsXml("word/document.xml");
-            _documentRelations = result.ReadAsXml("word/_rels/document.xml.rels");
-            _contentTypes = result.ReadAsXml("[Content_Types].xml");
-            _footnotes = result.ReadAsXml("word/footnotes.xml");
-            _charts = result.ReadAsXml("word/_rels/document.xml.rels")
-                            .Elements()
-                            .Select(x => x.Attribute("Target")?.Value)
-                            .Where(x => x?.StartsWith("charts/") ?? false)
-                            .Select(x => (Name: x, Chart: result.ReadAsXml($"word/{x}")))
-                            .ToImmutableList();
-            
+            _document = 
+                result.ReadAsXml() ?? throw new FileNotFoundException("document.xml");
+
+            _contentTypes = 
+                result.ReadAsXml("[Content_Types].xml") ?? throw new FileNotFoundException("[Content_Types].xml");
+
+            _footnotes =
+                result.ReadAsXml("word/footnotes.xml") ?? new XElement(W + "footnotes");
+
+            _documentRelations = 
+                result.ReadAsXml("word/_rels/document.xml.rels") ?? new XElement(P + "Relationships");
+
+            _footnoteRelations = 
+                result.ReadAsXml("word/_rels/footnotes.xml.rels") ?? new XElement(P + "Relationships");
+
+            _charts =
+                _documentRelations.Elements()
+                                  .Select(x => x.Attribute("Target")?.Value)
+                                  .Where(x => x?.StartsWith("charts/") ?? false)
+                                  .Select(x => (Name: x, Chart: result.ReadAsXml($"word/{x}")))
+                                  .ToImmutableList();
+
+            _currentDocumentRelationId =
+                _documentRelations.Elements(P + "Relationship")
+                                  .Attributes("Id")
+                                  .Select(x => x.Value.ParseInt() ?? 0)
+                                  .DefaultIfEmpty(0)
+                                  .Max();
+
             _currentFootnoteId =
                 _footnotes.Elements(W + "footnote")
                           .Attributes(W + "id")
-                          .Select(x => int.Parse(x.Value))
+                          .Select(x => x.Value.ParseInt() ?? 0)
+                          .DefaultIfEmpty(0)
                           .Max();
+
+            _currentFootnoteRelationId =
+                _footnoteRelations.Elements(P + "Relationship")
+                                  .Attributes("Id")
+                                  .Select(x => x.Value.ParseInt() ?? 0)
+                                  .DefaultIfEmpty(0)
+                                  .Max();
         }
 
         /// <summary>
@@ -122,15 +154,23 @@ namespace AD.OpenXml
         /// <param name="documentRelations"></param>
         /// <param name="contentTypes"></param>
         /// <param name="footnotes"></param>
+        /// <param name="foonoteRelations"></param>
         /// <param name="charts"></param>
         /// <param name="currentFootnoteId"></param>
-        public OpenXmlContainer([NotNull] XElement document, XElement documentRelations, XElement contentTypes, XElement footnotes, IEnumerable<(string Name, XElement Chart)> charts, int currentFootnoteId)
+        /// <param name="currentFootnoteRelationId"></param>
+        /// <param name="currentDocumentRelationId"></param>
+        public OpenXmlContainer([NotNull] XElement document, XElement documentRelations, XElement contentTypes, XElement footnotes, XElement foonoteRelations, IEnumerable<(string Name, XElement Chart)> charts, int currentFootnoteId, int currentFootnoteRelationId, int currentDocumentRelationId)
         {
             _document = document.Clone();
             _documentRelations = documentRelations.Clone();
             _contentTypes = contentTypes.Clone();
             _footnotes = footnotes.Clone();
+            _footnoteRelations = foonoteRelations.Clone();
             _charts = charts.Select(x => (Name: x.Name, Chart: x.Chart.Clone())).ToImmutableArray();
+            // TODO: Why isn't this needed? Actually, why does this proactively break the document?
+            //_currentFootnoteId = currentFootnoteId;
+            _currentFootnoteRelationId = currentFootnoteRelationId;
+            _currentDocumentRelationId = currentDocumentRelationId;
         }
 
         /// <summary>
@@ -143,6 +183,7 @@ namespace AD.OpenXml
             _footnotes.WriteInto(resultPath, "word/footnotes.xml");
             _contentTypes.WriteInto(resultPath, "[Content_Types].xml");
             _documentRelations.WriteInto(resultPath, "word/_rels/document.xml.rels");
+            _footnoteRelations.WriteInto(resultPath, "word/_rels/footnotes.xml.rels");
             foreach ((string Name, XElement Chart) chart in _charts)
             {
                 chart.Chart.WriteInto(resultPath, $"word/{chart.Name}");
@@ -178,123 +219,69 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(file));
             }
 
-            XElement modifiedSourceContent =
-                MarshalContentFrom(file);
+            XElement sourceContent1 =
+                file.MarshalContentFrom();
 
-            (XElement footnoteModifiedSourceContent, XElement modifiedSourceFootnotes, int updatedFootnoteId) =
-                MarshalFootnotesFrom(file, modifiedSourceContent, _currentFootnoteId);
+            (XElement sourceContent2, XElement sourceFootnotes1, int updatedFootnoteId) =
+                file.MarshalFootnotesFrom(sourceContent1, _currentFootnoteId);
 
+            (XElement sourceFootnotes2, XElement footnoteRelations1, int updatedFootnoteRelationId) = 
+                file.MarshalFootnoteHyperlinksFrom(sourceFootnotes1, _currentFootnoteRelationId);
 
-            (XElement chartAndFootnoteModifiedSourceContent, XElement modifiedDocumentRelations, XElement modifiedContentTypes, IEnumerable<(string Name, XElement Chart)> modifiedCharts) =
-                MarshalChartsFrom(file, footnoteModifiedSourceContent, _contentTypes, _documentRelations, _charts);
+            (XElement sourceContent3, XElement documentRelations1, int documentRelationId1) =
+                file.MarshalContentHyperlinksFrom(sourceContent2, _currentDocumentRelationId);
 
-            XElement mergedContent =
+            (XElement sourceContent4, XElement documentRelations2, XElement contentTypes1, IEnumerable<(string Name, XElement Chart)> charts1, int documentRelationId2) =
+                file.MarshalChartsFrom(sourceContent3, _contentTypes, _charts, documentRelationId1);
+
+            XElement resultContent =
                 new XElement(
                     _document.Name,
                     _document.Attributes(),
                     new XElement(W + "body",
                         _document.Element(W + "body")?.Elements(),
-                        chartAndFootnoteModifiedSourceContent.Element(W + "body")?.Elements()));
+                        sourceContent4.Element(W + "body")?.Elements()));
 
-            XElement mergedFootnotes =
+            XElement resultFootnotes =
                 new XElement(
                     _footnotes.Name,
                     _footnotes.Attributes(),
                     _footnotes.Elements()
                               .Union(
-                                  modifiedSourceFootnotes?.Elements() ?? Enumerable.Empty<XElement>(),
+                                  sourceFootnotes2?.Elements() ?? Enumerable.Empty<XElement>(),
                                   XNode.EqualityComparer));
 
-            XElement mergedFootnoteRelations = new XElement("a");
+            XElement resultFootnoteRelations =
+                new XElement(
+                    _footnoteRelations.Name,
+                    _footnoteRelations.Attributes(),
+                    _footnoteRelations.Elements()
+                                      .Union(
+                                          footnoteRelations1?.Elements() ?? Enumerable.Empty<XElement>(),
+                                          XNode.EqualityComparer));
+
+            XElement resultDocumentRelations =
+                new XElement(
+                    _documentRelations.Name,
+                    _documentRelations.Attributes(),
+                    _documentRelations.Elements()
+                                      .Union(
+                                          documentRelations1?.Elements() ?? Enumerable.Empty<XElement>(),
+                                          XNode.EqualityComparer)
+                                      .Union(
+                                          documentRelations2?.Elements() ?? Enumerable.Empty<XElement>(),
+                                          XNode.EqualityComparer));
 
             return new OpenXmlContainer(
-                mergedContent,
-                modifiedDocumentRelations,
-                modifiedContentTypes,
-                mergedFootnotes,
-                modifiedCharts,
-                updatedFootnoteId);
-
-        }
-
-        /// <summary>
-        /// Marshal content from the source document to be added into the container.
-        /// </summary>
-        /// <param name="file">The file from which content is copied.</param>
-        /// <returns>The updated document node of the source file.</returns>
-        /// <remarks>This method delegates its work to the <see cref="MarshalContentFromExtensions.MarshalContentFrom(DocxFilePath)"/> extension method.</remarks>
-        [Pure]
-        [NotNull]
-        private static XElement MarshalContentFrom([NotNull] DocxFilePath file)
-        {
-            if (file is null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
-
-            return file.MarshalContentFrom();
-        }
-
-        /// <summary>
-        /// Marshal footnotes from the source document into the container.
-        /// </summary>
-        /// <param name="file">The file from which content is copied.</param>
-        /// <param name="sourceContent">The document node of the source file containing any modifications made to this point.</param>
-        /// <param name="currentFootnoteId">The last footnote number currently in use by the container.</param>
-        /// <returns>The updated document node of the source file.</returns>
-        /// <remarks>This method delegates its work to the <see cref="MarshalFootnotesFromExtensions.MarshalFootnotesFrom(DocxFilePath, XElement, int)"/> extension method.</remarks>
-        [Pure]
-        private static (XElement SourceContent, XElement SourceFootnotes, int UpdatedFootnoteId) 
-            MarshalFootnotesFrom([NotNull] DocxFilePath file, [NotNull] XElement sourceContent, int currentFootnoteId)
-        {
-            if (file is null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
-            if (sourceContent is null)
-            {
-                throw new ArgumentNullException(nameof(sourceContent));
-            }
-
-            return file.MarshalFootnotesFrom(sourceContent, currentFootnoteId);
-        }
-
-        /// <summary>
-        /// Marshal footnotes from the source document into the container.
-        /// </summary>
-        /// <param name="file">The file from which content is copied.</param>
-        /// <param name="sourceContent">The document node of the source file containing any modifications made to this point.</param>
-        /// <param name="contentTypes"></param>
-        /// <param name="documentRelations"></param>
-        /// <param name="charts"></param>
-        /// <returns>The updated document node of the source file.</returns>
-        /// <remarks>This method delegates its work to the MarshalChartsFromExtensions.MarshalChartsFrom(...) extension method.</remarks>
-        [Pure]
-        private static (XElement SourceContent, XElement DocumentRelations, XElement ContentTypes, IEnumerable<(string Name, XElement Chart)> Charts)
-            MarshalChartsFrom([NotNull] DocxFilePath file, XElement sourceContent, XElement contentTypes, XElement documentRelations, IEnumerable<(string Name, XElement Chart)> charts)
-        {
-            if (file is null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
-            if (sourceContent is null)
-            {
-                throw new ArgumentNullException(nameof(sourceContent));
-            }
-            if (contentTypes is null)
-            {
-                throw new ArgumentNullException(nameof(contentTypes));
-            }
-            if (documentRelations is null)
-            {
-                throw new ArgumentNullException(nameof(documentRelations));
-            }
-            if (charts is null)
-            {
-                throw new ArgumentNullException(nameof(charts));
-            }
-
-            return file.MarshalChartsFrom(sourceContent, contentTypes, documentRelations, charts);
+                resultContent,
+                resultDocumentRelations,
+                contentTypes1,
+                resultFootnotes,
+                resultFootnoteRelations,
+                charts1,
+                updatedFootnoteId,
+                updatedFootnoteRelationId,
+                documentRelationId2);
         }
     }
 }

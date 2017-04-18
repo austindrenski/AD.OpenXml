@@ -40,26 +40,21 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(sourceContent));
             }
 
-            // TODO: Make the return type of ReadAsXml() a nullable singleton.
-            try
-            {
-                file.ReadAsXml("word/footnotes.xml");
-            }
-            catch
-            {
-                return (SourceContent: sourceContent, SourceFootnotes: null, UpdatedFootnoteId: currentFootnoteId);
-            }
-
             XElement sourceFootnotes =
-                file.ReadAsXml("word/footnotes.xml")
+                file.ReadAsXml("word/footnotes.xml")?
                     .RemoveRsidAttributes();
+
+            if (sourceFootnotes is null)
+            {
+                return (sourceContent, new XElement(W + "footnotes"), currentFootnoteId);
+            }
 
             sourceFootnotes.Descendants(W + "p")
                            .Attributes()
                            .Remove();
 
-            sourceFootnotes.Descendants(W + "hyperlink")
-                           .Remove();
+            //sourceFootnotes.Descendants(W + "hyperlink")
+            //               .Remove();
 
             var footnoteMapping =
                 sourceFootnotes.Elements(W + "footnote")
@@ -77,19 +72,22 @@ namespace AD.OpenXml
                                    })
                                .ToArray();
 
+            XElement modifiedContent = sourceContent.Clone();
+
+            XElement modifiedFootnotes = sourceFootnotes.Clone();
+
             foreach (var map in footnoteMapping)
             {
-                sourceContent =
-                    sourceContent.ChangeXAttributeValues(W + "footnoteReference", W + "Id", map.oldId, map.newId);
+                modifiedContent =
+                    modifiedContent.ChangeXAttributeValues(W + "footnoteReference", W + "Id", map.oldId, map.newId);
 
-                sourceFootnotes =
-                    sourceFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
+                modifiedFootnotes =
+                    modifiedFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
             }
-
+            
             int newCurrentId = footnoteMapping.Any() ? footnoteMapping.Max(x => x.newNumericId) : currentFootnoteId;
 
-            return (SourceContent: sourceContent, SourceFootnotes: sourceFootnotes, UpdatedFootnoteId: newCurrentId);
+            return (modifiedContent, modifiedFootnotes, newCurrentId);
         }
-
     }
 }

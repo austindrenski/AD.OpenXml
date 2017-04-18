@@ -978,23 +978,6 @@
             <exception cref="T:System.IO.PathTooLongException"/>
             <exception cref="T:System.UnauthorizedAccessException"/>
         </member>
-        <member name="M:AD.IO.ReadAsXmlExtensions.ReadAsXml(AD.IO.DocxFilePath)">
-            <summary>
-            Opens a Microsoft Word document (.docx) as an <see cref="T:System.Xml.Linq.XElement"/>.
-            </summary>
-            <param name="filePath">The file path of the .docx file to be opened. The file name is stored as an attribure of the root element.</param>
-            <returns>An <see cref="T:System.Xml.Linq.XElement"/> representing the document root of the Microsoft Word document.</returns>
-            <exception cref="T:System.ArgumentException"/>
-            <exception cref="T:System.ArgumentNullException"/>
-            <exception cref="T:System.IO.DirectoryNotFoundException"/>
-            <exception cref="T:System.IO.FileNotFoundException"/>
-            <exception cref="T:System.IO.InvalidDataException"/>
-            <exception cref="T:System.IO.IOException"/>
-            <exception cref="T:System.NotSupportedException"/>
-            <exception cref="T:System.ObjectDisposedException"/>
-            <exception cref="T:System.IO.PathTooLongException"/>
-            <exception cref="T:System.UnauthorizedAccessException"/>
-        </member>
         <member name="M:AD.IO.ReadAsXmlExtensions.ReadAsXml(System.Collections.Generic.IEnumerable{AD.IO.DocxFilePath})">
             <summary>
             Opens Microsoft Word documents (.docx) as an <see cref="T:System.Collections.Generic.IEnumerable`1"/>. 
@@ -1044,47 +1027,35 @@
         </member>
         <member name="T:AD.IO.ParseExtensions">
             <summary>
-            Parses <see cref="T:System.Collections.Generic.IEnumerator`1"/> as numbers.
+            Parses an <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a number.
             </summary>
-        </member>
-        <member name="M:AD.IO.ParseExtensions.Parse(System.Collections.Generic.IEnumerable{System.Char})">
-            <summary>
-            Filters an enumerable of characters for the numeric component, 
-            concatenates the characters, and then parses the string as an integer.
-            </summary>
-            <param name="enumerable">The source enumerable.</param>
-            <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as an integer.</returns>
         </member>
         <member name="M:AD.IO.ParseExtensions.ParseShort(System.Collections.Generic.IEnumerable{System.Char})">
             <summary>
-            Filters an enumerable of characters for the numeric component, 
-            concatenates the characters, and then parses the string as an integer.
+            Filters an enumerable of characters for the numeric component, concatenates the characters, and then parses the string as an integer.
             </summary>
-            <param name="enumerable">The source enumerable.</param>
+            <param name="souce">The source enumerable.</param>
             <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as an integer.</returns>
         </member>
         <member name="M:AD.IO.ParseExtensions.ParseInt(System.Collections.Generic.IEnumerable{System.Char})">
             <summary>
-            Filters an enumerable of characters for the numeric component, 
-            concatenates the characters, and then parses the string as an integer.
+            Filters an enumerable of characters for the numeric component, concatenates the characters, and then parses the string as an integer.
             </summary>
-            <param name="enumerable">The source enumerable.</param>
+            <param name="souce">The source enumerable.</param>
             <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as an integer.</returns>
         </member>
         <member name="M:AD.IO.ParseExtensions.ParseLong(System.Collections.Generic.IEnumerable{System.Char})">
             <summary>
-            Filters an enumerable of characters for the numeric component, 
-            concatenates the characters, and then parses the string as a long.
+            Filters an enumerable of characters for the numeric component, concatenates the characters, and then parses the string as a long.
             </summary>
-            <param name="enumerable">The source enumerable.</param>
+            <param name="souce">The source enumerable.</param>
             <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a long.</returns>
         </member>
         <member name="M:AD.IO.ParseExtensions.ParseDouble(System.Collections.Generic.IEnumerable{System.Char})">
             <summary>
-            Filters an enumerable of characters for the numeric component, 
-            concatenates the characters, and then parses the string as a double.
+            Filters an enumerable of characters for the numeric component, concatenates the characters, and then parses the string as a double.
             </summary>
-            <param name="enumerable">The source enumerable.</param>
+            <param name="souce">The source enumerable.</param>
             <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a double.</returns>
         </member>
         <member name="T:AD.IO.SplitDelimitedExtensions">
@@ -1153,7 +1124,7 @@
             Appends the strings of the enumerable collection by a delimiter. 
             Strings containing the delimiter are enclosed in double quotation marks.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1162,7 +1133,7 @@
             Appends the strings of the enumerable collection by a delimiter. 
             Strings containing the delimiter are enclosed in double quotation marks.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1170,14 +1141,14 @@
             <summary>
             Returns the delimited values of the <see cref="T:System.Xml.Linq.XElement"/>.
             </summary>
-            <param name="element">The <see cref="T:System.Xml.Linq.XElement"/> from which values are retrieved.</param>
+            <param name="source">The <see cref="T:System.Xml.Linq.XElement"/> from which values are retrieved.</param>
             <param name="delimiter">The character to delimit the values of the child elements.</param>
         </member>
         <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},System.String)">
             <summary>
             Returns the delimiter delimited values of the children each <see cref="T:System.Xml.Linq.XElement"/> delimited by new lines.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter and new lines.</returns>
         </member>
@@ -1185,7 +1156,7 @@
             <summary>
             Returns the delimiter delimited values of the children each <see cref="T:System.Xml.Linq.XElement"/> delimited by new lines.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter and new lines.</returns>
         </member>
@@ -1193,7 +1164,7 @@
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1201,7 +1172,7 @@
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1209,7 +1180,7 @@
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1217,7 +1188,7 @@
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1225,7 +1196,7 @@
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1233,7 +1204,7 @@
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1241,7 +1212,7 @@
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1249,7 +1220,7 @@
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1257,7 +1228,7 @@
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1265,15 +1236,15 @@
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Collections.Immutable.ImmutableArray{System.Collections.Immutable.ImmutableArray{``0}},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Collections.Immutable.IImmutableList{System.Collections.Immutable.IImmutableList{``0}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
-            <param name="enumerable">A collection to be delimited.</param>
+            <param name="source">A collection to be delimited.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1281,7 +1252,7 @@
             <summary>
             Appends the elements of the document by a delimiter.
             </summary>
-            <param name="document">An XDocument to be transformed into a delimited string.</param>
+            <param name="source">An XDocument to be transformed into a delimited string.</param>
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
@@ -1389,12 +1360,12 @@
         </member>
         <member name="M:AD.IO.WriteIntoExtensions.WriteInto(AD.IO.DocxFilePath,AD.IO.DocxFilePath,System.String,System.String)">
             <summary>
-            Saves the file at <param name="fromEntryPath"/> in <paramref name="fromFilePath"/> into <param name="toEntryPath"/> in <paramref name="toFilePath"/>.
+            Saves a doucment part from one file into another file at the given path.
             </summary>
             <param name="fromFilePath">The file that is copied.</param>
             <param name="toFilePath">The file into which <paramref name="fromFilePath"/> is copied.</param>
-            <param name="fromEntryPath">The location that is copied to the <paramref name="toEntryPath"/>.</param>
-            <param name="toEntryPath">The location to which the <paramref name="fromEntryPath"/> is copied.</param>
+            <param name="fromEntryPath">The location that is copied to the file.</param>
+            <param name="toEntryPath">The location to which the file is copied.</param>
         </member>
         <member name="M:AD.IO.WriteIntoExtensions.WriteInto(AD.IO.DocxFilePath,AD.IO.DocxFilePath)">
             <summary>

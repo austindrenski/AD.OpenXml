@@ -44,12 +44,12 @@ namespace AD.OpenXml
         /// <param name="file">The file from which content is copied.</param>
         /// <param name="sourceContent">The document node of the source file containing any modifications made to this point.</param>
         /// <param name="contentTypes"></param>
-        /// <param name="documentRelations"></param>
         /// <param name="charts"></param>
+        /// <param name="currentDocumentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
-        public static (XElement SourceContent, XElement DocumentRelations, XElement ContentTypes, IEnumerable<(string Name, XElement Chart)> Charts)
-            MarshalChartsFrom([NotNull] this DocxFilePath file, XElement sourceContent, XElement contentTypes, XElement documentRelations, IEnumerable<(string Name, XElement Chart)> charts)
+        public static (XElement SourceContent, XElement DocumentRelations, XElement ContentTypes, IEnumerable<(string Name, XElement Chart)> Charts, int UpdatedDocumentRelationId)
+            MarshalChartsFrom([NotNull] this DocxFilePath file, XElement sourceContent, XElement contentTypes, IEnumerable<(string Name, XElement Chart)> charts, int currentDocumentRelationId)
         {
             if (file is null)
             {
@@ -63,20 +63,10 @@ namespace AD.OpenXml
             {
                 throw new ArgumentNullException(nameof(contentTypes));
             }
-            if (documentRelations is null)
-            {
-                throw new ArgumentNullException(nameof(documentRelations));
-            }
             if (charts is null)
             {
                 throw new ArgumentNullException(nameof(charts));
             }
-
-            int currentDocumentRelationId =
-                documentRelations.Elements(P + "Relationship")
-                                 .Attributes("Id")
-                                 .Select(x => x.Value.ParseInt().GetValueOrDefault())
-                                 .Max();
 
             var chartMapping =
                 file.ReadAsXml("word/_rels/document.xml.rels")
@@ -95,7 +85,8 @@ namespace AD.OpenXml
                             x.SourceId,
                             x.SourceName,
                             ResultId = $"rId{currentDocumentRelationId + x.SourceIdNumeric}",
-                            ResultName = $"charts/chart{currentDocumentRelationId + x.SourceIdNumeric}.xml"
+                            ResultName = $"charts/chart{currentDocumentRelationId + x.SourceIdNumeric}.xml",
+                            NewNumericId = currentDocumentRelationId + x.SourceIdNumeric
                         })
                     .ToArray();
 
@@ -111,9 +102,7 @@ namespace AD.OpenXml
 
             XElement modifiedDocumentRelations =
                 new XElement(
-                    documentRelations.Name,
-                    documentRelations.Attributes(),
-                    documentRelations.Elements(),
+                    P + "Relationships",
                     chartMapping.Select(x =>
                         new XElement(P + "Relationship",
                             new XAttribute("Id", x.ResultId),
@@ -142,7 +131,12 @@ namespace AD.OpenXml
                 modifiedSourceContent = modifiedSourceContent.ChangeXAttributeValues(C + "chart", R + "id", map.SourceId, map.ResultId);
             }
 
-            return (SourceContent: modifiedSourceContent, DocumentRelations: modifiedDocumentRelations, ContentTypes: modifiedContentTypes, Charts: modifiedCharts);
+            int updatedDocumentRelationId =
+                chartMapping.Any()
+                    ? chartMapping.Max(x => x.NewNumericId)
+                    : currentDocumentRelationId;
+
+            return (modifiedSourceContent, modifiedDocumentRelations, modifiedContentTypes, modifiedCharts, updatedDocumentRelationId);
         }
     }
 }

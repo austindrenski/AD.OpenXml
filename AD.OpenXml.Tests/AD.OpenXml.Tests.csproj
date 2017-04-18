@@ -42,8 +42,8 @@
       <HintPath>..\packages\AD.Collections.1.1.0.1\lib\net461\AD.Collections.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="AD.IO, Version=1.1.0.18, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AD.IO.1.1.0.18\lib\net461\AD.IO.dll</HintPath>
+    <Reference Include="AD.IO, Version=1.1.0.23, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.IO.1.1.0.23\lib\net461\AD.IO.dll</HintPath>
     </Reference>
     <Reference Include="AD.Xml, Version=1.1.0.17, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AD.Xml.1.1.0.17\lib\net461\AD.Xml.dll</HintPath>

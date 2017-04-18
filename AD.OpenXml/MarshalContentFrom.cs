@@ -36,7 +36,7 @@ namespace AD.OpenXml
             }
 
             XElement source =
-                file.ReadAsXml("word/document.xml")
+                file.ReadAsXml()
 
                     // Remove editing attributes.
                     .RemoveRsidAttributes()
@@ -164,8 +164,6 @@ namespace AD.OpenXml
             {
                 source.Element(W + "body")?.Elements().First().Remove();
             }
-
-            source.Descendants(W + "hyperlink").Remove();
 
             return source;
         }
