@@ -6,9 +6,17 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Html
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class ToHeadingsExtensions
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
         public static XElement ConvertHeadings(this XElement element)
         {
             return element.ConvertHeadings("1")

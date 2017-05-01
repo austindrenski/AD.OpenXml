@@ -5,9 +5,17 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Html
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class ConvertItalicRunsExtensions
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
         public static XElement ConvertItalicRuns(this XElement element)
         {
             IEnumerable<XElement> items =

@@ -6,9 +6,17 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Html
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class ConvertTableCellsExtensions
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
         public static XElement ConvertTableCells(this XElement element)
         {
             IEnumerable<XElement> items = element.Descendants("tc").ToArray();

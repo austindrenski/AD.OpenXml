@@ -6,11 +6,18 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class AddDefaultExtensionsToContentTypesExtensions
     {
         private static readonly XNamespace C = XNamespaces.OpenXmlPackageContentTypes;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="toFilePath"></param>
         public static void AddDefaultExtensionsToContentTypes(this DocxFilePath toFilePath)
         {
             XElement types = toFilePath.ReadAsXml("[Content_Types].xml");

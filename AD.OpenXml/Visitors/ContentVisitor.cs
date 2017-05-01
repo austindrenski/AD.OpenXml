@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.OpenXml.Elements;
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml
+namespace AD.OpenXml.Visitors
 {
     /// <summary>
     /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
     [PublicAPI]
-    public static class MarshalContentFromExtensions
+    public class ContentVisitor
     {
         /// <summary>
         /// Represents the 'w:' prefix seen in raw OpenXML documents.
@@ -22,21 +21,32 @@ namespace AD.OpenXml
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
+        /// 
+        /// </summary>
+        [NotNull]
+        public XElement Content { get; }
+
+        /// <summary>
         /// Marshals content from the source document to be added into the container.
         /// </summary>
-        /// <param name="file">The file from which content is copied.</param>
+        /// <param name="subject">The file from which content is copied.</param>
         /// <returns>The updated document node of the source file.</returns>
+        public ContentVisitor(OpenXmlVisitor subject)
+        {
+            Content = Execute(subject.Document);
+        }
+
         [Pure]
         [NotNull]
-        public static XElement MarshalContentFrom([NotNull] this DocxFilePath file)
+        private static XElement Execute([NotNull] XElement content)
         {
-            if (file is null)
+            if (content is null)
             {
-                throw new ArgumentNullException(nameof(file));
+                throw new ArgumentNullException(nameof(content));
             }
 
             XElement source =
-                file.ReadAsXml()
+                content
 
                     // Remove editing attributes.
                     .RemoveRsidAttributes()
@@ -132,7 +142,7 @@ namespace AD.OpenXml
             //    sectionProperties.Remove();
             //    ancestorParagraph.AddAfterSelf(sectionProperties);
             //}
-            
+
             // There shouldn't be more than one paragraph style.
             foreach (XElement paragraphProperties in source.Descendants(W + "pPr").Where(x => x.Elements(W + "pStyle").Count() > 1))
             {

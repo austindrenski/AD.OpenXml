@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.OpenXml.Elements;
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml
+namespace AD.OpenXml.Visitors
 {
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public static class MarshalFootnotesFromExtensions
+    public class FootnoteVisitor
     {
         /// <summary>
         /// Represents the 'w:' prefix seen in raw OpenXML documents.
@@ -21,32 +20,50 @@ namespace AD.OpenXml
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
+        /// 
+        /// </summary>
+        public XElement Document { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public XElement Footnotes { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int FootnoteId { get; }
+        
+        /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
-        /// <param name="file">The file from which content is copied.</param>
-        /// <param name="sourceContent">The document node of the source file containing any modifications made to this point.</param>
-        /// <param name="currentFootnoteId">The last footnote number currently in use by the container.</param>
+        /// <param name="subject">The file from which content is copied.</param>
+        /// <param name="content">The document node of the source file containing any modifications made to this point.</param>
+        /// <param name="footnoteId">The last footnote number currently in use by the container.</param>
         /// <returns>The updated document node of the source file.</returns>
-        [Pure]
-        public static (XElement SourceContent, XElement SourceFootnotes, int UpdatedFootnoteId)
-            MarshalFootnotesFrom([NotNull] this DocxFilePath file, [NotNull] XElement sourceContent, int currentFootnoteId)
+        public FootnoteVisitor(OpenXmlVisitor subject, XElement content, int footnoteId)
         {
-            if (file is null)
+            (Document, Footnotes, FootnoteId) = Execute(subject.Footnotes, content, footnoteId);
+        }
+
+        [Pure]
+        private static (XElement Document, XElement Footnotes, int FootnoteId) Execute(XElement footnotes, XElement document, int footnoteId)
+        {
+            if (footnotes is null)
             {
-                throw new ArgumentNullException(nameof(file));
+                throw new ArgumentNullException(nameof(footnotes));
             }
-            if (sourceContent is null)
+            if (document is null)
             {
-                throw new ArgumentNullException(nameof(sourceContent));
+                throw new ArgumentNullException(nameof(document));
             }
 
             XElement sourceFootnotes =
-                file.ReadAsXml("word/footnotes.xml")?
-                    .RemoveRsidAttributes();
+                footnotes.RemoveRsidAttributes();
 
             if (sourceFootnotes is null)
             {
-                return (sourceContent, new XElement(W + "footnotes"), currentFootnoteId);
+                return (document, new XElement(W + "footnotes"), footnoteId);
             }
 
             sourceFootnotes.Descendants(W + "p")
@@ -67,12 +84,12 @@ namespace AD.OpenXml
                                    x => new
                                    {
                                        oldId = $"{x}",
-                                       newId = $"{currentFootnoteId + x}",
-                                       newNumericId = currentFootnoteId + x
+                                       newId = $"{footnoteId + x}",
+                                       newNumericId = footnoteId + x
                                    })
                                .ToArray();
 
-            XElement modifiedContent = sourceContent.Clone();
+            XElement modifiedContent = document.Clone();
 
             XElement modifiedFootnotes = sourceFootnotes.Clone();
 
@@ -84,8 +101,8 @@ namespace AD.OpenXml
                 modifiedFootnotes =
                     modifiedFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
             }
-            
-            int newCurrentId = footnoteMapping.Any() ? footnoteMapping.Max(x => x.newNumericId) : currentFootnoteId;
+
+            int newCurrentId = footnoteMapping.Any() ? footnoteMapping.Max(x => x.newNumericId) : footnoteId;
 
             return (modifiedContent, modifiedFootnotes, newCurrentId);
         }

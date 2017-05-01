@@ -7,6 +7,9 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Elements
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class AddAltChunkExtensions
     {
@@ -16,21 +19,49 @@ namespace AD.OpenXml.Elements
 
         private static int _index;
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="toFilePath"></param>
+        /// <param name="altChunkFile"></param>
+        /// <returns></returns>
         public static XElement AddAltChunk(this XElement element, DocxFilePath toFilePath, DocxFilePath altChunkFile)
         {
             return CreateAltChunk(element, element.Add, toFilePath, altChunkFile);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="toFilePath"></param>
+        /// <param name="altChunkFile"></param>
+        /// <returns></returns>
         public static XElement AddAltChunkAfterSelf(this XElement element, DocxFilePath toFilePath, DocxFilePath altChunkFile)
         {
             return CreateAltChunk(element, element.AddAfterSelf, toFilePath, altChunkFile);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="toFilePath"></param>
+        /// <param name="altChunkFile"></param>
+        /// <returns></returns>
         public static XElement AddAltChunkBeforeSelf(this XElement element, DocxFilePath toFilePath, DocxFilePath altChunkFile)
         {
             return CreateAltChunk(element, element.AddBeforeSelf, toFilePath, altChunkFile);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="toFilePath"></param>
+        /// <param name="altChunkFile"></param>
+        /// <returns></returns>
         public static XElement AddAltChunkFirst(this XElement element, DocxFilePath toFilePath, DocxFilePath altChunkFile)
         {
             return CreateAltChunk(element, element.AddFirst, toFilePath, altChunkFile);

@@ -6,11 +6,19 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Elements
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class HighlightInsertRequestsExtensions
     {
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
         public static XElement HighlightInsertRequests(this XElement element)
         {
             IEnumerable<XElement> appendices =

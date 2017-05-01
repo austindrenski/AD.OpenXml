@@ -5,9 +5,17 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Html
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class ConvertFootnoteReferencesExtensions
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
         public static XElement ConvertFootnoteReferences(this XElement element)
         {
             IEnumerable<XElement> references = element.Descendants("footnoteReference").ToArray();

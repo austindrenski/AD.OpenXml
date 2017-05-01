@@ -69,7 +69,7 @@ namespace AD.OpenXml.Documents
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
             // Modify document.xml
-            XElement document = toFilePath.ReadAsXml("word/document.xml");
+            XElement document = toFilePath.ReadAsXml();
 
             document.Descendants(W + "sectPr")
                     .Elements(W + "footerReference")
@@ -104,7 +104,7 @@ namespace AD.OpenXml.Documents
                     new XAttribute("Target", "footer1.xml")));
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
-            XElement document = toFilePath.ReadAsXml("word/document.xml");
+            XElement document = toFilePath.ReadAsXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.Add(
@@ -146,7 +146,7 @@ namespace AD.OpenXml.Documents
 
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
-            XElement document = toFilePath.ReadAsXml("word/document.xml");
+            XElement document = toFilePath.ReadAsXml();
 
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {

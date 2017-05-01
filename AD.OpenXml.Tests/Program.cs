@@ -2,6 +2,7 @@
 using System.Linq;
 using AD.IO;
 using AD.OpenXml.Documents;
+using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Tests
@@ -73,10 +74,10 @@ namespace AD.OpenXml.Tests
                          .ToArray();
 
             // Create container to encapsulate volatile operations
-            OpenXmlContainer container = new OpenXmlContainer(result);
+            OpenXmlVisitor container = new OpenXmlVisitor(result);
 
             // Merge files into container
-            OpenXmlContainer mergedContainer = container.MergeDocuments(files);
+            OpenXmlVisitor mergedContainer = container.Visit(files);
 
             // Save container to result path
             mergedContainer.Save(result);

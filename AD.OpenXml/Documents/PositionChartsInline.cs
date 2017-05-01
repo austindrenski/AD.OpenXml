@@ -7,6 +7,9 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class PositionChartsInlineExtensions
     {
@@ -14,6 +17,10 @@ namespace AD.OpenXml.Documents
 
         private static readonly XNamespace D = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="toFilePath"></param>
         public static void PositionChartsInline(this DocxFilePath toFilePath)
         {
             IEnumerable<XElement> charts = 

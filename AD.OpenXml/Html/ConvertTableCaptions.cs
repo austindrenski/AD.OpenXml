@@ -6,9 +6,17 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Html
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class ConvertTableCaptionsExtensions
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
         public static XElement ConvertTableCaptions(this XElement element)
         {
             IList<XElement> tables = element.Descendants("table").ToArray();
