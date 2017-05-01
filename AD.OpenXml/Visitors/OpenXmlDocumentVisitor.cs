@@ -12,14 +12,19 @@ namespace AD.OpenXml.Visitors
     /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
     [PublicAPI]
-    public class OpenXmlContentVisitor : OpenXmlVisitor
+    public class OpenXmlDocumentVisitor : OpenXmlVisitor
     {
+        /// <summary>
+        /// Active version of 'word/document.xml'.
+        /// </summary>
+        public override XElement Document { get; }
+
         /// <summary>
         /// Marshals content from the source document to be added into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
         /// <returns>The updated document node of the source file.</returns>
-        public OpenXmlContentVisitor(OpenXmlVisitor subject) : base(subject.File)
+        public OpenXmlDocumentVisitor(OpenXmlVisitor subject) : base(subject.File)
         {
             Document = Execute(subject.Document);
         }
@@ -94,42 +99,6 @@ namespace AD.OpenXml.Visitors
 
                     // Tidy up the XML for review.
                     .MergeRuns();
-
-            //// Set page size.
-            //foreach (XElement pageSize in source.Descendants(W + "pgSz"))
-            //{
-            //    pageSize.Element(W + "pgSz")?.SetAttributeValue(W + "w", "12240");
-            //    pageSize.Element(W + "pgSz")?.SetAttributeValue(W + "h", "15840");
-            //}
-
-            //// There shouldn't be section properties without orientations.
-            //foreach (XElement sectionProperties in source.Descendants(W + "sectPr").Where(x => !x.Descendants().Attributes(W + "orient").Any()).ToArray())
-            //{
-            //    sectionProperties.Element(W + "pgSz")?.SetAttributeValue(W + "orient", "portrait");
-            //}
-
-            //// There shouldn't be section properties type=nextPage.
-            //foreach (XElement sectionProperties in source.Descendants(W + "sectPr").Where(x => x.Element(W + "type")?.Value != "nextPage").ToArray())
-            //{
-            //    XElement type = sectionProperties.Element(W + "type");
-            //    if (type is null)
-            //    {
-            //        sectionProperties.Add(new XElement(W + "type"));
-            //    }
-            //    sectionProperties.Element(W + "type")?.SetAttributeValue(W + "val", "nextPage");
-            //}
-
-            //// There shouldn't be section properties in paragraph properties.
-            //foreach (XElement sectionProperties in source.Descendants(W + "sectPr").Where(x => x.Ancestors(W + "pPr").Any()).ToArray())
-            //{
-            //    XElement ancestorParagraph = sectionProperties.Ancestors(W + "p").FirstOrDefault();
-            //    if (ancestorParagraph is null)
-            //    {
-            //        continue;
-            //    }
-            //    sectionProperties.Remove();
-            //    ancestorParagraph.AddAfterSelf(sectionProperties);
-            //}
 
             // There shouldn't be more than one paragraph style.
             foreach (XElement paragraphProperties in source.Descendants(W + "pPr").Where(x => x.Elements(W + "pStyle").Count() > 1))

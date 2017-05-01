@@ -14,6 +14,21 @@ namespace AD.OpenXml.Visitors
     public class OpenXmlFootnoteVisitor : OpenXmlVisitor
     {
         /// <summary>
+        /// Active version of 'word/document.xml'.
+        /// </summary>
+        public override XElement Document { get; }
+        
+        /// <summary>
+        /// Active version of 'word/footnotes.xml'.
+        /// </summary>
+        public override XElement Footnotes { get; }
+        
+        /// <summary>
+        /// Returns the last footnote identifier currently in use by the container.
+        /// </summary>
+        public override int FootnoteId { get; }
+
+        /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
@@ -47,9 +62,6 @@ namespace AD.OpenXml.Visitors
             sourceFootnotes.Descendants(W + "p")
                            .Attributes()
                            .Remove();
-
-            //sourceFootnotes.Descendants(W + "hyperlink")
-            //               .Remove();
 
             var footnoteMapping =
                 sourceFootnotes.Elements(W + "footnote")
