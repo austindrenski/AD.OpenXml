@@ -11,39 +11,17 @@ namespace AD.OpenXml.Visitors
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public class FootnoteVisitor
+    public class FootnoteVisitor : OpenXmlVisitor
     {
-        /// <summary>
-        /// Represents the 'w:' prefix seen in raw OpenXML documents.
-        /// </summary>
-        [NotNull]
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public XElement Document { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public XElement Footnotes { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int FootnoteId { get; }
-        
         /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
-        /// <param name="content">The document node of the source file containing any modifications made to this point.</param>
         /// <param name="footnoteId">The last footnote number currently in use by the container.</param>
         /// <returns>The updated document node of the source file.</returns>
-        public FootnoteVisitor(OpenXmlVisitor subject, XElement content, int footnoteId)
+        public FootnoteVisitor(OpenXmlVisitor subject, int footnoteId) : base(subject.File)
         {
-            (Document, Footnotes, FootnoteId) = Execute(subject.Footnotes, content, footnoteId);
+            (Document, Footnotes, FootnoteId) = Execute(subject.Footnotes, subject.Document, footnoteId);
         }
 
         [Pure]

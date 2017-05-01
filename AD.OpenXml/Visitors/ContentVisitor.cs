@@ -12,28 +12,16 @@ namespace AD.OpenXml.Visitors
     /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
     [PublicAPI]
-    public class ContentVisitor
+    public class ContentVisitor : OpenXmlVisitor
     {
-        /// <summary>
-        /// Represents the 'w:' prefix seen in raw OpenXML documents.
-        /// </summary>
-        [NotNull]
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [NotNull]
-        public XElement Content { get; }
-
         /// <summary>
         /// Marshals content from the source document to be added into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
         /// <returns>The updated document node of the source file.</returns>
-        public ContentVisitor(OpenXmlVisitor subject)
+        public ContentVisitor(OpenXmlVisitor subject) : base(subject.File)
         {
-            Content = Execute(subject.Document);
+            Document = Execute(subject.Document);
         }
 
         [Pure]
