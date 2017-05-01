@@ -158,6 +158,7 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         /// Initializes an <see cref="Visitors.OpenXmlVisitor"/> by reading document parts into memory.
         /// </summary>
+        /// <param name="file"></param>
         /// <param name="document"></param>
         /// <param name="documentRelations"></param>
         /// <param name="contentTypes"></param>
@@ -167,11 +168,9 @@ namespace AD.OpenXml.Visitors
         /// <param name="currentFootnoteId"></param>
         /// <param name="currentFootnoteRelationId"></param>
         /// <param name="currentDocumentRelationId"></param>
-        // ReSharper disable once NotNullMemberIsNotInitialized
-        // TODO: OpenXmlVisitor objects constructed here cannot be passed to visitor classes due to the missing File property.
-        // TODO: This constructor should be eliminated at the earliest opportunity.
-        public OpenXmlVisitor([NotNull] XElement document, XElement documentRelations, XElement contentTypes, XElement footnotes, XElement foonoteRelations, IEnumerable<(string Name, XElement Chart)> charts, int currentFootnoteId, int currentFootnoteRelationId, int currentDocumentRelationId)
+        public OpenXmlVisitor([NotNull] DocxFilePath file, [NotNull] XElement document, XElement documentRelations, XElement contentTypes, XElement footnotes, XElement foonoteRelations, IEnumerable<(string Name, XElement Chart)> charts, int currentFootnoteId, int currentFootnoteRelationId, int currentDocumentRelationId)
         {
+            File = file;
             Document = document.Clone();
             DocumentRelations = documentRelations.Clone();
             ContentTypes = contentTypes.Clone();
@@ -217,30 +216,6 @@ namespace AD.OpenXml.Visitors
             return files.Aggregate(this, (current, next) => current.Visit(next));
         }
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [Pure]
-        [NotNull]
-        public OpenXmlVisitor VisitContent()
-        {
-            return new ContentVisitor(this);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="footnoteId"></param>
-        /// <returns></returns>
-        [Pure]
-        [NotNull]
-        public OpenXmlVisitor VisitFootnotes(int footnoteId)
-        {
-            return new FootnoteVisitor(this, footnoteId);
-        }
-
         /// <summary>
         /// Merges the source document into the result document.
         /// </summary>
@@ -256,9 +231,9 @@ namespace AD.OpenXml.Visitors
 
             OpenXmlVisitor subject = new OpenXmlVisitor(file);
 
-            OpenXmlVisitor contentVisitor = subject.VisitContent();
+            OpenXmlContentVisitor contentVisitor = subject.VisitContent();
 
-            OpenXmlVisitor footnoteVisitor = contentVisitor.VisitFootnotes(FootnoteId);
+            OpenXmlFootnoteVisitor footnoteVisitor = contentVisitor.VisitFootnotes(FootnoteId);
 
             (XElement sourceFootnotes2, XElement footnoteRelations1, int updatedFootnoteRelationId) = 
                 file.MarshalFootnoteHyperlinksFrom(footnoteVisitor.Footnotes, CurrentFootnoteRelationId);
@@ -307,16 +282,41 @@ namespace AD.OpenXml.Visitors
                                           documentRelations2?.Elements() ?? Enumerable.Empty<XElement>(),
                                           XNode.EqualityComparer));
 
-            return new OpenXmlVisitor(
-                resultContent,
-                resultDocumentRelations,
-                contentTypes1,
-                resultFootnotes,
-                resultFootnoteRelations,
-                charts1,
-                footnoteVisitor.FootnoteId,
-                updatedFootnoteRelationId,
-                documentRelationId2);
+            return
+                new OpenXmlVisitor(
+                    file: File,
+                    document: resultContent,
+                    documentRelations: resultDocumentRelations,
+                    contentTypes: contentTypes1,
+                    footnotes: resultFootnotes,
+                    foonoteRelations: resultFootnoteRelations,
+                    charts: charts1,
+                    currentFootnoteId: footnoteVisitor.FootnoteId,
+                    currentFootnoteRelationId: updatedFootnoteRelationId,
+                    currentDocumentRelationId: documentRelationId2);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [Pure]
+        [NotNull]
+        public OpenXmlContentVisitor VisitContent()
+        {
+            return new OpenXmlContentVisitor(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="footnoteId"></param>
+        /// <returns></returns>
+        [Pure]
+        [NotNull]
+        public OpenXmlFootnoteVisitor VisitFootnotes(int footnoteId)
+        {
+            return new OpenXmlFootnoteVisitor(this, footnoteId);
         }
     }
 }

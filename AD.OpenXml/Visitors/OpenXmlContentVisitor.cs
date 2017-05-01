@@ -12,14 +12,14 @@ namespace AD.OpenXml.Visitors
     /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
     [PublicAPI]
-    public class ContentVisitor : OpenXmlVisitor
+    public class OpenXmlContentVisitor : OpenXmlVisitor
     {
         /// <summary>
         /// Marshals content from the source document to be added into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
         /// <returns>The updated document node of the source file.</returns>
-        public ContentVisitor(OpenXmlVisitor subject) : base(subject.File)
+        public OpenXmlContentVisitor(OpenXmlVisitor subject) : base(subject.File)
         {
             Document = Execute(subject.Document);
         }

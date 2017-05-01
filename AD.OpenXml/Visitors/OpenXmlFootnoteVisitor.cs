@@ -11,7 +11,7 @@ namespace AD.OpenXml.Visitors
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public class FootnoteVisitor : OpenXmlVisitor
+    public class OpenXmlFootnoteVisitor : OpenXmlVisitor
     {
         /// <summary>
         /// Marshals footnotes from the source document into the container.
@@ -19,7 +19,7 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject">The file from which content is copied.</param>
         /// <param name="footnoteId">The last footnote number currently in use by the container.</param>
         /// <returns>The updated document node of the source file.</returns>
-        public FootnoteVisitor(OpenXmlVisitor subject, int footnoteId) : base(subject.File)
+        public OpenXmlFootnoteVisitor(OpenXmlVisitor subject, int footnoteId) : base(subject.File)
         {
             (Document, Footnotes, FootnoteId) = Execute(subject.Footnotes, subject.Document, footnoteId);
         }

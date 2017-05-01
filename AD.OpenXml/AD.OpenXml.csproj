@@ -70,8 +70,8 @@
     <Compile Include="Documents\MergeInto.cs" />
     <Compile Include="Documents\ModifyAreaChart.cs" />
     <Compile Include="Documents\RemoveDuplicateSectionProperties.cs" />
-    <Compile Include="Visitors\ContentVisitor.cs" />
-    <Compile Include="Visitors\FootnoteVisitor.cs" />
+    <Compile Include="Visitors\OpenXmlContentVisitor.cs" />
+    <Compile Include="Visitors\OpenXmlFootnoteVisitor.cs" />
     <Compile Include="MarshalChartsFrom.cs" />
     <Compile Include="MarshalContentHyperlinksFrom.cs" />
     <Compile Include="MarshalFootnoteHyperlinksFrom.cs" />
