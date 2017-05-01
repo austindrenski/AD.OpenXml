@@ -47,7 +47,7 @@ namespace AD.OpenXml.Visitors
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
-        public static (XElement Document, XElement DocumentRelations, int DocumentRelationId) Execute(XElement document, XElement documentRelations, int documentRelationId)
+        private static (XElement Document, XElement DocumentRelations, int DocumentRelationId) Execute(XElement document, XElement documentRelations, int documentRelationId)
         {
             XElement nextDocumentRelations =
                 documentRelations.RemoveRsidAttributes() ?? new XElement(P + "Relationships");
@@ -69,12 +69,12 @@ namespace AD.OpenXml.Visitors
                                 })
                             .ToArray();
 
-            XElement modifiedContents = document.Clone();
+            XElement modifiedDocument = document.Clone();
 
             foreach (var map in documentRelationMapping)
             {
-                modifiedContents =
-                    modifiedContents.ChangeXAttributeValues(W + "hyperlink", R + "id", map.oldId, map.newId);
+                modifiedDocument =
+                    modifiedDocument.ChangeXAttributeValues(W + "hyperlink", R + "id", map.oldId, map.newId);
 
                 nextDocumentRelations =
                     nextDocumentRelations.ChangeXAttributeValues(P + "Relationship", "Id", map.oldId, map.newId);
@@ -85,7 +85,7 @@ namespace AD.OpenXml.Visitors
                     ? documentRelationMapping.Max(x => x.newNumericId)
                     : documentRelationId;
 
-            return (modifiedContents, nextDocumentRelations, updatedFootnoteRelationId);
+            return (modifiedDocument, nextDocumentRelations, updatedFootnoteRelationId);
         }
     }
 }

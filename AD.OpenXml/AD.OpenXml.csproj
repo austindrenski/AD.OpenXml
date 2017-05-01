@@ -69,8 +69,6 @@
   <ItemGroup>
     <Compile Include="Documents\ModifyAreaChart.cs" />
     <Compile Include="Documents\RemoveDuplicateSectionProperties.cs" />
-    <Compile Include="MarshalChartsFrom.cs" />
-    <Compile Include="MarshalContentHyperlinksFrom.cs" />
     <Compile Include="Visitors\ChartInformation.cs" />
     <Compile Include="Visitors\OpenXmlChartVisitor.cs" />
     <Compile Include="Visitors\OpenXmlDocumentHyperlinkVisitor.cs" />

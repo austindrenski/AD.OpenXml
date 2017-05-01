@@ -65,9 +65,9 @@ namespace AD.OpenXml.Visitors
         /// </summary>
         /// <param name="subject"></param>
         /// <returns></returns>
-        protected override OpenXmlVisitor VisitCharts(OpenXmlVisitor subject, int documentRelationId)
+        protected override OpenXmlVisitor VisitCharts(OpenXmlVisitor subject)
         {
-            return new OpenXmlChartVisitor(subject, documentRelationId);
+            return new OpenXmlChartVisitor(subject);
         }
     }
 }

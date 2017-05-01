@@ -79,14 +79,14 @@ namespace AD.OpenXml.Visitors
                                    })
                                .ToArray();
 
-            XElement modifiedContent = document.Clone();
+            XElement modifiedDocument = document.Clone();
 
             XElement modifiedFootnotes = sourceFootnotes.Clone();
 
             foreach (var map in footnoteMapping)
             {
-                modifiedContent =
-                    modifiedContent.ChangeXAttributeValues(W + "footnoteReference", W + "Id", map.oldId, map.newId);
+                modifiedDocument =
+                    modifiedDocument.ChangeXAttributeValues(W + "footnoteReference", W + "Id", map.oldId, map.newId);
 
                 modifiedFootnotes =
                     modifiedFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
@@ -94,7 +94,7 @@ namespace AD.OpenXml.Visitors
 
             int newCurrentId = footnoteMapping.Any() ? footnoteMapping.Max(x => x.newNumericId) : footnoteId;
 
-            return (modifiedContent, modifiedFootnotes, newCurrentId);
+            return (modifiedDocument, modifiedFootnotes, newCurrentId);
         }
     }
 }

@@ -107,7 +107,7 @@ namespace AD.OpenXml.Visitors
         /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
         /// </summary>
         /// <param name="result">The file to which changes can be saved.</param>
-        public OpenXmlVisitor([NotNull] DocxFilePath result)
+        protected OpenXmlVisitor([NotNull] DocxFilePath result)
         {
             File = result;
 
@@ -170,7 +170,8 @@ namespace AD.OpenXml.Visitors
             ContentTypes = subject.ContentTypes.Clone();
             Footnotes = subject.Footnotes.Clone();
             FootnoteRelations = subject.FootnoteRelations.Clone();
-            Charts = subject.Charts.ToImmutableArray();
+            Charts = subject.Charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
+            FootnoteId = subject.FootnoteId;
             FootnoteRelationId = subject.FootnoteRelationId;
             DocumentRelationId = subject.DocumentRelationId;
         }
@@ -234,6 +235,11 @@ namespace AD.OpenXml.Visitors
             return files.Aggregate(this, (current, next) => current.Visit(next));
         }
 
+        public virtual OpenXmlVisitor Visit([NotNull] DocxFilePath file)
+        {
+            
+        }
+
         /// <summary>
         /// Merges the source document into the result document.
         /// </summary>
@@ -248,11 +254,17 @@ namespace AD.OpenXml.Visitors
             }
 
             OpenXmlVisitor subject = new OpenXmlVisitor(file);
-            OpenXmlDocumentVisitor contentVisitor = new OpenXmlDocumentVisitor(subject);
-            OpenXmlFootnoteVisitor footnoteVisitor = new OpenXmlFootnoteVisitor(contentVisitor, FootnoteId);
-            OpenXmlFootnoteHyperlinkVisitor footnoteHyperlinkVisitor = new OpenXmlFootnoteHyperlinkVisitor(footnoteVisitor, FootnoteRelationId);
-            OpenXmlDocumentHyperlinkVisitor documentHyperlinkVisitor = new OpenXmlDocumentHyperlinkVisitor(footnoteHyperlinkVisitor, DocumentRelationId);
-            OpenXmlChartVisitor chartsVisitor = new OpenXmlChartVisitor(documentHyperlinkVisitor, documentHyperlinkVisitor.DocumentRelationId);
+
+            OpenXmlDocumentVisitor a = new OpenXmlDocumentVisitor(subject);
+            OpenXmlVisitor b = new OpenXmlDocumentVisitor(subject);
+            OpenXmlDocumentVisitor c = VisitDocument(subject) as OpenXmlDocumentVisitor;
+            OpenXmlVisitor d = VisitDocument(subject);
+
+            OpenXmlVisitor documentVisitor = VisitDocument(subject);// new OpenXmlDocumentVisitor(subject);
+            OpenXmlVisitor footnoteVisitor = new OpenXmlFootnoteVisitor(documentVisitor, FootnoteId);
+            OpenXmlVisitor footnoteHyperlinkVisitor = new OpenXmlFootnoteHyperlinkVisitor(footnoteVisitor, FootnoteRelationId);
+            OpenXmlVisitor documentHyperlinkVisitor = new OpenXmlDocumentHyperlinkVisitor(footnoteHyperlinkVisitor, DocumentRelationId);
+            OpenXmlVisitor chartsVisitor = new OpenXmlChartVisitor(documentHyperlinkVisitor);
             
             XElement document =
                 new XElement(
@@ -374,9 +386,8 @@ namespace AD.OpenXml.Visitors
         /// 
         /// </summary>
         /// <param name="subject"></param>
-        /// <param name="documentRelationId"></param>
         /// <returns></returns>
-        protected virtual OpenXmlVisitor VisitCharts(OpenXmlVisitor subject, int documentRelationId)
+        protected virtual OpenXmlVisitor VisitCharts(OpenXmlVisitor subject)
         {
             return new OpenXmlVisitor(subject);
         }

@@ -44,10 +44,10 @@ namespace AD.OpenXml.Visitors
         /// Marshal footnotes from the source document into the container.
         /// </summary>
         /// <returns>The updated document node of the source file.</returns>
-        public OpenXmlChartVisitor(OpenXmlVisitor subject, int documentRelationId) : base(subject)
+        public OpenXmlChartVisitor(OpenXmlVisitor subject) : base(subject)
         {
             (Document, DocumentRelations, ContentTypes, Charts, DocumentRelationId)
-                = Execute(subject.File, subject.Document, subject.DocumentRelations, subject.ContentTypes, subject.Charts, documentRelationId);
+                = Execute(subject.File, subject.Document, subject.DocumentRelations, subject.ContentTypes, subject.Charts, subject.DocumentRelationId);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace AD.OpenXml.Visitors
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
-        public static (XElement Document, XElement DocumentRelations, XElement ContentTypes, IEnumerable<ChartInformation> Charts, int DocumentRelationId)
+        private static (XElement Document, XElement DocumentRelations, XElement ContentTypes, IEnumerable<ChartInformation> Charts, int DocumentRelationId)
             Execute(DocxFilePath file, XElement document, XElement documentRelations, XElement contentTypes, IEnumerable<ChartInformation> charts, int documentRelationId)
         {
             if (file is null)

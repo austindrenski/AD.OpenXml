@@ -31,15 +31,15 @@ namespace AD.OpenXml.Visitors
 
         [Pure]
         [NotNull]
-        private static XElement Execute([NotNull] XElement content)
+        private static XElement Execute([NotNull] XElement document)
         {
-            if (content is null)
+            if (document is null)
             {
-                throw new ArgumentNullException(nameof(content));
+                throw new ArgumentNullException(nameof(document));
             }
 
             XElement source =
-                content
+                document
 
                     // Remove editing attributes.
                     .RemoveRsidAttributes()
