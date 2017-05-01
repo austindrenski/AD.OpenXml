@@ -19,9 +19,6 @@ namespace AD.OpenXml.Tests
             // Declare version
             const string version = "7_4";
 
-            ProcessChapter(version,"C:\\Users\\adren\\Desktop\\OTAP 2016\\ch2");
-            System.Environment.Exit(0);
-
             // Process chapters
             ProcessChapter(version, $"{workingDirectory}\\ch0");
             ProcessChapter(version, $"{workingDirectory}\\ch1");
