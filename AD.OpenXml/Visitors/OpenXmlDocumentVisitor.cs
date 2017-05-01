@@ -24,7 +24,7 @@ namespace AD.OpenXml.Visitors
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
         /// <returns>The updated document node of the source file.</returns>
-        public OpenXmlDocumentVisitor(OpenXmlVisitor subject) : base(subject.File)
+        public OpenXmlDocumentVisitor(OpenXmlVisitor subject) : base(subject)
         {
             Document = Execute(subject.Document);
         }

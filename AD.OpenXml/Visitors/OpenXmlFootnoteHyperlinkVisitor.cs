@@ -35,7 +35,7 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject">The file from which content is copied.</param>
         /// <param name="footnoteRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
-        public OpenXmlFootnoteHyperlinkVisitor(OpenXmlVisitor subject, int footnoteRelationId) : base(subject.File)
+        public OpenXmlFootnoteHyperlinkVisitor(OpenXmlVisitor subject, int footnoteRelationId) : base(subject)
         {
             (Footnotes, FootnoteRelations, FootnoteRelationId) = Execute(subject.Footnotes, subject.FootnoteRelations, footnoteRelationId);
         }

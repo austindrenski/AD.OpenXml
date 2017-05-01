@@ -14,35 +14,35 @@ namespace AD.OpenXml.Tests
         public static void Main()
         {
             // Declare working directory
-            const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\content review";
+            const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\editorial review";
 
             // Declare version
-            const string version = "7_4";
+            const string version = "1_5";
 
             // Process chapters
-            ProcessChapter(version, $"{workingDirectory}\\ch0");
-            ProcessChapter(version, $"{workingDirectory}\\ch1");
-            ProcessChapter(version, $"{workingDirectory}\\ch2");
-            ProcessChapter(version, $"{workingDirectory}\\ch3");
-            ProcessChapter(version, $"{workingDirectory}\\ch4");
-            ProcessChapter(version, $"{workingDirectory}\\ch5");
-            ProcessChapter(version, $"{workingDirectory}\\ch6");
-            ProcessChapter(version, $"{workingDirectory}\\ch7");
+            //ProcessChapter(version, $"{workingDirectory}\\ch0");
+            //ProcessChapter(version, $"{workingDirectory}\\ch1");
+            //ProcessChapter(version, $"{workingDirectory}\\ch2");
+            //ProcessChapter(version, $"{workingDirectory}\\ch3");
+            //ProcessChapter(version, $"{workingDirectory}\\ch4");
+            //ProcessChapter(version, $"{workingDirectory}\\ch5");
+            //ProcessChapter(version, $"{workingDirectory}\\ch6");
+            //ProcessChapter(version, $"{workingDirectory}\\ch7");
             
             // Copy new files into report folder
             foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7" })
             {
                 foreach (string file in Directory.GetFiles($"{workingDirectory}\\{chapter}", "*.docx", SearchOption.TopDirectoryOnly).Where(x => !x.Contains("~")))
                 {
-                    File.Copy(file, $"{workingDirectory}\\_Report\\{Path.GetFileName(file)}", true);
+                    File.Copy(file, $"{workingDirectory}\\_report\\{Path.GetFileName(file)}", true);
                 }
             }
 
             // Process report
-            ProcessChapter(version, $"{workingDirectory}\\_Report");
+            ProcessChapter(version, $"{workingDirectory}\\_report");
 
             // Delete old files in report folder
-            foreach (string section in Directory.GetFiles($"{workingDirectory}\\_Report", "*.docx", SearchOption.TopDirectoryOnly))
+            foreach (string section in Directory.GetFiles($"{workingDirectory}\\_report", "*.docx", SearchOption.TopDirectoryOnly))
             {
                 File.Delete(section);
             }
@@ -51,10 +51,10 @@ namespace AD.OpenXml.Tests
         private static void ProcessChapter(string version, string workingDirectory)
         {
             // Create output directory
-            Directory.CreateDirectory($"{workingDirectory}\\output");
+            Directory.CreateDirectory($"{workingDirectory}\\_output");
 
             // Create result file
-            DocxFilePath result = DocxFilePath.Create($"{workingDirectory}\\output\\OTAP_2016_v_{version}.docx", true);
+            DocxFilePath result = DocxFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.docx", true);
 
             // Add footnotes file
             result.AddFootnotes();
@@ -74,7 +74,7 @@ namespace AD.OpenXml.Tests
                          .ToArray();
 
             // Create container to encapsulate volatile operations
-            OpenXmlVisitor container = new OpenXmlVisitor(result);
+            OpenXmlVisitor container = new ReportVisitor(result);
 
             // Merge files into container
             OpenXmlVisitor mergedContainer = container.Visit(files);
@@ -113,12 +113,12 @@ namespace AD.OpenXml.Tests
             result.RemoveDuplicateSectionProperties();
 
             // Write document.xml to XML file
-            XmlFilePath xml = XmlFilePath.Create($"{workingDirectory}\\output\\OTAP_2016_v_{version}.xml");
-            result.ReadAsXml().Elements().WriteXml(xml);
+            //XmlFilePath xml = XmlFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.xml");
+            //result.ReadAsXml().Elements().WriteXml(xml);
 
             // Write document.xml to HTML file
-            HtmlFilePath html = HtmlFilePath.Create($"{workingDirectory}\\output\\OTAP_2016_v_{version}.html");
-            result.ReadAsXml().ProcessHtml().WriteHtml(html);
+            //HtmlFilePath html = HtmlFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.html");
+            //result.ReadAsXml().ProcessHtml().WriteHtml(html);
         }
     }
 }

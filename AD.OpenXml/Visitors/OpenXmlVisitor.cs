@@ -86,7 +86,7 @@ namespace AD.OpenXml.Visitors
         /// Active version of word/charts/chart#.xml.
         /// </summary>
         [NotNull]
-        public virtual IImmutableList<(string Name, XElement Chart)> Charts { get; }
+        public virtual IEnumerable<ChartInformation> Charts { get; }
 
         /// <summary>
         /// Returns the last document relation identifier in use by the container.
@@ -133,7 +133,7 @@ namespace AD.OpenXml.Visitors
                 documentRelations.Elements()
                                   .Select(x => x.Attribute("Target")?.Value)
                                   .Where(x => x?.StartsWith("charts/") ?? false)
-                                  .Select(x => (Name: x, Chart: result.ReadAsXml($"word/{x}")))
+                                  .Select(x => new ChartInformation(x, result.ReadAsXml($"word/{x}")))
                                   .ToImmutableList();
 
             DocumentRelationId =
@@ -159,7 +159,24 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Initializes an <see cref="Visitors.OpenXmlVisitor"/> by reading document parts into memory.
+        /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
+        /// </summary>
+        /// <param name="subject"></param>
+        protected OpenXmlVisitor([NotNull] OpenXmlVisitor subject)
+        {
+            File = subject.File;
+            Document = subject.Document.Clone();
+            DocumentRelations = subject.DocumentRelations.Clone();
+            ContentTypes = subject.ContentTypes.Clone();
+            Footnotes = subject.Footnotes.Clone();
+            FootnoteRelations = subject.FootnoteRelations.Clone();
+            Charts = subject.Charts.ToImmutableArray();
+            FootnoteRelationId = subject.FootnoteRelationId;
+            DocumentRelationId = subject.DocumentRelationId;
+        }
+
+        /// <summary>
+        /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
         /// </summary>
         /// <param name="file"></param>
         /// <param name="document"></param>
@@ -168,10 +185,10 @@ namespace AD.OpenXml.Visitors
         /// <param name="footnotes"></param>
         /// <param name="foonoteRelations"></param>
         /// <param name="charts"></param>
-        /// <param name="currentFootnoteId"></param>
-        /// <param name="currentFootnoteRelationId"></param>
-        /// <param name="currentDocumentRelationId"></param>
-        private OpenXmlVisitor([NotNull] DocxFilePath file, [NotNull] XElement document, XElement documentRelations, XElement contentTypes, XElement footnotes, XElement foonoteRelations, IEnumerable<(string Name, XElement Chart)> charts, int currentFootnoteId, int currentFootnoteRelationId, int currentDocumentRelationId)
+        /// <param name="footnoteId"></param>
+        /// <param name="footnoteRelationId"></param>
+        /// <param name="documentRelationId"></param>
+        private OpenXmlVisitor([NotNull] DocxFilePath file, [NotNull] XElement document, XElement documentRelations, XElement contentTypes, XElement footnotes, XElement foonoteRelations, IEnumerable<ChartInformation> charts, int footnoteId, int footnoteRelationId, int documentRelationId)
         {
             File = file;
             Document = document.Clone();
@@ -179,11 +196,9 @@ namespace AD.OpenXml.Visitors
             ContentTypes = contentTypes.Clone();
             Footnotes = footnotes.Clone();
             FootnoteRelations = foonoteRelations.Clone();
-            Charts = charts.Select(x => (Name: x.Name, Chart: x.Chart.Clone())).ToImmutableArray();
-            // TODO: Why isn't this needed? Actually, why does this proactively break the document?
-            //_currentFootnoteId = currentFootnoteId;
-            FootnoteRelationId = currentFootnoteRelationId;
-            DocumentRelationId = currentDocumentRelationId;
+            Charts = charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
+            FootnoteRelationId = footnoteRelationId;
+            DocumentRelationId = documentRelationId;
         }
 
         /// <summary>
@@ -197,9 +212,9 @@ namespace AD.OpenXml.Visitors
             ContentTypes.WriteInto(resultPath, "[Content_Types].xml");
             DocumentRelations.WriteInto(resultPath, "word/_rels/document.xml.rels");
             FootnoteRelations.WriteInto(resultPath, "word/_rels/footnotes.xml.rels");
-            foreach ((string Name, XElement Chart) chart in Charts)
+            foreach (ChartInformation item in Charts)
             {
-                chart.Chart.WriteInto(resultPath, $"word/{chart.Name}");
+                item.Chart.WriteInto(resultPath, $"word/{item.Name}");
             }
         }
 
@@ -232,109 +247,138 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(file));
             }
 
-            OpenXmlVisitor subject = 
-                new OpenXmlVisitor(file);
-
-            OpenXmlDocumentVisitor contentVisitor =
-                subject.VisitContent();
-
-            OpenXmlFootnoteVisitor footnoteVisitor = 
-                contentVisitor.VisitFootnotes(FootnoteId);
-
-            OpenXmlFootnoteHyperlinkVisitor footnoteHyperlinkVisitor = 
-                footnoteVisitor.VisitFootnoteHyperlinks(FootnoteRelationId);
+            OpenXmlVisitor subject = new OpenXmlVisitor(file);
+            OpenXmlDocumentVisitor contentVisitor = new OpenXmlDocumentVisitor(subject);
+            OpenXmlFootnoteVisitor footnoteVisitor = new OpenXmlFootnoteVisitor(contentVisitor, FootnoteId);
+            OpenXmlFootnoteHyperlinkVisitor footnoteHyperlinkVisitor = new OpenXmlFootnoteHyperlinkVisitor(footnoteVisitor, FootnoteRelationId);
+            OpenXmlDocumentHyperlinkVisitor documentHyperlinkVisitor = new OpenXmlDocumentHyperlinkVisitor(footnoteHyperlinkVisitor, DocumentRelationId);
+            OpenXmlChartVisitor chartsVisitor = new OpenXmlChartVisitor(documentHyperlinkVisitor, documentHyperlinkVisitor.DocumentRelationId);
             
-            (XElement sourceContent3, XElement documentRelations1, int documentRelationId1) =
-                file.MarshalContentHyperlinksFrom(footnoteVisitor.Document, DocumentRelationId);
-
-            (XElement sourceContent4, XElement documentRelations2, XElement contentTypes1, IEnumerable<(string Name, XElement Chart)> charts1, int documentRelationId2) =
-                file.MarshalChartsFrom(sourceContent3, ContentTypes, Charts, documentRelationId1);
-
-            XElement resultContent =
+            XElement document =
                 new XElement(
                     Document.Name,
                     Document.Attributes(),
-                    new XElement(W + "body",
-                        Document.Element(W + "body")?.Elements(),
-                        sourceContent4.Element(W + "body")?.Elements()));
+                    new XElement(
+                        Document.Elements().First().Name,
+                        Document.Elements().First().Elements(),
+                        chartsVisitor.Document.Elements().First().Elements()));
 
-            XElement resultFootnotes =
+            XElement footnotes =
                 new XElement(
                     Footnotes.Name,
                     Footnotes.Attributes(),
                     Footnotes.Elements()
                              .Union(
-                                 footnoteHyperlinkVisitor.Footnotes.Elements(),
+                                 chartsVisitor.Footnotes.Elements(),
                                  XNode.EqualityComparer));
 
-            XElement resultFootnoteRelations =
+            XElement footnoteRelations =
                 new XElement(
                     FootnoteRelations.Name,
                     FootnoteRelations.Attributes(),
                     FootnoteRelations.Elements()
                                      .Union(
-                                         footnoteHyperlinkVisitor.FootnoteRelations.Elements(),
+                                         chartsVisitor.FootnoteRelations.Elements(),
                                          XNode.EqualityComparer));
 
-            XElement resultDocumentRelations =
+            XElement documentRelations =
                 new XElement(
                     DocumentRelations.Name,
                     DocumentRelations.Attributes(),
                     DocumentRelations.Elements()
-                                      .Union(
-                                          documentRelations1?.Elements() ?? Enumerable.Empty<XElement>(),
-                                          XNode.EqualityComparer)
-                                      .Union(
-                                          documentRelations2?.Elements() ?? Enumerable.Empty<XElement>(),
-                                          XNode.EqualityComparer));
+                                     .Union(
+                                         chartsVisitor.DocumentRelations.Elements(),
+                                         XNode.EqualityComparer));
+
+            XElement contentTypes =
+                new XElement(
+                    ContentTypes.Name,
+                    ContentTypes.Attributes(),
+                    ContentTypes.Elements()
+                                .Union(
+                                    chartsVisitor.ContentTypes.Elements(),
+                                    XNode.EqualityComparer));
+
+            IEnumerable<ChartInformation> charts =
+                Charts.Union(
+                    chartsVisitor.Charts,
+                    ChartInformation.Comparer);
+
+            int footnoteId =
+                chartsVisitor.FootnoteId;
+
+            int footnoteRelationId =
+                chartsVisitor.FootnoteRelationId;
+
+            int documentRelationId =
+                chartsVisitor.DocumentRelationId;
 
             return
                 new OpenXmlVisitor(
-                    file: File,
-                    document: resultContent,
-                    documentRelations: resultDocumentRelations,
-                    contentTypes: contentTypes1,
-                    footnotes: resultFootnotes,
-                    foonoteRelations: resultFootnoteRelations,
-                    charts: charts1,
-                    currentFootnoteId: footnoteVisitor.FootnoteId,
-                    currentFootnoteRelationId: footnoteHyperlinkVisitor.FootnoteRelationId,
-                    currentDocumentRelationId: documentRelationId2);
+                    File,
+                    document,
+                    documentRelations,
+                    contentTypes,
+                    footnotes,
+                    footnoteRelations,
+                    charts,
+                    footnoteId,
+                    footnoteRelationId,
+                    documentRelationId);
         }
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="subject"></param>
         /// <returns></returns>
-        [Pure]
-        [NotNull]
-        public OpenXmlDocumentVisitor VisitContent()
+        protected virtual OpenXmlVisitor VisitDocument(OpenXmlVisitor subject)
         {
-            return new OpenXmlDocumentVisitor(this);
+            return new OpenXmlVisitor(subject);
         }
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="subject"></param>
         /// <param name="footnoteId"></param>
         /// <returns></returns>
-        [Pure]
-        [NotNull]
-        public OpenXmlFootnoteVisitor VisitFootnotes(int footnoteId)
+        protected virtual OpenXmlVisitor VisitFootnotes(OpenXmlVisitor subject, int footnoteId)
         {
-            return new OpenXmlFootnoteVisitor(this, footnoteId);
+            return new OpenXmlVisitor(subject);
         }
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="subject"></param>
         /// <param name="footnoteRelationId"></param>
         /// <returns></returns>
-        [Pure]
-        [NotNull]
-        public OpenXmlFootnoteHyperlinkVisitor VisitFootnoteHyperlinks(int footnoteRelationId)
+        protected virtual OpenXmlVisitor VisitDocumentHyperlinks(OpenXmlVisitor subject, int footnoteRelationId)
         {
-            return new OpenXmlFootnoteHyperlinkVisitor(this, footnoteRelationId);
+            return new OpenXmlVisitor(subject);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="footnoteRelationId"></param>
+        /// <returns></returns>
+        protected virtual OpenXmlVisitor VisitFootnoteHyperlinks(OpenXmlVisitor subject, int footnoteRelationId)
+        {
+            return new OpenXmlVisitor(subject);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="documentRelationId"></param>
+        /// <returns></returns>
+        protected virtual OpenXmlVisitor VisitCharts(OpenXmlVisitor subject, int documentRelationId)
+        {
+            return new OpenXmlVisitor(subject);
         }
     }
 }

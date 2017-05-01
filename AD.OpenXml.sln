@@ -1,9 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AD.OpenXml.Tests", "AD.OpenXml.Tests\AD.OpenXml.Tests.csproj", "{05BAB84C-75DB-41D6-9C56-E1BE7501581A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{16A300C9-1B25-4D68-9F97-05B8CA2766C9} = {16A300C9-1B25-4D68-9F97-05B8CA2766C9}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AD.OpenXml", "AD.OpenXml\AD.OpenXml.csproj", "{16A300C9-1B25-4D68-9F97-05B8CA2766C9}"
 EndProject
