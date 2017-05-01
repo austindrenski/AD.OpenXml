@@ -67,7 +67,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Documents\MergeInto.cs" />
     <Compile Include="Documents\ModifyAreaChart.cs" />
     <Compile Include="Documents\RemoveDuplicateSectionProperties.cs" />
     <Compile Include="Visitors\OpenXmlDocumentVisitor.cs" />
@@ -83,13 +82,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Documents\AddFootnotes.cs" />
-    <Compile Include="Elements\TransferFootnotes.cs" />
     <Compile Include="Html\BodyToHtml.cs" />
     <Compile Include="Html\ConvertBoldRuns.cs" />
     <Compile Include="Html\ConvertFootnoteReferences.cs" />
     <Compile Include="Html\ConvertHeadings.cs" />
     <Compile Include="Html\ConvertItalicRuns.cs" />
-    <Compile Include="ConvertOpenXmlToXml.cs" />
     <Compile Include="Html\ConvertSimpleRuns.cs" />
     <Compile Include="Html\ConvertStyleToClass.cs" />
     <Compile Include="Html\ConvertTableCaptions.cs" />
@@ -122,10 +119,8 @@
     <Compile Include="Elements\RemoveRsidAttributes.cs" />
     <Compile Include="Elements\RemoveRunPropertiesFromParagraphProperties.cs" />
     <Compile Include="Elements\SetTableStyles.cs" />
-    <Compile Include="Elements\TransferChartsInto.cs" />
     <Compile Include="Html\HtmlConverter.cs" />
     <Compile Include="Packaging\EnumerateChartPaths.cs" />
-    <Compile Include="Process508From.cs" />
     <Compile Include="ProcessHtml.cs" />
   </ItemGroup>
   <ItemGroup>
