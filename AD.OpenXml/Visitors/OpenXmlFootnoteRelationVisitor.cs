@@ -12,7 +12,7 @@ namespace AD.OpenXml.Visitors
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public class OpenXmlFootnoteHyperlinkVisitor : OpenXmlVisitor
+    public class OpenXmlFootnoteRelationVisitor : OpenXmlVisitor
     {
         /// <summary>
         /// Active version of 'word/footnotes.xml'.
@@ -30,13 +30,13 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject">The file from which content is copied.</param>
         /// <param name="footnoteRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
-        public OpenXmlFootnoteHyperlinkVisitor(OpenXmlVisitor subject, int footnoteRelationId) : base(subject)
+        public OpenXmlFootnoteRelationVisitor(OpenXmlVisitor subject, int footnoteRelationId) : base(subject)
         {
             (Footnotes, FootnoteRelations) = Execute(subject.Footnotes, subject.FootnoteRelations, footnoteRelationId);
         }
 
         [Pure]
-        private static (XElement Footnotes, XElement FootnoteRelations) Execute([NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, int currentFootnoteRelationId)
+        private static (XElement Footnotes, XElement FootnoteRelations) Execute([NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, int footnoteRelationId)
         {
             if (footnotes is null)
             {
@@ -46,36 +46,28 @@ namespace AD.OpenXml.Visitors
             XElement nextFootnoteRelations =
                 footnoteRelations.RemoveRsidAttributes() ?? new XElement(P + "Relationships");
 
-            nextFootnoteRelations.Elements()
-                                 .Where(x => !x.Attribute("Type")?.Value.Contains("hyperlink") ?? true)
-                                 .Remove();
-
-            XElement nextFootnotes =
-                footnotes.RemoveRsidAttributes() ?? new XElement(W + "footnotes");
-
             var footnoteRelationMapping =
-                nextFootnotes.Descendants(W + "hyperlink")
-                             .Attributes(R + "id")
-                             .Select(x => x.Value.ParseInt() ?? 0)
-                             .OrderByDescending(x => x)
-                             .Select(
-                                 x => new
-                                 {
-                                     oldId = $"rId{x}",
-                                     newId = $"rId{x + currentFootnoteRelationId}",
-                                     newNumericId = x + currentFootnoteRelationId
-                                 })
-                             .ToArray();
+                nextFootnoteRelations.Descendants(P + "Relationship")
+                                     .Attributes("Id")
+                                     .Select(x => x.Value.ParseInt() ?? 0)
+                                     .OrderBy(x => x)
+                                     .Select(
+                                         (x, i) => new
+                                         {
+                                             oldId = $"rId{x}",
+                                             newId = $"rId{footnoteRelationId + i}"
+                                         })
+                                     .ToArray();
 
             XElement modifiedFootnotes = footnotes.Clone();
 
             foreach (var map in footnoteRelationMapping)
             {
                 modifiedFootnotes =
-                    modifiedFootnotes.ChangeXAttributeValues(W + "hyperlink", R + "id", map.oldId, map.newId);
+                    modifiedFootnotes.ChangeXAttributeValues(R + "id", map.oldId, map.newId);
 
                 nextFootnoteRelations =
-                    nextFootnoteRelations.ChangeXAttributeValues(P + "Relationship", "Id", map.oldId, map.newId);
+                    nextFootnoteRelations.ChangeXAttributeValues("Id", map.oldId, map.newId);
             }
             
             return (modifiedFootnotes, nextFootnoteRelations);

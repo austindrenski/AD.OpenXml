@@ -124,14 +124,14 @@ namespace AD.OpenXml.Visitors
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override OpenXmlVisitor VisitDocumentHyperlinks(OpenXmlVisitor subject, int documentRelationId)
+        protected override OpenXmlVisitor VisitDocumentRelations(OpenXmlVisitor subject, int documentRelationId)
         {
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlDocumentHyperlinkVisitor(subject, documentRelationId);
+            return new OpenXmlDocumentRelationVisitor(subject, documentRelationId);
         }
 
         /// <summary>
@@ -148,35 +148,14 @@ namespace AD.OpenXml.Visitors
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override OpenXmlVisitor VisitFootnoteHyperlinks(OpenXmlVisitor subject, int footnoteRelationId)
+        protected override OpenXmlVisitor VisitFootnoteRelations(OpenXmlVisitor subject, int footnoteRelationId)
         {
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlFootnoteHyperlinkVisitor(subject, footnoteRelationId);
-        }
-
-        /// <summary>
-        /// Visit the <see cref="OpenXmlVisitor.Charts"/> and <see cref="OpenXmlVisitor.DocumentRelations"/> of the subject to modify charts in the document.
-        /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
-        /// </param>
-        /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        protected override OpenXmlVisitor VisitCharts(OpenXmlVisitor subject)
-        {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            return new OpenXmlChartVisitor(subject);
+            return new OpenXmlFootnoteRelationVisitor(subject, footnoteRelationId);
         }
     }
 }

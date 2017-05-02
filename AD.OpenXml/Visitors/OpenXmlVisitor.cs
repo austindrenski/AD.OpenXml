@@ -106,32 +106,32 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         /// Returns the last document relationship identifier in use by the container.
         /// </summary>
-        public int DocumentRelationId =>
+        public int NextDocumentRelationId =>
             DocumentRelations.Elements(P + "Relationship")
                              .Attributes("Id")
                              .Select(x => x.Value.ParseInt() ?? 0)
                              .DefaultIfEmpty(0)
-                             .Max();
+                             .Max() + 1;
 
         /// <summary>
         /// Returns the last footnote identifier currently in use by the container.
         /// </summary>
-        public int FootnoteId =>
+        public int NextFootnoteId =>
             Footnotes.Elements(W + "footnote")
                      .Attributes(W + "id")
                      .Select(x => x.Value.ParseInt() ?? 0)
                      .DefaultIfEmpty(0)
-                     .Max();
+                     .Max() + 1;
 
         /// <summary>
         /// Returns the last footnote relationship identifier currently in use by the container.
         /// </summary>
-        public int FootnoteRelationId =>
+        public int NextFootnoteRelationId =>
             FootnoteRelations.Elements(P + "Relationship")
                              .Attributes("Id")
                              .Select(x => x.Value.ParseInt() ?? 0)
                              .DefaultIfEmpty(0)
-                             .Max();
+                             .Max() + 1;
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
@@ -277,11 +277,10 @@ namespace AD.OpenXml.Visitors
 
             OpenXmlVisitor subject = new OpenXmlVisitor(file);
             OpenXmlVisitor documentVisitor = VisitDocument(subject);
-            OpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, FootnoteId);
-            OpenXmlVisitor footnoteHyperlinkVisitor = VisitFootnoteHyperlinks(footnoteVisitor, FootnoteRelationId);
-            OpenXmlVisitor documentHyperlinkVisitor = VisitDocumentHyperlinks(footnoteHyperlinkVisitor, DocumentRelationId);
-            OpenXmlVisitor chartsVisitor = VisitCharts(documentHyperlinkVisitor);
-            
+            OpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId);
+            OpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(footnoteVisitor, NextFootnoteRelationId);
+            OpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteRelationVisitor, NextDocumentRelationId);
+
             XElement document =
                 new XElement(
                     Document.Name,
@@ -289,10 +288,7 @@ namespace AD.OpenXml.Visitors
                     new XElement(
                         Document.Elements().First().Name,
                         Document.Elements().First().Elements(),
-                        chartsVisitor.Document
-                                     .Elements()
-                                     .First()
-                                     .Elements()));
+                        documentRelationVisitor.Document.Elements().First().Elements()));
 
             XElement footnotes =
                 new XElement(
@@ -300,7 +296,7 @@ namespace AD.OpenXml.Visitors
                     Footnotes.Attributes(),
                     Footnotes.Elements()
                              .Union(
-                                 chartsVisitor.Footnotes.Elements(),
+                                 documentRelationVisitor.Footnotes.Elements(),
                                  XNode.EqualityComparer));
 
             XElement footnoteRelations =
@@ -309,7 +305,7 @@ namespace AD.OpenXml.Visitors
                     FootnoteRelations.Attributes(),
                     FootnoteRelations.Elements()
                                      .Union(
-                                         chartsVisitor.FootnoteRelations.Elements(),
+                                         documentRelationVisitor.FootnoteRelations.Elements(),
                                          XNode.EqualityComparer));
 
             XElement documentRelations =
@@ -318,7 +314,7 @@ namespace AD.OpenXml.Visitors
                     DocumentRelations.Attributes(),
                     DocumentRelations.Elements()
                                      .Union(
-                                         chartsVisitor.DocumentRelations.Elements(),
+                                         documentRelationVisitor.DocumentRelations.Elements(),
                                          XNode.EqualityComparer));
 
             XElement contentTypes =
@@ -327,12 +323,12 @@ namespace AD.OpenXml.Visitors
                     ContentTypes.Attributes(),
                     ContentTypes.Elements()
                                 .Union(
-                                    chartsVisitor.ContentTypes.Elements(),
+                                    documentRelationVisitor.ContentTypes.Elements(),
                                     XNode.EqualityComparer));
 
             IEnumerable<ChartInformation> charts =
                 Charts.Union(
-                    chartsVisitor.Charts,
+                    documentRelationVisitor.Charts,
                     ChartInformation.Comparer);
 
             return
@@ -408,7 +404,7 @@ namespace AD.OpenXml.Visitors
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual OpenXmlVisitor VisitDocumentHyperlinks([NotNull] OpenXmlVisitor subject, int documentRelationId)
+        protected virtual OpenXmlVisitor VisitDocumentRelations([NotNull] OpenXmlVisitor subject, int documentRelationId)
         {
             if (subject is null)
             {
@@ -433,29 +429,7 @@ namespace AD.OpenXml.Visitors
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual OpenXmlVisitor VisitFootnoteHyperlinks([NotNull] OpenXmlVisitor subject, int footnoteRelationId)
-        {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            return new OpenXmlVisitor(subject);
-        }
-
-        /// <summary>
-        /// Visit the <see cref="Charts"/> and <see cref="DocumentRelations"/> of the subject to modify charts in the document.
-        /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
-        /// </param>
-        /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [NotNull]
-        protected virtual OpenXmlVisitor VisitCharts([NotNull] OpenXmlVisitor subject)
+        protected virtual OpenXmlVisitor VisitFootnoteRelations([NotNull] OpenXmlVisitor subject, int footnoteRelationId)
         {
             if (subject is null)
             {

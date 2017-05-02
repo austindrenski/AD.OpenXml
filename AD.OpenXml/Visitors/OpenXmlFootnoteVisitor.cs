@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
+using AD.IO;
 using AD.OpenXml.Elements;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -26,9 +27,15 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
-        /// <param name="subject">The file from which content is copied.</param>
-        /// <param name="footnoteId">The last footnote number currently in use by the container.</param>
-        /// <returns>The updated document node of the source file.</returns>
+        /// <param name="subject">
+        /// The file from which content is copied.
+        /// </param>
+        /// <param name="footnoteId">
+        /// The last footnote number currently in use by the container.
+        /// </param>
+        /// <returns>
+        /// The updated document node of the source file.
+        /// </returns>
         public OpenXmlFootnoteVisitor(OpenXmlVisitor subject, int footnoteId) : base(subject)
         {
             (Document, Footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId);
@@ -58,36 +65,38 @@ namespace AD.OpenXml.Visitors
                            .Attributes()
                            .Remove();
 
+            sourceFootnotes.Descendants(W + "bookmarkStart")
+                           .Remove();
+
+            sourceFootnotes.Descendants(W + "bookmarkEnd")
+                           .Remove();
+
             var footnoteMapping =
                 sourceFootnotes.Elements(W + "footnote")
                                .Attributes(W + "id")
-                               .Select(x => x.Value)
-                               .Select(int.Parse)
+                               .Select(x => x.Value.ParseInt())
                                .Where(x => x > 0)
                                .OrderBy(x => x)
                                .Select(
                                    (x, i) => new
                                    {
                                        oldId = $"{x}",
-                                       newId = $"{footnoteId + i}",
-                                       newNumericId = footnoteId + i
+                                       newId = $"{footnoteId + i}"
                                    })
                                .ToArray();
 
             XElement modifiedDocument = document.Clone();
 
-            XElement modifiedFootnotes = sourceFootnotes.Clone();
-
             foreach (var map in footnoteMapping)
             {
                 modifiedDocument =
-                    modifiedDocument.ChangeXAttributeValues(W + "footnoteReference", W + "Id", map.oldId, map.newId);
+                    modifiedDocument.ChangeXAttributeValues(W + "footnoteReference", W + "id", map.oldId, map.newId);
 
-                modifiedFootnotes =
-                    modifiedFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
+                sourceFootnotes =
+                    sourceFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
             }
 
-            return (modifiedDocument, modifiedFootnotes);
+            return (modifiedDocument, sourceFootnotes);
         }
     }
 }

@@ -70,10 +70,9 @@
     <Compile Include="Documents\ModifyAreaChart.cs" />
     <Compile Include="Documents\RemoveDuplicateSectionProperties.cs" />
     <Compile Include="Visitors\ChartInformation.cs" />
-    <Compile Include="Visitors\OpenXmlChartVisitor.cs" />
-    <Compile Include="Visitors\OpenXmlDocumentHyperlinkVisitor.cs" />
+    <Compile Include="Visitors\OpenXmlDocumentRelationVisitor.cs" />
     <Compile Include="Visitors\OpenXmlDocumentVisitor.cs" />
-    <Compile Include="Visitors\OpenXmlFootnoteHyperlinkVisitor.cs" />
+    <Compile Include="Visitors\OpenXmlFootnoteRelationVisitor.cs" />
     <Compile Include="Visitors\OpenXmlFootnoteVisitor.cs" />
     <Compile Include="Visitors\OpenXmlVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
