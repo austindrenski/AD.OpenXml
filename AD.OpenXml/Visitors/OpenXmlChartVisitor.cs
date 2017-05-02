@@ -36,17 +36,12 @@ namespace AD.OpenXml.Visitors
         public override IEnumerable<ChartInformation> Charts { get; }
 
         /// <summary>
-        /// Returns the last document relation identifier in use by the container.
-        /// </summary>
-        public override int DocumentRelationId { get; }
-
-        /// <summary>
         /// Marshal footnotes from the source document into the container.
         /// </summary>
         /// <returns>The updated document node of the source file.</returns>
         public OpenXmlChartVisitor(OpenXmlVisitor subject) : base(subject)
         {
-            (Document, DocumentRelations, ContentTypes, Charts, DocumentRelationId)
+            (Document, DocumentRelations, ContentTypes, Charts)
                 = Execute(subject.File, subject.Document, subject.DocumentRelations, subject.ContentTypes, subject.Charts, subject.DocumentRelationId);
         }
 
@@ -61,7 +56,7 @@ namespace AD.OpenXml.Visitors
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
-        private static (XElement Document, XElement DocumentRelations, XElement ContentTypes, IEnumerable<ChartInformation> Charts, int DocumentRelationId)
+        private static (XElement Document, XElement DocumentRelations, XElement ContentTypes, IEnumerable<ChartInformation> Charts)
             Execute(DocxFilePath file, XElement document, XElement documentRelations, XElement contentTypes, IEnumerable<ChartInformation> charts, int documentRelationId)
         {
             if (file is null)
@@ -147,12 +142,7 @@ namespace AD.OpenXml.Visitors
                 chartMapping.Select(x => x.ChartInformation)
                             .ToImmutableArray();
 
-            int updatedDocumentRelationId =
-                chartMapping.Any()
-                    ? chartMapping.Max(x => x.x.NewNumericId)
-                    : documentRelationId;
-
-            return (modifiedSourceContent, modifiedDocumentRelations, modifiedContentTypes, modifiedCharts, updatedDocumentRelationId);
+            return (modifiedSourceContent, modifiedDocumentRelations, modifiedContentTypes, modifiedCharts);
         }
     }
 }

@@ -24,11 +24,6 @@ namespace AD.OpenXml.Visitors
         public override XElement Footnotes { get; }
         
         /// <summary>
-        /// Returns the last footnote identifier currently in use by the container.
-        /// </summary>
-        public override int FootnoteId { get; }
-
-        /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
@@ -36,11 +31,11 @@ namespace AD.OpenXml.Visitors
         /// <returns>The updated document node of the source file.</returns>
         public OpenXmlFootnoteVisitor(OpenXmlVisitor subject, int footnoteId) : base(subject)
         {
-            (Document, Footnotes, FootnoteId) = Execute(subject.Footnotes, subject.Document, footnoteId);
+            (Document, Footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId);
         }
 
         [Pure]
-        private static (XElement Document, XElement Footnotes, int FootnoteId) Execute(XElement footnotes, XElement document, int footnoteId)
+        private static (XElement Document, XElement Footnotes) Execute(XElement footnotes, XElement document, int footnoteId)
         {
             if (footnotes is null)
             {
@@ -56,7 +51,7 @@ namespace AD.OpenXml.Visitors
 
             if (sourceFootnotes is null)
             {
-                return (document, new XElement(W + "footnotes"), footnoteId);
+                return (document, new XElement(W + "footnotes"));
             }
 
             sourceFootnotes.Descendants(W + "p")
@@ -69,13 +64,13 @@ namespace AD.OpenXml.Visitors
                                .Select(x => x.Value)
                                .Select(int.Parse)
                                .Where(x => x > 0)
-                               .OrderByDescending(x => x)
+                               .OrderBy(x => x)
                                .Select(
-                                   x => new
+                                   (x, i) => new
                                    {
                                        oldId = $"{x}",
-                                       newId = $"{footnoteId + x}",
-                                       newNumericId = footnoteId + x
+                                       newId = $"{footnoteId + i}",
+                                       newNumericId = footnoteId + i
                                    })
                                .ToArray();
 
@@ -92,9 +87,7 @@ namespace AD.OpenXml.Visitors
                     modifiedFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
             }
 
-            int newCurrentId = footnoteMapping.Any() ? footnoteMapping.Max(x => x.newNumericId) : footnoteId;
-
-            return (modifiedDocument, modifiedFootnotes, newCurrentId);
+            return (modifiedDocument, modifiedFootnotes);
         }
     }
 }

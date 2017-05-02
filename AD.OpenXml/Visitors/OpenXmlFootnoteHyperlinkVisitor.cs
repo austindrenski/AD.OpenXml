@@ -25,11 +25,6 @@ namespace AD.OpenXml.Visitors
         public override XElement FootnoteRelations { get; }
 
         /// <summary>
-        /// Returns the last footnote hyperlink identifier currently in use by the container.
-        /// </summary>
-        public override int FootnoteRelationId { get; }
-
-        /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
@@ -37,11 +32,11 @@ namespace AD.OpenXml.Visitors
         /// <returns>The updated document node of the source file.</returns>
         public OpenXmlFootnoteHyperlinkVisitor(OpenXmlVisitor subject, int footnoteRelationId) : base(subject)
         {
-            (Footnotes, FootnoteRelations, FootnoteRelationId) = Execute(subject.Footnotes, subject.FootnoteRelations, footnoteRelationId);
+            (Footnotes, FootnoteRelations) = Execute(subject.Footnotes, subject.FootnoteRelations, footnoteRelationId);
         }
 
         [Pure]
-        private static (XElement Footnotes, XElement FootnoteRelations, int FootnoteRelationId) Execute([NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, int currentFootnoteRelationId)
+        private static (XElement Footnotes, XElement FootnoteRelations) Execute([NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, int currentFootnoteRelationId)
         {
             if (footnotes is null)
             {
@@ -82,13 +77,8 @@ namespace AD.OpenXml.Visitors
                 nextFootnoteRelations =
                     nextFootnoteRelations.ChangeXAttributeValues(P + "Relationship", "Id", map.oldId, map.newId);
             }
-
-            int updatedFootnoteRelationId =
-                footnoteRelationMapping.Any()
-                    ? footnoteRelationMapping.Max(x => x.newNumericId)
-                    : currentFootnoteRelationId;
-
-            return (modifiedFootnotes, nextFootnoteRelations, updatedFootnoteRelationId);
+            
+            return (modifiedFootnotes, nextFootnoteRelations);
         }
     }
 }

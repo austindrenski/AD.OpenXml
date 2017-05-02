@@ -24,11 +24,6 @@ namespace AD.OpenXml.Visitors
         public override XElement DocumentRelations { get; }
         
         /// <summary>
-        /// Returns the last document relation identifier in use by the container.
-        /// </summary>
-        public override int DocumentRelationId { get; }
-
-        /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
@@ -36,7 +31,7 @@ namespace AD.OpenXml.Visitors
         /// <returns>The updated document node of the source file.</returns>
         public OpenXmlDocumentHyperlinkVisitor(OpenXmlVisitor subject, int documentRelationId) : base(subject)
         {
-            (Document, DocumentRelations, DocumentRelationId) = Execute(subject.Document, subject.DocumentRelations, documentRelationId);
+            (Document, DocumentRelations) = Execute(subject.Document, subject.DocumentRelations, documentRelationId);
         }
 
         /// <summary>
@@ -47,7 +42,7 @@ namespace AD.OpenXml.Visitors
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
-        private static (XElement Document, XElement DocumentRelations, int DocumentRelationId) Execute(XElement document, XElement documentRelations, int documentRelationId)
+        private static (XElement Document, XElement DocumentRelations) Execute(XElement document, XElement documentRelations, int documentRelationId)
         {
             XElement nextDocumentRelations =
                 documentRelations.RemoveRsidAttributes() ?? new XElement(P + "Relationships");
@@ -79,13 +74,8 @@ namespace AD.OpenXml.Visitors
                 nextDocumentRelations =
                     nextDocumentRelations.ChangeXAttributeValues(P + "Relationship", "Id", map.oldId, map.newId);
             }
-
-            int updatedFootnoteRelationId =
-                documentRelationMapping.Any()
-                    ? documentRelationMapping.Max(x => x.newNumericId)
-                    : documentRelationId;
-
-            return (modifiedDocument, nextDocumentRelations, updatedFootnoteRelationId);
+            
+            return (modifiedDocument, nextDocumentRelations);
         }
     }
 }

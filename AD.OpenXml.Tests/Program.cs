@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using AD.IO;
 using AD.OpenXml.Documents;
@@ -29,10 +30,12 @@ namespace AD.OpenXml.Tests
             ProcessChapter(version, $"{workingDirectory}\\ch6");
             ProcessChapter(version, $"{workingDirectory}\\ch7");
 
+            #region Report from original components
+
             // Copy new files into report folder
             foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7" })
             {
-                foreach (string file in Directory.GetFiles($"{workingDirectory}\\{chapter}", "*.docx", SearchOption.TopDirectoryOnly).Where(x => !x.Contains("~")))
+                foreach (string file in Directory.GetFiles($"{workingDirectory}\\{chapter}", "*.docx", SearchOption.TopDirectoryOnly))
                 {
                     File.Copy(file, $"{workingDirectory}\\_report\\{Path.GetFileName(file)}", true);
                 }
@@ -46,6 +49,60 @@ namespace AD.OpenXml.Tests
             {
                 File.Delete(section);
             }
+
+            #endregion
+
+            //#region Report from compiled chapters
+
+            //            // Copy new files into report folder
+            //            foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7" })
+            //            {
+            //                File.Copy(
+            //                    Directory.GetFiles($"{workingDirectory}\\{chapter}\\_output", "*.docx", SearchOption.TopDirectoryOnly)
+            //                             .OrderByDescending(OrderPredicate)
+            //                             .First(),
+            //                    $"{workingDirectory}\\_report\\{chapter.ParseInt()} - {Path.GetFileName(chapter)}.docx",
+            //                    true);
+            //            }
+
+            //            // Process report
+            //            ProcessChapter(version, $"{workingDirectory}\\_report");
+
+            //            // Delete old files in report folder
+            //            foreach (string section in Directory.GetFiles($"{workingDirectory}\\_report", "*.docx", SearchOption.TopDirectoryOnly))
+            //            {
+            //                File.Delete(section);
+            //            }
+
+            //            #endregion
+        }
+
+        private static bool FilePredicate(string path)
+        {
+            if (path is null)
+            {
+                return false;
+            }
+            if (path.Contains('~'))
+            {
+                Console.WriteLine($"{DateTime.Now}: Skipping file '{path}'; unexpected character in path.");
+                return false;
+            }
+            // ReSharper disable once InvertIf
+            if (!char.IsNumber(Path.GetFileName(path).FirstOrDefault()))
+            {
+                Console.WriteLine($"{DateTime.Now}: Skipping file '{path}'; file name must start with number.");
+                return false;
+            }
+            return true;
+        }
+
+        private static double? OrderPredicate(string path)
+        {
+            return
+                Path.GetFileNameWithoutExtension(path ?? string.Empty)
+                    .TakeWhile(y => char.IsNumber(y) || char.IsPunctuation(y))
+                    .ParseDouble();
         }
 
         private static void ProcessChapter(string version, string workingDirectory)
@@ -56,59 +113,53 @@ namespace AD.OpenXml.Tests
             // Locate the component files
             DocxFilePath[] files =
                 Directory.GetFiles(workingDirectory, "*.docx", SearchOption.TopDirectoryOnly)
-                         .Where(
-                             x => !x.Contains('~'))
-                         .OrderBy(
-                             x =>
-                                 Path.GetFileNameWithoutExtension(x)
-                                     .TakeWhile(y => char.IsNumber(y) || char.IsPunctuation(y))
-                                     .Aggregate(default(string), (current, next) => current + next)
-                                     .ParseDouble())
+                         .Where(FilePredicate)
+                         .OrderBy(OrderPredicate)
                          .Select(
                              x => (DocxFilePath) x)
                          .ToArray();
 
-            // Create result file
-            DocxFilePath result = DocxFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.docx", true);
+            // Create output file
+            DocxFilePath output = DocxFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.docx", true);
 
             // Add footnotes file
-            result.AddFootnotes();
+            output.AddFootnotes();
 
             // Create a ReportVisitor based on the result path and visit the component doucments.
-            OpenXmlVisitor visitor = new ReportVisitor(result).Visit(files);
+            OpenXmlVisitor visitor = new ReportVisitor(output).Visit(files);
 
             // Save the visitor results to result path.
-            visitor.Save(result);
+            visitor.Save(output);
 
             // Create custom styles
-            result.AddStyles();
+            output.AddStyles();
 
             // Add headers
-            result.AddHeaders("The Year in Trade 2016");
+            output.AddHeaders("The Year in Trade 2016");
 
             // Add footers
-            result.AddFooters();
+            output.AddFooters();
 
             // Set all chart objects inline
-            result.PositionChartsInline();
+            output.PositionChartsInline();
 
             // Set the inner positions of chart objects
-            result.PositionChartsInner();
+            output.PositionChartsInner();
 
             // Set the outer positions of chart objects
-            result.PositionChartsOuter();
+            output.PositionChartsOuter();
 
             // Set the style of bar chart objects
-            result.ModifyBarChartStyles();
+            output.ModifyBarChartStyles();
 
             // Set the style of line chart objects
-            result.ModifyLineChartStyles();
+            output.ModifyLineChartStyles();
             
             // Set the style of area chart objects
-            result.ModifyAreaChartStyles();
+            output.ModifyAreaChartStyles();
 
             // Remove duplicate section properties
-            result.RemoveDuplicateSectionProperties();
+            output.RemoveDuplicateSectionProperties();
 
             // Write document.xml to XML file
             //XmlFilePath xml = XmlFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.xml");
