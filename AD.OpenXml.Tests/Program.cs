@@ -20,15 +20,15 @@ namespace AD.OpenXml.Tests
             const string version = "1_5";
 
             // Process chapters
-            //ProcessChapter(version, $"{workingDirectory}\\ch0");
-            //ProcessChapter(version, $"{workingDirectory}\\ch1");
-            //ProcessChapter(version, $"{workingDirectory}\\ch2");
-            //ProcessChapter(version, $"{workingDirectory}\\ch3");
-            //ProcessChapter(version, $"{workingDirectory}\\ch4");
-            //ProcessChapter(version, $"{workingDirectory}\\ch5");
-            //ProcessChapter(version, $"{workingDirectory}\\ch6");
-            //ProcessChapter(version, $"{workingDirectory}\\ch7");
-            
+            ProcessChapter(version, $"{workingDirectory}\\ch0");
+            ProcessChapter(version, $"{workingDirectory}\\ch1");
+            ProcessChapter(version, $"{workingDirectory}\\ch2");
+            ProcessChapter(version, $"{workingDirectory}\\ch3");
+            ProcessChapter(version, $"{workingDirectory}\\ch4");
+            ProcessChapter(version, $"{workingDirectory}\\ch5");
+            ProcessChapter(version, $"{workingDirectory}\\ch6");
+            ProcessChapter(version, $"{workingDirectory}\\ch7");
+
             // Copy new files into report folder
             foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7" })
             {
@@ -53,12 +53,7 @@ namespace AD.OpenXml.Tests
             // Create output directory
             Directory.CreateDirectory($"{workingDirectory}\\_output");
 
-            // Create result file
-            DocxFilePath result = DocxFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.docx", true);
-
-            // Add footnotes file
-            result.AddFootnotes();
-
+            // Locate the component files
             DocxFilePath[] files =
                 Directory.GetFiles(workingDirectory, "*.docx", SearchOption.TopDirectoryOnly)
                          .Where(
@@ -73,14 +68,17 @@ namespace AD.OpenXml.Tests
                              x => (DocxFilePath) x)
                          .ToArray();
 
-            // Create container to encapsulate volatile operations
-            OpenXmlVisitor container = new ReportVisitor(result);
+            // Create result file
+            DocxFilePath result = DocxFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.docx", true);
 
-            // Merge files into container
-            OpenXmlVisitor mergedContainer = container.Visit(files);
+            // Add footnotes file
+            result.AddFootnotes();
 
-            // Save container to result path
-            mergedContainer.Save(result);
+            // Create a ReportVisitor based on the result path and visit the component doucments.
+            OpenXmlVisitor visitor = new ReportVisitor(result).Visit(files);
+
+            // Save the visitor results to result path.
+            visitor.Save(result);
 
             // Create custom styles
             result.AddStyles();

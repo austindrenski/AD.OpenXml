@@ -11,8 +11,23 @@ using JetBrains.Annotations;
 namespace AD.OpenXml.Visitors
 {
     /// <summary>
-    /// This class serves as a container to encapsulate XML components of a Word document.
+    /// Represents a visitor or rewriter for OpenXML documents.
     /// </summary>
+    /// <remarks>
+    /// This class is modeled after the <see cref="System.Linq.Expressions.ExpressionVisitor"/>. 
+    /// 
+    /// The goal is to encapsulate OpenXML manipulations within immutable objects. Every visit operation should be a pure function.
+    /// Access to <see cref="XElement"/> objects should be done with care, ensuring that objects are cloned prior to any in-place mainpulations.
+    /// 
+    /// Implementers should derive two types of classes from <see cref="OpenXmlVisitor"/>: a visitor class, and one or more visitation classes.
+    /// 
+    /// The derived visitor class should provide:
+    ///   1) A public constructor that implements <see cref="OpenXmlVisitor(DocxFilePath)"/>.
+    ///   2) A private constructor that implements <see cref="OpenXmlVisitor(OpenXmlVisitor)"/>.
+    ///   3) An override to the <see cref="Visit(DocxFilePath)"/> method that wraps the base implementation in the private constructor of the derived class.
+    ///   4) An override to the <see cref="Visit(IEnumerable{DocxFilePath})"/> method that wraps the base implementation in the private constructor of the derived class.
+    ///   5) An override for each desired visitor methods. The default implementations return a new deep copy of the submitted vistor.
+    /// </remarks>
     [PublicAPI]
     public class OpenXmlVisitor
     {
@@ -89,7 +104,7 @@ namespace AD.OpenXml.Visitors
         public virtual IEnumerable<ChartInformation> Charts { get; }
 
         /// <summary>
-        /// Returns the last document relation identifier in use by the container.
+        /// Returns the last document relationship identifier in use by the container.
         /// </summary>
         public virtual int DocumentRelationId { get; }
 
@@ -99,14 +114,16 @@ namespace AD.OpenXml.Visitors
         public virtual int FootnoteId { get; }
 
         /// <summary>
-        /// Returns the last footnote hyperlink identifier currently in use by the container.
+        /// Returns the last footnote relationship identifier currently in use by the container.
         /// </summary>
         public virtual int FootnoteRelationId { get; }
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
         /// </summary>
-        /// <param name="result">The file to which changes can be saved.</param>
+        /// <param name="result">
+        /// The file to which changes can be saved.
+        /// </param>
         protected OpenXmlVisitor([NotNull] DocxFilePath result)
         {
             File = result;
@@ -131,37 +148,39 @@ namespace AD.OpenXml.Visitors
 
             Charts =
                 documentRelations.Elements()
-                                  .Select(x => x.Attribute("Target")?.Value)
-                                  .Where(x => x?.StartsWith("charts/") ?? false)
-                                  .Select(x => new ChartInformation(x, result.ReadAsXml($"word/{x}")))
-                                  .ToImmutableList();
+                                 .Select(x => x.Attribute("Target")?.Value)
+                                 .Where(x => x?.StartsWith("charts/") ?? false)
+                                 .Select(x => new ChartInformation(x, result.ReadAsXml($"word/{x}")))
+                                 .ToImmutableList();
 
             DocumentRelationId =
                 documentRelations.Elements(P + "Relationship")
-                                  .Attributes("Id")
-                                  .Select(x => x.Value.ParseInt() ?? 0)
-                                  .DefaultIfEmpty(0)
-                                  .Max();
+                                 .Attributes("Id")
+                                 .Select(x => x.Value.ParseInt() ?? 0)
+                                 .DefaultIfEmpty(0)
+                                 .Max();
 
             FootnoteId =
                 footnotes.Elements(W + "footnote")
-                          .Attributes(W + "id")
-                          .Select(x => x.Value.ParseInt() ?? 0)
-                          .DefaultIfEmpty(0)
-                          .Max();
+                         .Attributes(W + "id")
+                         .Select(x => x.Value.ParseInt() ?? 0)
+                         .DefaultIfEmpty(0)
+                         .Max();
 
             FootnoteRelationId =
                 footnoteRelations.Elements(P + "Relationship")
-                                  .Attributes("Id")
-                                  .Select(x => x.Value.ParseInt() ?? 0)
-                                  .DefaultIfEmpty(0)
-                                  .Max();
+                                 .Attributes("Id")
+                                 .Select(x => x.Value.ParseInt() ?? 0)
+                                 .DefaultIfEmpty(0)
+                                 .Max();
         }
 
         /// <summary>
-        /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
+        /// Initializes a new <see cref="OpenXmlVisitor"/> from an existing <see cref="OpenXmlVisitor"/>.
         /// </summary>
-        /// <param name="subject"></param>
+        /// <param name="subject">
+        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// </param>
         protected OpenXmlVisitor([NotNull] OpenXmlVisitor subject)
         {
             File = subject.File;
@@ -177,19 +196,40 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
+        /// Initializes a new <see cref="OpenXmlVisitor"/> from the supplied components. 
+        /// This constructor should only be called within the base class.
         /// </summary>
-        /// <param name="file"></param>
-        /// <param name="document"></param>
-        /// <param name="documentRelations"></param>
-        /// <param name="contentTypes"></param>
-        /// <param name="footnotes"></param>
-        /// <param name="foonoteRelations"></param>
-        /// <param name="charts"></param>
-        /// <param name="footnoteId"></param>
-        /// <param name="footnoteRelationId"></param>
-        /// <param name="documentRelationId"></param>
-        private OpenXmlVisitor([NotNull] DocxFilePath file, [NotNull] XElement document, XElement documentRelations, XElement contentTypes, XElement footnotes, XElement foonoteRelations, IEnumerable<ChartInformation> charts, int footnoteId, int footnoteRelationId, int documentRelationId)
+        /// <param name="file">
+        /// 
+        /// </param>
+        /// <param name="document">
+        /// 
+        /// </param>
+        /// <param name="documentRelations">
+        /// 
+        /// </param>
+        /// <param name="contentTypes">
+        /// 
+        /// </param>
+        /// <param name="footnotes">
+        /// 
+        /// </param>
+        /// <param name="foonoteRelations">
+        /// 
+        /// </param>
+        /// <param name="charts">
+        /// 
+        /// </param>
+        /// <param name="footnoteId">
+        /// 
+        /// </param>
+        /// <param name="footnoteRelationId">
+        /// 
+        /// </param>
+        /// <param name="documentRelationId">
+        /// 
+        /// </param>
+        private OpenXmlVisitor([NotNull] DocxFilePath file, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement contentTypes, [NotNull] XElement footnotes, [NotNull] XElement foonoteRelations, [NotNull] IEnumerable<ChartInformation> charts, int footnoteId, int footnoteRelationId, int documentRelationId)
         {
             File = file;
             Document = document.Clone();
@@ -203,9 +243,11 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Saves any modifications to <paramref name="resultPath"/>. This operation will overwrite any existing content for the modified parts.
+        /// Saves the current visitor to the <see cref="DocxFilePath"/>.
         /// </summary>
-        /// <param name="resultPath">The path to which modified parts are written.</param>
+        /// <param name="resultPath">
+        /// The path to which modified parts are written.
+        /// </param>
         public void Save([NotNull] DocxFilePath resultPath)
         {
             Document.WriteInto(resultPath, "word/document.xml");
@@ -220,12 +262,15 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Merges the source document into the result document.
+        /// Visit and join the component documents into the <see cref="OpenXmlVisitor"/>.
         /// </summary>
-        /// <param name="files">The files from which content is copied.</param>
+        /// <param name="files">
+        /// The files to visit.
+        /// </param>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        public OpenXmlVisitor Visit([NotNull][ItemNotNull] IEnumerable<DocxFilePath> files)
+        public virtual OpenXmlVisitor Visit([NotNull][ItemNotNull] IEnumerable<DocxFilePath> files)
         {
             if (files is null)
             {
@@ -235,18 +280,17 @@ namespace AD.OpenXml.Visitors
             return files.Aggregate(this, (current, next) => current.Visit(next));
         }
 
-        public virtual OpenXmlVisitor Visit([NotNull] DocxFilePath file)
-        {
-            
-        }
 
         /// <summary>
-        /// Merges the source document into the result document.
+        /// Visit and join the component document into the <see cref="OpenXmlVisitor"/>.
         /// </summary>
-        /// <param name="file">The file from which content is copied.</param>
+        /// <param name="file">
+        /// The files to visit.
+        /// </param>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        public OpenXmlVisitor Visit([NotNull] DocxFilePath file)
+        public virtual OpenXmlVisitor Visit([NotNull] DocxFilePath file)
         {
             if (file is null)
             {
@@ -254,17 +298,11 @@ namespace AD.OpenXml.Visitors
             }
 
             OpenXmlVisitor subject = new OpenXmlVisitor(file);
-
-            OpenXmlDocumentVisitor a = new OpenXmlDocumentVisitor(subject);
-            OpenXmlVisitor b = new OpenXmlDocumentVisitor(subject);
-            OpenXmlDocumentVisitor c = VisitDocument(subject) as OpenXmlDocumentVisitor;
-            OpenXmlVisitor d = VisitDocument(subject);
-
-            OpenXmlVisitor documentVisitor = VisitDocument(subject);// new OpenXmlDocumentVisitor(subject);
-            OpenXmlVisitor footnoteVisitor = new OpenXmlFootnoteVisitor(documentVisitor, FootnoteId);
-            OpenXmlVisitor footnoteHyperlinkVisitor = new OpenXmlFootnoteHyperlinkVisitor(footnoteVisitor, FootnoteRelationId);
-            OpenXmlVisitor documentHyperlinkVisitor = new OpenXmlDocumentHyperlinkVisitor(footnoteHyperlinkVisitor, DocumentRelationId);
-            OpenXmlVisitor chartsVisitor = new OpenXmlChartVisitor(documentHyperlinkVisitor);
+            OpenXmlVisitor documentVisitor = VisitDocument(subject);
+            OpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, FootnoteId);
+            OpenXmlVisitor footnoteHyperlinkVisitor = VisitFootnoteHyperlinks(footnoteVisitor, FootnoteRelationId);
+            OpenXmlVisitor documentHyperlinkVisitor = VisitDocumentHyperlinks(footnoteHyperlinkVisitor, DocumentRelationId);
+            OpenXmlVisitor chartsVisitor = VisitCharts(documentHyperlinkVisitor);
             
             XElement document =
                 new XElement(
@@ -273,7 +311,10 @@ namespace AD.OpenXml.Visitors
                     new XElement(
                         Document.Elements().First().Name,
                         Document.Elements().First().Elements(),
-                        chartsVisitor.Document.Elements().First().Elements()));
+                        chartsVisitor.Document
+                                     .Elements()
+                                     .First()
+                                     .Elements()));
 
             XElement footnotes =
                 new XElement(
@@ -340,55 +381,121 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// 
+        /// Visit the <see cref="Document"/> of the subject.
         /// </summary>
-        /// <param name="subject"></param>
-        /// <returns></returns>
-        protected virtual OpenXmlVisitor VisitDocument(OpenXmlVisitor subject)
+        /// <param name="subject">
+        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="OpenXmlVisitor"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [NotNull]
+        protected virtual OpenXmlVisitor VisitDocument([NotNull] OpenXmlVisitor subject)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             return new OpenXmlVisitor(subject);
         }
 
         /// <summary>
-        /// 
+        /// Visit the <see cref="Footnotes"/> of the subject.
         /// </summary>
-        /// <param name="subject"></param>
-        /// <param name="footnoteId"></param>
-        /// <returns></returns>
-        protected virtual OpenXmlVisitor VisitFootnotes(OpenXmlVisitor subject, int footnoteId)
+        /// <param name="subject">
+        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// </param>
+        /// <param name="footnoteId">
+        /// The current footnote identifier.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="OpenXmlVisitor"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [NotNull]
+        protected virtual OpenXmlVisitor VisitFootnotes([NotNull] OpenXmlVisitor subject, int footnoteId)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             return new OpenXmlVisitor(subject);
         }
 
         /// <summary>
-        /// 
+        /// Visit the <see cref="Document"/> and <see cref="DocumentRelations"/> of the subject to modify hyperlinks in the main document.
         /// </summary>
-        /// <param name="subject"></param>
-        /// <param name="footnoteRelationId"></param>
-        /// <returns></returns>
-        protected virtual OpenXmlVisitor VisitDocumentHyperlinks(OpenXmlVisitor subject, int footnoteRelationId)
+        /// <param name="subject">
+        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// </param>
+        /// <param name="documentRelationId">
+        /// The current document relationship identifier.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="OpenXmlVisitor"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [NotNull]
+        protected virtual OpenXmlVisitor VisitDocumentHyperlinks([NotNull] OpenXmlVisitor subject, int documentRelationId)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             return new OpenXmlVisitor(subject);
         }
 
         /// <summary>
-        /// 
+        /// Visit the <see cref="Footnotes"/> and <see cref="FootnoteRelations"/> of the subject to modify hyperlinks in the main document.
         /// </summary>
-        /// <param name="subject"></param>
-        /// <param name="footnoteRelationId"></param>
-        /// <returns></returns>
-        protected virtual OpenXmlVisitor VisitFootnoteHyperlinks(OpenXmlVisitor subject, int footnoteRelationId)
+        /// <param name="subject">
+        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// </param>
+        /// <param name="footnoteRelationId">
+        /// The current footnote relationship identifier.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="OpenXmlVisitor"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [NotNull]
+        protected virtual OpenXmlVisitor VisitFootnoteHyperlinks([NotNull] OpenXmlVisitor subject, int footnoteRelationId)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             return new OpenXmlVisitor(subject);
         }
 
         /// <summary>
-        /// 
+        /// Visit the <see cref="Charts"/> and <see cref="DocumentRelations"/> of the subject to modify charts in the document.
         /// </summary>
-        /// <param name="subject"></param>
-        /// <returns></returns>
-        protected virtual OpenXmlVisitor VisitCharts(OpenXmlVisitor subject)
+        /// <param name="subject">
+        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="OpenXmlVisitor"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [NotNull]
+        protected virtual OpenXmlVisitor VisitCharts([NotNull] OpenXmlVisitor subject)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             return new OpenXmlVisitor(subject);
         }
     }
