@@ -264,13 +264,6 @@ namespace AD.OpenXml.Visitors
             }
 
             return files.Aggregate(this, (current, next) => current.Visit(next));
-
-            //return files.Aggregate(this, (current, next) =>
-            //{
-            //    var a = current.Visit(next);
-            //    a.Save(File);
-            //    return a;
-            //});
         }
 
 
