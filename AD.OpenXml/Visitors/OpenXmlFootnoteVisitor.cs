@@ -85,7 +85,6 @@ namespace AD.OpenXml.Visitors
             XElement resultFootnotes =
                 new XElement(
                     modifiedFootnotes.Name,
-                    modifiedFootnotes.Attributes(),
                     modifiedFootnotes.Elements()
                                      .OrderBy(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0")));
 

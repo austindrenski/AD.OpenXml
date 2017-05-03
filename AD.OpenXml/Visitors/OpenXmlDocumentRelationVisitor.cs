@@ -64,36 +64,37 @@ namespace AD.OpenXml.Visitors
                                  .Select(
                                      x => new
                                      {
-                                         Id = x.Attribute("Id")?.Value.ParseInt(),
-                                         Type = x.Attribute("Type")?.Value,
-                                         Target = x.Attribute("Target")?.Value,
-                                         TargetMode = x.Attribute("TargetMode")?.Value
+                                         Id = x.Attribute("Id"),
+                                         Type = x.Attribute("Type"),
+                                         Target = x.Attribute("Target"),
+                                         TargetMode = x.Attribute("TargetMode")
                                      })
-                                 .OrderBy(x => x.Id)
+                                 .OrderBy(x => x.Id.Value.ParseInt())
                                  .Select(
                                      (x, i) => new
                                      {
-                                         oldId = $"rId{x.Id}",
-                                         newId = $"rId{documentRelationId + i}",
+                                         oldId = x.Id,
+                                         newId = new XAttribute("Id", $"rId{documentRelationId + i}"),
                                          x.Type,
-                                         x.Target,
+                                         oldTarget = x.Target,
+                                         newTarget = x.Target.Value.StartsWith("charts/") ? new XAttribute("Target", $"charts/chart{documentRelationId + i}.xml") : x.Target,
                                          x.TargetMode
                                      })
                                  .ToArray();
 
             ChartInformation[] chartMapping =
                 documentRelationMapping
-                    .Where(x => x.Target.StartsWith("charts/"))
+                    .Where(x => x.oldTarget.Value.StartsWith("charts/"))
                     .Select(
                         x => new
                         {
-                            Id = x.newId,
-                            SourceName = x.Target,
-                            ResultName = $"charts/chart{x.newId.ParseInt()}.xml"
+                            x.newId,
+                            x.oldTarget,
+                            x.newTarget
                         })
-                    .OrderBy(x => x.Id.ParseInt())
+                    .OrderBy(x => x.newId.Value.ParseInt())
                     .Select(
-                        x => new ChartInformation(x.ResultName, charts.Single(y => y.Name == x.SourceName).Chart))
+                        x => new ChartInformation(x.newTarget.Value, charts.Single(y => y.Name == x.oldTarget.Value).Chart))
                     .Select(
                         x =>
                         {
@@ -108,29 +109,29 @@ namespace AD.OpenXml.Visitors
             foreach (var map in documentRelationMapping)
             {
                 modifiedDocument =
-                    modifiedDocument.ChangeXAttributeValues(R + "id", map.oldId, map.newId);
+                    modifiedDocument.ChangeXAttributeValues(R + "id", map.oldId.Value, map.newId.Value);
             }
 
             XElement modifiedDocumentRelations =
                 new XElement(
                     documentRelations.Name,
-                    documentRelations.Attributes(),
                     documentRelationMapping.Select(
                         x =>
-                            new XElement(P + "Relationship",
-                                new XAttribute("Id", x.newId),
-                                new XAttribute("Type", x.Type),
-                                new XAttribute("Target", x.Target.StartsWith("charts/") ? $"charts/chart{x.newId.ParseInt()}.xml" : x.Target),
-                                x.TargetMode is null ? null : new XAttribute("TargetMode", x.TargetMode))));
-            
+                            new XElement(
+                                P + "Relationship",
+                                x.newId,
+                                x.Type,
+                                x.newTarget,
+                                x.TargetMode)));
+
             XElement modifiedContentTypes =
                 new XElement(
                     contentTypes.Name,
-                    contentTypes.Attributes(),
-                    chartMapping.Select(x =>
-                        new XElement(T + "Override",
-                            new XAttribute("PartName", $"/word/{x.Name}"),
-                            new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml"))));
+                    chartMapping.Select(
+                        x =>
+                            new XElement(T + "Override",
+                                new XAttribute("PartName", $"/word/{x.Name}"),
+                                new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml"))));
 
             return (modifiedDocument, modifiedDocumentRelations, modifiedContentTypes, chartMapping);
         }

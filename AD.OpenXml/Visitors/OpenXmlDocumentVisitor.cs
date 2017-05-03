@@ -89,8 +89,6 @@ namespace AD.OpenXml.Visitors
                     .SetTableStyles()
 
                     // Remove elements used above, but not needed in the output.
-                    //.RemoveByAll(x => x.Name.LocalName == "docPr")
-                    //.RemoveByAll(x => x.Name.LocalName == "cNvGraphicFramePr")
                     .RemoveByAll(W + "u")
                     .RemoveByAllIfEmpty(W + "tcPr")
                     .RemoveByAllIfEmpty(W + "rPr")
@@ -101,6 +99,16 @@ namespace AD.OpenXml.Visitors
 
                     // Tidy up the XML for review.
                     .MergeRuns();
+
+            //source.Descendants()
+            //      .Attributes()
+            //      .Where(x => x.Name.LocalName == "docPr")
+            //      .Remove();
+
+            //source.Descendants()
+            //      .Attributes()
+            //      .Where(x => x.Name.LocalName == "cNvGraphicFramePr")
+            //      .Remove();
 
             //source.Descendants()
             //      .Attributes()

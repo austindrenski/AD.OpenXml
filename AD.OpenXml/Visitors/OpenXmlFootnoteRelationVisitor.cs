@@ -49,12 +49,11 @@ namespace AD.OpenXml.Visitors
             var footnoteRelationMapping =
                 nextFootnoteRelations.Descendants(P + "Relationship")
                                      .Attributes("Id")
-                                     .Select(x => x.Value.ParseInt() ?? 0)
-                                     .OrderBy(x => x)
+                                     .OrderBy(x => x.Value.ParseInt() ?? 0)
                                      .Select(
                                          (x, i) => new
                                          {
-                                             oldId = $"rId{x}",
+                                             oldId = x.Value,
                                              newId = $"rId{footnoteRelationId + i}"
                                          })
                                      .ToArray();
