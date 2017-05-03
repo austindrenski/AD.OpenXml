@@ -1,25 +1,25 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:abstractNum w:abstractNumId="0">
-    <w:lvl w:ilvl="0">
-      <w:lvlJc w:val="left"/>
-      <w:lvlText w:val="Chapter %1"/>
-      <w:numFmt w:val="decimal"/>
-      <w:start w:val="1"/>
-      <w:suff w:val="space"/>
-    </w:lvl>
     <w:multiLevelType w:val="singleLevel"/>
+    <w:lvl w:ilvl="0">
+      <w:start w:val="1"/>
+      <w:numFmt w:val="decimal"/>
+      <w:lvlText w:val="Chapter %1"/>
+      <w:suff w:val="space"/>
+      <w:lvlJc w:val="left"/>
+    </w:lvl>
   </w:abstractNum>
   <w:abstractNum w:abstractNumId="1">
+    <w:multiLevelType w:val="singleLevel"/>
     <w:lvl w:ilvl="0">
-      <w:lvlJc w:val="left"/>
-      <w:lvlText w:val="Appendix %1"/>
+      <w:start w:val="1"/>
       <w:numFmt w:val="upperLetter"/>
       <w:pStyle w:val="Appendix"/>
-      <w:start w:val="1"/>
+      <w:lvlText w:val="Appendix %1"/>
       <w:suff w:val="space"/>
+      <w:lvlJc w:val="left"/>
     </w:lvl>
-    <w:multiLevelType w:val="singleLevel"/>
   </w:abstractNum>
   <w:num w:numId="1">
     <w:abstractNumId w:val="0"/>

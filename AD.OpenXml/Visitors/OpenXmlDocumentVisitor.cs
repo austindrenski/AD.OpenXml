@@ -89,6 +89,8 @@ namespace AD.OpenXml.Visitors
                     .SetTableStyles()
 
                     // Remove elements used above, but not needed in the output.
+                    //.RemoveByAll(x => x.Name.LocalName == "docPr")
+                    //.RemoveByAll(x => x.Name.LocalName == "cNvGraphicFramePr")
                     .RemoveByAll(W + "u")
                     .RemoveByAllIfEmpty(W + "tcPr")
                     .RemoveByAllIfEmpty(W + "rPr")
@@ -99,6 +101,23 @@ namespace AD.OpenXml.Visitors
 
                     // Tidy up the XML for review.
                     .MergeRuns();
+
+            //source.Descendants()
+            //      .Attributes()
+            //      .Where(x => x.Name.LocalName == "editId")
+            //      .Remove();
+
+            //source.Descendants()
+            //      .Attributes()
+            //      .Where(x => x.Name.LocalName == "anchorId")
+            //      .Remove();
+
+            //source.Descendants()
+            //      .Attributes()
+            //      .Where(x => x.IsNamespaceDeclaration)
+            //      .Where(x => x.Value == "http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing")
+            //      .Remove();
+
 
             // There shouldn't be more than one paragraph style.
             foreach (XElement paragraphProperties in source.Descendants(W + "pPr").Where(x => x.Elements(W + "pStyle").Count() > 1))

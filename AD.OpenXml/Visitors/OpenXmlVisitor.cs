@@ -117,11 +117,14 @@ namespace AD.OpenXml.Visitors
         /// Returns the last footnote identifier currently in use by the container.
         /// </summary>
         public int NextFootnoteId =>
+                        //Footnotes.Elements(W + "footnote")
+                        //         .Attributes(W + "id")
+                        //         .Select(x => int.Parse(x.Value))
+                        //         .Where(x => x > 0)
+                        //         .DefaultIfEmpty(0)
+                        //         .Max() + 1;
             Footnotes.Elements(W + "footnote")
-                     .Attributes(W + "id")
-                     .Select(x => x.Value.ParseInt() ?? 0)
-                     .DefaultIfEmpty(0)
-                     .Max() + 1;
+                     .Count(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0") > 0) + 1;
 
         /// <summary>
         /// Returns the last footnote relationship identifier currently in use by the container.
@@ -143,8 +146,13 @@ namespace AD.OpenXml.Visitors
         {
             File = result;
 
-            Document = 
+            XElement document = 
                 result.ReadAsXml() ?? throw new FileNotFoundException("document.xml");
+
+            document.SetAttributeValue(XNamespace.Xmlns + "wp", XNamespaces.OpenXmlDrawingmlWordprocessingDrawing);
+            document.SetAttributeValue(XNamespace.Xmlns + "r", XNamespaces.OpenXmlOfficeDocumentRelationships);
+
+            Document = document;
 
             ContentTypes = 
                 result.ReadAsXml("[Content_Types].xml") ?? throw new FileNotFoundException("[Content_Types].xml");
@@ -294,10 +302,8 @@ namespace AD.OpenXml.Visitors
                 new XElement(
                     Footnotes.Name,
                     Footnotes.Attributes(),
-                    Footnotes.Elements()
-                             .Union(
-                                 documentRelationVisitor.Footnotes.Elements(),
-                                 XNode.EqualityComparer));
+                    Footnotes.Elements(),
+                    documentRelationVisitor.Footnotes.Elements());
 
             XElement footnoteRelations =
                 new XElement(

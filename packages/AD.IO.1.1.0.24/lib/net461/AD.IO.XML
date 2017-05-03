@@ -1160,6 +1160,14 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter and new lines.</returns>
         </member>
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimitedString``1(``0,System.String)">
+            <summary>
+            Appends the elements of the enumerable collection by a delimiter.
+            </summary>
+            <param name="source">A collection to be delimited.</param>
+            <param name="delimiter">The delimiter used to delimit the collection.</param>
+            <returns>A string delimited by the delimiter.</returns>
+        </member>
         <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Collections.Generic.IEnumerable{``0},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.

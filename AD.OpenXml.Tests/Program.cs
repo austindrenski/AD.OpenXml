@@ -54,27 +54,34 @@ namespace AD.OpenXml.Tests
 
             //#region Report from compiled chapters
 
-            //            // Copy new files into report folder
-            //            foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7" })
-            //            {
-            //                File.Copy(
-            //                    Directory.GetFiles($"{workingDirectory}\\{chapter}\\_output", "*.docx", SearchOption.TopDirectoryOnly)
-            //                             .OrderByDescending(OrderPredicate)
-            //                             .First(),
-            //                    $"{workingDirectory}\\_report\\{chapter.ParseInt()} - {Path.GetFileName(chapter)}.docx",
-            //                    true);
-            //            }
+            //// Copy new files into report folder
+            //foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7" })
+            //{
+            //    Console.WriteLine(
+            //        Directory.GetFiles($"{workingDirectory}\\{chapter}\\_output", "*.docx", SearchOption.TopDirectoryOnly)
+            //                 .Where(x => !x.Contains('~'))
+            //                 .OrderByDescending(x => x.ParseLong())
+            //                 .First());
 
-            //            // Process report
-            //            ProcessChapter(version, $"{workingDirectory}\\_report");
+            //    File.Copy(
+            //        Directory.GetFiles($"{workingDirectory}\\{chapter}\\_output", "*.docx", SearchOption.TopDirectoryOnly)
+            //                 .Where(x => !x.Contains('~'))
+            //                 .OrderByDescending(x => x.ParseLong())
+            //                 .First(),
+            //        $"{workingDirectory}\\_report\\{chapter.ParseInt()} - {Path.GetFileName(chapter)}.docx",
+            //        true);
+            //}
 
-            //            // Delete old files in report folder
-            //            foreach (string section in Directory.GetFiles($"{workingDirectory}\\_report", "*.docx", SearchOption.TopDirectoryOnly))
-            //            {
-            //                File.Delete(section);
-            //            }
+            //// Process report
+            //ProcessChapter(version, $"{workingDirectory}\\_report");
 
-            //            #endregion
+            ////Delete old files in report folder
+            //foreach (string section in Directory.GetFiles($"{workingDirectory}\\_report", "*.docx", SearchOption.TopDirectoryOnly))
+            //{
+            //    File.Delete(section);
+            //}
+
+            //#endregion
         }
 
         private static bool FilePredicate(string path)
@@ -115,8 +122,7 @@ namespace AD.OpenXml.Tests
                 Directory.GetFiles(workingDirectory, "*.docx", SearchOption.TopDirectoryOnly)
                          .Where(FilePredicate)
                          .OrderBy(OrderPredicate)
-                         .Select(
-                             x => (DocxFilePath) x)
+                         .Select(x => (DocxFilePath) x)
                          .ToArray();
 
             // Create output file

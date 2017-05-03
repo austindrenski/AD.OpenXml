@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
@@ -53,50 +54,42 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(document));
             }
 
-            XElement sourceFootnotes =
-                footnotes.RemoveRsidAttributes();
+            XElement modifiedFootnotes =
+                footnotes.RemoveRsidAttributes()
+                         .RemoveByAll(W + "bookmarkStart")
+                         .RemoveByAll(W + "bookmarkEnd")
+                         .RemoveBy(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0") < 1);
 
-            if (sourceFootnotes is null)
+            modifiedFootnotes.Descendants(W + "p")
+                             .Attributes()
+                             .Remove();
+
+            IEnumerable<(string oldId, string newId)> footnoteMapping =
+                modifiedFootnotes.Elements(W + "footnote")
+                                 .Select(x => x.Attribute(W + "id"))
+                                 .OrderBy(x => x?.Value.ParseInt())
+                                 .Select(
+                                     (x, i) => (oldId: x.Value, newId: $"{footnoteId + i}"))
+                                 .OrderByDescending(x => x.oldId.ParseInt())
+                                 .ToArray();
+
+            foreach ((string oldId, string newId) map in footnoteMapping)
             {
-                return (document, new XElement(W + "footnotes"));
+                document =
+                    document.ChangeXAttributeValues(W + "footnoteReference", W + "id", map.oldId, map.newId);
+
+                modifiedFootnotes =
+                    modifiedFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
             }
 
-            sourceFootnotes.Descendants(W + "p")
-                           .Attributes()
-                           .Remove();
+            XElement resultFootnotes =
+                new XElement(
+                    modifiedFootnotes.Name,
+                    modifiedFootnotes.Attributes(),
+                    modifiedFootnotes.Elements()
+                                     .OrderBy(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0")));
 
-            sourceFootnotes.Descendants(W + "bookmarkStart")
-                           .Remove();
-
-            sourceFootnotes.Descendants(W + "bookmarkEnd")
-                           .Remove();
-
-            var footnoteMapping =
-                sourceFootnotes.Elements(W + "footnote")
-                               .Attributes(W + "id")
-                               .Select(x => x.Value.ParseInt())
-                               .Where(x => x > 0)
-                               .OrderBy(x => x)
-                               .Select(
-                                   (x, i) => new
-                                   {
-                                       oldId = $"{x}",
-                                       newId = $"{footnoteId + i}"
-                                   })
-                               .ToArray();
-
-            XElement modifiedDocument = document.Clone();
-
-            foreach (var map in footnoteMapping)
-            {
-                modifiedDocument =
-                    modifiedDocument.ChangeXAttributeValues(W + "footnoteReference", W + "id", map.oldId, map.newId);
-
-                sourceFootnotes =
-                    sourceFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
-            }
-
-            return (modifiedDocument, sourceFootnotes);
+            return (document, resultFootnotes);
         }
     }
 }

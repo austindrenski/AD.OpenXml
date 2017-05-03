@@ -64,6 +64,7 @@ namespace AD.OpenXml.Documents
             element.Descendants(C + "crossesBetween").SetAttributeValues("val", "between");
             element.Descendants(C + "lblAlgn").SetAttributeValues("val", "ctr");
             element.Descendants(C + "lblOffset").SetAttributeValues("val", "100");
+            element.Descendants(C + "numFmt").SetAttributeValues("sourceLinked", "0");
 
             element.Add(
                 new XElement(C + "spPr",
