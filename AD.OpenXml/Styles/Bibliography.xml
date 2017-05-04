@@ -4,8 +4,8 @@
   <w:name w:val="Bibliography"/>
   <w:next w:val="Normal"/>
   <w:pPr>
-    <w:contextualSpacing/>
     <w:ind w:left="720" w:hanging="720"/>
     <w:spacing w:after="240" w:before="0" w:line="240" w:lineRule="auto"/>
+    <w:keepNext/>
   </w:pPr>
 </w:style>
