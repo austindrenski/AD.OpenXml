@@ -55,10 +55,64 @@ namespace AD.OpenXml.Visitors
             }
 
             XElement modifiedFootnotes =
-                footnotes.RemoveRsidAttributes()
-                         .RemoveByAll(W + "bookmarkStart")
-                         .RemoveByAll(W + "bookmarkEnd")
-                         .RemoveBy(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0") < 1);
+                footnotes
+                    // Remove editing attributes.
+                    .RemoveRsidAttributes()
+
+                    // Remove run properties from the paragraph scope.
+                    .RemoveRunPropertiesFromParagraphProperties()
+
+                    // Remove elements that should never exist in-line.                         
+                    .RemoveByAll(W + "proofErr")
+                    .RemoveByAll(W + "bookmarkStart")
+                    .RemoveByAll(W + "bookmarkEnd")
+                    .RemoveByAll(W + "tblPrEx")
+                    .RemoveByAll(W + "spacing")
+                    .RemoveByAll(W + "lang")
+                    .RemoveByAll(W + "numPr")
+                    .RemoveByAll(W + "hideMark")
+                    .RemoveByAll(W + "noWrap")
+                    .RemoveByAll(W + "rFonts")
+                    .RemoveByAll(W + "sz")
+                    .RemoveByAll(W + "szCs")
+                    .RemoveByAll(W + "bCs")
+                    .RemoveByAll(W + "iCs")
+                    .RemoveByAll(W + "color")
+                    .RemoveByAll(W + "lastRenderedPageBreak")
+                    .RemoveByAll(W + "keepNext")
+                    .RemoveByAll(W + "noProof")
+
+                    // Remove elements that should almost never exist.
+                    .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
+                    .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
+                    .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("Default", StringComparison.OrdinalIgnoreCase) ?? false))
+                    .RemoveByAll(x => x.Name.Equals(W + "jc") && !x.Ancestors(W + "tbl").Any())
+
+                    // Alter bold, italic, and underline elements.
+                    .ChangeBoldToStrong()
+                    .ChangeItalicToEmphasis()
+                    .ChangeUnderlineToTableCaption()
+                    .ChangeUnderlineToFigureCaption()
+                    .ChangeUnderlineToSourceNote()
+                    .ChangeSuperscriptToReference()
+
+                    // Mark insert requests for the production team.
+                    .MergeRuns()
+                    .HighlightInsertRequests()
+
+                    // Set table styles.
+                    .SetTableStyles()
+
+                    // Remove elements used above, but not needed in the output.
+                    .RemoveByAll(W + "u")
+                    .RemoveByAllIfEmpty(W + "tcPr")
+                    .RemoveByAllIfEmpty(W + "rPr")
+                    .RemoveByAllIfEmpty(W + "pPr")
+                    .RemoveByAllIfEmpty(W + "t")
+                    .RemoveByAllIfEmpty(W + "r")
+                    .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false))
+
+                    .RemoveBy(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0") < 1);
 
             modifiedFootnotes.Descendants(W + "p")
                              .Attributes()
@@ -81,6 +135,8 @@ namespace AD.OpenXml.Visitors
                 modifiedFootnotes =
                     modifiedFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
             }
+
+
 
             XElement resultFootnotes =
                 new XElement(

@@ -97,35 +97,15 @@ namespace AD.OpenXml.Visitors
                     .RemoveByAllIfEmpty(W + "r")
                     .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false))
 
+                    // Remove for this stage
+                    .RemoveByAll(W + "footerReference")
+                    .RemoveByAll(W + "headerReference")
+
+                    // Add soft breaks to headings
+                    //.AddLineBreakToHeadings()
+
                     // Tidy up the XML for review.
                     .MergeRuns();
-
-            //source.Descendants()
-            //      .Attributes()
-            //      .Where(x => x.Name.LocalName == "docPr")
-            //      .Remove();
-
-            //source.Descendants()
-            //      .Attributes()
-            //      .Where(x => x.Name.LocalName == "cNvGraphicFramePr")
-            //      .Remove();
-
-            //source.Descendants()
-            //      .Attributes()
-            //      .Where(x => x.Name.LocalName == "editId")
-            //      .Remove();
-
-            //source.Descendants()
-            //      .Attributes()
-            //      .Where(x => x.Name.LocalName == "anchorId")
-            //      .Remove();
-
-            //source.Descendants()
-            //      .Attributes()
-            //      .Where(x => x.IsNamespaceDeclaration)
-            //      .Where(x => x.Value == "http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing")
-            //      .Remove();
-
 
             // There shouldn't be more than one paragraph style.
             foreach (XElement paragraphProperties in source.Descendants(W + "pPr").Where(x => x.Elements(W + "pStyle").Count() > 1))

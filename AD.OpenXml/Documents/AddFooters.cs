@@ -64,7 +64,8 @@ namespace AD.OpenXml.Documents
                             .Where(x => x.Attribute("Target")?.Value.Contains("footer") ?? false)
                             .Remove();
 
-            int currentFooterId = documentRelation.Elements().Attributes("Id").Select(x => int.Parse(x.Value.Substring(3))).DefaultIfEmpty(0).Max();
+            int currentFooterId =
+                documentRelation.Elements().Count();
 
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 

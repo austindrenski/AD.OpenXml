@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Documents
+namespace AD.OpenXml.Elements
 {
     /// <summary>
     /// Extension methods to remove duplicate section properties.
@@ -20,17 +19,19 @@ namespace AD.OpenXml.Documents
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
-        /// Removes section properties elements when they are sequential duplicates. 
+        /// 
         /// </summary>
-        /// <param name="result"></param>
-        public static void RemoveDuplicateSectionProperties([NotNull] this DocxFilePath result)
+        /// <param name="document"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static XElement RemoveDuplicateSectionProperties([NotNull] this XElement document)
         {
-            if (result is null)
+            if (document is null)
             {
-                throw new ArgumentNullException(nameof(result));
+                throw new ArgumentNullException(nameof(document));
             }
 
-            XElement resultDocument = result.ReadAsXml();
+            XElement resultDocument = document.Clone();
 
             XElement[] sections =
                 resultDocument.Descendants(W + "sectPr")
@@ -47,13 +48,7 @@ namespace AD.OpenXml.Documents
                 }
             }
 
-            //for (int i = 0; i < sections.Length - 1; i++)
-            //{
-            //    sections[i].Remove();
-            //}
-
-
-            resultDocument.WriteInto(result, "word/document.xml");
+            return resultDocument;
         }
     }
 }

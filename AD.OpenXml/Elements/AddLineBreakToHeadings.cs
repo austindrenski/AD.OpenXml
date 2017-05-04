@@ -24,11 +24,17 @@ namespace AD.OpenXml.Elements
         {
             IEnumerable<XElement> headingParagraphFirstRun =
                 element.Descendants(W + "p")
-                       .Where(x => x.Element(W + "pPr")?
-                                    .Element(W + "pStyle")?
-                                    .Attribute(W + "val")?
-                                    .Value
-                                    .Equals("heading1", StringComparison.OrdinalIgnoreCase) ?? false)
+                       .Where(x => (x.Element(W + "pPr")?
+                                     .Element(W + "pStyle")?
+                                     .Attribute(W + "val")?
+                                     .Value
+                                     .Equals("heading1", StringComparison.OrdinalIgnoreCase) ?? false)
+                                   ||
+                                   (x.Element(W + "pPr")?
+                                     .Element(W + "pStyle")?
+                                     .Attribute(W + "val")?
+                                     .Value
+                                     .Equals("appendix", StringComparison.OrdinalIgnoreCase) ?? false))
                        .Select(x => x.Elements(W + "r").FirstOrDefault())
                        .Where(x => x != null)
                        .ToArray();

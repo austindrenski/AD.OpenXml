@@ -11,7 +11,7 @@ namespace AD.OpenXml.Elements
     [PublicAPI]
     public static class RemoveRunPropertiesFromParagraphPropertiesExtensions
     {
-        private static XNamespace _w = XNamespaces.OpenXmlWordprocessingmlMain;
+        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// Removes &lt;rPr [...] /&gt; nodes from &lt;pPr [...] /&gt; nodes.
@@ -23,8 +23,8 @@ namespace AD.OpenXml.Elements
         /// <exception cref="System.ArgumentNullException"/>
         public static XElement RemoveRunPropertiesFromParagraphProperties(this XElement element)
         {
-            element.Descendants(_w + "rPr")
-                   .Where(x => x.Parent?.Name == _w + "pPr")
+            element.Descendants(W + "rPr")
+                   .Where(x => x.Parent?.Name == W + "pPr")
                    .Remove();
             return element;
         }

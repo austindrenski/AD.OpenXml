@@ -68,7 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Documents\ModifyAreaChart.cs" />
-    <Compile Include="Documents\RemoveDuplicateSectionProperties.cs" />
+    <Compile Include="Elements\RemoveDuplicateSectionProperties.cs" />
     <Compile Include="Visitors\ChartInformation.cs" />
     <Compile Include="Visitors\OpenXmlDocumentRelationVisitor.cs" />
     <Compile Include="Visitors\OpenXmlDocumentVisitor.cs" />

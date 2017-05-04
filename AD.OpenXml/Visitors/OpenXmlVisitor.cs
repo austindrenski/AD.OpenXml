@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
+using AD.OpenXml.Elements;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -107,22 +108,12 @@ namespace AD.OpenXml.Visitors
         /// Returns the last document relationship identifier in use by the container.
         /// </summary>
         public int NextDocumentRelationId =>
-            DocumentRelations.Elements(P + "Relationship")
-                             .Attributes("Id")
-                             .Select(x => x.Value.ParseInt() ?? 0)
-                             .DefaultIfEmpty(0)
-                             .Max() + 1;
+            DocumentRelations.Elements().Count() + 1;
 
         /// <summary>
         /// Returns the last footnote identifier currently in use by the container.
         /// </summary>
         public int NextFootnoteId =>
-                        //Footnotes.Elements(W + "footnote")
-                        //         .Attributes(W + "id")
-                        //         .Select(x => int.Parse(x.Value))
-                        //         .Where(x => x > 0)
-                        //         .DefaultIfEmpty(0)
-                        //         .Max() + 1;
             Footnotes.Elements(W + "footnote")
                      .Count(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0") > 0) + 1;
 
@@ -130,11 +121,7 @@ namespace AD.OpenXml.Visitors
         /// Returns the last footnote relationship identifier currently in use by the container.
         /// </summary>
         public int NextFootnoteRelationId =>
-            FootnoteRelations.Elements(P + "Relationship")
-                             .Attributes("Id")
-                             .Select(x => x.Value.ParseInt() ?? 0)
-                             .DefaultIfEmpty(0)
-                             .Max() + 1;
+            FootnoteRelations.Elements().Count() + 1;
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
@@ -148,9 +135,6 @@ namespace AD.OpenXml.Visitors
 
             XElement document = 
                 result.ReadAsXml() ?? throw new FileNotFoundException("document.xml");
-
-            document.SetAttributeValue(XNamespace.Xmlns + "wp", XNamespaces.OpenXmlDrawingmlWordprocessingDrawing);
-            document.SetAttributeValue(XNamespace.Xmlns + "r", XNamespaces.OpenXmlOfficeDocumentRelationships);
 
             Document = document;
 
@@ -298,6 +282,8 @@ namespace AD.OpenXml.Visitors
                         Document.Elements().First().Elements(),
                         documentRelationVisitor.Document.Elements().First().Elements()));
 
+            document = document.RemoveDuplicateSectionProperties();
+
             XElement footnotes =
                 new XElement(
                     Footnotes.Name,
@@ -324,7 +310,7 @@ namespace AD.OpenXml.Visitors
                                      .Union(
                                          documentRelationVisitor.DocumentRelations.Elements(),
                                          XNode.EqualityComparer));
-
+            
             XElement contentTypes =
                 new XElement(
                     ContentTypes.Name,
