@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Visitors;
@@ -83,6 +82,16 @@ namespace AD.OpenXml
         IOpenXmlVisitor Visit([NotNull] DocxFilePath file);
 
         /// <summary>
+        /// Folds <paramref name="subject"/> into this <see cref="IOpenXmlVisitor"/>.
+        /// </summary>
+        /// <param name="subject">
+        /// The <see cref="IOpenXmlVisitor"/> that is folded into this <see cref="IOpenXmlVisitor"/>.
+        /// </param>
+        [Pure]
+        [NotNull]
+        IOpenXmlVisitor Fold([NotNull] IOpenXmlVisitor subject);
+        
+        /// <summary>
         /// Visit and join the component documents into this <see cref="IOpenXmlVisitor"/>.
         /// </summary>
         /// <param name="files">
@@ -90,6 +99,6 @@ namespace AD.OpenXml
         /// </param>
         [Pure]
         [NotNull]
-        IOpenXmlVisitor Visit([ItemNotNull, NotNull] IEnumerable<DocxFilePath> files);
+        IOpenXmlVisitor VisitAndFold([ItemNotNull][NotNull] IEnumerable<DocxFilePath> files);
     }
 }

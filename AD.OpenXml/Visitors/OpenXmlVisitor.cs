@@ -242,21 +242,105 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Visit and join the component documents into the <see cref="IOpenXmlVisitor"/>.
+        /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
         /// </summary>
         /// <param name="files">
         /// The files to visit.
         /// </param>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        public IOpenXmlVisitor Visit(IEnumerable<DocxFilePath> files)
+        public virtual IOpenXmlVisitor VisitAndFold(IEnumerable<DocxFilePath> files)
         {
             if (files is null)
             {
                 throw new ArgumentNullException(nameof(files));
             }
 
-            return files.Aggregate(this as IOpenXmlVisitor, (current, next) => current.Visit(next));
+            return files.Aggregate(this as IOpenXmlVisitor, (current, next) => current.Fold(current.Visit(next)));
+        }
+
+        /// <summary>
+        /// Folds <paramref name="subject"/> into this <see cref="IOpenXmlVisitor"/>.
+        /// </summary>
+        /// <param name="subject">
+        /// The <see cref="IOpenXmlVisitor"/> that is folded into this <see cref="IOpenXmlVisitor"/>.
+        /// </param>
+        [Pure]
+        public virtual IOpenXmlVisitor Fold(IOpenXmlVisitor subject)
+        {
+            return Create(StaticFold(this, subject));
+        }
+
+        /// <summary>
+        /// Folds <paramref name="subject"/> into this <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">
+        /// The <see cref="IOpenXmlVisitor"/> into which the <paramref name="subject"/> is folded.
+        /// </param>
+        /// <param name="subject">
+        /// The <see cref="IOpenXmlVisitor"/> that is folded into the <paramref name="source"/>.
+        /// </param>
+        [Pure]
+        private static OpenXmlVisitor StaticFold(IOpenXmlVisitor source, IOpenXmlVisitor subject)
+        {
+            XElement document =
+                new XElement(
+                    source.Document.Name,
+                    source.Document.Attributes(),
+                    new XElement(
+                        source.Document.Elements().First().Name,
+                        source.Document.Elements().First().Elements(),
+                        subject.Document.Elements().First().Elements()));
+
+            document = document.RemoveDuplicateSectionProperties();
+
+            XElement footnotes =
+                new XElement(
+                    source.Footnotes.Name,
+                    source.Footnotes.Attributes(),
+                    source.Footnotes
+                          .Elements()
+                          .Union(
+                              subject.Footnotes.Elements(),
+                              XNode.EqualityComparer));
+
+            XElement footnoteRelations =
+                new XElement(
+                    source.FootnoteRelations.Name,
+                    source.FootnoteRelations.Attributes(),
+                    source.FootnoteRelations
+                          .Elements()
+                          .Union(
+                              subject.FootnoteRelations.Elements(),
+                              XNode.EqualityComparer));
+
+            XElement documentRelations =
+                new XElement(
+                    source.DocumentRelations.Name,
+                    source.DocumentRelations.Attributes(),
+                    source.DocumentRelations
+                          .Elements()
+                          .Union(
+                              subject.DocumentRelations.Elements(),
+                              XNode.EqualityComparer));
+
+            XElement contentTypes =
+                new XElement(
+                    source.ContentTypes.Name,
+                    source.ContentTypes.Attributes(),
+                    source.ContentTypes
+                          .Elements()
+                          .Union(
+                              subject.ContentTypes.Elements(),
+                              XNode.EqualityComparer));
+
+            IEnumerable<ChartInformation> charts =
+                source.Charts
+                      .Union(
+                          subject.Charts,
+                          ChartInformation.Comparer);
+
+            return new OpenXmlVisitor(contentTypes, document, documentRelations, footnotes, footnoteRelations, charts);
         }
 
         /// <summary>
@@ -280,59 +364,61 @@ namespace AD.OpenXml.Visitors
             IOpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(footnoteVisitor, NextFootnoteRelationId);
             IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteRelationVisitor, NextDocumentRelationId);
 
-            XElement document =
-                new XElement(
-                    Document.Name,
-                    Document.Attributes(),
-                    new XElement(
-                        Document.Elements().First().Name,
-                        Document.Elements().First().Elements(),
-                        documentRelationVisitor.Document.Elements().First().Elements()));
+            return documentRelationVisitor;
 
-            document = document.RemoveDuplicateSectionProperties();
+            //XElement document =
+            //    new XElement(
+            //        Document.Name,
+            //        Document.Attributes(),
+            //        new XElement(
+            //            Document.Elements().First().Name,
+            //            Document.Elements().First().Elements(),
+            //            documentRelationVisitor.Document.Elements().First().Elements()));
 
-            XElement footnotes =
-                new XElement(
-                    Footnotes.Name,
-                    Footnotes.Attributes(),
-                    Footnotes.Elements()
-                             .Union(
-                                 documentRelationVisitor.Footnotes.Elements(),
-                                 XNode.EqualityComparer));
+            //document = document.RemoveDuplicateSectionProperties();
 
-            XElement footnoteRelations =
-                new XElement(
-                    FootnoteRelations.Name,
-                    FootnoteRelations.Attributes(),
-                    FootnoteRelations.Elements()
-                                     .Union(
-                                         documentRelationVisitor.FootnoteRelations.Elements(),
-                                         XNode.EqualityComparer));
+            //XElement footnotes =
+            //    new XElement(
+            //        Footnotes.Name,
+            //        Footnotes.Attributes(),
+            //        Footnotes.Elements()
+            //                 .Union(
+            //                     documentRelationVisitor.Footnotes.Elements(),
+            //                     XNode.EqualityComparer));
 
-            XElement documentRelations =
-                new XElement(
-                    DocumentRelations.Name,
-                    DocumentRelations.Attributes(),
-                    DocumentRelations.Elements()
-                                     .Union(
-                                         documentRelationVisitor.DocumentRelations.Elements(),
-                                         XNode.EqualityComparer));
-            
-            XElement contentTypes =
-                new XElement(
-                    ContentTypes.Name,
-                    ContentTypes.Attributes(),
-                    ContentTypes.Elements()
-                                .Union(
-                                    documentRelationVisitor.ContentTypes.Elements(),
-                                    XNode.EqualityComparer));
+            //XElement footnoteRelations =
+            //    new XElement(
+            //        FootnoteRelations.Name,
+            //        FootnoteRelations.Attributes(),
+            //        FootnoteRelations.Elements()
+            //                         .Union(
+            //                             documentRelationVisitor.FootnoteRelations.Elements(),
+            //                             XNode.EqualityComparer));
 
-            IEnumerable<ChartInformation> charts =
-                Charts.Union(
-                    documentRelationVisitor.Charts,
-                    ChartInformation.Comparer);
+            //XElement documentRelations =
+            //    new XElement(
+            //        DocumentRelations.Name,
+            //        DocumentRelations.Attributes(),
+            //        DocumentRelations.Elements()
+            //                         .Union(
+            //                             documentRelationVisitor.DocumentRelations.Elements(),
+            //                             XNode.EqualityComparer));
 
-            return Create(new OpenXmlVisitor(contentTypes, document, documentRelations, footnotes, footnoteRelations, charts));
+            //XElement contentTypes =
+            //    new XElement(
+            //        ContentTypes.Name,
+            //        ContentTypes.Attributes(),
+            //        ContentTypes.Elements()
+            //                    .Union(
+            //                        documentRelationVisitor.ContentTypes.Elements(),
+            //                        XNode.EqualityComparer));
+
+            //IEnumerable<ChartInformation> charts =
+            //    Charts.Union(
+            //        documentRelationVisitor.Charts,
+            //        ChartInformation.Comparer);
+
+            //return Create(new OpenXmlVisitor(contentTypes, document, documentRelations, footnotes, footnoteRelations, charts));
         }
 
         /// <summary>

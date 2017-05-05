@@ -22,10 +22,10 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         /// Initialize a new <see cref="ReportVisitor"/> from the supplied <see cref="OpenXmlVisitor"/>.
         /// </summary>
-        /// <param name="openXmlVisitor">
+        /// <param name="subject">
         /// The <see cref="OpenXmlVisitor"/> used to initialize the new <see cref="ReportVisitor"/>.
         /// </param>
-        private ReportVisitor([NotNull] IOpenXmlVisitor openXmlVisitor) : base(openXmlVisitor) { }
+        private ReportVisitor([NotNull] IOpenXmlVisitor subject) : base(subject) { }
 
         /// <summary>
         /// 
@@ -61,7 +61,7 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new DocumentVisit(subject).Result;
+            return Create(new DocumentVisit(subject).Result);
         }
 
         /// <summary>

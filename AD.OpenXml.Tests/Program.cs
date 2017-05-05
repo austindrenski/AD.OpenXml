@@ -130,7 +130,7 @@ namespace AD.OpenXml.Tests
             DocxFilePath output = DocxFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.docx", true);
             
             // Create a ReportVisitor based on the result path and visit the component doucments.
-            IOpenXmlVisitor visitor = new ReportVisitor(output).Visit(files);
+            IOpenXmlVisitor visitor = new ReportVisitor(output).VisitAndFold(files);
 
             // Save the visitor results to result path.
             visitor.Save(output);
