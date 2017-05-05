@@ -136,7 +136,7 @@ namespace AD.OpenXml.Tests
             visitor.Save(output);
 
             // Create custom styles
-            output.AddStyles();
+            //output.AddStyles();
 
             // Add headers
             output.AddHeaders("The Year in Trade 2016");
