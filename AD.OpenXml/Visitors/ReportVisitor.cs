@@ -136,7 +136,6 @@ namespace AD.OpenXml.Visitors
             return new FootnoteRelationVisit(subject, footnoteRelationId).Result;
         }
 
-
         /// <summary>
         /// Visit the <see cref="OpenXmlVisitor.Styles"/> of the subject.
         /// </summary>
@@ -156,6 +155,27 @@ namespace AD.OpenXml.Visitors
             }
 
             return new StyleVisit(subject).Result;
+        }
+
+        /// <summary>
+        /// Visit the <see cref="OpenXmlVisitor.Numbering"/> of the subject.
+        /// </summary>
+        /// <param name="subject">
+        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="OpenXmlVisitor"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        protected override IOpenXmlVisitor VisitNumbering(IOpenXmlVisitor subject)
+        {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
+            return new NumberingVisit(subject).Result;
         }
     }
 }

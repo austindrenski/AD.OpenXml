@@ -96,7 +96,7 @@
     <Compile Include="Html\ConvertTextNodes.cs" />
     <Compile Include="Documents\AddFooters.cs" />
     <Compile Include="Documents\AddHeaders.cs" />
-    <Compile Include="Documents\AddStyles.cs" />
+    <Compile Include="Documents\AddNumbering.cs" />
     <Compile Include="Documents\ModifyBarChartStyles.cs" />
     <Compile Include="Documents\ModifyLineChartStyles.cs" />
     <Compile Include="Documents\PositionChartsInline.cs" />
@@ -121,6 +121,7 @@
     <Compile Include="Documents\EnumerateChartPaths.cs" />
     <Compile Include="ProcessHtml.cs" />
     <Compile Include="Visitors\ReportVisitor.cs" />
+    <Compile Include="Visits\NumberingVisit.cs" />
     <Compile Include="Visits\StyleVisit.cs" />
   </ItemGroup>
   <ItemGroup>

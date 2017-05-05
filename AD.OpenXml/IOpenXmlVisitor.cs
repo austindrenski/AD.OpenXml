@@ -55,6 +55,12 @@ namespace AD.OpenXml
         XElement Styles { get; }
 
         /// <summary>
+        /// word/numbering.xml
+        /// </summary>
+        [NotNull]
+        XElement Numbering { get; }
+
+        /// <summary>
         /// The current document relation number incremented by one.
         /// </summary>
         int NextDocumentRelationId { get; }

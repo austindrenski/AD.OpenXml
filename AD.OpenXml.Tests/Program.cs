@@ -135,9 +135,6 @@ namespace AD.OpenXml.Tests
             // Save the visitor results to result path.
             visitor.Save(output);
 
-            // Create custom styles
-            //output.AddStyles();
-
             // Add headers
             output.AddHeaders("The Year in Trade 2016");
 

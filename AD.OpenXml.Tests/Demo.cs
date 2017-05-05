@@ -29,7 +29,7 @@ namespace AD.OpenXml.Tests
             source.WriteInto(result, "word/document.xml");
 
             // Create custom styles
-            result.AddStyles();
+            //result.AddStyles();
 
             // Add headers
             result.AddHeaders("Year in Trade");

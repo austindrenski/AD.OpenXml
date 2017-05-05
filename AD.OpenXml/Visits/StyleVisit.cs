@@ -36,6 +36,7 @@ namespace AD.OpenXml.Visits
                     subject.Footnotes,
                     subject.FootnoteRelations,
                     styles,
+                    subject.Numbering,
                     subject.Charts);
         }
 

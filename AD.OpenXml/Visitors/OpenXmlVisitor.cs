@@ -71,6 +71,11 @@ namespace AD.OpenXml.Visitors
         public XElement Styles { get; }
 
         /// <summary>
+        /// word/numbering.xml
+        /// </summary>
+        public XElement Numbering { get; }
+
+        /// <summary>
         /// The current document relation number incremented by one.
         /// </summary>
         public int NextDocumentRelationId =>
@@ -119,7 +124,10 @@ namespace AD.OpenXml.Visitors
                 result.ReadAsXml("word/_rels/footnotes.xml.rels") ?? new XElement(P + "Relationships");
 
             Styles =
-                result.ReadAsXml("word/styles.xml") ?? new XElement(W + "styles");
+                result.ReadAsXml("word/styles.xml") ?? throw new FileNotFoundException("word/styles.xml");
+
+            Numbering =
+                result.ReadAsXml("word/numbering.xml") ?? new XElement(W + "numbering");
 
             Charts =
                 result.ReadAsXml("word/_rels/document.xml.rels")
@@ -150,6 +158,7 @@ namespace AD.OpenXml.Visitors
             Footnotes = subject.Footnotes.Clone();
             FootnoteRelations = subject.FootnoteRelations.Clone();
             Styles = subject.Styles.Clone();
+            Numbering = subject.Numbering.Clone();
             Charts = subject.Charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
         }
 
@@ -172,10 +181,11 @@ namespace AD.OpenXml.Visitors
         /// 
         /// </param>
         /// <param name="styles"></param>
+        /// <param name="numbering"></param>
         /// <param name="charts">
         /// 
         /// </param>
-        public OpenXmlVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] IEnumerable<ChartInformation> charts)
+        public OpenXmlVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] IEnumerable<ChartInformation> charts)
         {
             if (contentTypes is null)
             {
@@ -201,6 +211,10 @@ namespace AD.OpenXml.Visitors
             {
                 throw new ArgumentNullException(nameof(styles));
             }
+            if (numbering is null)
+            {
+                throw new ArgumentNullException(nameof(numbering));
+            }
             if (charts is null)
             {
                 throw new ArgumentNullException(nameof(charts));
@@ -212,6 +226,7 @@ namespace AD.OpenXml.Visitors
             Footnotes = footnotes.Clone();
             FootnoteRelations = footnoteRelations.Clone();
             Styles = styles.Clone();
+            Numbering = numbering.Clone();
             Charts = charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
         }
 
@@ -251,6 +266,7 @@ namespace AD.OpenXml.Visitors
             DocumentRelations.WriteInto(result, "word/_rels/document.xml.rels");
             FootnoteRelations.WriteInto(result, "word/_rels/footnotes.xml.rels");
             Styles.WriteInto(result, "word/styles.xml");
+            Numbering.WriteInto(result, "word/numbering.xml");
             foreach (ChartInformation item in Charts)
             {
                 item.Chart.WriteInto(result, $"word/{item.Name}");
@@ -376,13 +392,23 @@ namespace AD.OpenXml.Visitors
                               subject.Styles.Elements(),
                               XNode.EqualityComparer));
 
+            XElement numbering =
+                new XElement(
+                    source.Numbering.Name,
+                    source.Numbering.Attributes(),
+                    source.Numbering
+                          .Elements()
+                          .Union(
+                              subject.Numbering.Elements(),
+                              XNode.EqualityComparer));
+
             IEnumerable<ChartInformation> charts =
                 source.Charts
                       .Union(
                           subject.Charts,
                           ChartInformation.Comparer);
 
-            return new OpenXmlVisitor(contentTypes, document, documentRelations, footnotes, footnoteRelations, styles, charts);
+            return new OpenXmlVisitor(contentTypes, document, documentRelations, footnotes, footnoteRelations, styles, numbering, charts);
         }
 
         /// <summary>
@@ -406,8 +432,9 @@ namespace AD.OpenXml.Visitors
             IOpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(footnoteVisitor, NextFootnoteRelationId);
             IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteRelationVisitor, NextDocumentRelationId);
             IOpenXmlVisitor styleVisitor = VisitStyles(documentRelationVisitor);
+            IOpenXmlVisitor numberingVisitor = VisitNumbering(styleVisitor);
 
-            return styleVisitor;
+            return numberingVisitor;
         }
 
         /// <summary>
@@ -520,6 +547,28 @@ namespace AD.OpenXml.Visitors
         [Pure]
         [NotNull]
         protected virtual IOpenXmlVisitor VisitStyles([NotNull] IOpenXmlVisitor subject)
+        {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
+            return Create(subject);
+        }
+
+        /// <summary>
+        /// Visit the <see cref="Numbering"/> of the subject.
+        /// </summary>
+        /// <param name="subject">
+        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="OpenXmlVisitor"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [NotNull]
+        protected virtual IOpenXmlVisitor VisitNumbering([NotNull] IOpenXmlVisitor subject)
         {
             if (subject is null)
             {
