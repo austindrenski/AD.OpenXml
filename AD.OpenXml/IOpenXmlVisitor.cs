@@ -92,7 +92,7 @@ namespace AD.OpenXml
         IOpenXmlVisitor Fold([NotNull] IOpenXmlVisitor subject);
         
         /// <summary>
-        /// Visit and join the component documents into this <see cref="IOpenXmlVisitor"/>.
+        /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
         /// </summary>
         /// <param name="files">
         /// The files to visit.

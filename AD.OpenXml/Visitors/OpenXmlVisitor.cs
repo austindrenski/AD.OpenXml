@@ -265,9 +265,15 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject">
         /// The <see cref="IOpenXmlVisitor"/> that is folded into this <see cref="IOpenXmlVisitor"/>.
         /// </param>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         public virtual IOpenXmlVisitor Fold(IOpenXmlVisitor subject)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             return Create(StaticFold(this, subject));
         }
 
@@ -280,9 +286,19 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject">
         /// The <see cref="IOpenXmlVisitor"/> that is folded into the <paramref name="source"/>.
         /// </param>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
-        private static OpenXmlVisitor StaticFold(IOpenXmlVisitor source, IOpenXmlVisitor subject)
+        private static OpenXmlVisitor StaticFold([NotNull] IOpenXmlVisitor source, [NotNull] IOpenXmlVisitor subject)
         {
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             XElement document =
                 new XElement(
                     source.Document.Name,
@@ -365,60 +381,6 @@ namespace AD.OpenXml.Visitors
             IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteRelationVisitor, NextDocumentRelationId);
 
             return documentRelationVisitor;
-
-            //XElement document =
-            //    new XElement(
-            //        Document.Name,
-            //        Document.Attributes(),
-            //        new XElement(
-            //            Document.Elements().First().Name,
-            //            Document.Elements().First().Elements(),
-            //            documentRelationVisitor.Document.Elements().First().Elements()));
-
-            //document = document.RemoveDuplicateSectionProperties();
-
-            //XElement footnotes =
-            //    new XElement(
-            //        Footnotes.Name,
-            //        Footnotes.Attributes(),
-            //        Footnotes.Elements()
-            //                 .Union(
-            //                     documentRelationVisitor.Footnotes.Elements(),
-            //                     XNode.EqualityComparer));
-
-            //XElement footnoteRelations =
-            //    new XElement(
-            //        FootnoteRelations.Name,
-            //        FootnoteRelations.Attributes(),
-            //        FootnoteRelations.Elements()
-            //                         .Union(
-            //                             documentRelationVisitor.FootnoteRelations.Elements(),
-            //                             XNode.EqualityComparer));
-
-            //XElement documentRelations =
-            //    new XElement(
-            //        DocumentRelations.Name,
-            //        DocumentRelations.Attributes(),
-            //        DocumentRelations.Elements()
-            //                         .Union(
-            //                             documentRelationVisitor.DocumentRelations.Elements(),
-            //                             XNode.EqualityComparer));
-
-            //XElement contentTypes =
-            //    new XElement(
-            //        ContentTypes.Name,
-            //        ContentTypes.Attributes(),
-            //        ContentTypes.Elements()
-            //                    .Union(
-            //                        documentRelationVisitor.ContentTypes.Elements(),
-            //                        XNode.EqualityComparer));
-
-            //IEnumerable<ChartInformation> charts =
-            //    Charts.Union(
-            //        documentRelationVisitor.Charts,
-            //        ChartInformation.Comparer);
-
-            //return Create(new OpenXmlVisitor(contentTypes, document, documentRelations, footnotes, footnoteRelations, charts));
         }
 
         /// <summary>
