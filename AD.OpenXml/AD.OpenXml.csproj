@@ -94,8 +94,6 @@
     <Compile Include="Html\ConvertTableCells.cs" />
     <Compile Include="Html\ConvertTables.cs" />
     <Compile Include="Html\ConvertTextNodes.cs" />
-    <Compile Include="Documents\AddAltChunkToDocumentRelationships.cs" />
-    <Compile Include="Documents\AddDefaultExtensionsToContentTypes.cs" />
     <Compile Include="Documents\AddFooters.cs" />
     <Compile Include="Documents\AddHeaders.cs" />
     <Compile Include="Documents\AddStyles.cs" />
@@ -104,7 +102,6 @@
     <Compile Include="Documents\PositionChartsInline.cs" />
     <Compile Include="Documents\PositionChartsInner.cs" />
     <Compile Include="Documents\PositionChartsOuter.cs" />
-    <Compile Include="Elements\AddAltChunk.cs" />
     <Compile Include="Elements\AddFigureCaption.cs" />
     <Compile Include="Elements\AddLineBreakToHeadings.cs" />
     <Compile Include="Elements\AddTableCaption.cs" />
@@ -121,7 +118,7 @@
     <Compile Include="Elements\RemoveRunPropertiesFromParagraphProperties.cs" />
     <Compile Include="Elements\SetTableStyles.cs" />
     <Compile Include="Html\HtmlConverter.cs" />
-    <Compile Include="Packaging\EnumerateChartPaths.cs" />
+    <Compile Include="Documents\EnumerateChartPaths.cs" />
     <Compile Include="ProcessHtml.cs" />
     <Compile Include="Visitors\ReportVisitor.cs" />
   </ItemGroup>
