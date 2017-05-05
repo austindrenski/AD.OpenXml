@@ -5,7 +5,7 @@ using System.Linq;
 using AD.IO;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Packaging
+namespace AD.OpenXml.Documents
 {
     /// <summary>
     /// Enumerates chart file paths in the target document that start like 'word/charts' but not like 'word/charts/_rels'.
