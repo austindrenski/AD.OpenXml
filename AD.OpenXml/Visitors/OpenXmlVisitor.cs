@@ -250,6 +250,7 @@ namespace AD.OpenXml.Visitors
             ContentTypes.WriteInto(result, "[Content_Types].xml");
             DocumentRelations.WriteInto(result, "word/_rels/document.xml.rels");
             FootnoteRelations.WriteInto(result, "word/_rels/footnotes.xml.rels");
+            Styles.WriteInto(result, "word/styles.xml");
             foreach (ChartInformation item in Charts)
             {
                 item.Chart.WriteInto(result, $"word/{item.Name}");

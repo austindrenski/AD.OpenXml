@@ -147,6 +147,7 @@ namespace AD.OpenXml.Visitors
         /// A new <see cref="OpenXmlVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         protected override IOpenXmlVisitor VisitStyles(IOpenXmlVisitor subject)
         {
             if (subject is null)
