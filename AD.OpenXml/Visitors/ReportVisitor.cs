@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using AD.IO;
+using AD.OpenXml.Visits;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visitors
@@ -28,41 +30,24 @@ namespace AD.OpenXml.Visitors
         /// </param>
         /// <exception cref="ArgumentNullException"/>
         private ReportVisitor([NotNull] OpenXmlVisitor openXmlVisitor) : base(openXmlVisitor) { }
-
-        /// <summary>
-        /// Visit and join the component documents into the <see cref="OpenXmlVisitor"/>.
-        /// </summary>
-        /// <param name="files">
-        /// The files to visit.
-        /// </param>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        public override OpenXmlVisitor Visit(IEnumerable<DocxFilePath> files)
+ 
+        protected override OpenXmlVisitor Create(OpenXmlVisitor subject)
         {
-            if (files is null)
-            {
-                throw new ArgumentNullException(nameof(files));
-            }
-
-            return new ReportVisitor(base.Visit(files));
+            return new ReportVisitor(subject);
         }
 
-        /// <summary>
-        /// Visit and join the component document into the <see cref="OpenXmlVisitor"/>.
-        /// </summary>
-        /// <param name="file">
-        /// The files to visit.
-        /// </param>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        public override OpenXmlVisitor Visit(DocxFilePath file)
+        protected override OpenXmlVisitor Create(DocxFilePath file, XElement document, XElement documentRelations, XElement contentTypes, XElement footnotes, XElement footnoteRelations, IEnumerable<ChartInformation> charts)
         {
-            if (file is null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
-
-            return new ReportVisitor(base.Visit(file));
+            return
+                new ReportVisitor(
+                    base.Create(
+                        file,
+                        document,
+                        documentRelations,
+                        contentTypes,
+                        footnotes,
+                        footnoteRelations,
+                        charts));
         }
 
         /// <summary>
@@ -83,7 +68,7 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlDocumentVisitor(subject);
+            return new OpenXmlDocumentVisit(subject).Result;
         }
 
         /// <summary>
@@ -107,7 +92,7 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlFootnoteVisitor(subject, footnoteId);
+            return new OpenXmlFootnoteVisit(subject, footnoteId).Result;
         }
 
         /// <summary>
@@ -131,7 +116,7 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlDocumentRelationVisitor(subject, documentRelationId);
+            return new OpenXmlDocumentRelationVisit(subject, documentRelationId).Result;
         }
 
         /// <summary>
@@ -155,7 +140,7 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlFootnoteRelationVisitor(subject, footnoteRelationId);
+            return new OpenXmlFootnoteRelationVisit(subject, footnoteRelationId).Result;
         }
     }
 }

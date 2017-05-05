@@ -21,7 +21,8 @@ namespace AD.OpenXml.Elements
         /// <returns></returns>
         public static XElement RemoveRsidAttributes(this XElement element)
         {
-            return element.RemoveAttributesBy(W + "rsidP")
+            return element.RemoveAttributesBy(W + "rsidDel")
+                          .RemoveAttributesBy(W + "rsidP")
                           .RemoveAttributesBy(W + "rsidR")
                           .RemoveAttributesBy(W + "rsidRDefault")
                           .RemoveAttributesBy(W + "rsidRPr")

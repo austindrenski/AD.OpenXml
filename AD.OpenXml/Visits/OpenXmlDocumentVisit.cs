@@ -3,30 +3,44 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using AD.OpenXml.Elements;
+using AD.OpenXml.Visitors;
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml.Visits
 {
     /// <summary>
     /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
     [PublicAPI]
-    public class OpenXmlDocumentVisitor : OpenXmlVisitor
+    public class OpenXmlDocumentVisit : IVisit
     {
+        [NotNull]
+        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
         /// <summary>
-        /// Active version of 'word/document.xml'.
+        /// 
         /// </summary>
-        public override XElement Document { get; }
+        public OpenXmlVisitor Result { get; }
 
         /// <summary>
         /// Marshals content from the source document to be added into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
         /// <returns>The updated document node of the source file.</returns>
-        public OpenXmlDocumentVisitor(OpenXmlVisitor subject) : base(subject)
+        public OpenXmlDocumentVisit(OpenXmlVisitor subject)
         {
-            Document = Execute(subject.Document);
+            XElement document = Execute(subject.Document);
+
+            Result =
+                new OpenXmlVisitor(
+                    subject.File,
+                    document,
+                    subject.DocumentRelations,
+                    subject.ContentTypes,
+                    subject.Footnotes,
+                    subject.FootnoteRelations,
+                    subject.Charts);
         }
 
         [Pure]
@@ -48,24 +62,24 @@ namespace AD.OpenXml.Visitors
                     .RemoveRunPropertiesFromParagraphProperties()
 
                     // Remove elements that should never exist in-line.
-                    .RemoveByAll(W + "proofErr")
-                    .RemoveByAll(W + "bookmarkStart")
+                    .RemoveByAll(W + "bCs")
                     .RemoveByAll(W + "bookmarkEnd")
-                    .RemoveByAll(W + "tblPrEx")
-                    .RemoveByAll(W + "spacing")
-                    .RemoveByAll(W + "lang")
-                    .RemoveByAll(W + "numPr")
+                    .RemoveByAll(W + "bookmarkStart")
+                    .RemoveByAll(W + "color")
                     .RemoveByAll(W + "hideMark")
+                    .RemoveByAll(W + "iCs")
+                    .RemoveByAll(W + "keepNext")
+                    .RemoveByAll(W + "lang")
+                    .RemoveByAll(W + "lastRenderedPageBreak")
+                    .RemoveByAll(W + "noProof")
                     .RemoveByAll(W + "noWrap")
+                    .RemoveByAll(W + "numPr")
+                    .RemoveByAll(W + "proofErr")
                     .RemoveByAll(W + "rFonts")
+                    .RemoveByAll(W + "spacing")
                     .RemoveByAll(W + "sz")
                     .RemoveByAll(W + "szCs")
-                    .RemoveByAll(W + "bCs")
-                    .RemoveByAll(W + "iCs")
-                    .RemoveByAll(W + "color")
-                    .RemoveByAll(W + "lastRenderedPageBreak")
-                    .RemoveByAll(W + "keepNext")
-                    .RemoveByAll(W + "noProof")
+                    .RemoveByAll(W + "tblPrEx")
 
                     // Remove elements that should almost never exist.
                     .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))

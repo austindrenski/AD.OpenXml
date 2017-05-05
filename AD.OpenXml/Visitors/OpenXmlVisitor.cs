@@ -20,47 +20,21 @@ namespace AD.OpenXml.Visitors
     /// The goal is to encapsulate OpenXML manipulations within immutable objects. Every visit operation should be a pure function.
     /// Access to <see cref="XElement"/> objects should be done with care, ensuring that objects are cloned prior to any in-place mainpulations.
     /// 
-    /// Implementers should derive two types of classes from <see cref="OpenXmlVisitor"/>: a visitor class, and one or more visitation classes.
-    /// 
     /// The derived visitor class should provide:
-    ///   1) A public constructor that implements <see cref="OpenXmlVisitor(DocxFilePath)"/>.
-    ///   2) A private constructor that implements <see cref="OpenXmlVisitor(OpenXmlVisitor)"/>.
-    ///   3) An override to the <see cref="Visit(DocxFilePath)"/> method that wraps the base implementation in the private constructor of the derived class.
-    ///   4) An override to the <see cref="Visit(IEnumerable{DocxFilePath})"/> method that wraps the base implementation in the private constructor of the derived class.
-    ///   5) An override for each desired visitor methods. The default implementations return a new deep copy of the submitted vistor.
+    ///   1) A public constructor that delegates to <see cref="OpenXmlVisitor(DocxFilePath)"/>.
+    ///   2) A private constructor that delegates to <see cref="OpenXmlVisitor(OpenXmlVisitor)"/>.
+    ///   3) Override <see cref="Create(OpenXmlVisitor)"/>.
+    ///   4) Override <see cref="Create(DocxFilePath, XElement, XElement, XElement, XElement, XElement, IEnumerable{ChartInformation})"/>.
+    ///   5) An optional override for each desired visitor method.
     /// </remarks>
     [PublicAPI]
     public class OpenXmlVisitor
     {
-        /// <summary>
-        /// Represents the 'c:' prefix seen in the markup for chart[#].xml
-        /// </summary>
         [NotNull]
-        protected static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
+        private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
-        /// <summary>
-        /// Represents the 'r:' prefix seen in the markup of [Content_Types].xml
-        /// </summary>
         [NotNull]
-        protected static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
-        /// <summary>
-        /// Represents the 'r:' prefix seen in the markup of document.xml.
-        /// </summary>
-        [NotNull]
-        protected static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
-
-        /// <summary>
-        /// The namespace declared on the [Content_Types].xml
-        /// </summary>
-        [NotNull]
-        protected static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
-
-        /// <summary>
-        /// Represents the 'w:' prefix seen in raw OpenXML documents.
-        /// </summary>
-        [NotNull]
-        protected static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// The source file for this <see cref="OpenXmlVisitor"/>.
@@ -72,37 +46,37 @@ namespace AD.OpenXml.Visitors
         /// Active version of 'word/document.xml'.
         /// </summary>
         [NotNull]
-        public virtual XElement Document { get; }
+        public XElement Document { get; }
 
         /// <summary>
         /// Active version of 'word/_rels/document.xml.rels'.
         /// </summary>
         [NotNull]
-        public virtual XElement DocumentRelations { get; }
+        public XElement DocumentRelations { get; }
 
         /// <summary>
         /// Active version of '[Content_Types].xml'.
         /// </summary>
         [NotNull]
-        public virtual XElement ContentTypes { get; }
+        public XElement ContentTypes { get; }
 
         /// <summary>
         /// Active version of 'word/footnotes.xml'.
         /// </summary>
         [NotNull]
-        public virtual XElement Footnotes { get; }
+        public XElement Footnotes { get; }
 
         /// <summary>
         /// Active version of 'word/_rels/footnotes.xml.rels'.
         /// </summary>
         [NotNull]
-        public virtual XElement FootnoteRelations { get; }
+        public XElement FootnoteRelations { get; }
 
         /// <summary>
         /// Active version of word/charts/chart#.xml.
         /// </summary>
         [NotNull]
-        public virtual IEnumerable<ChartInformation> Charts { get; }
+        public IEnumerable<ChartInformation> Charts { get; }
 
         /// <summary>
         /// Returns the last document relationship identifier in use by the container.
@@ -122,14 +96,14 @@ namespace AD.OpenXml.Visitors
         /// </summary>
         public int NextFootnoteRelationId =>
             FootnoteRelations.Elements().Count() + 1;
-        
+
         /// <summary>
         /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
         /// </summary>
         /// <param name="result">
         /// The file to which changes can be saved.
         /// </param>
-        protected OpenXmlVisitor([NotNull] DocxFilePath result)
+        public OpenXmlVisitor([NotNull] DocxFilePath result)
         {
             File = result;
 
@@ -163,7 +137,7 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject">
         /// The <see cref="OpenXmlVisitor"/> to visit.
         /// </param>
-        protected OpenXmlVisitor([NotNull] OpenXmlVisitor subject)
+        public OpenXmlVisitor([NotNull] OpenXmlVisitor subject)
         {
             File = subject.File;
             Document = subject.Document.Clone();
@@ -199,7 +173,7 @@ namespace AD.OpenXml.Visitors
         /// <param name="charts">
         /// 
         /// </param>
-        private OpenXmlVisitor([NotNull] DocxFilePath file, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement contentTypes, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] IEnumerable<ChartInformation> charts)
+        public OpenXmlVisitor([NotNull] DocxFilePath file, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement contentTypes, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] IEnumerable<ChartInformation> charts)
         {
             File = file;
             Document = document.Clone();
@@ -208,6 +182,54 @@ namespace AD.OpenXml.Visitors
             Footnotes = footnotes.Clone();
             FootnoteRelations = footnoteRelations.Clone();
             Charts = charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <returns></returns>
+        protected virtual OpenXmlVisitor Create([NotNull] OpenXmlVisitor subject)
+        {
+            return new OpenXmlVisitor(subject);
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="OpenXmlVisitor"/> from the supplied components. 
+        /// This constructor should only be called within the base class.
+        /// </summary>
+        /// <param name="file">
+        /// 
+        /// </param>
+        /// <param name="document">
+        /// 
+        /// </param>
+        /// <param name="documentRelations">
+        /// 
+        /// </param>
+        /// <param name="contentTypes">
+        /// 
+        /// </param>
+        /// <param name="footnotes">
+        /// 
+        /// </param>
+        /// <param name="footnoteRelations">
+        /// 
+        /// </param>
+        /// <param name="charts">
+        /// 
+        /// </param>
+        protected virtual OpenXmlVisitor Create([NotNull] DocxFilePath file, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement contentTypes, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] IEnumerable<ChartInformation> charts)
+        {
+            return
+                new OpenXmlVisitor(
+                    File,
+                    document,
+                    documentRelations,
+                    contentTypes,
+                    footnotes,
+                    footnoteRelations,
+                    charts);
         }
 
         /// <summary>
@@ -323,7 +345,7 @@ namespace AD.OpenXml.Visitors
                     ChartInformation.Comparer);
 
             return
-                new OpenXmlVisitor(
+                Create(
                     File,
                     document,
                     documentRelations,
@@ -352,7 +374,7 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlVisitor(subject);
+            return Create(subject);
         }
 
         /// <summary>
@@ -377,7 +399,7 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlVisitor(subject);
+            return Create(subject);
         }
 
         /// <summary>
@@ -402,7 +424,7 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlVisitor(subject);
+            return Create(subject);
         }
 
         /// <summary>
@@ -427,7 +449,7 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlVisitor(subject);
+            return Create(subject);
         }
     }
 }

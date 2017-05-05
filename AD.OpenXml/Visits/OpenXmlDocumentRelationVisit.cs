@@ -3,36 +3,37 @@ using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Elements;
+using AD.OpenXml.Visitors;
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml.Visits
 {
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public class OpenXmlDocumentRelationVisitor : OpenXmlVisitor
+    public class OpenXmlDocumentRelationVisit : IVisit
     {
-        /// <summary>
-        /// Active version of 'word/document.xml'.
-        /// </summary>
-        public override XElement Document { get; }
+        [NotNull]
+        private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
+
+        [NotNull]
+        private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
+
+        [NotNull]
+        private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
+
+        [NotNull]
+        private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
+
+        [NotNull]
+        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
-        /// Active version of 'word/_rels/document.xml.rels'.
+        /// 
         /// </summary>
-        public override XElement DocumentRelations { get; }
-
-        /// <summary>
-        /// Active version of '[Content_Types].xml'.
-        /// </summary>
-        public override XElement ContentTypes { get; }
-
-        /// <summary>
-        /// Active version of word/charts/chart#.xml.
-        /// </summary>
-        public override IEnumerable<ChartInformation> Charts{ get; }
+        public OpenXmlVisitor Result { get; }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
@@ -40,9 +41,20 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject">The file from which content is copied.</param>
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
-        public OpenXmlDocumentRelationVisitor(OpenXmlVisitor subject, int documentRelationId) : base(subject)
+        public OpenXmlDocumentRelationVisit(OpenXmlVisitor subject, int documentRelationId)
         {
-            (Document, DocumentRelations, ContentTypes, Charts) = Execute(subject.Document, subject.DocumentRelations, subject.ContentTypes, subject.Charts, documentRelationId);
+            (var document, var documentRelations, var contentTypes, var charts) = 
+                Execute(subject.Document, subject.DocumentRelations, subject.ContentTypes, subject.Charts, documentRelationId);
+
+            Result = 
+                new OpenXmlVisitor(
+                    subject.File, 
+                    document, 
+                    documentRelations, 
+                    contentTypes,
+                    subject.Footnotes,
+                    subject.FootnoteRelations,
+                    charts);
         }
 
         /// <summary>

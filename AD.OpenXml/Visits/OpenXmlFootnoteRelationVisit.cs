@@ -3,26 +3,28 @@ using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Elements;
+using AD.OpenXml.Visitors;
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml.Visits
 {
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public class OpenXmlFootnoteRelationVisitor : OpenXmlVisitor
+    public sealed class OpenXmlFootnoteRelationVisit : IVisit
     {
-        /// <summary>
-        /// Active version of 'word/footnotes.xml'.
-        /// </summary>
-        public override XElement Footnotes { get; }
+        [NotNull]
+        private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
+
+        [NotNull]
+        private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
         /// <summary>
-        /// Active version of 'word/_rels/footnotes.xml.rels'.
+        /// 
         /// </summary>
-        public override XElement FootnoteRelations { get; }
+        public OpenXmlVisitor Result { get; }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
@@ -30,9 +32,19 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject">The file from which content is copied.</param>
         /// <param name="footnoteRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
-        public OpenXmlFootnoteRelationVisitor(OpenXmlVisitor subject, int footnoteRelationId) : base(subject)
+        public OpenXmlFootnoteRelationVisit(OpenXmlVisitor subject, int footnoteRelationId)
         {
-            (Footnotes, FootnoteRelations) = Execute(subject.Footnotes, subject.FootnoteRelations, footnoteRelationId);
+            (var footnotes, var footnoteRelations) = Execute(subject.Footnotes, subject.FootnoteRelations, footnoteRelationId);
+
+            Result =
+                new OpenXmlVisitor(
+                    subject.File,
+                    subject.Document,
+                    subject.DocumentRelations,
+                    subject.ContentTypes,
+                    footnotes,
+                    footnoteRelations,
+                    subject.Charts);
         }
 
         [Pure]
