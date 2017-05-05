@@ -122,7 +122,7 @@ namespace AD.OpenXml.Visitors
         /// </summary>
         public int NextFootnoteRelationId =>
             FootnoteRelations.Elements().Count() + 1;
-
+        
         /// <summary>
         /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
         /// </summary>
@@ -133,23 +133,21 @@ namespace AD.OpenXml.Visitors
         {
             File = result;
 
-            XElement document = 
+            Document = 
                 result.ReadAsXml() ?? throw new FileNotFoundException("document.xml");
-
-            Document = document;
 
             ContentTypes = 
                 result.ReadAsXml("[Content_Types].xml") ?? throw new FileNotFoundException("[Content_Types].xml");
             
             Footnotes =
-                result.ReadAsXml("word/footnotes.xml") ?? new XElement(W + "footnotes");
+                result.ReadAsXml("word/footnotes.xml") ?? throw new FileNotFoundException("word/footnotes.xml");
 
             XElement documentRelations =
                 DocumentRelations =
-                    result.ReadAsXml("word/_rels/document.xml.rels") ?? new XElement(P + "Relationships");
+                    result.ReadAsXml("word/_rels/document.xml.rels") ?? throw new FileNotFoundException("word/_rels/document.xml.rels");
 
             FootnoteRelations =
-                result.ReadAsXml("word/_rels/footnotes.xml.rels") ?? new XElement(P + "Relationships");
+                result.ReadAsXml("word/_rels/footnotes.xml.rels") ?? throw new FileNotFoundException("word/_rels/footnotes.xml.rels");
 
             Charts =
                 documentRelations.Elements()
@@ -195,20 +193,20 @@ namespace AD.OpenXml.Visitors
         /// <param name="footnotes">
         /// 
         /// </param>
-        /// <param name="foonoteRelations">
+        /// <param name="footnoteRelations">
         /// 
         /// </param>
         /// <param name="charts">
         /// 
         /// </param>
-        private OpenXmlVisitor([NotNull] DocxFilePath file, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement contentTypes, [NotNull] XElement footnotes, [NotNull] XElement foonoteRelations, [NotNull] IEnumerable<ChartInformation> charts)
+        private OpenXmlVisitor([NotNull] DocxFilePath file, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement contentTypes, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] IEnumerable<ChartInformation> charts)
         {
             File = file;
             Document = document.Clone();
             DocumentRelations = documentRelations.Clone();
             ContentTypes = contentTypes.Clone();
             Footnotes = footnotes.Clone();
-            FootnoteRelations = foonoteRelations.Clone();
+            FootnoteRelations = footnoteRelations.Clone();
             Charts = charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
         }
 
@@ -249,7 +247,6 @@ namespace AD.OpenXml.Visitors
 
             return files.Aggregate(this, (current, next) => current.Visit(next));
         }
-
 
         /// <summary>
         /// Visit and join the component document into the <see cref="OpenXmlVisitor"/>.

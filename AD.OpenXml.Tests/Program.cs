@@ -129,7 +129,7 @@ namespace AD.OpenXml.Tests
             DocxFilePath output = DocxFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.docx", true);
 
             // Add footnotes file
-            output.AddFootnotes();
+            //output.AddFootnotes();
             
             // Create a ReportVisitor based on the result path and visit the component doucments.
             OpenXmlVisitor visitor = new ReportVisitor(output).Visit(files);

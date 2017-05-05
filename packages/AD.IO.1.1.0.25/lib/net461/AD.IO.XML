@@ -116,6 +116,34 @@
             &lt;/w:ftr&gt;.
              </summary>
         </member>
+        <member name="P:AD.IO.Properties.Resources.footnotes">
+             <summary>
+               Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+            &lt;w:footnotes xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
+              &lt;w:footnote w:type=&quot;separator&quot; w:id=&quot;-1&quot;&gt;
+                &lt;w:p&gt;
+                  &lt;w:pPr&gt;
+                    &lt;w:spacing w:after=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+                  &lt;/w:pPr&gt;
+                  &lt;w:r&gt;
+                    &lt;w:separator/&gt;
+                  &lt;/w:r&gt;
+                &lt;/w:p&gt;
+              &lt;/w:footnote&gt;
+              &lt;w:footnote w:type=&quot;continuationSeparator&quot; w:id=&quot;0&quot;&gt;
+                &lt;w:p&gt;
+                  &lt;w:pPr&gt;
+                    &lt;w:spacing w:after=&quot;0&quot; w:line=&quot;240&quot; w:lineRule= [rest of string was truncated]&quot;;.
+             </summary>
+        </member>
+        <member name="P:AD.IO.Properties.Resources.footnotes_xml_rels">
+             <summary>
+               Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+            &lt;Relationships xmlns=&quot;http://schemas.openxmlformats.org/package/2006/relationships&quot;&gt;
+              
+            &lt;/Relationships&gt;.
+             </summary>
+        </member>
         <member name="P:AD.IO.Properties.Resources.header1">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;

@@ -30,7 +30,7 @@ namespace AD.OpenXml.Documents
             new XElement(
                     packageRelation.Name,
                     packageRelation.Attributes(),
-                    packageRelation.Elements().Where(x => !x.Attribute("PartName")?.Value.StartsWith("/word/footntoes") ?? true),
+                    packageRelation.Elements().Where(x => !x.Attribute("PartName")?.Value.StartsWith("/word/footnotes") ?? true),
                     new XElement(
                         T + "Override",
                         new XAttribute("PartName", "/word/footnotes.xml"),
