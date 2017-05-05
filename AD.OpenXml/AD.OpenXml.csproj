@@ -70,8 +70,8 @@
     <Compile Include="Documents\ModifyAreaChart.cs" />
     <Compile Include="Elements\RemoveDuplicateSectionProperties.cs" />
     <Compile Include="Visitors\ChartInformation.cs" />
-    <Compile Include="Visitors\IOpenXmlVisitor.cs" />
-    <Compile Include="Visits\IOpenXmlVisit.cs" />
+    <Compile Include="IOpenXmlVisitor.cs" />
+    <Compile Include="IOpenXmlVisit.cs" />
     <Compile Include="Visits\DocumentRelationVisit.cs" />
     <Compile Include="Visits\DocumentVisit.cs" />
     <Compile Include="Visits\FootnoteRelationVisit.cs" />

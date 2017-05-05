@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
+using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml
 {
     /// <summary>
     /// Represents a visitor or rewriter for OpenXML documents.

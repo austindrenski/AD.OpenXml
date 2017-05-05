@@ -1,7 +1,7 @@
-﻿using AD.OpenXml.Visitors;
+﻿using System.Linq;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visits
+namespace AD.OpenXml
 {
     /// <summary>
     /// 
