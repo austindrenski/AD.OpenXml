@@ -49,6 +49,12 @@ namespace AD.OpenXml
         XElement Footnotes { get; }
 
         /// <summary>
+        /// word/styles.xml
+        /// </summary>
+        [NotNull]
+        XElement Styles { get; }
+
+        /// <summary>
         /// The current document relation number incremented by one.
         /// </summary>
         int NextDocumentRelationId { get; }

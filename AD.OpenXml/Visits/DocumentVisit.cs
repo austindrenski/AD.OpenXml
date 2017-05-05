@@ -13,7 +13,7 @@ namespace AD.OpenXml.Visits
     /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
     [PublicAPI]
-    public class DocumentVisit : IOpenXmlVisit
+    public sealed class DocumentVisit : IOpenXmlVisit
     {
         [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
@@ -39,6 +39,7 @@ namespace AD.OpenXml.Visits
                     subject.DocumentRelations,
                     subject.Footnotes,
                     subject.FootnoteRelations,
+                    subject.Styles,
                     subject.Charts);
         }
 

@@ -121,6 +121,7 @@
     <Compile Include="Documents\EnumerateChartPaths.cs" />
     <Compile Include="ProcessHtml.cs" />
     <Compile Include="Visitors\ReportVisitor.cs" />
+    <Compile Include="Visits\StyleVisit.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\[Content_Types].xml" />

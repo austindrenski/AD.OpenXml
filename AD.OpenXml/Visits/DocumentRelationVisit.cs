@@ -13,7 +13,7 @@ namespace AD.OpenXml.Visits
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public class DocumentRelationVisit : IOpenXmlVisit
+    public sealed class DocumentRelationVisit : IOpenXmlVisit
     {
         [NotNull]
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
@@ -53,6 +53,7 @@ namespace AD.OpenXml.Visits
                     documentRelations,
                     subject.Footnotes,
                     subject.FootnoteRelations,
+                    subject.Styles,
                     charts);
         }
 

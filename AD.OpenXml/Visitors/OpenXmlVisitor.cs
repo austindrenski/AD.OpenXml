@@ -66,6 +66,11 @@ namespace AD.OpenXml.Visitors
         public XElement Footnotes { get; }
 
         /// <summary>
+        /// word/styles.xml
+        /// </summary>
+        public XElement Styles { get; }
+
+        /// <summary>
         /// The current document relation number incremented by one.
         /// </summary>
         public int NextDocumentRelationId =>
@@ -113,6 +118,9 @@ namespace AD.OpenXml.Visitors
             FootnoteRelations =
                 result.ReadAsXml("word/_rels/footnotes.xml.rels") ?? new XElement(P + "Relationships");
 
+            Styles =
+                result.ReadAsXml("word/styles.xml") ?? new XElement(W + "styles");
+
             Charts =
                 result.ReadAsXml("word/_rels/document.xml.rels")
                       .Elements()
@@ -141,6 +149,7 @@ namespace AD.OpenXml.Visitors
             ContentTypes = subject.ContentTypes.Clone();
             Footnotes = subject.Footnotes.Clone();
             FootnoteRelations = subject.FootnoteRelations.Clone();
+            Styles = subject.Styles.Clone();
             Charts = subject.Charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
         }
 
@@ -162,10 +171,11 @@ namespace AD.OpenXml.Visitors
         /// <param name="footnoteRelations">
         /// 
         /// </param>
+        /// <param name="styles"></param>
         /// <param name="charts">
         /// 
         /// </param>
-        public OpenXmlVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] IEnumerable<ChartInformation> charts)
+        public OpenXmlVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] IEnumerable<ChartInformation> charts)
         {
             if (contentTypes is null)
             {
@@ -187,6 +197,10 @@ namespace AD.OpenXml.Visitors
             {
                 throw new ArgumentNullException(nameof(footnoteRelations));
             }
+            if (styles is null)
+            {
+                throw new ArgumentNullException(nameof(styles));
+            }
             if (charts is null)
             {
                 throw new ArgumentNullException(nameof(charts));
@@ -197,6 +211,7 @@ namespace AD.OpenXml.Visitors
             DocumentRelations = documentRelations.Clone();
             Footnotes = footnotes.Clone();
             FootnoteRelations = footnoteRelations.Clone();
+            Styles = styles.Clone();
             Charts = charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
         }
 
@@ -350,13 +365,23 @@ namespace AD.OpenXml.Visitors
                               subject.ContentTypes.Elements(),
                               XNode.EqualityComparer));
 
+            XElement styles =
+                new XElement(
+                    source.Styles.Name,
+                    source.Styles.Attributes(),
+                    source.Styles
+                          .Elements()
+                          .Union(
+                              subject.Styles.Elements(),
+                              XNode.EqualityComparer));
+
             IEnumerable<ChartInformation> charts =
                 source.Charts
                       .Union(
                           subject.Charts,
                           ChartInformation.Comparer);
 
-            return new OpenXmlVisitor(contentTypes, document, documentRelations, footnotes, footnoteRelations, charts);
+            return new OpenXmlVisitor(contentTypes, document, documentRelations, footnotes, footnoteRelations, styles, charts);
         }
 
         /// <summary>
@@ -379,8 +404,9 @@ namespace AD.OpenXml.Visitors
             IOpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId);
             IOpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(footnoteVisitor, NextFootnoteRelationId);
             IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteRelationVisitor, NextDocumentRelationId);
+            IOpenXmlVisitor styleVisitor = VisitStyles(documentRelationVisitor);
 
-            return documentRelationVisitor;
+            return styleVisitor;
         }
 
         /// <summary>
@@ -471,6 +497,28 @@ namespace AD.OpenXml.Visitors
         [Pure]
         [NotNull]
         protected virtual IOpenXmlVisitor VisitFootnoteRelations([NotNull] IOpenXmlVisitor subject, int footnoteRelationId)
+        {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
+            return Create(subject);
+        }
+
+        /// <summary>
+        /// Visit the <see cref="Styles"/> of the subject.
+        /// </summary>
+        /// <param name="subject">
+        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="OpenXmlVisitor"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [NotNull]
+        protected virtual IOpenXmlVisitor VisitStyles([NotNull] IOpenXmlVisitor subject)
         {
             if (subject is null)
             {

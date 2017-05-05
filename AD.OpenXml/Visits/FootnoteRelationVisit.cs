@@ -43,6 +43,7 @@ namespace AD.OpenXml.Visits
                     subject.DocumentRelations,
                     footnotes,
                     footnoteRelations,
+                    subject.Styles,
                     subject.Charts);
         }
 
