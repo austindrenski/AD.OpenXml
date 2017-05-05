@@ -4,27 +4,26 @@ using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Elements;
+using AD.OpenXml.Visitors;
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml.Visits
 {
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public class OpenXmlFootnoteVisitor : OpenXmlVisitor
+    public class FootnoteVisit : IOpenXmlVisit
     {
+        [NotNull]
+        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
         /// <summary>
-        /// Active version of 'word/document.xml'.
+        /// 
         /// </summary>
-        public override XElement Document { get; }
-        
-        /// <summary>
-        /// Active version of 'word/footnotes.xml'.
-        /// </summary>
-        public override XElement Footnotes { get; }
-        
+        public IOpenXmlVisitor Result { get; }
+
         /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
@@ -37,9 +36,18 @@ namespace AD.OpenXml.Visitors
         /// <returns>
         /// The updated document node of the source file.
         /// </returns>
-        public OpenXmlFootnoteVisitor(OpenXmlVisitor subject, int footnoteId) : base(subject)
+        public FootnoteVisit(IOpenXmlVisitor subject, int footnoteId)
         {
-            (Document, Footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId);
+            (var document, var footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId);
+
+             Result =
+                new OpenXmlVisitor(
+                    subject.ContentTypes,
+                    document,
+                    subject.DocumentRelations,
+                    footnotes,
+                    subject.FootnoteRelations,
+                    subject.Charts);
         }
 
         [Pure]
@@ -62,25 +70,25 @@ namespace AD.OpenXml.Visitors
                     // Remove run properties from the paragraph scope.
                     .RemoveRunPropertiesFromParagraphProperties()
 
-                    // Remove elements that should never exist in-line.                         
-                    .RemoveByAll(W + "proofErr")
-                    .RemoveByAll(W + "bookmarkStart")
+                    // Remove elements that should never exist in-line.
+                    .RemoveByAll(W + "bCs")
                     .RemoveByAll(W + "bookmarkEnd")
-                    .RemoveByAll(W + "tblPrEx")
-                    .RemoveByAll(W + "spacing")
-                    .RemoveByAll(W + "lang")
-                    .RemoveByAll(W + "numPr")
+                    .RemoveByAll(W + "bookmarkStart")
+                    .RemoveByAll(W + "color")
                     .RemoveByAll(W + "hideMark")
+                    .RemoveByAll(W + "iCs")
+                    .RemoveByAll(W + "keepNext")
+                    .RemoveByAll(W + "lang")
+                    .RemoveByAll(W + "lastRenderedPageBreak")
+                    .RemoveByAll(W + "noProof")
                     .RemoveByAll(W + "noWrap")
+                    .RemoveByAll(W + "numPr")
+                    .RemoveByAll(W + "proofErr")
                     .RemoveByAll(W + "rFonts")
+                    .RemoveByAll(W + "spacing")
                     .RemoveByAll(W + "sz")
                     .RemoveByAll(W + "szCs")
-                    .RemoveByAll(W + "bCs")
-                    .RemoveByAll(W + "iCs")
-                    .RemoveByAll(W + "color")
-                    .RemoveByAll(W + "lastRenderedPageBreak")
-                    .RemoveByAll(W + "keepNext")
-                    .RemoveByAll(W + "noProof")
+                    .RemoveByAll(W + "tblPrEx")
 
                     // Remove elements that should almost never exist.
                     .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
@@ -120,8 +128,10 @@ namespace AD.OpenXml.Visitors
 
             IEnumerable<(string oldId, string newId)> footnoteMapping =
                 modifiedFootnotes.Elements(W + "footnote")
-                                 .Select(x => x.Attribute(W + "id"))
-                                 .OrderBy(x => x?.Value.ParseInt())
+                                 .Select(
+                                    x => x.Attribute(W + "id"))
+                                 .OrderBy(
+                                    x => x?.Value.ParseInt())
                                  .Select(
                                      (x, i) => (oldId: x.Value, newId: $"{footnoteId + i}"))
                                  .OrderByDescending(x => x.oldId.ParseInt())
@@ -135,8 +145,7 @@ namespace AD.OpenXml.Visitors
                 modifiedFootnotes =
                     modifiedFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
             }
-
-
+            
 
             XElement resultFootnotes =
                 new XElement(

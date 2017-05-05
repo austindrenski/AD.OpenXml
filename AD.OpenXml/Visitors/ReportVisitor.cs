@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using AD.IO;
+using AD.OpenXml.Visits;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visitors
@@ -17,7 +17,6 @@ namespace AD.OpenXml.Visitors
         /// <param name="result">
         /// The base path used to initialize the new <see cref="ReportVisitor"/>.
         /// </param>
-        /// <exception cref="ArgumentNullException"/>
         public ReportVisitor([NotNull] DocxFilePath result) : base(result) { }
 
         /// <summary>
@@ -26,136 +25,115 @@ namespace AD.OpenXml.Visitors
         /// <param name="openXmlVisitor">
         /// The <see cref="OpenXmlVisitor"/> used to initialize the new <see cref="ReportVisitor"/>.
         /// </param>
-        /// <exception cref="ArgumentNullException"/>
-        private ReportVisitor([NotNull] OpenXmlVisitor openXmlVisitor) : base(openXmlVisitor) { }
+        private ReportVisitor([NotNull] IOpenXmlVisitor openXmlVisitor) : base(openXmlVisitor) { }
 
         /// <summary>
-        /// Visit and join the component documents into the <see cref="OpenXmlVisitor"/>.
+        /// 
         /// </summary>
-        /// <param name="files">
-        /// The files to visit.
-        /// </param>
+        /// <param name="subject"></param>
+        /// <returns></returns>
         /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        public override OpenXmlVisitor Visit(IEnumerable<DocxFilePath> files)
-        {
-            if (files is null)
-            {
-                throw new ArgumentNullException(nameof(files));
-            }
-
-            return new ReportVisitor(base.Visit(files));
-        }
-
-        /// <summary>
-        /// Visit and join the component document into the <see cref="OpenXmlVisitor"/>.
-        /// </summary>
-        /// <param name="file">
-        /// The files to visit.
-        /// </param>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        public override OpenXmlVisitor Visit(DocxFilePath file)
-        {
-            if (file is null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
-
-            return new ReportVisitor(base.Visit(file));
-        }
-
-        /// <summary>
-        /// Visit the <see cref="OpenXmlVisitor.Document"/> of the subject.
-        /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
-        /// </param>
-        /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        protected override OpenXmlVisitor VisitDocument(OpenXmlVisitor subject)
+        protected override IOpenXmlVisitor Create(IOpenXmlVisitor subject)
         {
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlDocumentVisitor(subject);
+            return new ReportVisitor(subject);
         }
 
         /// <summary>
-        /// Visit the <see cref="OpenXmlVisitor.Footnotes"/> of the subject.
+        /// Visit the <see cref="IOpenXmlVisitor.Document"/> of the subject.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="IOpenXmlVisitor"/> to visit.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="IOpenXmlVisitor"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        protected override IOpenXmlVisitor VisitDocument(IOpenXmlVisitor subject)
+        {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
+            return new DocumentVisit(subject).Result;
+        }
+
+        /// <summary>
+        /// Visit the <see cref="IOpenXmlVisitor.Footnotes"/> of the subject.
+        /// </summary>
+        /// <param name="subject">
+        /// The <see cref="IOpenXmlVisitor"/> to visit.
         /// </param>
         /// <param name="footnoteId">
         /// The current footnote identifier.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="IOpenXmlVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override OpenXmlVisitor VisitFootnotes(OpenXmlVisitor subject, int footnoteId)
+        protected override IOpenXmlVisitor VisitFootnotes(IOpenXmlVisitor subject, int footnoteId)
         {
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlFootnoteVisitor(subject, footnoteId);
+            return new FootnoteVisit(subject, footnoteId).Result;
         }
 
         /// <summary>
-        /// Visit the <see cref="OpenXmlVisitor.Document"/> and <see cref="OpenXmlVisitor.DocumentRelations"/> of the subject to modify hyperlinks in the main document.
+        /// Visit the <see cref="IOpenXmlVisitor.Document"/> and <see cref="IOpenXmlVisitor.DocumentRelations"/> of the subject to modify hyperlinks in the main document.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="IOpenXmlVisitor"/> to visit.
         /// </param>
         /// <param name="documentRelationId">
         /// The current document relationship identifier.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="IOpenXmlVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override OpenXmlVisitor VisitDocumentRelations(OpenXmlVisitor subject, int documentRelationId)
+        protected override IOpenXmlVisitor VisitDocumentRelations(IOpenXmlVisitor subject, int documentRelationId)
         {
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlDocumentRelationVisitor(subject, documentRelationId);
+            return new DocumentRelationVisit(subject, documentRelationId).Result;
         }
 
         /// <summary>
-        /// Visit the <see cref="OpenXmlVisitor.Footnotes"/> and <see cref="OpenXmlVisitor.FootnoteRelations"/> of the subject to modify hyperlinks in the main document.
+        /// Visit the <see cref="IOpenXmlVisitor.Footnotes"/> and <see cref="IOpenXmlVisitor.FootnoteRelations"/> of the subject to modify hyperlinks in the main document.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="IOpenXmlVisitor"/> to visit.
         /// </param>
         /// <param name="footnoteRelationId">
         /// The current footnote relationship identifier.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="IOpenXmlVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override OpenXmlVisitor VisitFootnoteRelations(OpenXmlVisitor subject, int footnoteRelationId)
+        protected override IOpenXmlVisitor VisitFootnoteRelations(IOpenXmlVisitor subject, int footnoteRelationId)
         {
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlFootnoteRelationVisitor(subject, footnoteRelationId);
+            return new FootnoteRelationVisit(subject, footnoteRelationId).Result;
         }
     }
 }
