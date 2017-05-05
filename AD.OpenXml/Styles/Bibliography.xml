@@ -6,6 +6,6 @@
   <w:pPr>
     <w:ind w:left="720" w:hanging="720"/>
     <w:spacing w:after="240" w:before="0" w:line="240" w:lineRule="auto"/>
-    <w:keepNext/>
+    <w:keepLines/>
   </w:pPr>
 </w:style>
