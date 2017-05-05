@@ -133,28 +133,28 @@ namespace AD.OpenXml.Visitors
         {
             File = result;
 
+            ContentTypes =
+                result.ReadAsXml("[Content_Types].xml") ?? throw new FileNotFoundException("[Content_Types].xml");
+
             Document = 
                 result.ReadAsXml() ?? throw new FileNotFoundException("document.xml");
-
-            ContentTypes = 
-                result.ReadAsXml("[Content_Types].xml") ?? throw new FileNotFoundException("[Content_Types].xml");
             
-            Footnotes =
-                result.ReadAsXml("word/footnotes.xml") ?? throw new FileNotFoundException("word/footnotes.xml");
+            DocumentRelations =
+                result.ReadAsXml("word/_rels/document.xml.rels") ?? throw new FileNotFoundException("word/_rels/document.xml.rels");
 
-            XElement documentRelations =
-                DocumentRelations =
-                    result.ReadAsXml("word/_rels/document.xml.rels") ?? throw new FileNotFoundException("word/_rels/document.xml.rels");
+            Footnotes =
+                result.ReadAsXml("word/footnotes.xml") ?? new XElement(W + "footnotes");
 
             FootnoteRelations =
-                result.ReadAsXml("word/_rels/footnotes.xml.rels") ?? throw new FileNotFoundException("word/_rels/footnotes.xml.rels");
+                result.ReadAsXml("word/_rels/footnotes.xml.rels") ?? new XElement(P + "Relationships");
 
             Charts =
-                documentRelations.Elements()
-                                 .Select(x => x.Attribute("Target")?.Value)
-                                 .Where(x => x?.StartsWith("charts/") ?? false)
-                                 .Select(x => new ChartInformation(x, result.ReadAsXml($"word/{x}")))
-                                 .ToImmutableList();
+                result.ReadAsXml("word/_rels/document.xml.rels")
+                      .Elements()
+                      .Select(x => x.Attribute("Target")?.Value)
+                      .Where(x => x?.StartsWith("charts/") ?? false)
+                      .Select(x => new ChartInformation(x, result.ReadAsXml($"word/{x}")))
+                      .ToImmutableList();
         }
 
         /// <summary>
