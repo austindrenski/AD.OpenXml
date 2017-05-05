@@ -76,6 +76,7 @@ namespace AD.OpenXml.Visits
                     .RemoveByAll(W + "numPr")
                     .RemoveByAll(W + "proofErr")
                     .RemoveByAll(W + "rFonts")
+                    .RemoveByAll(W + "shd")
                     .RemoveByAll(W + "spacing")
                     .RemoveByAll(W + "sz")
                     .RemoveByAll(W + "szCs")
