@@ -107,11 +107,9 @@ namespace AD.OpenXml.Documents
                             .Where(x => x.Attribute("Target")?.Value.Contains("numbering") ?? false)
                             .Remove();
 
-            int documentId = documentRelation.Elements().Attributes("Id").Select(x => int.Parse(x.Value.Substring(3))).Max();
-
             documentRelation.Add(
                 new XElement(R + "Relationship",
-                    new XAttribute("Id", $"rId{++documentId}"),
+                    new XAttribute("Id", $"rId{documentRelation.Elements().Count() + 1}"),
                     new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
                     new XAttribute("Target", "numbering.xml")));
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
