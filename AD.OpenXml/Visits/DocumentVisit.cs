@@ -13,7 +13,7 @@ namespace AD.OpenXml.Visits
     /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
     [PublicAPI]
-    public class OpenXmlDocumentVisit : IVisit
+    public class DocumentVisit : IOpenXmlVisit
     {
         [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
@@ -21,23 +21,22 @@ namespace AD.OpenXml.Visits
         /// <summary>
         /// 
         /// </summary>
-        public OpenXmlVisitor Result { get; }
+        public IOpenXmlVisitor Result { get; }
 
         /// <summary>
         /// Marshals content from the source document to be added into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
         /// <returns>The updated document node of the source file.</returns>
-        public OpenXmlDocumentVisit(OpenXmlVisitor subject)
+        public DocumentVisit(IOpenXmlVisitor subject)
         {
             XElement document = Execute(subject.Document);
 
             Result =
                 new OpenXmlVisitor(
-                    subject.File,
+                    subject.ContentTypes,
                     document,
                     subject.DocumentRelations,
-                    subject.ContentTypes,
                     subject.Footnotes,
                     subject.FootnoteRelations,
                     subject.Charts);

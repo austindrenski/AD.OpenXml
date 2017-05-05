@@ -7,11 +7,11 @@ namespace AD.OpenXml.Visits
     /// 
     /// </summary>
     [PublicAPI]
-    public interface IVisit
+    public interface IOpenXmlVisit
     {
         /// <summary>
         /// 
         /// </summary>
-        OpenXmlVisitor Result { get; }
+        IOpenXmlVisitor Result { get; }
     }
 }
