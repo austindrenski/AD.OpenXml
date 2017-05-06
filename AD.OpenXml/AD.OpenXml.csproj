@@ -96,7 +96,6 @@
     <Compile Include="Html\ConvertTextNodes.cs" />
     <Compile Include="Documents\AddFooters.cs" />
     <Compile Include="Documents\AddHeaders.cs" />
-    <Compile Include="Documents\AddNumbering.cs" />
     <Compile Include="Documents\ModifyBarChartStyles.cs" />
     <Compile Include="Documents\ModifyLineChartStyles.cs" />
     <Compile Include="Documents\PositionChartsInline.cs" />

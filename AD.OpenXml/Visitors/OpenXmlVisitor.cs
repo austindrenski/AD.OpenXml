@@ -429,9 +429,9 @@ namespace AD.OpenXml.Visitors
             IOpenXmlVisitor subject = new OpenXmlVisitor(file);
             IOpenXmlVisitor documentVisitor = VisitDocument(subject);
             IOpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId);
-            IOpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(footnoteVisitor, NextFootnoteRelationId);
-            IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteRelationVisitor, NextDocumentRelationId);
-            IOpenXmlVisitor styleVisitor = VisitStyles(documentRelationVisitor);
+            IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteVisitor, NextDocumentRelationId);
+            IOpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(documentRelationVisitor, NextFootnoteRelationId);
+            IOpenXmlVisitor styleVisitor = VisitStyles(footnoteRelationVisitor);
             IOpenXmlVisitor numberingVisitor = VisitNumbering(styleVisitor);
 
             return numberingVisitor;
