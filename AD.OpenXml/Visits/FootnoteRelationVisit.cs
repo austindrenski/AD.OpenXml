@@ -59,30 +59,66 @@ namespace AD.OpenXml.Visits
             XElement nextFootnoteRelations =
                 footnoteRelations.RemoveRsidAttributes() ?? new XElement(P + "Relationships");
 
+            //var footnoteRelationMapping =
+            //    nextFootnoteRelations.Descendants(P + "Relationship")
+            //                         .Attributes("Id")
+            //                         .OrderBy(x => x.Value.ParseInt() ?? 0)
+            //                         .Select(
+            //                             (x, i) => new
+            //                             {
+            //                                 oldId = x.Value,
+            //                                 newId = $"rId{footnoteRelationId + i}"
+            //                             })
+            //                         .ToArray();
+
             var footnoteRelationMapping =
-                nextFootnoteRelations.Descendants(P + "Relationship")
-                                     .Attributes("Id")
-                                     .OrderBy(x => x.Value.ParseInt() ?? 0)
-                                     .Select(
-                                         (x, i) => new
-                                         {
-                                             oldId = x.Value,
-                                             newId = $"rId{footnoteRelationId + i}"
-                                         })
-                                     .ToArray();
+                footnoteRelations.RemoveRsidAttributes()
+                                 .Descendants(P + "Relationship")
+                                 .Select(
+                                     x => new
+                                     {
+                                         Id = x.Attribute("Id"),
+                                         Type = x.Attribute("Type"),
+                                         Target = x.Attribute("Target"),
+                                         TargetMode = x.Attribute("TargetMode")
+                                     })
+                                 .OrderBy(x => x.Id.Value.ParseInt())
+                                 .Select(
+                                     (x, i) => new
+                                     {
+                                         oldId = x.Id,
+                                         newId = new XAttribute("Id", $"rId{footnoteRelationId + i}"),
+                                         x.Type,
+                                         x.Target,
+                                         x.TargetMode
+                                     })
+                                 .ToArray();
 
             XElement modifiedFootnotes = footnotes.Clone();
 
             foreach (var map in footnoteRelationMapping)
             {
                 modifiedFootnotes =
-                    modifiedFootnotes.ChangeXAttributeValues(R + "id", map.oldId, map.newId);
+                    modifiedFootnotes.ChangeXAttributeValues(R + "id", (string) map.oldId, (string) map.newId);
 
-                nextFootnoteRelations =
-                    nextFootnoteRelations.ChangeXAttributeValues("Id", map.oldId, map.newId);
+                //nextFootnoteRelations =
+                //    nextFootnoteRelations.ChangeXAttributeValues("Id", (string) map.oldId, (string) map.newId);
             }
-            
-            return (modifiedFootnotes, nextFootnoteRelations);
+
+
+            XElement modifiedFootnoteRelations =
+                new XElement(
+                    footnoteRelations.Name,
+                    footnoteRelationMapping.Select(
+                        x =>
+                            new XElement(
+                                P + "Relationship",
+                                x.newId,
+                                x.Type,
+                                x.Target,
+                                x.TargetMode)));
+
+            return (modifiedFootnotes, modifiedFootnoteRelations);
         }
     }
 }

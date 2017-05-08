@@ -69,11 +69,11 @@ namespace AD.OpenXml.Visits
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
         private static (XElement Document, XElement DocumentRelations, XElement ContentTypes, IEnumerable<ChartInformation> Charts) Execute(XElement document, XElement documentRelations, XElement contentTypes, IEnumerable<ChartInformation> charts, int documentRelationId)
-        { 
+        {
             var documentRelationMapping =
                 documentRelations.Descendants(P + "Relationship")
-                                 .Where(x => x.Attribute("Type")?.Value == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart"
-                                          || x.Attribute("Type")?.Value == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink")
+                                 .Where(x => (string) x.Attribute("Type") == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart"
+                                             || (string) x.Attribute("Type") == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink")
                                  .Select(
                                      x => new
                                      {
@@ -90,7 +90,9 @@ namespace AD.OpenXml.Visits
                                          newId = new XAttribute("Id", $"rId{documentRelationId + i}"),
                                          x.Type,
                                          oldTarget = x.Target,
-                                         newTarget = x.Target.Value.StartsWith("charts/") ? new XAttribute("Target", $"charts/chart{documentRelationId + i}.xml") : x.Target,
+                                         newTarget = x.Target.Value.StartsWith("charts/")
+                                                         ? new XAttribute("Target", $"charts/chart{documentRelationId + i}.xml")
+                                                         : x.Target,
                                          x.TargetMode
                                      })
                                  .ToArray();
@@ -122,7 +124,7 @@ namespace AD.OpenXml.Visits
             foreach (var map in documentRelationMapping)
             {
                 modifiedDocument =
-                    modifiedDocument.ChangeXAttributeValues(R + "id", map.oldId.Value, map.newId.Value);
+                    modifiedDocument.ChangeXAttributeValues(R + "id", (string) map.oldId, (string) map.newId);
             }
 
             XElement modifiedDocumentRelations =

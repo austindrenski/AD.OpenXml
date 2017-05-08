@@ -98,6 +98,18 @@ namespace AD.OpenXml.Visitors
             FootnoteRelations.Elements().Count() + 1;
 
         /// <summary>
+        /// The current tracked changes number in the document incremented by one.
+        /// </summary>
+        public int NextDocumentTrackedChangesId =>
+            Document.Descendants().Where(x => x.Name == W + "del" || x.Name == W + "ins").Distinct().Count() + 1;
+
+        /// <summary>
+        /// The current tracked changes number in the footnotes incremented by one.
+        /// </summary>
+        public int NextFootnoteTrackedChangesId =>
+            Footnotes.Descendants().Where(x => x.Name == W + "del" || x.Name == W + "ins").Distinct().Count() + 1;
+
+        /// <summary>
         /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
         /// </summary>
         /// <param name="result">
@@ -291,12 +303,19 @@ namespace AD.OpenXml.Visitors
             }
 
             Document.WriteInto(result, "word/document.xml");
+
             Footnotes.WriteInto(result, "word/footnotes.xml");
+
             ContentTypes.WriteInto(result, "[Content_Types].xml");
+
             DocumentRelations.WriteInto(result, "word/_rels/document.xml.rels");
+
             FootnoteRelations.WriteInto(result, "word/_rels/footnotes.xml.rels");
+
             Styles.WriteInto(result, "word/styles.xml");
+
             Numbering.WriteInto(result, "word/numbering.xml");
+
             foreach (ChartInformation item in Charts)
             {
                 item.Chart.WriteInto(result, $"word/{item.Name}");
@@ -304,21 +323,29 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
+        /// Visit and join the component document into the <see cref="IOpenXmlVisitor"/>.
         /// </summary>
-        /// <param name="files">
+        /// <param name="file">
         /// The files to visit.
         /// </param>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        public virtual IOpenXmlVisitor VisitAndFold(IEnumerable<DocxFilePath> files)
+        public virtual IOpenXmlVisitor Visit(DocxFilePath file)
         {
-            if (files is null)
+            if (file is null)
             {
-                throw new ArgumentNullException(nameof(files));
+                throw new ArgumentNullException(nameof(file));
             }
 
-            return files.Aggregate(this as IOpenXmlVisitor, (current, next) => current.Fold(current.Visit(next)));
+            IOpenXmlVisitor subject = new OpenXmlVisitor(file);
+            IOpenXmlVisitor documentVisitor = VisitDocument(subject, NextDocumentTrackedChangesId);
+            IOpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId, NextFootnoteTrackedChangesId);
+            IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteVisitor, NextDocumentRelationId);
+            IOpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(documentRelationVisitor, NextFootnoteRelationId);
+            IOpenXmlVisitor styleVisitor = VisitStyles(footnoteRelationVisitor);
+            IOpenXmlVisitor numberingVisitor = VisitNumbering(styleVisitor);
+
+            return numberingVisitor;
         }
 
         /// <summary>
@@ -340,6 +367,24 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
+        /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
+        /// </summary>
+        /// <param name="files">
+        /// The files to visit.
+        /// </param>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        public virtual IOpenXmlVisitor VisitAndFold(IEnumerable<DocxFilePath> files)
+        {
+            if (files is null)
+            {
+                throw new ArgumentNullException(nameof(files));
+            }
+
+            return files.Aggregate(this as IOpenXmlVisitor, (current, next) => current.Fold(current.Visit(next)));
+        }
+        
+        /// <summary>
         /// Folds <paramref name="subject"/> into this <paramref name="source"/>.
         /// </summary>
         /// <param name="source">
@@ -350,6 +395,7 @@ namespace AD.OpenXml.Visitors
         /// </param>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
+        [NotNull]
         private static OpenXmlVisitor StaticFold([NotNull] IOpenXmlVisitor source, [NotNull] IOpenXmlVisitor subject)
         {
             if (source is null)
@@ -442,36 +488,13 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Visit and join the component document into the <see cref="IOpenXmlVisitor"/>.
-        /// </summary>
-        /// <param name="file">
-        /// The files to visit.
-        /// </param>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        public virtual IOpenXmlVisitor Visit(DocxFilePath file)
-        {
-            if (file is null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
-
-            IOpenXmlVisitor subject = new OpenXmlVisitor(file);
-            IOpenXmlVisitor documentVisitor = VisitDocument(subject);
-            IOpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId);
-            IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteVisitor, NextDocumentRelationId);
-            IOpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(documentRelationVisitor, NextFootnoteRelationId);
-            IOpenXmlVisitor styleVisitor = VisitStyles(footnoteRelationVisitor);
-            IOpenXmlVisitor numberingVisitor = VisitNumbering(styleVisitor);
-
-            return numberingVisitor;
-        }
-
-        /// <summary>
         /// Visit the <see cref="Document"/> of the subject.
         /// </summary>
         /// <param name="subject">
         /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// </param>
+        /// <param name="documentTrackedChangesId">
+        /// The current document tracked changes number incremented by one.
         /// </param>
         /// <returns>
         /// A new <see cref="OpenXmlVisitor"/>.
@@ -479,7 +502,7 @@ namespace AD.OpenXml.Visitors
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual IOpenXmlVisitor VisitDocument([NotNull] IOpenXmlVisitor subject)
+        protected virtual IOpenXmlVisitor VisitDocument([NotNull] IOpenXmlVisitor subject, int documentTrackedChangesId)
         {
             if (subject is null)
             {
@@ -498,13 +521,16 @@ namespace AD.OpenXml.Visitors
         /// <param name="footnoteId">
         /// The current footnote identifier.
         /// </param>
+        /// <param name="footnoteTrackedChangesId">
+        /// The current footnote tracked changes number incremented by one.
+        /// </param>
         /// <returns>
         /// A new <see cref="OpenXmlVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual IOpenXmlVisitor VisitFootnotes([NotNull] IOpenXmlVisitor subject, int footnoteId)
+        protected virtual IOpenXmlVisitor VisitFootnotes([NotNull] IOpenXmlVisitor subject, int footnoteId, int footnoteTrackedChangesId)
         {
             if (subject is null)
             {

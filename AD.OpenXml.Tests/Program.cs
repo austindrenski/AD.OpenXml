@@ -16,20 +16,19 @@ namespace AD.OpenXml.Tests
         {
             // Declare working directory
             const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\editorial review";
-            //const string workingDirectory = "Z:\\Records\\Operations\\Economics\\Sec 332\\Active Cases\\OTAP 2016\\Draft report\\OLD\\Content Review";
 
             // Declare version
-            const string version = "3_3";
+            const string version = "3_4";
 
-            // Process chapters
-            ProcessChapter(version, $"{workingDirectory}\\ch0");
-            ProcessChapter(version, $"{workingDirectory}\\ch1");
-            ProcessChapter(version, $"{workingDirectory}\\ch2");
-            ProcessChapter(version, $"{workingDirectory}\\ch3");
-            ProcessChapter(version, $"{workingDirectory}\\ch4");
-            ProcessChapter(version, $"{workingDirectory}\\ch5");
+            //// Process chapters
+            //ProcessChapter(version, $"{workingDirectory}\\ch0");
+            //ProcessChapter(version, $"{workingDirectory}\\ch1");
+            //ProcessChapter(version, $"{workingDirectory}\\ch2");
+            //ProcessChapter(version, $"{workingDirectory}\\ch3");
+            //ProcessChapter(version, $"{workingDirectory}\\ch4");
+            //ProcessChapter(version, $"{workingDirectory}\\ch5");
             ProcessChapter(version, $"{workingDirectory}\\ch6");
-            ProcessChapter(version, $"{workingDirectory}\\ch7");
+            //ProcessChapter(version, $"{workingDirectory}\\ch7");
 
             #region Report from original components
 

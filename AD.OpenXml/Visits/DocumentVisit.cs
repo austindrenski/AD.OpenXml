@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using AD.IO;
 using AD.OpenXml.Elements;
 using AD.OpenXml.Visitors;
 using AD.Xml;
@@ -27,10 +28,13 @@ namespace AD.OpenXml.Visits
         /// Marshals content from the source document to be added into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
+        /// <param name="documentTrackedChangesId">
+        /// The current document tracked changes number incremented by one.
+        /// </param>
         /// <returns>The updated document node of the source file.</returns>
-        public DocumentVisit(IOpenXmlVisitor subject)
+        public DocumentVisit(IOpenXmlVisitor subject, int documentTrackedChangesId)
         {
-            XElement document = Execute(subject.Document);
+            XElement document = Execute(subject.Document, documentTrackedChangesId);
 
             Result =
                 new OpenXmlVisitor(
@@ -46,7 +50,7 @@ namespace AD.OpenXml.Visits
 
         [Pure]
         [NotNull]
-        private static XElement Execute([NotNull] XElement document)
+        private static XElement Execute([NotNull] XElement document, int documentTrackedChangesId)
         {
             if (document is null)
             {
@@ -82,6 +86,11 @@ namespace AD.OpenXml.Visits
                     .RemoveByAll(W + "sz")
                     .RemoveByAll(W + "szCs")
                     .RemoveByAll(W + "tblPrEx")
+                    .RemoveByAll(W + "commentRangeStart")
+                    .RemoveByAll(W + "commentRangeEnd")
+                    .RemoveByAll(W + "commentReference")
+                    .RemoveByAll(x => (string) x.Attribute(W + "val") == "CommentReference")
+                    .RemoveByAll(W + "author")
 
                     // Remove elements that should almost never exist.
                     .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
@@ -144,6 +153,29 @@ namespace AD.OpenXml.Visits
                 runProperties.AddFirst(distinct);
             }
 
+            var trackedChangeMapping =
+                source.Descendants()
+                      .Where(x => x.Name == W + "ins" || x.Name == W + "del")
+                      .Attributes(W + "id")
+                      .OrderBy(x => x.Value.ParseInt())
+                      .Select(
+                          (x, i) => new
+                          {
+                              oldId = x,
+                              newId = new XAttribute(W + "id", $"{documentTrackedChangesId + i}")
+                          })
+                      .ToArray();
+
+
+            foreach (var map in trackedChangeMapping)
+            {
+                source =
+                    source.ChangeXAttributeValues(W + "del", (string)map.oldId, (string)map.newId);
+
+                source =
+                    source.ChangeXAttributeValues(W + "ins", (string)map.oldId, (string)map.newId);
+            }
+            
             source.Descendants(W + "sectPr").Attributes().Remove();
 
             source.Descendants(W + "p").Attributes().Remove();

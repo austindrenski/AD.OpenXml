@@ -49,19 +49,22 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject">
         /// The <see cref="IOpenXmlVisitor"/> to visit.
         /// </param>
+        /// <param name="documentTrackedChangesId">
+        /// The current document tracked changes number incremented by one.
+        /// </param>
         /// <returns>
         /// A new <see cref="IOpenXmlVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override IOpenXmlVisitor VisitDocument(IOpenXmlVisitor subject)
+        protected override IOpenXmlVisitor VisitDocument(IOpenXmlVisitor subject, int documentTrackedChangesId)
         {
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return Create(new DocumentVisit(subject).Result);
+            return Create(new DocumentVisit(subject, documentTrackedChangesId).Result);
         }
 
         /// <summary>
@@ -73,19 +76,22 @@ namespace AD.OpenXml.Visitors
         /// <param name="footnoteId">
         /// The current footnote identifier.
         /// </param>
+        /// <param name="footnoteTrackedChangesId">
+        /// The current footnote tracked changes number incremented by one.
+        /// </param>
         /// <returns>
         /// A new <see cref="IOpenXmlVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override IOpenXmlVisitor VisitFootnotes(IOpenXmlVisitor subject, int footnoteId)
+        protected override IOpenXmlVisitor VisitFootnotes(IOpenXmlVisitor subject, int footnoteId, int footnoteTrackedChangesId)
         {
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new FootnoteVisit(subject, footnoteId).Result;
+            return new FootnoteVisit(subject, footnoteId, footnoteTrackedChangesId).Result;
         }
 
         /// <summary>
