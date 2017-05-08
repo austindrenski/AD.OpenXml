@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using AD.OpenXml.Properties;
 using AD.OpenXml.Visitors;
 using AD.Xml;
@@ -34,14 +32,13 @@ namespace AD.OpenXml.Visits
         /// <param name="subject"></param>
         public NumberingVisit(IOpenXmlVisitor subject)
         {
-            (XElement numbering, XElement documentRelations, XElement contentTypes) = 
-                Execute(subject.DocumentRelations, subject.ContentTypes, subject.NextDocumentRelationId);
+            XElement numbering = Execute();
 
             Result =
                 new OpenXmlVisitor(
-                    contentTypes,
+                    subject.ContentTypes,
                     subject.Document,
-                    documentRelations,
+                    subject.DocumentRelations,
                     subject.Footnotes,
                     subject.FootnoteRelations,
                     subject.Styles,
@@ -50,42 +47,12 @@ namespace AD.OpenXml.Visits
         }
 
         [Pure]
-        private static (XElement Numbering, XElement DocumentRelations, XElement ContentTypes) 
-            Execute(XElement documentRelation, XElement contentTypes, int documentRelationId)
+        private static XElement Execute()
         {
-            if (documentRelation is null)
-            {
-                throw new ArgumentNullException(nameof(documentRelation));
-            }
-            if (contentTypes is null)
-            {
-                throw new ArgumentNullException(nameof(contentTypes));
-            }
-
             XElement numbering =
-                XElement.Parse(Resources.Numbering);
-            
-            XElement modifiedDocumentRelations =
-                new XElement(
-                    documentRelation.Name,
-                    documentRelation.Attributes(),
-                    documentRelation.Elements().Where(x => x.Attribute("Tartget")?.Value == "numbering.xml"),
-                    new XElement(
-                        P + "Relationship",
-                        new XAttribute("Id", $"rId{documentRelationId}"),
-                        new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
-                        new XAttribute("Target", "numbering.xml")));
+                XElement.Parse(Resources.Numbering);         
 
-            XElement modifiedContentTypes =
-                new XElement(
-                    contentTypes.Name,
-                    contentTypes.Attributes(),
-                    contentTypes.Elements().Where(x => x.Attribute("PartName")?.Value == "/word/numbering.xml"),
-                    new XElement(T + "Override",
-                        new XAttribute("PartName", "/word/numbering.xml"),
-                        new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml")));
-
-            return (numbering, modifiedDocumentRelations, modifiedContentTypes);
+            return numbering;
         }
     }
 }

@@ -33,6 +33,9 @@ namespace AD.OpenXml.Visitors
         private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
         [NotNull]
+        private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
+
+        [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
@@ -127,7 +130,34 @@ namespace AD.OpenXml.Visitors
                 result.ReadAsXml("word/styles.xml") ?? throw new FileNotFoundException("word/styles.xml");
 
             Numbering =
-                result.ReadAsXml("word/numbering.xml") ?? new XElement(W + "numbering");
+                result.ReadAsXml("word/numbering.xml");
+
+            if (Numbering is null)
+            {
+                Numbering = new XElement(W + "numbering");
+
+                DocumentRelations =
+                    new XElement(
+                        DocumentRelations.Name,
+                        DocumentRelations.Attributes(),
+                        DocumentRelations.Elements()
+                                         .Where(x => !x.Attribute("Tartget")?.Value.Equals("numbering.xml", StringComparison.OrdinalIgnoreCase) ?? true),
+                        new XElement(
+                            P + "Relationship",
+                            new XAttribute("Id", $"rId{NextDocumentRelationId}"),
+                            new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
+                            new XAttribute("Target", "numbering.xml")));
+
+                ContentTypes =
+                    new XElement(
+                        ContentTypes.Name,
+                        ContentTypes.Attributes(),
+                        ContentTypes.Elements()
+                                    .Where(x => !x.Attribute("PartName")?.Value.Equals("/word/numbering.xml", StringComparison.OrdinalIgnoreCase) ?? true),
+                        new XElement(T + "Override",
+                            new XAttribute("PartName", "/word/numbering.xml"),
+                            new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml")));
+            }
 
             Charts =
                 result.ReadAsXml("word/_rels/document.xml.rels")

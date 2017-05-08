@@ -23,6 +23,9 @@
       <w:right w:w="58" w:type="dxa" />
     </w:tblCellMar>
   </w:tblPr>
+  <w:trPr>
+    <w:cantSplit/>
+  </w:trPr>
   <w:tcPr>
     <w:shd w:val="clear" w:color="auto" w:fill="auto" />
   </w:tcPr>
@@ -31,6 +34,9 @@
       <w:b />
     </w:rPr>
     <w:tblPr />
+    <w:trPr>
+      <w:tblHeader w:val="true"/>
+    </w:trPr>
     <w:tcPr>
       <w:tcBorders>
         <w:bottom w:val="single" w:sz="4" w:space="0" w:color="005070" />
