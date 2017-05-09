@@ -18,6 +18,18 @@ namespace AD.OpenXml.Visits
     {
         [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        
+        [NotNull]
+        private static readonly IEnumerable<XName> Revisions =
+            new XName[]
+            {
+                W + "ins",
+                W + "del",
+                W + "rPrChange",
+                W + "moveToRangeStart",
+                W + "moveToRangeEnd",
+                W + "moveTo"
+            };
 
         /// <summary>
         /// 
@@ -33,15 +45,15 @@ namespace AD.OpenXml.Visits
         /// <param name="footnoteId">
         /// The last footnote number currently in use by the container.
         /// </param>
-        /// <param name="footnoteTrackedChangesId">
-        /// The current footnote tracked changes number incremented by one.
+        /// <param name="revisionId">
+        /// The current revision number incremented by one.
         /// </param>
         /// <returns>
         /// The updated document node of the source file.
         /// </returns>
-        public FootnoteVisit(IOpenXmlVisitor subject, int footnoteId, int footnoteTrackedChangesId)
+        public FootnoteVisit(IOpenXmlVisitor subject, int footnoteId, int revisionId)
         {
-            (var document, var footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId, footnoteTrackedChangesId);
+            (var document, var footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId, revisionId);
 
              Result =
                 new OpenXmlVisitor(
@@ -56,7 +68,7 @@ namespace AD.OpenXml.Visits
         }
 
         [Pure]
-        private static (XElement Document, XElement Footnotes) Execute(XElement footnotes, XElement document, int footnoteId, int footnoteTrackedChangesId)
+        private static (XElement Document, XElement Footnotes) Execute(XElement footnotes, XElement document, int footnoteId, int revisionId)
         {
             if (footnotes is null)
             {
@@ -149,65 +161,33 @@ namespace AD.OpenXml.Visits
 
             foreach ((string oldId, string newId) map in footnoteMapping)
             {
-                foreach (XAttribute attribute in document.Descendants(W + "footnoteReference").Attributes(W + "id").Where(x => x.Value == map.oldId))
-                {
-                    attribute.SetValue(map.newId);
-                }
-                
-                foreach (XAttribute attribute in modifiedFootnotes.Descendants(W + "footnote").Attributes(W + "id").Where(x => x.Value == map.oldId))
-                {
-                    attribute.SetValue(map.newId);
-                }
-
-                //document =
-                //    document.ChangeXAttributeValues(W + "footnoteReference", W + "id", map.oldId, map.newId);
-
-                //modifiedFootnotes =
-                //    modifiedFootnotes.ChangeXAttributeValues(W + "footnote", W + "id", map.oldId, map.newId);
-
+                document.Descendants(W + "footnoteReference").Attributes(W + "id").Single(x => x.Value == map.oldId).SetValue(map.newId);
+                modifiedFootnotes.Descendants(W + "footnote").Attributes(W + "id").Single(x => x.Value == map.oldId).SetValue(map.newId);
             }
 
-            //Console.WriteLine("ins + del attributes:");
-            //modifiedFootnotes.Descendants()
-            //                 .Where(x => x.Name == W + "ins" || x.Name == W + "del")
-            //                 .ToList()
-            //                 .ForEach(x => Console.WriteLine($"{x.Name}: {(string) x.Attribute(W + "id")}"));
-
-            //Console.WriteLine("ins + del mappings:");
-            //modifiedFootnotes.Descendants()
-            //                 .Where(x => x.Name == W + "ins" || x.Name == W + "del")
-            //                 .Attributes(W + "id")
-            //                 .OrderBy(x => x.Value.ParseInt())
-            //                 .Select(
-            //                     (x, i) => new
-            //                     {
-            //                         oldId = x,
-            //                         newId = new XAttribute(W + "id", $"{footnoteTrackedChangesId + i}")
-            //                     })
-            //                 .ToList()
-            //                 .ForEach(x => Console.WriteLine($"old: {x.oldId}, new: {x.newId}"));
-
-            var trackedChangeMapping =
+            var revisionMapping =
                 modifiedFootnotes.Descendants()
-                                 .Where(x => x.Name == W + "ins" || x.Name == W + "del")
-                                 .Attributes(W + "id")
-                                 .OrderBy(x => x.Value.ParseInt())
+                                 .Where(x => Revisions.Contains(x.Name))
+                                 .OrderBy(x => x.Attribute(W + "id")?.Value.ParseInt())
                                  .Select(
-                                     (x, i) => new
+                                     x => new
                                      {
-                                         oldId = x,
-                                         newId = new XAttribute(W + "id", $"{footnoteTrackedChangesId + i}")
+                                         type = x.Name,
+                                         oldId = x.Attribute(W + "id"),
+                                         newId = new XAttribute(W + "id", $"{revisionId + x.Attribute(W + "id")?.Value.ParseInt()}")
                                      })
+                                 .OrderByDescending(x => x.oldId.Value.ParseInt())
                                  .ToArray();
 
+            revisionMapping.ToList()
+                           .ForEach(x => Console.WriteLine($"type: {x.type}, old: {x.oldId}, new: {x.newId}"));
 
-            foreach (var map in trackedChangeMapping)
+            foreach (XName revision in Revisions)
             {
-                modifiedFootnotes =
-                    modifiedFootnotes.ChangeXAttributeValues(W + "del", (string) map.oldId, (string) map.newId);
-
-                modifiedFootnotes =
-                    modifiedFootnotes.ChangeXAttributeValues(W + "ins", (string)map.oldId, (string)map.newId);
+                foreach (var map in revisionMapping)
+                {
+                    modifiedFootnotes = modifiedFootnotes.ChangeXAttributeValues(revision, W + "id", (string) map.oldId, (string) map.newId);
+                }
             }
 
             XElement resultFootnotes =

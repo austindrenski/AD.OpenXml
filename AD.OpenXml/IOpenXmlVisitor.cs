@@ -76,15 +76,10 @@ namespace AD.OpenXml
         int NextFootnoteRelationId { get; }
 
         /// <summary>
-        /// The current tracked changes number in the document incremented by one.
+        /// The current revision number incremented by one.
         /// </summary>
-        int NextDocumentTrackedChangesId { get; }
-
-        /// <summary>
-        /// The current tracked changes number in the footnotes incremented by one.
-        /// </summary>
-        int NextFootnoteTrackedChangesId { get; }
-
+        int NextRevisionId { get; }
+        
         /// <summary>
         /// Writes the <see cref="IOpenXmlVisitor"/> to the <see cref="DocxFilePath"/>.
         /// </summary>

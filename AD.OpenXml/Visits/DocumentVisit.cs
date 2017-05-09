@@ -19,6 +19,18 @@ namespace AD.OpenXml.Visits
         [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
+        [NotNull]
+        private static readonly IEnumerable<XName> Revisions =
+            new XName[]
+            {
+                W + "ins",
+                W + "del",
+                W + "rPrChange",
+                W + "moveToRangeStart",
+                W + "moveToRangeEnd",
+                W + "moveTo"
+            };
+
         /// <summary>
         /// 
         /// </summary>
@@ -28,13 +40,13 @@ namespace AD.OpenXml.Visits
         /// Marshals content from the source document to be added into the container.
         /// </summary>
         /// <param name="subject">The file from which content is copied.</param>
-        /// <param name="documentTrackedChangesId">
-        /// The current document tracked changes number incremented by one.
+        /// <param name="revisionId">
+        /// The current revision number incremented by one.
         /// </param>
         /// <returns>The updated document node of the source file.</returns>
-        public DocumentVisit(IOpenXmlVisitor subject, int documentTrackedChangesId)
+        public DocumentVisit(IOpenXmlVisitor subject, int revisionId)
         {
-            XElement document = Execute(subject.Document, documentTrackedChangesId);
+            XElement document = Execute(subject.Document, revisionId);
 
             Result =
                 new OpenXmlVisitor(
@@ -50,7 +62,7 @@ namespace AD.OpenXml.Visits
 
         [Pure]
         [NotNull]
-        private static XElement Execute([NotNull] XElement document, int documentTrackedChangesId)
+        private static XElement Execute([NotNull] XElement document, int revisionId)
         {
             if (document is null)
             {
@@ -153,29 +165,28 @@ namespace AD.OpenXml.Visits
                 runProperties.AddFirst(distinct);
             }
 
-            var trackedChangeMapping =
+            var revisionMapping =
                 source.Descendants()
-                      .Where(x => x.Name == W + "ins" || x.Name == W + "del")
+                      .Where(x => Revisions.Contains(x.Name))
                       .Attributes(W + "id")
                       .OrderBy(x => x.Value.ParseInt())
                       .Select(
-                          (x, i) => new
+                          x => new
                           {
                               oldId = x,
-                              newId = new XAttribute(W + "id", $"{documentTrackedChangesId + i}")
+                              newId = new XAttribute(W + "id", $"{revisionId + x.Value.ParseInt()}")
                           })
+                      .OrderByDescending(x => x.oldId.Value.ParseInt())
                       .ToArray();
 
-
-            foreach (var map in trackedChangeMapping)
+            foreach (XName revision in Revisions)
             {
-                source =
-                    source.ChangeXAttributeValues(W + "del", (string)map.oldId, (string)map.newId);
-
-                source =
-                    source.ChangeXAttributeValues(W + "ins", (string)map.oldId, (string)map.newId);
+                foreach (var map in revisionMapping)
+                {
+                    source = source.ChangeXAttributeValues(revision, W + "id", (string)map.oldId, (string)map.newId);
+                }
             }
-            
+
             source.Descendants(W + "sectPr").Attributes().Remove();
 
             source.Descendants(W + "p").Attributes().Remove();

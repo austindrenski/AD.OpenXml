@@ -38,6 +38,18 @@ namespace AD.OpenXml.Visitors
         [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
+        [NotNull]
+        private static readonly IEnumerable<XName> Revisions =
+            new XName[]
+            {
+                W + "ins",
+                W + "del",
+                W + "rPrChange",
+                W + "moveToRangeStart",
+                W + "moveToRangeEnd",
+                W + "moveTo"
+            };
+
         /// <summary>
         /// word/charts/chart#.xml.
         /// </summary>
@@ -100,15 +112,18 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         /// The current tracked changes number in the document incremented by one.
         /// </summary>
-        public int NextDocumentTrackedChangesId =>
-            Document.Descendants().Where(x => x.Name == W + "del" || x.Name == W + "ins").Distinct().Count() + 1;
-
-        /// <summary>
-        /// The current tracked changes number in the footnotes incremented by one.
-        /// </summary>
-        public int NextFootnoteTrackedChangesId =>
-            Footnotes.Descendants().Where(x => x.Name == W + "del" || x.Name == W + "ins").Distinct().Count() + 1;
-
+        public int NextRevisionId =>
+            Math.Max(
+                Document.Descendants()
+                        .Where(x => Revisions.Contains(x.Name))
+                        .Select(x => x.Attribute(W + "id")?.Value.ParseInt() ?? 0)
+                        .DefaultIfEmpty(0)
+                        .Max(),
+                Footnotes.Descendants()
+                         .Where(x => Revisions.Contains(x.Name))
+                         .Select(x => x.Attribute(W + "id")?.Value.ParseInt() ?? 0)
+                         .DefaultIfEmpty(0)
+                         .Max()) + 1;
         /// <summary>
         /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
         /// </summary>
@@ -338,8 +353,8 @@ namespace AD.OpenXml.Visitors
             }
 
             IOpenXmlVisitor subject = new OpenXmlVisitor(file);
-            IOpenXmlVisitor documentVisitor = VisitDocument(subject, NextDocumentTrackedChangesId);
-            IOpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId, NextFootnoteTrackedChangesId);
+            IOpenXmlVisitor documentVisitor = VisitDocument(subject, NextRevisionId);
+            IOpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId, NextRevisionId);
             IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteVisitor, NextDocumentRelationId);
             IOpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(documentRelationVisitor, NextFootnoteRelationId);
             IOpenXmlVisitor styleVisitor = VisitStyles(footnoteRelationVisitor);
@@ -493,8 +508,8 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject">
         /// The <see cref="OpenXmlVisitor"/> to visit.
         /// </param>
-        /// <param name="documentTrackedChangesId">
-        /// The current document tracked changes number incremented by one.
+        /// <param name="revisionId">
+        /// The current revision number incremented by one.
         /// </param>
         /// <returns>
         /// A new <see cref="OpenXmlVisitor"/>.
@@ -502,7 +517,7 @@ namespace AD.OpenXml.Visitors
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual IOpenXmlVisitor VisitDocument([NotNull] IOpenXmlVisitor subject, int documentTrackedChangesId)
+        protected virtual IOpenXmlVisitor VisitDocument([NotNull] IOpenXmlVisitor subject, int revisionId)
         {
             if (subject is null)
             {
@@ -521,8 +536,8 @@ namespace AD.OpenXml.Visitors
         /// <param name="footnoteId">
         /// The current footnote identifier.
         /// </param>
-        /// <param name="footnoteTrackedChangesId">
-        /// The current footnote tracked changes number incremented by one.
+        /// <param name="revisionId">
+        /// The current revision number incremented by one.
         /// </param>
         /// <returns>
         /// A new <see cref="OpenXmlVisitor"/>.
@@ -530,7 +545,7 @@ namespace AD.OpenXml.Visitors
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual IOpenXmlVisitor VisitFootnotes([NotNull] IOpenXmlVisitor subject, int footnoteId, int footnoteTrackedChangesId)
+        protected virtual IOpenXmlVisitor VisitFootnotes([NotNull] IOpenXmlVisitor subject, int footnoteId, int revisionId)
         {
             if (subject is null)
             {
