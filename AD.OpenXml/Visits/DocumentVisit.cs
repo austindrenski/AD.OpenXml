@@ -102,7 +102,6 @@ namespace AD.OpenXml.Visits
                     .RemoveByAll(W + "commentRangeEnd")
                     .RemoveByAll(W + "commentReference")
                     .RemoveByAll(x => (string) x.Attribute(W + "val") == "CommentReference")
-                    .RemoveByAll(W + "author")
 
                     // Remove elements that should almost never exist.
                     .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
@@ -157,7 +156,7 @@ namespace AD.OpenXml.Visits
             {
                 IEnumerable<XElement> styles = runProperties.Elements(W + "rStyle").ToArray();
                 styles.Remove();
-                IEnumerable<XElement> distinct = styles.Distinct().ToArray();
+                IEnumerable<XElement> distinct = styles.Distinct(XNode.EqualityComparer).Cast<XElement>().ToArray();
                 if (distinct.Any(x => x.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false))
                 {
                     distinct = distinct.Where(x => x.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false);
@@ -196,6 +195,21 @@ namespace AD.OpenXml.Visits
             if (source.Element(W + "body")?.Elements().First().Name == W + "sectPr")
             {
                 source.Element(W + "body")?.Elements().First().Remove();
+            }
+
+            if (source.Element(W + "body")?.Elements().Last().Name == W + "sectPr")
+            {
+                XElement sectionProperties = source.Element(W + "body")?.Elements().Last();
+
+                XElement previous = sectionProperties.Previous();
+
+                sectionProperties?.Remove();
+
+                if (!previous?.Elements(W + "pPr").Any() ?? false)
+                {
+                    previous?.AddFirst(new XElement(W + "pPr", sectionProperties));
+                }
+                previous?.Element(W + "pPr")?.Add(sectionProperties);
             }
 
             return source;

@@ -480,7 +480,10 @@ namespace AD.OpenXml.Visitors
                     source.Styles
                           .Elements()
                           .Union(
-                              subject.Styles.Elements(),
+                              subject.Styles
+                                     .Elements()
+                                     .Where(x => x.Name != W + "docDefaults")
+                                     .Where(x => (string) x.Attribute(W + "styleId") != "Normal"),
                               XNode.EqualityComparer));
 
             XElement numbering =

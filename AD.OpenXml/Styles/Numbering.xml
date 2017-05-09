@@ -5,8 +5,7 @@
     <w:lvl w:ilvl="0">
       <w:start w:val="1"/>
       <w:numFmt w:val="decimal"/>
-      <w:lvlText w:val="Chapter %1"/>
-      <w:suff w:val="space"/>
+      <w:lvlText w:val="Chapter %1 "/>
       <w:lvlJc w:val="left"/>
     </w:lvl>
   </w:abstractNum>
@@ -16,8 +15,7 @@
       <w:start w:val="1"/>
       <w:numFmt w:val="upperLetter"/>
       <w:pStyle w:val="Appendix"/>
-      <w:lvlText w:val="Appendix %1"/>
-      <w:suff w:val="space"/>
+      <w:lvlText w:val="Appendix %1 "/>
       <w:lvlJc w:val="left"/>
     </w:lvl>
   </w:abstractNum>

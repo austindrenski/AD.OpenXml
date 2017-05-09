@@ -56,21 +56,6 @@ namespace AD.OpenXml.Visits
                 throw new ArgumentNullException(nameof(footnotes));
             }
 
-            XElement nextFootnoteRelations =
-                footnoteRelations.RemoveRsidAttributes() ?? new XElement(P + "Relationships");
-
-            //var footnoteRelationMapping =
-            //    nextFootnoteRelations.Descendants(P + "Relationship")
-            //                         .Attributes("Id")
-            //                         .OrderBy(x => x.Value.ParseInt() ?? 0)
-            //                         .Select(
-            //                             (x, i) => new
-            //                             {
-            //                                 oldId = x.Value,
-            //                                 newId = $"rId{footnoteRelationId + i}"
-            //                             })
-            //                         .ToArray();
-
             var footnoteRelationMapping =
                 footnoteRelations.RemoveRsidAttributes()
                                  .Descendants(P + "Relationship")
@@ -100,9 +85,6 @@ namespace AD.OpenXml.Visits
             {
                 modifiedFootnotes =
                     modifiedFootnotes.ChangeXAttributeValues(R + "id", (string) map.oldId, (string) map.newId);
-
-                //nextFootnoteRelations =
-                //    nextFootnoteRelations.ChangeXAttributeValues("Id", (string) map.oldId, (string) map.newId);
             }
 
 

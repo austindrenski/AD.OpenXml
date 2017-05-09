@@ -5,9 +5,9 @@
   <w:name w:val="table of figures"/>
   <w:next w:val="Normal"/>
   <w:pPr>
-    <w:spacing w:after="0"/>
     <w:tabs>
       <w:tab w:val="right" w:leader="dot" w:pos="9360"/>
     </w:tabs>
+    <w:spacing w:after="0"/>
   </w:pPr>
 </w:style>

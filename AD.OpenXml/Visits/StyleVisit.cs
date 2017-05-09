@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 using AD.OpenXml.Properties;
 using AD.OpenXml.Visitors;
@@ -49,7 +50,7 @@ namespace AD.OpenXml.Visits
                 throw new ArgumentNullException(nameof(styles));
             }
 
-            return
+            XElement results =
                 new XElement(
                     styles.Name,
                     styles.Attributes(),
@@ -93,6 +94,33 @@ namespace AD.OpenXml.Visits
                     XElement.Parse(Resources.TOC3),
                     XElement.Parse(Resources.TOC4),
                     XElement.Parse(Resources.TOCHeading));
+
+            foreach (XElement style in results.Elements())
+            {
+                if (style.Elements().First().Name == W + "name")
+                {
+                    continue;
+                }
+
+                XElement name = style.Element(W + "name");
+                name?.Remove();
+                style.AddFirst(name);
+            }
+
+            foreach (XElement style in results.Elements())
+            {
+                if (style.Element(W + "name")?.Next()?.Name == W + "next")
+                {
+                    continue;
+                }
+
+                XElement next = style.Element(W + "next");
+                next?.Remove();
+                style.Element(W + "name")?.AddAfterSelf(next);
+            }
+
+
+            return results;
         }
     }
 }

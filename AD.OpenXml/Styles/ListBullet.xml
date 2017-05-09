@@ -5,9 +5,9 @@
   <w:name w:val="List Bullet"/>
   <w:pPr>
     <w:contextualSpacing/>
-    <w:numPr>
+    <!--<w:numPr>
       <w:numId w:val="15"/>
-    </w:numPr>
+    </w:numPr>-->
     <w:spacing w:after="240"/>
   </w:pPr>
 </w:style>

@@ -35,7 +35,7 @@
     </w:rPr>
     <w:tblPr />
     <w:trPr>
-      <w:tblHeader w:val="true"/>
+      <w:tblHeader/>
     </w:trPr>
     <w:tcPr>
       <w:tcBorders>

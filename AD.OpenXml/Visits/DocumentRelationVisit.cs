@@ -30,6 +30,9 @@ namespace AD.OpenXml.Visits
         [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
+        [NotNull]
+        private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
+
         /// <summary>
         /// 
         /// </summary>
@@ -121,10 +124,23 @@ namespace AD.OpenXml.Visits
             XElement modifiedDocument = 
                 document.RemoveRsidAttributes();
 
-            foreach (var map in documentRelationMapping)
+            foreach (XAttribute item in modifiedDocument.Descendants().Attributes(R + "id"))
             {
-                modifiedDocument =
-                    modifiedDocument.ChangeXAttributeValues(R + "id", (string) map.oldId, (string) map.newId);
+                var map = documentRelationMapping.SingleOrDefault(x => (string) x.oldId == (string) item);
+
+                if (map is null)
+                {
+                    continue;
+                }
+
+                item.SetValue((string) map.newId);
+
+                item.Parent?
+                    .Ancestors(W + "drawing")
+                    .Descendants()
+                    .Attributes("id")
+                    .SingleOrDefault()?
+                    .SetValue(map.newId.Value.ParseInt().ToString());
             }
 
             XElement modifiedDocumentRelations =

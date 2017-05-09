@@ -108,10 +108,12 @@ namespace AD.OpenXml.Documents
             XElement document = toFilePath.ReadAsXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
-                sectionProperties.Add(
-                    new XElement(W + "footerReference",
-                        new XAttribute(W + "type", "default"),
-                        new XAttribute(R + "id", footerId)));
+                sectionProperties.Elements(W + "headerReference")
+                                 .Last()
+                                 .AddAfterSelf(
+                                     new XElement(W + "footerReference",
+                                         new XAttribute(W + "type", "default"),
+                                         new XAttribute(R + "id", footerId)));
             }
             document.WriteInto(toFilePath, "word/document.xml");
 
@@ -151,10 +153,11 @@ namespace AD.OpenXml.Documents
 
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
-                sectionProperties.Add(
-                    new XElement(W + "footerReference",
-                        new XAttribute(W + "type", "even"),
-                        new XAttribute(R + "id", footerId)));
+                sectionProperties.Elements(W + "headerReference")
+                                 .Last()
+                                 .AddAfterSelf(new XElement(W + "footerReference",
+                                     new XAttribute(W + "type", "even"),
+                                     new XAttribute(R + "id", footerId)));
             }
 
             document.WriteInto(toFilePath, "word/document.xml");
