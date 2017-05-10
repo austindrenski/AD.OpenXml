@@ -83,6 +83,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AD.OpenXml.Standard\AD.OpenXml.Standard.csproj">
+      <Project>{5e86904c-f80f-40a5-bf48-5ea4790ce7af}</Project>
+      <Name>AD.OpenXml.Standard</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AD.OpenXml\AD.OpenXml.csproj">
       <Project>{16a300c9-1b25-4d68-9f97-05b8ca2766c9}</Project>
       <Name>AD.OpenXml</Name>
