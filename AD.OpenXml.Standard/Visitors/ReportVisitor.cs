@@ -1,9 +1,10 @@
 ﻿using System;
-using AD.IO;
-using AD.OpenXml.Visits;
+using System.Linq;
+using AD.IO.Standard;
+using AD.OpenXml.Standard.Visits;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml.Standard.Visitors
 {
     /// <summary>
     /// Represents a visitor or rewriter for OpenXML documents.

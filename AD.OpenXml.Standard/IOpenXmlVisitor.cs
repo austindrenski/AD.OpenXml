@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
-using AD.OpenXml.Visitors;
+using AD.IO.Standard;
+using AD.OpenXml.Standard.Visitors;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml
+namespace AD.OpenXml.Standard
 {
     /// <summary>
     /// Represents a visitor or rewriter for OpenXML documents.
@@ -84,7 +85,7 @@ namespace AD.OpenXml
         /// Writes the <see cref="IOpenXmlVisitor"/> to the <see cref="DocxFilePath"/>.
         /// </summary>
         /// <param name="result">
-        /// The file to which the <see cref="IOpenXmlVisitor"/> is written.
+        /// The file to which the <see cref="DocxFilePath"/> is written.
         /// </param>
         void Save([NotNull] DocxFilePath result);
 

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Html
+namespace AD.OpenXml.Standard.Html
 {
     /// <summary>
     /// 

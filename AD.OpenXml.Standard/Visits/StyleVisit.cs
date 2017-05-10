@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using AD.OpenXml.Properties;
-using AD.OpenXml.Visitors;
-using AD.Xml;
+using AD.OpenXml.Standard.Properties;
+using AD.OpenXml.Standard.Visitors;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visits
+namespace AD.OpenXml.Standard.Visits
 {
     /// <summary>
     /// 

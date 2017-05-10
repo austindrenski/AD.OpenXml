@@ -4,12 +4,11 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
-using AD.OpenXml.Elements;
-using AD.Xml;
+using AD.IO.Standard;
+using AD.OpenXml.Standard.Elements;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml.Standard.Visitors
 {
     /// <summary>
     /// Represents a visitor or rewriter for OpenXML documents.

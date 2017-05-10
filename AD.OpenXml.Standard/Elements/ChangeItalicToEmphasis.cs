@@ -1,8 +1,8 @@
-﻿using System.Xml.Linq;
-using AD.Xml;
+﻿using System.Linq;
+using System.Xml.Linq;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Elements
+namespace AD.OpenXml.Standard.Elements
 {
     /// <summary>
     /// Extension methods to replace &lt;i/&gt; elements with &lt;rStyle val="Emphasis"/&gt; elements.

@@ -1,6 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿using System.Linq;
+using JetBrains.Annotations;
 
-namespace AD.OpenXml
+namespace AD.OpenXml.Standard
 {
     /// <summary>
     /// 

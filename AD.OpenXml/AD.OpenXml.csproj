@@ -124,19 +124,6 @@
     <Compile Include="Visits\StyleVisit.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\[Content_Types].xml" />
-    <None Include="Resources\app.xml" />
-    <None Include="Resources\core.xml" />
-    <None Include="Resources\document.xml" />
-    <None Include="Resources\document.xml.rels.xml" />
-    <None Include="Resources\footer1.xml" />
-    <None Include="Resources\footer2.xml" />
-    <None Include="Resources\header1.xml" />
-    <None Include="Resources\header2.xml" />
-    <None Include="Resources\rels.xml" />
-    <None Include="Resources\settings.xml" />
-    <None Include="Resources\styles.xml" />
-    <None Include="Resources\theme1.xml" />
     <Content Include="Styles\Appendix.xml" />
     <Content Include="Styles\Bibliography.xml" />
     <Content Include="Styles\Box.xml" />
@@ -205,7 +192,6 @@
     <Content Include="Templates\document.xml.rels.xml" />
     <Content Include="Templates\footer1.xml" />
     <Content Include="Templates\footer2.xml" />
-    <Content Include="Resources\footnotes.xml" />
     <Content Include="Templates\footnotes.xml" />
     <Content Include="Templates\footnotes.xml.rels.xml" />
     <Content Include="Templates\header1.xml" />

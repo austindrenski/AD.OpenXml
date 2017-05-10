@@ -2,11 +2,10 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using AD.IO;
-using AD.Xml;
+using AD.IO.Standard;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Elements
+namespace AD.OpenXml.Standard.Elements
 {
     /// <summary>
     /// Set table styles to BlueTableBasic and perform basic cleaning.

@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Xml.Linq;
 using JetBrains.Annotations;
+using AD.IO.Standard;
+using AD.OpenXml.Standard.Properties;
 
 namespace AD.OpenXml.Standard.Documents
 {

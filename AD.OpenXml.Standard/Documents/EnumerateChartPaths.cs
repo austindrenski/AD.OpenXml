@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
+using AD.IO.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Standard.Documents

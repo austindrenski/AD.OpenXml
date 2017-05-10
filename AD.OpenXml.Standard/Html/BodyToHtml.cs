@@ -1,7 +1,8 @@
-﻿using System.Xml.Linq;
+﻿using System.Linq;
+using System.Xml.Linq;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Html
+namespace AD.OpenXml.Standard.Html
 {
     /// <summary>
     /// Extension methods to transform a &gt;body&lt;...&gt;/body&lt; element into a well-formed HTML document.
