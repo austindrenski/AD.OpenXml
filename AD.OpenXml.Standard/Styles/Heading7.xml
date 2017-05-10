@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:style w:type="paragraph" w:styleId="Heading7" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:locked/>
+  <w:name w:val="heading 7"/>
+  <w:next w:val="Normal"/>
+  <w:pPr>
+    <w:outlineLvl w:val="6"/>
+    <w:spacing w:after="240" w:before="0" w:line="240" w:lineRule="auto"/>
+    <w:keepNext/>
+  </w:pPr>
+  <w:rPr>
+    <w:b/>
+    <w:color w:val="005070"/>
+    <w:rFonts w:ascii="Tahoma"/>
+    <w:sz w:val="24"/>
+  </w:rPr>
+</w:style>
