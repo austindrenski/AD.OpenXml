@@ -2,8 +2,8 @@
 using System.IO;
 using System.Linq;
 using AD.IO;
-using AD.OpenXml.Standard.Documents;
-using AD.OpenXml.Standard.Visitors;
+using AD.OpenXml.Documents;
+using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Tests

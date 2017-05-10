@@ -269,10 +269,10 @@
     <value>..\Styles\TOCHeading.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="footnotes" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\footnotes.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\Templates\footnotes.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="_Content_Types_" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\[Content_Types].xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\Templates\[Content_Types].xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="footer1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Templates\footer1.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
