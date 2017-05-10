@@ -2,6 +2,7 @@
 using System.Xml.Linq;
 using AD.OpenXml.Standard.Properties;
 using AD.OpenXml.Standard.Visitors;
+using AD.Xml.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Standard.Visits
