@@ -1,0 +1,331 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" >
+  <w:style w:type="paragraph" w:styleId="ListNumber">
+    <w:name w:val="List Number"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00FA68DE"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="20"/>
+      </w:numPr>
+      <w:spacing w:after="240"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListContinue">
+    <w:name w:val="List Continue"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00FA68DE"/>
+    <w:pPr>
+      <w:spacing w:after="240"/>
+      <w:ind w:left="360"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListContinue2">
+    <w:name w:val="List Continue 2"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00FA68DE"/>
+    <w:pPr>
+      <w:spacing w:after="120"/>
+      <w:ind w:left="720"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListParagraph">
+    <w:name w:val="List Paragraph"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="34"/>
+    <w:qFormat/>
+    <w:locked/>
+    <w:rsid w:val="002D6035"/>
+    <w:pPr>
+      <w:spacing w:after="240"/>
+      <w:ind w:left="720"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListNumber2">
+    <w:name w:val="List Number 2"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00FA68DE"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="21"/>
+      </w:numPr>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListNumber3">
+    <w:name w:val="List Number 3"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00FA68DE"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="22"/>
+      </w:numPr>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListContinue5">
+    <w:name w:val="List Continue 5"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="002D6035"/>
+    <w:pPr>
+      <w:spacing w:after="120"/>
+      <w:ind w:left="1800"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListBullet4">
+    <w:name w:val="List Bullet 4"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00700C13"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="18"/>
+      </w:numPr>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListBullet3">
+    <w:name w:val="List Bullet 3"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00FA68DE"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="17"/>
+      </w:numPr>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="List3">
+    <w:name w:val="List 3"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00700C13"/>
+    <w:pPr>
+      <w:ind w:left="1080" w:hanging="360"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="List2">
+    <w:name w:val="List 2"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00700C13"/>
+    <w:pPr>
+      <w:ind w:left="720" w:hanging="360"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="List">
+    <w:name w:val="List"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00700C13"/>
+    <w:pPr>
+      <w:ind w:left="360" w:hanging="360"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="332ReportCoverTitle">
+    <w:name w:val="332 Report Cover Title"/>
+    <w:basedOn w:val="Heading1"/>
+    <w:rsid w:val="007C04B2"/>
+    <w:pPr>
+      <w:pageBreakBefore w:val="0"/>
+      <w:numPr>
+        <w:numId w:val="0"/>
+      </w:numPr>
+      <w:spacing w:before="1920" w:after="120" w:line="276" w:lineRule="auto"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:eastAsia="Times New Roman"/>
+      <w:bCs w:val="0"/>
+      <w:color w:val="F2F2F2" w:themeColor="background1" w:themeShade="F2"/>
+      <w:sz w:val="72"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="332ReportCoverSub-Title">
+    <w:name w:val="332 Report Cover Sub-Title"/>
+    <w:basedOn w:val="Heading1"/>
+    <w:rsid w:val="00AE7C7B"/>
+    <w:pPr>
+      <w:pageBreakBefore w:val="0"/>
+      <w:numPr>
+        <w:numId w:val="0"/>
+      </w:numPr>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:eastAsia="Times New Roman"/>
+      <w:b w:val="0"/>
+      <w:color w:val="F2F2F2" w:themeColor="background1" w:themeShade="F2"/>
+      <w:sz w:val="52"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="332ReportCoverReviewStage">
+    <w:name w:val="332 Report Cover Review Stage"/>
+    <w:basedOn w:val="Normal"/>
+    <w:rsid w:val="006A2470"/>
+    <w:pPr>
+      <w:spacing w:before="2800" w:after="0" w:line="240" w:lineRule="auto"/>
+      <w:ind w:left="720"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Tahoma" w:hAnsi="Tahoma"/>
+      <w:color w:val="005070"/>
+      <w:sz w:val="52"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="332ReportCoverDatePubNo">
+    <w:name w:val="332 Report Cover Date/Pub No."/>
+    <w:basedOn w:val="Normal"/>
+    <w:rsid w:val="006A2470"/>
+    <w:pPr>
+      <w:spacing w:before="3000" w:after="0" w:line="240" w:lineRule="auto"/>
+      <w:ind w:left="720"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Tahoma" w:hAnsi="Tahoma"/>
+      <w:color w:val="005070"/>
+      <w:sz w:val="32"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="332ReportCoverAgencyName">
+    <w:name w:val="332 Report Cover AgencyName"/>
+    <w:basedOn w:val="332ReportCoverTitle"/>
+    <w:qFormat/>
+    <w:rsid w:val="00B95F75"/>
+    <w:pPr>
+      <w:spacing w:before="500"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+    <w:rPr>
+      <w:color w:val="005070"/>
+      <w:sz w:val="48"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="List4">
+    <w:name w:val="List 4"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00700C13"/>
+    <w:pPr>
+      <w:ind w:left="1440" w:hanging="360"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="List5">
+    <w:name w:val="List 5"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00700C13"/>
+    <w:pPr>
+      <w:ind w:left="1800" w:hanging="360"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListBullet2">
+    <w:name w:val="List Bullet 2"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00700C13"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="16"/>
+      </w:numPr>
+      <w:spacing w:after="240"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListBullet5">
+    <w:name w:val="List Bullet 5"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00700C13"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="19"/>
+      </w:numPr>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListContinue3">
+    <w:name w:val="List Continue 3"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00FA68DE"/>
+    <w:pPr>
+      <w:spacing w:after="120"/>
+      <w:ind w:left="1080"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListContinue4">
+    <w:name w:val="List Continue 4"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00FA68DE"/>
+    <w:pPr>
+      <w:spacing w:after="120"/>
+      <w:ind w:left="1440"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListNumber4">
+    <w:name w:val="List Number 4"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00FA68DE"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="23"/>
+      </w:numPr>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListNumber5">
+    <w:name w:val="List Number 5"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00FA68DE"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="24"/>
+      </w:numPr>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+</w:styles>

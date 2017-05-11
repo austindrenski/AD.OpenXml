@@ -1,17 +1,23 @@
 ﻿using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
-using AD.OpenXml.Packaging;
-using AD.Xml;
+using AD.IO.Standard;
+using AD.Xml.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class PositionChartsInternalExtensions
     {
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="toFilePath"></param>
         public static void PositionChartsInner(this DocxFilePath toFilePath)
         {
             foreach (string item in toFilePath.EnumerateChartPaths())

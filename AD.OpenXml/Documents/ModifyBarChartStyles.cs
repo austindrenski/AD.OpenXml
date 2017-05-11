@@ -1,8 +1,7 @@
 ﻿using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
-using AD.OpenXml.Packaging;
-using AD.Xml;
+using AD.IO.Standard;
+using AD.Xml.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
@@ -64,6 +63,7 @@ namespace AD.OpenXml.Documents
             element.Descendants(C + "crossesBetween").SetAttributeValues("val", "between");
             element.Descendants(C + "lblAlgn").SetAttributeValues("val", "ctr");
             element.Descendants(C + "lblOffset").SetAttributeValues("val", "100");
+            element.Descendants(C + "numFmt").SetAttributeValues("sourceLinked", "0");
 
             element.Add(
                 new XElement(C + "spPr",

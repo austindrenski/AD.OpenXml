@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using AD.IO;
-using AD.Xml;
+using AD.IO.Standard;
+using AD.Xml.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Elements
@@ -29,13 +29,9 @@ namespace AD.OpenXml.Elements
                 item.Add(
                     new XElement(W + "tblStyle",
                         new XAttribute(W + "val", "BlueTableBasic")),
-                    //new XElement(W + "tblW",
-                    //    new XAttribute(W + "type", "dxa"),
-                    //    new XAttribute(W + "w", "9360")),
                     new XElement(W + "tblW",
-                        new XAttribute(W + "type", "auto")),
-                    new XElement(W + "tblLayout",
-                        new XAttribute(W + "type", "autofit")),
+                        new XAttribute(W + "type", "pct"),
+                        new XAttribute(W + "w", "5000")),
                     new XElement(W + "tblLook",
                         new XAttribute(W + "val", "04A0"),
                         new XAttribute(W + "firstRow", "1"),
@@ -92,10 +88,10 @@ namespace AD.OpenXml.Elements
                 }
             }
 
-            source.Descendants(W + "tcPr").Descendants().Where(x => x.Name != W + "vAlign").Remove();
+            //source.Descendants(W + "tcPr").Descendants().Where(x => x.Name != W + "vAlign").Remove();
             source.Descendants(W + "trPr").Remove();
-            source.Descendants(W + "gridCol").Attributes(W + "w").Remove();
-            
+            //source.Descendants(W + "gridCol").Attributes(W + "w").Remove();
+
             return source;
         }
     }

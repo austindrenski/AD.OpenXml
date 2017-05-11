@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:style w:type="paragraph" w:customStyle="1" w:styleId="1stParaExecutiveSummary" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" >
+  <w:basedOn w:val="Normal"/>
+  <w:name w:val="1st Para Executive Summary"/>
+  <w:pPr>
+    <w:spacing w:after="240"/>
+  </w:pPr>
+  <w:rPr>
+    <w:color w:val="005070"/>
+    <w:sz w:val="32"/>
+  </w:rPr>
+</w:style>

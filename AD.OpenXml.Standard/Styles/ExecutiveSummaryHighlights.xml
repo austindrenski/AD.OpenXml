@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:style w:type="paragraph" w:customStyle="1" w:styleId="ExecutiveSummaryHighlights" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" >
+  <w:basedOn w:val="1stParaExecutiveSummary"/>
+  <w:name w:val="Executive Summary Highlights"/>
+  <w:pPr>
+    <w:contextualSpacing/>
+    <w:spacing w:line="240" w:lineRule="auto"/>
+  </w:pPr>
+  <w:rPr>
+    <w:sz w:val="28"/>
+  </w:rPr>
+</w:style>

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
+using AD.IO.Standard;
 using AD.OpenXml.Properties;
-using AD.Xml;
+using AD.Xml.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
@@ -68,7 +68,7 @@ namespace AD.OpenXml.Documents
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
             // Modify document.xml
-            XElement document = toFilePath.ReadAsXml("word/document.xml");
+            XElement document = toFilePath.ReadAsXml();
             document.Descendants(W + "sectPr")
                     .Elements(W + "headerReference")
                     .Remove();
@@ -101,7 +101,7 @@ namespace AD.OpenXml.Documents
                     new XAttribute("Target", "header2.xml")));
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
-            XElement document = toFilePath.ReadAsXml("word/document.xml");
+            XElement document = toFilePath.ReadAsXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.AddFirst(
@@ -145,7 +145,7 @@ namespace AD.OpenXml.Documents
                     new XAttribute("Target", "header1.xml")));
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
-            XElement document = toFilePath.ReadAsXml("word/document.xml");
+            XElement document = toFilePath.ReadAsXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.AddFirst(

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
+using AD.IO.Standard;
 using AD.OpenXml.Properties;
-using AD.Xml;
+using AD.Xml.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
@@ -64,12 +64,13 @@ namespace AD.OpenXml.Documents
                             .Where(x => x.Attribute("Target")?.Value.Contains("footer") ?? false)
                             .Remove();
 
-            int currentFooterId = documentRelation.Elements().Attributes("Id").Select(x => int.Parse(x.Value.Substring(3))).DefaultIfEmpty(0).Max();
+            int currentFooterId =
+                documentRelation.Elements().Count();
 
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
             // Modify document.xml
-            XElement document = toFilePath.ReadAsXml("word/document.xml");
+            XElement document = toFilePath.ReadAsXml();
 
             document.Descendants(W + "sectPr")
                     .Elements(W + "footerReference")
@@ -104,13 +105,15 @@ namespace AD.OpenXml.Documents
                     new XAttribute("Target", "footer1.xml")));
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
-            XElement document = toFilePath.ReadAsXml("word/document.xml");
+            XElement document = toFilePath.ReadAsXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
-                sectionProperties.Add(
-                    new XElement(W + "footerReference",
-                        new XAttribute(W + "type", "default"),
-                        new XAttribute(R + "id", footerId)));
+                sectionProperties.Elements(W + "headerReference")
+                                 .Last()
+                                 .AddAfterSelf(
+                                     new XElement(W + "footerReference",
+                                         new XAttribute(W + "type", "default"),
+                                         new XAttribute(R + "id", footerId)));
             }
             document.WriteInto(toFilePath, "word/document.xml");
 
@@ -146,14 +149,15 @@ namespace AD.OpenXml.Documents
 
             documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
 
-            XElement document = toFilePath.ReadAsXml("word/document.xml");
+            XElement document = toFilePath.ReadAsXml();
 
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
-                sectionProperties.Add(
-                    new XElement(W + "footerReference",
-                        new XAttribute(W + "type", "even"),
-                        new XAttribute(R + "id", footerId)));
+                sectionProperties.Elements(W + "headerReference")
+                                 .Last()
+                                 .AddAfterSelf(new XElement(W + "footerReference",
+                                     new XAttribute(W + "type", "even"),
+                                     new XAttribute(R + "id", footerId)));
             }
 
             document.WriteInto(toFilePath, "word/document.xml");

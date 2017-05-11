@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
-using AD.IO;
-using AD.Xml;
+using AD.IO.Standard;
+using AD.Xml.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [PublicAPI]
     public static class PositionChartsOuterExtensions
     {
@@ -15,6 +18,10 @@ namespace AD.OpenXml.Documents
 
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="toFilePath"></param>
         public static void PositionChartsOuter(this DocxFilePath toFilePath)
         {
             XElement element = toFilePath.ReadAsXml();

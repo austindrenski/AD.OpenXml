@@ -97,21 +97,20 @@ namespace AD.OpenXml.Properties {
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
         ///&lt;w:style w:type=&quot;paragraph&quot; w:styleId=&quot;Appendix&quot; xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
-        ///  &lt;w:locked/&gt;
         ///  &lt;w:name w:val=&quot;Appendix&quot;/&gt;
         ///  &lt;w:next w:val=&quot;Normal&quot;/&gt;
+        ///  &lt;w:locked/&gt;
         ///  &lt;w:pPr&gt;
         ///    &lt;w:numPr&gt;
         ///      &lt;w:numId w:val=&quot;2&quot;/&gt;
         ///    &lt;/w:numPr&gt;
         ///    &lt;w:outlineLvl w:val=&quot;0&quot;/&gt;
         ///    &lt;w:pageBreakBefore/&gt;
-        ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
-        ///    &lt;w:keepNext/&gt;
+        ///    &lt;w:spacing w:after=&quot;4800&quot; w:before=&quot;4800&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
         ///  &lt;/w:pPr&gt;
         ///  &lt;w:rPr&gt;
         ///    &lt;w:b/&gt;
-        ///    [rest of string was truncated]&quot;;.
+        ///    &lt;w:color w:val [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Appendix {
             get {
@@ -126,9 +125,9 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:name w:val=&quot;Bibliography&quot;/&gt;
         ///  &lt;w:next w:val=&quot;Normal&quot;/&gt;
         ///  &lt;w:pPr&gt;
-        ///    &lt;w:contextualSpacing/&gt;
         ///    &lt;w:ind w:left=&quot;720&quot; w:hanging=&quot;720&quot;/&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot; w:before=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;w:keepLines/&gt;
         ///  &lt;/w:pPr&gt;
         ///&lt;/w:style&gt;.
         /// </summary>
@@ -289,17 +288,17 @@ namespace AD.OpenXml.Properties {
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
         ///&lt;w:docDefaults xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot; &gt;
-        ///  &lt;w:pPrDefault&gt;
-        ///    &lt;w:pPr&gt;
-        ///      &lt;w:spacing w:after=&quot;200&quot; w:before=&quot;0&quot; w:line=&quot;276&quot; w:lineRule=&quot;auto&quot;/&gt;
-        ///    &lt;/w:pPr&gt;
-        ///  &lt;/w:pPrDefault&gt;
         ///  &lt;w:rPrDefault&gt;
         ///    &lt;w:rPr&gt;
         ///      &lt;w:rFonts w:ascii=&quot;Calibri&quot;/&gt;
         ///      &lt;w:sz w:val=&quot;24&quot;/&gt;
         ///    &lt;/w:rPr&gt;
         ///  &lt;/w:rPrDefault&gt;
+        ///  &lt;w:pPrDefault&gt;
+        ///    &lt;w:pPr&gt;
+        ///      &lt;w:spacing w:after=&quot;200&quot; w:before=&quot;0&quot; w:line=&quot;276&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///    &lt;/w:pPr&gt;
+        ///  &lt;/w:pPrDefault&gt;
         ///&lt;/w:docDefaults&gt;.
         /// </summary>
         internal static string DocDefaults {
@@ -494,13 +493,21 @@ namespace AD.OpenXml.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
-        ///&lt;w:footnotes
-        ///  xmlns:wpc=&quot;http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas&quot;
-        ///  xmlns:cx=&quot;http://schemas.microsoft.com/office/drawing/2014/chartex&quot;
-        ///  xmlns:cx1=&quot;http://schemas.microsoft.com/office/drawing/2015/9/8/chartex&quot;
-        ///  xmlns:cx2=&quot;http://schemas.microsoft.com/office/drawing/2015/10/21/chartex&quot;
-        ///  xmlns:cx3=&quot;http://schemas.microsoft.com/office/drawing/2016/5/9/chartex&quot;
-        ///  xmlns:cx4=&quot;http://schemas.microsoft.com/office/drawing/2 [rest of string was truncated]&quot;;.
+        ///&lt;w:footnotes xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
+        ///  &lt;w:footnote w:type=&quot;separator&quot; w:id=&quot;-1&quot;&gt;
+        ///    &lt;w:p&gt;
+        ///      &lt;w:pPr&gt;
+        ///        &lt;w:spacing w:after=&quot;0&quot; w:line=&quot;240&quot; w:lineRule=&quot;auto&quot;/&gt;
+        ///      &lt;/w:pPr&gt;
+        ///      &lt;w:r&gt;
+        ///        &lt;w:separator/&gt;
+        ///      &lt;/w:r&gt;
+        ///    &lt;/w:p&gt;
+        ///  &lt;/w:footnote&gt;
+        ///  &lt;w:footnote w:type=&quot;continuationSeparator&quot; w:id=&quot;0&quot;&gt;
+        ///    &lt;w:p&gt;
+        ///      &lt;w:pPr&gt;
+        ///        &lt;w:spacing w:after=&quot;0&quot; w:line=&quot;240&quot; w:lineRule= [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string footnotes {
             get {
@@ -538,16 +545,10 @@ namespace AD.OpenXml.Properties {
         ///      &lt;w:jc w:val=&quot;left&quot;/&gt;
         ///    &lt;/w:pPr&gt;
         ///    &lt;w:r&gt;
-        ///      &lt;w:t xml:space=&quot;preserve&quot;&gt;Chapter &lt;/w:t&gt;
+        ///      &lt;w:t&gt;{0}&lt;/w:t&gt;
         ///    &lt;/w:r&gt;
-        ///    &lt;w:fldSimple w:instr=&quot; STYLEREF  &amp;quot;heading 1&amp;quot; \s \* MERGEFORMAT &quot;&gt;
-        ///      &lt;w:r&gt;
-        ///        &lt;w:t/&gt;
-        ///      &lt;/w:r&gt;
-        ///    &lt;/w:fldSimple&gt;
-        ///    &lt;w:r&gt;
-        ///      &lt;w:t xml:space=&quot;preserve&quot;&gt;: &lt;/w:t&gt;
-        ///    &lt;/w:r [rest of string was truncated]&quot;;.
+        ///  &lt;/w:p&gt;
+        ///&lt;/w:hdr&gt;.
         /// </summary>
         internal static string header1 {
             get {
@@ -564,10 +565,16 @@ namespace AD.OpenXml.Properties {
         ///      &lt;w:jc w:val=&quot;right&quot;/&gt;
         ///    &lt;/w:pPr&gt;
         ///    &lt;w:r&gt;
-        ///      &lt;w:t&gt;{0}&lt;/w:t&gt;
+        ///      &lt;w:t xml:space=&quot;preserve&quot;&gt;Chapter &lt;/w:t&gt;
         ///    &lt;/w:r&gt;
-        ///  &lt;/w:p&gt;
-        ///&lt;/w:hdr&gt;.
+        ///    &lt;w:fldSimple w:instr=&quot; STYLEREF  &amp;quot;heading 1&amp;quot; \s \* MERGEFORMAT &quot;&gt;
+        ///      &lt;w:r&gt;
+        ///        &lt;w:t/&gt;
+        ///      &lt;/w:r&gt;
+        ///    &lt;/w:fldSimple&gt;
+        ///    &lt;w:r&gt;
+        ///      &lt;w:t xml:space=&quot;preserve&quot;&gt;: &lt;/w:t&gt;
+        ///    &lt;/w: [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string header2 {
             get {
@@ -810,9 +817,9 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:name w:val=&quot;List Bullet&quot;/&gt;
         ///  &lt;w:pPr&gt;
         ///    &lt;w:contextualSpacing/&gt;
-        ///    &lt;w:numPr&gt;
+        ///    &lt;!--&lt;w:numPr&gt;
         ///      &lt;w:numId w:val=&quot;15&quot;/&gt;
-        ///    &lt;/w:numPr&gt;
+        ///    &lt;/w:numPr&gt;--&gt;
         ///    &lt;w:spacing w:after=&quot;240&quot;/&gt;
         ///  &lt;/w:pPr&gt;
         ///&lt;/w:style&gt;.
@@ -843,18 +850,17 @@ namespace AD.OpenXml.Properties {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
         ///&lt;w:numbering xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
         ///  &lt;w:abstractNum w:abstractNumId=&quot;0&quot;&gt;
-        ///    &lt;w:lvl w:ilvl=&quot;0&quot;&gt;
-        ///      &lt;w:lvlJc w:val=&quot;left&quot;/&gt;
-        ///      &lt;w:lvlText w:val=&quot;Chapter %1&quot;/&gt;
-        ///      &lt;w:numFmt w:val=&quot;decimal&quot;/&gt;
-        ///      &lt;w:start w:val=&quot;1&quot;/&gt;
-        ///      &lt;w:suff w:val=&quot;space&quot;/&gt;
-        ///    &lt;/w:lvl&gt;
         ///    &lt;w:multiLevelType w:val=&quot;singleLevel&quot;/&gt;
+        ///    &lt;w:lvl w:ilvl=&quot;0&quot;&gt;
+        ///      &lt;w:start w:val=&quot;1&quot;/&gt;
+        ///      &lt;w:numFmt w:val=&quot;decimal&quot;/&gt;
+        ///      &lt;w:lvlText w:val=&quot;Chapter %1 &quot;/&gt;
+        ///      &lt;w:lvlJc w:val=&quot;left&quot;/&gt;
+        ///    &lt;/w:lvl&gt;
         ///  &lt;/w:abstractNum&gt;
         ///  &lt;w:abstractNum w:abstractNumId=&quot;1&quot;&gt;
-        ///    &lt;w:lvl w:ilvl=&quot;0&quot;&gt;
-        /// [rest of string was truncated]&quot;;.
+        ///    &lt;w:multiLevelType w:val=&quot;singleLevel&quot;/&gt;
+        ///    &lt;w:lv [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Numbering {
             get {
@@ -1036,10 +1042,10 @@ namespace AD.OpenXml.Properties {
         ///  &lt;w:name w:val=&quot;table of figures&quot;/&gt;
         ///  &lt;w:next w:val=&quot;Normal&quot;/&gt;
         ///  &lt;w:pPr&gt;
-        ///    &lt;w:spacing w:after=&quot;0&quot;/&gt;
         ///    &lt;w:tabs&gt;
         ///      &lt;w:tab w:val=&quot;right&quot; w:leader=&quot;dot&quot; w:pos=&quot;9360&quot;/&gt;
         ///    &lt;/w:tabs&gt;
+        ///    &lt;w:spacing w:after=&quot;0&quot;/&gt;
         ///  &lt;/w:pPr&gt;
         ///&lt;/w:style&gt;
         ///.

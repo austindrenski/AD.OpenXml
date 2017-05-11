@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:style w:type="character" w:customStyle="1" w:styleId="Subscript" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:basedOn w:val="DefaultParagraphFont"/>
+  <w:locked/>
+  <w:name w:val="subscript"/>
+  <w:qFormat/>
+  <w:rPr>
+    <w:vertAlign w:val="subscript"/>
+  </w:rPr>
+</w:style>
