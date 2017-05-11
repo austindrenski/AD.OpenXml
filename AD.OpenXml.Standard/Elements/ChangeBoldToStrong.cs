@@ -1,9 +1,8 @@
-﻿using System.Linq;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using AD.Xml.Standard;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Standard.Elements
+namespace AD.OpenXml.Elements
 {
     /// <summary>
     /// Extension methods to replace &lt;b/&gt; elements with &lt;rStyle val="Strong"/&gt; elements.

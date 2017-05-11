@@ -1,5 +1,5 @@
 ﻿using System.Xml.Linq;
-using AD.Xml;
+using AD.Xml.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Elements

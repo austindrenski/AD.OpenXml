@@ -6,7 +6,7 @@ using AD.IO.Standard;
 using AD.Xml.Standard;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Standard.Elements
+namespace AD.OpenXml.Elements
 {
     /// <summary>
     /// Set table styles to BlueTableBasic and perform basic cleaning.

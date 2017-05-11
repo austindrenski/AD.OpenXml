@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:style w:type="paragraph" w:customStyle="1" w:styleId="StyleNotImplemented" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" >
+  <w:basedOn w:val="Normal"/>
+  <w:name w:val="Style Not Implemented"/>
+  <w:locked/>
+  <w:pPr>
+    <w:keepNext/>
+    <w:spacing w:after="0" w:line="240" w:lineRule="auto"/>
+  </w:pPr>
+  <w:rPr>
+    <w:color w:val="A52A2A"/>
+    <w:sz w:val="22"/>
+  </w:rPr>
+</w:style>

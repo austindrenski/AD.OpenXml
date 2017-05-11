@@ -8,11 +8,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AD.OpenXml.Standard.Properties {
-    using System;
-    using System.Reflection;
-    
-    
+using System.Reflection;
+
+namespace AD.OpenXml.Properties {
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>

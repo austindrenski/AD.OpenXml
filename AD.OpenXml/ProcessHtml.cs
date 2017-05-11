@@ -1,6 +1,6 @@
 ﻿using System.Xml.Linq;
 using AD.OpenXml.Html;
-using AD.Xml;
+using AD.Xml.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml

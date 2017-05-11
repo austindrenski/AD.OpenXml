@@ -1,10 +1,9 @@
-﻿using System.Linq;
-using System.Xml.Linq;
-using AD.OpenXml.Standard.Html;
+﻿using System.Xml.Linq;
+using AD.OpenXml.Html;
 using AD.Xml.Standard;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Standard
+namespace AD.OpenXml
 {
     /// <summary>
     /// Performs a variety of processing to transform the XML node into a well-formed HTML document.

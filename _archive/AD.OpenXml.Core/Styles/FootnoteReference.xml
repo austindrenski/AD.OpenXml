@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:style w:type="character" w:styleId="FootnoteReference" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:basedOn w:val="DefaultParagraphFont"/>
+  <w:name w:val="footnote reference"/>
+  <w:locked/>
+  <w:rPr>
+    <w:vertAlign w:val="superscript"/>
+  </w:rPr>
+</w:style>

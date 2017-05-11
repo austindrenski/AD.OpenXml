@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO.Standard;
-using AD.OpenXml.Standard.Elements;
-using AD.OpenXml.Standard.Visitors;
+using AD.OpenXml.Elements;
+using AD.OpenXml.Visitors;
 using AD.Xml.Standard;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Standard.Visits
+namespace AD.OpenXml.Visits
 {
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
+using AD.IO.Standard;
 using AD.OpenXml.Elements;
 using AD.OpenXml.Visitors;
-using AD.Xml;
+using AD.Xml.Standard;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits

@@ -3,7 +3,7 @@ using System.Xml.Linq;
 using AD.Xml.Standard;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Standard.Elements
+namespace AD.OpenXml.Elements
 {
     /// <summary>
     /// Extension methods to removes &lt;rPr [...] /&gt; nodes from &lt;pPr [...] /&gt; nodes.

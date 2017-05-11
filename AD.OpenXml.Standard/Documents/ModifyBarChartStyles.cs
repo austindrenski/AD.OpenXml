@@ -4,7 +4,7 @@ using AD.IO.Standard;
 using AD.Xml.Standard;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Standard.Documents
+namespace AD.OpenXml.Documents
 {
     /// <summary>
     /// Modifies bar chart styling in the target document.

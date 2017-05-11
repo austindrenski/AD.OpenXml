@@ -4,7 +4,7 @@ using System.Xml.Linq;
 using AD.Xml.Standard;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Standard.Elements
+namespace AD.OpenXml.Elements
 {
     /// <summary>
     /// Extension methods to replace &lt;u/&gt; elements with &lt;pStyle val=[...]/&gt; elements.
