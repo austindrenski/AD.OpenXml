@@ -1,26 +1,26 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>AD.IO.Standard</name>
+        <name>AD.IO</name>
     </assembly>
     <members>
-        <member name="T:AD.IO.Standard.ExtractZipFileExtensions">
+        <member name="T:AD.IO.ExtractZipFileExtensions">
             <summary>
-            Extension methods to extract entries from a <see cref="T:AD.IO.Standard.ZipFilePath"/>.
+            Extension methods to extract entries from a <see cref="T:AD.IO.ZipFilePath"/>.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.ExtractZipFileExtensions.ExtractZipFile(AD.IO.Standard.ZipFilePath,AD.IO.Standard.FilePath,System.Boolean)">
+        <member name="M:AD.IO.ExtractZipFileExtensions.ExtractZipFile(AD.IO.ZipFilePath,AD.IO.FilePath,System.Boolean)">
             <summary>
-            Extracts a single file from the <see cref="T:AD.IO.Standard.ZipFilePath"/>. An exception is thrown if more than one file is found in the zip archive.
+            Extracts a single file from the <see cref="T:AD.IO.ZipFilePath"/>. An exception is thrown if more than one file is found in the zip archive.
             </summary>
             <param name="zipFilePath">The zip file to open.</param>
             <param name="filePath">The file path to which the extracted entry is saved.</param>
             <param name="overwrite">If true, the file path is overwritten.</param>
             <exception cref="T:System.InvalidOperationException"/>
         </member>
-        <member name="M:AD.IO.Standard.ExtractZipFileExtensions.ExtractZipFile(AD.IO.Standard.ZipFilePath,AD.IO.Standard.FilePath,System.Boolean,System.String)">
+        <member name="M:AD.IO.ExtractZipFileExtensions.ExtractZipFile(AD.IO.ZipFilePath,AD.IO.FilePath,System.Boolean,System.String)">
             <summary>
-            Extracts a single file from the <see cref="T:AD.IO.Standard.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.Standard.FilePath"/> is found in the zip archive.
+            Extracts a single file from the <see cref="T:AD.IO.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.FilePath"/> is found in the zip archive.
             </summary>
             <param name="zipFilePath">The zip file to open.</param>
             <param name="filePath">The file path to which the extracted entry is saved.</param>
@@ -28,18 +28,18 @@
             <param name="completedMessage">The message written to STDOUT upon successful completion.</param>
             <exception cref="T:System.InvalidOperationException"/>
         </member>
-        <member name="M:AD.IO.Standard.ExtractZipFileExtensions.ExtractZipFile(AD.IO.Standard.ZipFilePath,AD.IO.Standard.ZipFilePath,System.Boolean)">
+        <member name="M:AD.IO.ExtractZipFileExtensions.ExtractZipFile(AD.IO.ZipFilePath,AD.IO.ZipFilePath,System.Boolean)">
             <summary>
-            Extracts a single file from the <see cref="T:AD.IO.Standard.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.Standard.ZipFilePath"/> is found in the zip archive.
+            Extracts a single file from the <see cref="T:AD.IO.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.ZipFilePath"/> is found in the zip archive.
             </summary>
             <param name="zipFilePath">The zip file to open.</param>
             <param name="outZipFilePath">The file path to which the extracted entry is saved.</param>
             <param name="overwrite">If true, the file path is overwritten.</param>
             <exception cref="T:System.InvalidOperationException"/>
         </member>
-        <member name="M:AD.IO.Standard.ExtractZipFileExtensions.ExtractZipFile(AD.IO.Standard.ZipFilePath,AD.IO.Standard.ZipFilePath,System.Boolean,System.String)">
+        <member name="M:AD.IO.ExtractZipFileExtensions.ExtractZipFile(AD.IO.ZipFilePath,AD.IO.ZipFilePath,System.Boolean,System.String)">
             <summary>
-            Extracts a single file from the <see cref="T:AD.IO.Standard.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.Standard.ZipFilePath"/> is found in the zip archive.
+            Extracts a single file from the <see cref="T:AD.IO.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.ZipFilePath"/> is found in the zip archive.
             </summary>
             <param name="zipFilePath">The zip file to open.</param>
             <param name="outZipFilePath">The file path to which the extracted entry is saved.</param>
@@ -47,18 +47,18 @@
             <param name="completedMessage">The message written to STDOUT upon successful completion.</param>
             <exception cref="T:System.InvalidOperationException"/>
         </member>
-        <member name="M:AD.IO.Standard.ExtractZipFileExtensions.ExtractZipFile(AD.IO.Standard.ZipFilePath,AD.IO.Standard.DelimitedFilePath,System.Boolean)">
+        <member name="M:AD.IO.ExtractZipFileExtensions.ExtractZipFile(AD.IO.ZipFilePath,AD.IO.DelimitedFilePath,System.Boolean)">
             <summary>
-            Extracts a single file from the <see cref="T:AD.IO.Standard.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.Standard.DelimitedFilePath"/> is found in the zip archive.
+            Extracts a single file from the <see cref="T:AD.IO.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.DelimitedFilePath"/> is found in the zip archive.
             </summary>
             <param name="zipFilePath">The zip file to open.</param>
             <param name="delimitedFilePath">The file path to which the extracted entry is saved.</param>
             <param name="overwrite">If true, the file path is overwritten.</param>
             <exception cref="T:System.InvalidOperationException"/>
         </member>
-        <member name="M:AD.IO.Standard.ExtractZipFileExtensions.ExtractZipFile(AD.IO.Standard.ZipFilePath,AD.IO.Standard.DelimitedFilePath,System.Boolean,System.String)">
+        <member name="M:AD.IO.ExtractZipFileExtensions.ExtractZipFile(AD.IO.ZipFilePath,AD.IO.DelimitedFilePath,System.Boolean,System.String)">
             <summary>
-            Extracts a single file from the <see cref="T:AD.IO.Standard.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.Standard.DelimitedFilePath"/> is found in the zip archive.
+            Extracts a single file from the <see cref="T:AD.IO.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.DelimitedFilePath"/> is found in the zip archive.
             </summary>
             <param name="zipFilePath">The zip file to open.</param>
             <param name="delimitedFilePath">The file path to which the extracted entry is saved.</param>
@@ -66,18 +66,18 @@
             <param name="completedMessage">The message written to STDOUT upon successful completion.</param>
             <exception cref="T:System.InvalidOperationException"/>
         </member>
-        <member name="M:AD.IO.Standard.ExtractZipFileExtensions.ExtractZipFile(AD.IO.Standard.ZipFilePath,AD.IO.Standard.XmlFilePath,System.Boolean)">
+        <member name="M:AD.IO.ExtractZipFileExtensions.ExtractZipFile(AD.IO.ZipFilePath,AD.IO.XmlFilePath,System.Boolean)">
             <summary>
-            Extracts a single file from the <see cref="T:AD.IO.Standard.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.Standard.XmlFilePath"/> is found in the zip archive.
+            Extracts a single file from the <see cref="T:AD.IO.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.XmlFilePath"/> is found in the zip archive.
             </summary>
             <param name="zipFilePath">The zip file to open.</param>
             <param name="xmlFilePath">The file path to which the extracted entry is saved.</param>
             <param name="overwrite">If true, the file path is overwritten.</param>
             <exception cref="T:System.InvalidOperationException"/>
         </member>
-        <member name="M:AD.IO.Standard.ExtractZipFileExtensions.ExtractZipFile(AD.IO.Standard.ZipFilePath,AD.IO.Standard.XmlFilePath,System.Boolean,System.String)">
+        <member name="M:AD.IO.ExtractZipFileExtensions.ExtractZipFile(AD.IO.ZipFilePath,AD.IO.XmlFilePath,System.Boolean,System.String)">
             <summary>
-            Extracts a single file from the <see cref="T:AD.IO.Standard.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.Standard.XmlFilePath"/> is found in the zip archive.
+            Extracts a single file from the <see cref="T:AD.IO.ZipFilePath"/>. An exception is thrown if more than one <see cref="T:AD.IO.XmlFilePath"/> is found in the zip archive.
             </summary>
             <param name="zipFilePath">The zip file to open.</param>
             <param name="xmlFilePath">The file path to which the extracted entry is saved.</param>
@@ -85,29 +85,29 @@
             <param name="completedMessage">The message written to STDOUT upon successful completion.</param>
             <exception cref="T:System.InvalidOperationException"/>
         </member>
-        <member name="M:AD.IO.Standard.ExtractZipFileExtensions.ExtractZipFiles(AD.IO.Standard.ZipFilePath,AD.IO.Standard.DirectoryPath,System.Boolean)">
+        <member name="M:AD.IO.ExtractZipFileExtensions.ExtractZipFiles(AD.IO.ZipFilePath,AD.IO.DirectoryPath,System.Boolean)">
             <summary>
-            Extracts any files in the <see cref="T:AD.IO.Standard.ZipFilePath"/> to the <see cref="T:AD.IO.Standard.DirectoryPath"/>.
+            Extracts any files in the <see cref="T:AD.IO.ZipFilePath"/> to the <see cref="T:AD.IO.DirectoryPath"/>.
             </summary>
             <param name="zipFilePath">The zip file from which files are extracted.</param>
             <param name="directoryPath">The directory to which extracted entries are written.</param>
             <param name="overwrite">If true, the directory is overwritten.</param>
         </member>
-        <member name="M:AD.IO.Standard.ExtractZipFileExtensions.ExtractZipFiles(AD.IO.Standard.ZipFilePath,AD.IO.Standard.DirectoryPath,System.Boolean,System.String)">
+        <member name="M:AD.IO.ExtractZipFileExtensions.ExtractZipFiles(AD.IO.ZipFilePath,AD.IO.DirectoryPath,System.Boolean,System.String)">
             <summary>
-            Extracts any files in the <see cref="T:AD.IO.Standard.ZipFilePath"/> to the <see cref="T:AD.IO.Standard.DirectoryPath"/>.
+            Extracts any files in the <see cref="T:AD.IO.ZipFilePath"/> to the <see cref="T:AD.IO.DirectoryPath"/>.
             </summary>
             <param name="zipFilePath">The zip file from which files are extracted.</param>
             <param name="directoryPath">The directory to which extracted entries are written.</param>
             <param name="overwrite">If true, the directory is overwritten.</param>
             <param name="completedMessage">The message written to STDOUT upon successful completion.</param>
         </member>
-        <member name="T:AD.IO.Standard.GetZipFileExtensions">
+        <member name="T:AD.IO.GetZipFileExtensions">
             <summary>
-            Extensions methods to download zip files from a <see cref="T:AD.IO.Standard.UrlPath"/>.
+            Extensions methods to download zip files from a <see cref="T:AD.IO.UrlPath"/>.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.GetZipFileExtensions.GetZipFile(AD.IO.Standard.UrlPath,AD.IO.Standard.ZipFilePath,System.Boolean)">
+        <member name="M:AD.IO.GetZipFileExtensions.GetZipFile(AD.IO.UrlPath,AD.IO.ZipFilePath,System.Boolean)">
             <summary>
             Saves a zip file to <paramref name="zipFilePath"/> from the response stream of the <paramref name="urlPath"/>.
             </summary>
@@ -115,84 +115,84 @@
             <param name="zipFilePath">The file path to which the zip file is saved.</param>
             <param name="overwrite">If true, the zip file is overwritten.</param>
         </member>
-        <member name="M:AD.IO.Standard.GetZipFileExtensions.TryGetZipFile(AD.IO.Standard.UrlPath,AD.IO.Standard.ZipFilePath,System.Boolean,System.String)">
+        <member name="M:AD.IO.GetZipFileExtensions.TryGetZipFile(AD.IO.UrlPath,AD.IO.ZipFilePath,System.Boolean,System.String)">
             <summary>
-            Tries to save a response stream to the <see cref="T:AD.IO.Standard.ZipFilePath"/>. This method continues until sucessful.
+            Tries to save a response stream to the <see cref="T:AD.IO.ZipFilePath"/>. This method continues until sucessful.
             </summary>
             <param name="urlPath">The address from which the zip file is returned.</param>
             <param name="zipFilePath">The file path to which the zip file is saved.</param>
             <param name="overwrite">If true, the zip file is overwritten.</param>
             <param name="completedMessage">A message written to stdout upon completion.</param>
         </member>
-        <member name="T:AD.IO.Standard.ParseExtensions">
+        <member name="T:AD.IO.ParseExtensions">
             <summary>
             Parses an <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a number.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.ParseExtensions.ParseShort(System.Collections.Generic.IEnumerable{System.Char})">
+        <member name="M:AD.IO.ParseExtensions.ParseShort(System.Collections.Generic.IEnumerable{System.Char})">
             <summary>
             Filters an enumerable of characters for the numeric component, concatenates the characters, and then parses the string as an integer.
             </summary>
             <param name="souce">The source enumerable.</param>
             <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as an integer.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ParseExtensions.ParseInt(System.Collections.Generic.IEnumerable{System.Char})">
+        <member name="M:AD.IO.ParseExtensions.ParseInt(System.Collections.Generic.IEnumerable{System.Char})">
             <summary>
             Filters an enumerable of characters for the numeric component, concatenates the characters, and then parses the string as an integer.
             </summary>
             <param name="souce">The source enumerable.</param>
             <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as an integer.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ParseExtensions.ParseLong(System.Collections.Generic.IEnumerable{System.Char})">
+        <member name="M:AD.IO.ParseExtensions.ParseLong(System.Collections.Generic.IEnumerable{System.Char})">
             <summary>
             Filters an enumerable of characters for the numeric component, concatenates the characters, and then parses the string as a long.
             </summary>
             <param name="souce">The source enumerable.</param>
             <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a long.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ParseExtensions.ParseDouble(System.Collections.Generic.IEnumerable{System.Char})">
+        <member name="M:AD.IO.ParseExtensions.ParseDouble(System.Collections.Generic.IEnumerable{System.Char})">
             <summary>
             Filters an enumerable of characters for the numeric component, concatenates the characters, and then parses the string as a double.
             </summary>
             <param name="souce">The source enumerable.</param>
             <returns>The numeric components of the source <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a double.</returns>
         </member>
-        <member name="T:AD.IO.Standard.DelimitedFilePath">
+        <member name="T:AD.IO.DelimitedFilePath">
             <summary>
             Path to a delimited file on the system. An exception is thrown if the file does not exist, or if it is not a delimited file.
             </summary>
         </member>
-        <member name="F:AD.IO.Standard.DelimitedFilePath._path">
+        <member name="F:AD.IO.DelimitedFilePath._path">
             <summary>
             The full file path.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.DelimitedFilePath.Extension">
+        <member name="P:AD.IO.DelimitedFilePath.Extension">
             <summary>
             The file path extension.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.DelimitedFilePath.Name">
+        <member name="P:AD.IO.DelimitedFilePath.Name">
             <summary>
             The file name.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.DelimitedFilePath.Headers">
+        <member name="P:AD.IO.DelimitedFilePath.Headers">
             <summary>
             The items from the first row of the file.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.DelimitedFilePath.HeaderRow">
+        <member name="P:AD.IO.DelimitedFilePath.HeaderRow">
             <summary>
             The the first row of the file.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.DelimitedFilePath.Delimiter">
+        <member name="P:AD.IO.DelimitedFilePath.Delimiter">
             <summary>
             The character that delimits data in the file.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DelimitedFilePath.#ctor(System.String,System.Char)">
+        <member name="M:AD.IO.DelimitedFilePath.#ctor(System.String,System.Char)">
             <summary>
             Creates a new DelimitedFilePath object to hold the path to a delimited file.
             </summary>
@@ -201,452 +201,452 @@
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.DelimitedFilePath.Create(System.String,System.Char)">
+        <member name="M:AD.IO.DelimitedFilePath.Create(System.String,System.Char)">
             <summary>
             Creates a delimited file along the path if one does not exist.
             </summary>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.DelimitedFilePath.Create(System.String)">
+        <member name="M:AD.IO.DelimitedFilePath.Create(System.String)">
             <summary>
             Creates a delimited file along the path if one does not exist.
             </summary>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.DelimitedFilePath.AD#IO#Standard#IPath#Create(System.String)">
+        <member name="M:AD.IO.DelimitedFilePath.AD#IO#IPath#Create(System.String)">
             <summary>
             Explicit IPath implementation.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DelimitedFilePath.ToString">
+        <member name="M:AD.IO.DelimitedFilePath.ToString">
             <summary>
             Returns the delimited file path.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DelimitedFilePath.op_Implicit(AD.IO.Standard.DelimitedFilePath)~System.String">
+        <member name="M:AD.IO.DelimitedFilePath.op_Implicit(AD.IO.DelimitedFilePath)~System.String">
             <summary>
             Implicitly casts a DelimitedFilePath as its internal delimited file path string.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DelimitedFilePath.op_Implicit(System.String)~AD.IO.Standard.DelimitedFilePath">
+        <member name="M:AD.IO.DelimitedFilePath.op_Implicit(System.String)~AD.IO.DelimitedFilePath">
             <summary>
             Implicitly casts a string as a DelimitedFilePath. An exception is thrown if the delimited file is not found.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.DelimitedFilePath.op_Explicit(AD.IO.Standard.DelimitedFilePath)~AD.IO.Standard.FilePath">
+        <member name="M:AD.IO.DelimitedFilePath.op_Explicit(AD.IO.DelimitedFilePath)~AD.IO.FilePath">
             <summary>
             Implicitly casts a DelimitedFilePath as a FilePath.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.DelimitedFilePath.op_Explicit(AD.IO.Standard.DelimitedFilePath)~AD.IO.Standard.UrlPath">
+        <member name="M:AD.IO.DelimitedFilePath.op_Explicit(AD.IO.DelimitedFilePath)~AD.IO.UrlPath">
             <summary>
             Implicitly casts a FilePath as a UrlPath. An exception is thrown if the delimited file path is not a well-formed URI.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="T:AD.IO.Standard.DirectoryPath">
+        <member name="T:AD.IO.DirectoryPath">
             <summary>
             Path to a directory on the system. An exception is thrown if the directory does not exist.
             </summary>
         </member>
-        <member name="F:AD.IO.Standard.DirectoryPath._path">
+        <member name="F:AD.IO.DirectoryPath._path">
             <summary>
             The full directory path.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.DirectoryPath.Extension">
+        <member name="P:AD.IO.DirectoryPath.Extension">
             <summary>
             The file path extension.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.DirectoryPath.Name">
+        <member name="P:AD.IO.DirectoryPath.Name">
             <summary>
             The directory name.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DirectoryPath.#ctor(System.String)">
+        <member name="M:AD.IO.DirectoryPath.#ctor(System.String)">
             <summary>
             Creates a new DirectoryPath object to hold the path to a directory.
             </summary>
             <param name="directoryPath">A string directory path.</param>
             <exception cref="T:System.IO.DirectoryNotFoundException"/>
         </member>
-        <member name="M:AD.IO.Standard.DirectoryPath.Create(System.String)">
+        <member name="M:AD.IO.DirectoryPath.Create(System.String)">
             <summary>
             Creates a directory along the path if one does not exist.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DirectoryPath.AD#IO#Standard#IPath#Create(System.String)">
+        <member name="M:AD.IO.DirectoryPath.AD#IO#IPath#Create(System.String)">
             <summary>
             Explicit IPath implementation.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DirectoryPath.ToString">
+        <member name="M:AD.IO.DirectoryPath.ToString">
             <summary>
             Returns the directory path.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DirectoryPath.op_Implicit(AD.IO.Standard.DirectoryPath)~System.String">
+        <member name="M:AD.IO.DirectoryPath.op_Implicit(AD.IO.DirectoryPath)~System.String">
             <summary>
             Implicitly casts a DirectoryPath as its internal directory path string.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DirectoryPath.op_Implicit(System.String)~AD.IO.Standard.DirectoryPath">
+        <member name="M:AD.IO.DirectoryPath.op_Implicit(System.String)~AD.IO.DirectoryPath">
             <summary>
             Implicitly casts a string as a DirectoryPath. An exception is thrown if the directory is not found.
             </summary>
             <exception cref="T:System.IO.DirectoryNotFoundException"/>
         </member>
-        <member name="T:AD.IO.Standard.DocxFilePath">
+        <member name="T:AD.IO.DocxFilePath">
             <summary>
             Path to a Microsoft Word file on the system. An exception is thrown if the file does not exist.
             </summary>
         </member>
-        <member name="F:AD.IO.Standard.DocxFilePath._path">
+        <member name="F:AD.IO.DocxFilePath._path">
             <summary>
             The full file path.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.DocxFilePath.Extension">
+        <member name="P:AD.IO.DocxFilePath.Extension">
             <summary>
             The file extension.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.DocxFilePath.Name">
+        <member name="P:AD.IO.DocxFilePath.Name">
             <summary>
             The file name.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DocxFilePath.#ctor(System.String)">
+        <member name="M:AD.IO.DocxFilePath.#ctor(System.String)">
             <summary>
-            Creates a new <see cref="T:AD.IO.Standard.DocxFilePath"/> to hold the path to a file.
+            Creates a new <see cref="T:AD.IO.DocxFilePath"/> to hold the path to a file.
             </summary>
             <param name="filePath">A string file path.</param>
             <exception cref="T:System.IO.FileNotFoundException"/>
         </member>
-        <member name="M:AD.IO.Standard.DocxFilePath.Create(System.String)">
+        <member name="M:AD.IO.DocxFilePath.Create(System.String)">
             <summary>
             Creates a file along the path if one does not exist.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DocxFilePath.Create(System.String,System.Boolean)">
+        <member name="M:AD.IO.DocxFilePath.Create(System.String,System.Boolean)">
             <summary>
             Creates a file along the path, overwriting any existing file.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DocxFilePath.CreateNew(System.String)">
+        <member name="M:AD.IO.DocxFilePath.CreateNew(System.String)">
             <summary>
             Creates a docx file from the given docx file.
             </summary>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.DocxFilePath.ToString">
+        <member name="M:AD.IO.DocxFilePath.ToString">
             <summary>
             Returns the file path.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DocxFilePath.op_Implicit(AD.IO.Standard.DocxFilePath)~System.String">
+        <member name="M:AD.IO.DocxFilePath.op_Implicit(AD.IO.DocxFilePath)~System.String">
             <summary>
             Implicitly casts a FilePath as its internal file path string.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.DocxFilePath.op_Implicit(System.String)~AD.IO.Standard.DocxFilePath">
+        <member name="M:AD.IO.DocxFilePath.op_Implicit(System.String)~AD.IO.DocxFilePath">
             <summary>
             Implicitly casts a string as a DocxFilePath. An exception is thrown if the file is not found.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
         </member>
-        <member name="M:AD.IO.Standard.DocxFilePath.op_Implicit(AD.IO.Standard.DocxFilePath)~AD.IO.Standard.FilePath">
+        <member name="M:AD.IO.DocxFilePath.op_Implicit(AD.IO.DocxFilePath)~AD.IO.FilePath">
             <summary>
             Implicitly casts a string as a DocxFilePath. An exception is thrown if the file is not found.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
         </member>
-        <member name="M:AD.IO.Standard.DocxFilePath.op_Explicit(AD.IO.Standard.DocxFilePath)~AD.IO.Standard.ZipFilePath">
+        <member name="M:AD.IO.DocxFilePath.op_Explicit(AD.IO.DocxFilePath)~AD.IO.ZipFilePath">
             <summary>
             Implicitly casts a DocxFilePath as a ZipFilePath. An exception is thrown if the file is not a zip file path, or if the file is not found.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.DocxFilePath.op_Explicit(AD.IO.Standard.DocxFilePath)~AD.IO.Standard.UrlPath">
+        <member name="M:AD.IO.DocxFilePath.op_Explicit(AD.IO.DocxFilePath)~AD.IO.UrlPath">
             <summary>
             Implicitly casts a DocxFilePath as a UrlPath. An exception is thrown if the file path is not a well-formed URI.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="T:AD.IO.Standard.FilePath">
+        <member name="T:AD.IO.FilePath">
             <summary>
             Path to a file on the system. An exception is thrown if the file does not exist.
             </summary>
         </member>
-        <member name="F:AD.IO.Standard.FilePath._path">
+        <member name="F:AD.IO.FilePath._path">
             <summary>
             The full file path.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.FilePath.Extension">
+        <member name="P:AD.IO.FilePath.Extension">
             <summary>
             The file path extension.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.FilePath.Name">
+        <member name="P:AD.IO.FilePath.Name">
             <summary>
             The file name.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.FilePath.#ctor(System.String)">
+        <member name="M:AD.IO.FilePath.#ctor(System.String)">
             <summary>
             Creates a new FilePath object to hold the path to a file.
             </summary>
             <param name="filePath">A string file path.</param>
             <exception cref="T:System.IO.FileNotFoundException"/>
         </member>
-        <member name="M:AD.IO.Standard.FilePath.Create(System.String)">
+        <member name="M:AD.IO.FilePath.Create(System.String)">
             <summary>
             Creates a file along the path if one does not exist.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.FilePath.AD#IO#Standard#IPath#Create(System.String)">
+        <member name="M:AD.IO.FilePath.AD#IO#IPath#Create(System.String)">
             <summary>
             Explicit IPath implementation.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.FilePath.ToString">
+        <member name="M:AD.IO.FilePath.ToString">
             <summary>
             Returns the file path.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.FilePath.op_Implicit(AD.IO.Standard.FilePath)~System.String">
+        <member name="M:AD.IO.FilePath.op_Implicit(AD.IO.FilePath)~System.String">
             <summary>
             Implicitly casts a FilePath as its internal file path string.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.FilePath.op_Implicit(System.String)~AD.IO.Standard.FilePath">
+        <member name="M:AD.IO.FilePath.op_Implicit(System.String)~AD.IO.FilePath">
             <summary>
             Implicitly casts a string as a FilePath. An exception is thrown if the file is not found.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
         </member>
-        <member name="M:AD.IO.Standard.FilePath.op_Implicit(AD.IO.Standard.FilePath)~AD.IO.Standard.DocxFilePath">
+        <member name="M:AD.IO.FilePath.op_Implicit(AD.IO.FilePath)~AD.IO.DocxFilePath">
             <summary>
             Implicitly casts a FilePath as a DocxFilePath. An exception is thrown if the file is not found.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
         </member>
-        <member name="M:AD.IO.Standard.FilePath.op_Explicit(AD.IO.Standard.FilePath)~AD.IO.Standard.ZipFilePath">
+        <member name="M:AD.IO.FilePath.op_Explicit(AD.IO.FilePath)~AD.IO.ZipFilePath">
             <summary>
             Implicitly casts a FilePath as a ZipFilePath. An exception is thrown if the file is not a zip file path, or if the file is not found.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.FilePath.op_Explicit(AD.IO.Standard.FilePath)~AD.IO.Standard.UrlPath">
+        <member name="M:AD.IO.FilePath.op_Explicit(AD.IO.FilePath)~AD.IO.UrlPath">
             <summary>
             Implicitly casts a FilePath as a UrlPath. An exception is thrown if the file path is not a well-formed URI.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="T:AD.IO.Standard.HtmlFilePath">
+        <member name="T:AD.IO.HtmlFilePath">
             <summary>
             Path to an HTML file on the system. An exception is thrown if the file does not exist, or if it is not an HTML file.
             </summary>
         </member>
-        <member name="F:AD.IO.Standard.HtmlFilePath._path">
+        <member name="F:AD.IO.HtmlFilePath._path">
             <summary>
             The full file path.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.HtmlFilePath.Extension">
+        <member name="P:AD.IO.HtmlFilePath.Extension">
             <summary>
             The file path extension.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.HtmlFilePath.Name">
+        <member name="P:AD.IO.HtmlFilePath.Name">
             <summary>
             The file name.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.HtmlFilePath.#ctor(System.String)">
+        <member name="M:AD.IO.HtmlFilePath.#ctor(System.String)">
             <summary>
-            Creates a new <see cref="T:AD.IO.Standard.HtmlFilePath"/> object to hold the path to an HTML file.
+            Creates a new <see cref="T:AD.IO.HtmlFilePath"/> object to hold the path to an HTML file.
             </summary>
             <param name="htmlFilePath">A string HTML file path.</param>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.HtmlFilePath.Create(System.String)">
+        <member name="M:AD.IO.HtmlFilePath.Create(System.String)">
             <summary>
             Creates an HTML file along the path if one does not exist.
             </summary>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.HtmlFilePath.AD#IO#Standard#IPath#Create(System.String)">
+        <member name="M:AD.IO.HtmlFilePath.AD#IO#IPath#Create(System.String)">
             <summary>
-            Explicit <see cref="T:AD.IO.Standard.IPath"/> implementation.
+            Explicit <see cref="T:AD.IO.IPath"/> implementation.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.HtmlFilePath.ToString">
+        <member name="M:AD.IO.HtmlFilePath.ToString">
             <summary>
             Returns the internal HTML file path string.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.HtmlFilePath.op_Implicit(AD.IO.Standard.HtmlFilePath)~System.String">
+        <member name="M:AD.IO.HtmlFilePath.op_Implicit(AD.IO.HtmlFilePath)~System.String">
             <summary>
-            Implicitly casts a <see cref="T:AD.IO.Standard.HtmlFilePath"/> as its internal HTML file path string.
+            Implicitly casts a <see cref="T:AD.IO.HtmlFilePath"/> as its internal HTML file path string.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.HtmlFilePath.op_Implicit(System.String)~AD.IO.Standard.HtmlFilePath">
+        <member name="M:AD.IO.HtmlFilePath.op_Implicit(System.String)~AD.IO.HtmlFilePath">
             <summary>
-            Implicitly casts a string as a <see cref="T:AD.IO.Standard.HtmlFilePath"/>. An exception is thrown if the HTML file is not found.
-            </summary>
-            <exception cref="T:System.IO.FileNotFoundException"/>
-            <exception cref="T:System.ArgumentException"/>
-        </member>
-        <member name="M:AD.IO.Standard.HtmlFilePath.op_Explicit(AD.IO.Standard.HtmlFilePath)~AD.IO.Standard.FilePath">
-            <summary>
-            Implicitly casts a <see cref="T:AD.IO.Standard.HtmlFilePath"/> as a <see cref="T:System.IO.FileNotFoundException"/>.
-            </summary>
-            <exception cref="T:System.ArgumentException"/>
-            <exception cref="T:AD.IO.Standard.FilePath"/>
-        </member>
-        <member name="M:AD.IO.Standard.HtmlFilePath.op_Explicit(AD.IO.Standard.HtmlFilePath)~AD.IO.Standard.UrlPath">
-            <summary>
-            Implicitly casts an <see cref="T:AD.IO.Standard.HtmlFilePath"/> as a <see cref="T:AD.IO.Standard.UrlPath"/>. An exception is thrown if the HTML file path is not a well-formed URI.
+            Implicitly casts a string as a <see cref="T:AD.IO.HtmlFilePath"/>. An exception is thrown if the HTML file is not found.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="T:AD.IO.Standard.IPath">
+        <member name="M:AD.IO.HtmlFilePath.op_Explicit(AD.IO.HtmlFilePath)~AD.IO.FilePath">
+            <summary>
+            Implicitly casts a <see cref="T:AD.IO.HtmlFilePath"/> as a <see cref="T:System.IO.FileNotFoundException"/>.
+            </summary>
+            <exception cref="T:System.ArgumentException"/>
+            <exception cref="T:AD.IO.FilePath"/>
+        </member>
+        <member name="M:AD.IO.HtmlFilePath.op_Explicit(AD.IO.HtmlFilePath)~AD.IO.UrlPath">
+            <summary>
+            Implicitly casts an <see cref="T:AD.IO.HtmlFilePath"/> as a <see cref="T:AD.IO.UrlPath"/>. An exception is thrown if the HTML file path is not a well-formed URI.
+            </summary>
+            <exception cref="T:System.IO.FileNotFoundException"/>
+            <exception cref="T:System.ArgumentException"/>
+        </member>
+        <member name="T:AD.IO.IPath">
             <summary>
             Defines common functionality for system paths.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.IPath.Extension">
+        <member name="P:AD.IO.IPath.Extension">
             <summary>
             The file extension or null.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.IPath.Name">
+        <member name="P:AD.IO.IPath.Name">
             <summary>
             The file name or null.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.IPath.Create(System.String)">
+        <member name="M:AD.IO.IPath.Create(System.String)">
             <summary>
             Creates a new path.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.IPath.ToString">
+        <member name="M:AD.IO.IPath.ToString">
             <summary>
             Returns the internal string path.
             </summary>
         </member>
-        <member name="T:AD.IO.Standard.UrlPath">
+        <member name="T:AD.IO.UrlPath">
             <summary>
             Represents a URL. Exceptions are thrown if the URL is invalid.
             </summary>
         </member>
-        <member name="F:AD.IO.Standard.UrlPath._path">
+        <member name="F:AD.IO.UrlPath._path">
             <summary>
             The string representation of the URL path.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.UrlPath.UriPath">
+        <member name="P:AD.IO.UrlPath.UriPath">
             <summary>
             The Uri representation of the URL path.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.UrlPath.Extension">
+        <member name="P:AD.IO.UrlPath.Extension">
             <summary>
             The file path extension.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.UrlPath.Name">
+        <member name="P:AD.IO.UrlPath.Name">
             <summary>
             The file name.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.UrlPath.#ctor(System.String)">
+        <member name="M:AD.IO.UrlPath.#ctor(System.String)">
             <summary>
             Creates a new UrlPath object to hold the path to a url.
             </summary>
             <param name="urlPath">A string url path.</param>
             <exception cref="T:System.UriFormatException"/>
         </member>
-        <member name="M:AD.IO.Standard.UrlPath.Create(System.String)">
+        <member name="M:AD.IO.UrlPath.Create(System.String)">
             <summary>
             Creates a url along the path if one does not exist.
             </summary>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.UrlPath.AD#IO#Standard#IPath#Create(System.String)">
+        <member name="M:AD.IO.UrlPath.AD#IO#IPath#Create(System.String)">
             <summary>
             Explicit IPath implementation.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.UrlPath.ToString">
+        <member name="M:AD.IO.UrlPath.ToString">
             <summary>
             Returns the url path.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.UrlPath.op_Implicit(AD.IO.Standard.UrlPath)~System.String">
+        <member name="M:AD.IO.UrlPath.op_Implicit(AD.IO.UrlPath)~System.String">
             <summary>
             Implicitly casts a UrlPath as its internal string representation.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.UrlPath.op_Implicit(System.String)~AD.IO.Standard.UrlPath">
+        <member name="M:AD.IO.UrlPath.op_Implicit(System.String)~AD.IO.UrlPath">
             <summary>
             Implicitly casts a string as a UrlPath. An exception is thrown if the url is not well-formatted.
             </summary>
             <exception cref="T:System.UriFormatException"/>
         </member>
-        <member name="M:AD.IO.Standard.UrlPath.op_Implicit(AD.IO.Standard.UrlPath)~System.Uri">
+        <member name="M:AD.IO.UrlPath.op_Implicit(AD.IO.UrlPath)~System.Uri">
             <summary>
             Implicitly casts a UrlPath as its internal Uri representation.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.UrlPath.op_Explicit(AD.IO.Standard.UrlPath)~AD.IO.Standard.FilePath">
+        <member name="M:AD.IO.UrlPath.op_Explicit(AD.IO.UrlPath)~AD.IO.FilePath">
             <summary>
             Explicitly casts a UrlPath as a Uri. An exception is thrown if the url is not a file path URI.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
         </member>
-        <member name="M:AD.IO.Standard.UrlPath.op_Explicit(AD.IO.Standard.UrlPath)~AD.IO.Standard.ZipFilePath">
+        <member name="M:AD.IO.UrlPath.op_Explicit(AD.IO.UrlPath)~AD.IO.ZipFilePath">
             <summary>
             Explicitly casts a UrlPath as a Uri. An exception is thrown if the url is not a file path URI.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="T:AD.IO.Standard.XmlFilePath">
+        <member name="T:AD.IO.XmlFilePath">
             <summary>
             Path to an XML file on the system. An exception is thrown if the file does not exist, or if it is not an XML file.
             </summary>
         </member>
-        <member name="F:AD.IO.Standard.XmlFilePath._path">
+        <member name="F:AD.IO.XmlFilePath._path">
             <summary>
             The full file path.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.XmlFilePath.Extension">
+        <member name="P:AD.IO.XmlFilePath.Extension">
             <summary>
             The file path extension.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.XmlFilePath.Name">
+        <member name="P:AD.IO.XmlFilePath.Name">
             <summary>
             The file name.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.XmlFilePath.#ctor(System.String)">
+        <member name="M:AD.IO.XmlFilePath.#ctor(System.String)">
             <summary>
             Creates a new XmlFilePath object to hold the path to an XML file.
             </summary>
@@ -654,69 +654,69 @@
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.XmlFilePath.Create(System.String)">
+        <member name="M:AD.IO.XmlFilePath.Create(System.String)">
             <summary>
             Creates an XML file along the path if one does not exist.
             </summary>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.XmlFilePath.AD#IO#Standard#IPath#Create(System.String)">
+        <member name="M:AD.IO.XmlFilePath.AD#IO#IPath#Create(System.String)">
             <summary>
             Explicit IPath implementation.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.XmlFilePath.ToString">
+        <member name="M:AD.IO.XmlFilePath.ToString">
             <summary>
             Returns the XML file path.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.XmlFilePath.op_Implicit(AD.IO.Standard.XmlFilePath)~System.String">
+        <member name="M:AD.IO.XmlFilePath.op_Implicit(AD.IO.XmlFilePath)~System.String">
             <summary>
             Implicitly casts a XmlFilePath as its internal XML file path string.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.XmlFilePath.op_Implicit(System.String)~AD.IO.Standard.XmlFilePath">
+        <member name="M:AD.IO.XmlFilePath.op_Implicit(System.String)~AD.IO.XmlFilePath">
             <summary>
             Implicitly casts a string as a XmlFilePath. An exception is thrown if the XML file is not found.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.XmlFilePath.op_Explicit(AD.IO.Standard.XmlFilePath)~AD.IO.Standard.FilePath">
+        <member name="M:AD.IO.XmlFilePath.op_Explicit(AD.IO.XmlFilePath)~AD.IO.FilePath">
             <summary>
             Implicitly casts a XmlFilePath as a FilePath.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.XmlFilePath.op_Explicit(AD.IO.Standard.XmlFilePath)~AD.IO.Standard.UrlPath">
+        <member name="M:AD.IO.XmlFilePath.op_Explicit(AD.IO.XmlFilePath)~AD.IO.UrlPath">
             <summary>
             Implicitly casts a FilePath as a UrlPath. An exception is thrown if the XML file path is not a well-formed URI.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="T:AD.IO.Standard.ZipFilePath">
+        <member name="T:AD.IO.ZipFilePath">
             <summary>
             Path to a zip file on the system. An exception is thrown if the file does not exist, or if it is not a zip file.
             </summary>
         </member>
-        <member name="F:AD.IO.Standard.ZipFilePath._path">
+        <member name="F:AD.IO.ZipFilePath._path">
             <summary>
             The full file path.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.ZipFilePath.Extension">
+        <member name="P:AD.IO.ZipFilePath.Extension">
             <summary>
             The file path extension.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.ZipFilePath.Name">
+        <member name="P:AD.IO.ZipFilePath.Name">
             <summary>
             The file name.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.ZipFilePath.#ctor(System.String)">
+        <member name="M:AD.IO.ZipFilePath.#ctor(System.String)">
             <summary>
             Creates a new ZipFilePath object to hold the path to a zip file.
             </summary>
@@ -724,65 +724,65 @@
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.ZipFilePath.Create(System.String)">
+        <member name="M:AD.IO.ZipFilePath.Create(System.String)">
             <summary>
             Creates a zip file along the path if one does not exist.
             </summary>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.ZipFilePath.AD#IO#Standard#IPath#Create(System.String)">
+        <member name="M:AD.IO.ZipFilePath.AD#IO#IPath#Create(System.String)">
             <summary>
             Explicit IPath implementation.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.ZipFilePath.ToString">
+        <member name="M:AD.IO.ZipFilePath.ToString">
             <summary>
             Returns the zip file path.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.ZipFilePath.op_Implicit(AD.IO.Standard.ZipFilePath)~System.String">
+        <member name="M:AD.IO.ZipFilePath.op_Implicit(AD.IO.ZipFilePath)~System.String">
             <summary>
             Implicitly casts a ZipFilePath as its internal zip file path string.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.ZipFilePath.op_Implicit(System.String)~AD.IO.Standard.ZipFilePath">
+        <member name="M:AD.IO.ZipFilePath.op_Implicit(System.String)~AD.IO.ZipFilePath">
             <summary>
             Implicitly casts a string as a ZipFilePath. An exception is thrown if the zip file is not found.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.ZipFilePath.op_Explicit(AD.IO.Standard.ZipFilePath)~AD.IO.Standard.FilePath">
+        <member name="M:AD.IO.ZipFilePath.op_Explicit(AD.IO.ZipFilePath)~AD.IO.FilePath">
             <summary>
             Implicitly casts a ZipFilePath as a FilePath.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="M:AD.IO.Standard.ZipFilePath.op_Explicit(AD.IO.Standard.ZipFilePath)~AD.IO.Standard.UrlPath">
+        <member name="M:AD.IO.ZipFilePath.op_Explicit(AD.IO.ZipFilePath)~AD.IO.UrlPath">
             <summary>
             Implicitly casts a FilePath as a UrlPath. An exception is thrown if the zip file path is not a well-formed URI.
             </summary>
             <exception cref="T:System.IO.FileNotFoundException"/>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="T:AD.IO.Standard.Properties.Resources">
+        <member name="T:AD.IO.Properties.Resources">
             <summary>
               A strongly-typed resource class, for looking up localized strings, etc.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.ResourceManager">
+        <member name="P:AD.IO.Properties.Resources.ResourceManager">
             <summary>
               Returns the cached ResourceManager instance used by this class.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.Culture">
+        <member name="P:AD.IO.Properties.Resources.Culture">
             <summary>
               Overrides the current thread's CurrentUICulture property for all
               resource lookups using this strongly typed resource class.
             </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources._Content_Types_">
+        <member name="P:AD.IO.Properties.Resources._Content_Types_">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;Types xmlns=&quot;http://schemas.openxmlformats.org/package/2006/content-types&quot;&gt;
@@ -792,7 +792,7 @@
               &lt;Default Extension=&quot;xml&quot; ContentType [rest of string was truncated]&quot;;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.app">
+        <member name="P:AD.IO.Properties.Resources.app">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;Properties xmlns=&quot;http://schemas.openxmlformats.org/officeDocument/2006/extended-properties&quot;
@@ -808,7 +808,7 @@
               &lt;Paragraphs&gt;0&lt;/Paragraphs&gt; [rest of string was truncated]&quot;;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.core">
+        <member name="P:AD.IO.Properties.Resources.core">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;cp:coreProperties xmlns:cp=&quot;http://schemas.openxmlformats.org/package/2006/metadata/core-properties&quot; 
@@ -820,7 +820,7 @@
               &lt;cp:revision&gt;0&lt;/cp:r [rest of string was truncated]&quot;;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.document">
+        <member name="P:AD.IO.Properties.Resources.document">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot; ?&gt;
             &lt;w:document xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
@@ -829,7 +829,7 @@
             &lt;/w:document&gt;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.document_xml_rels">
+        <member name="P:AD.IO.Properties.Resources.document_xml_rels">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;Relationships xmlns=&quot;http://schemas.openxmlformats.org/package/2006/relationships&quot;&gt;
@@ -838,7 +838,7 @@
               &lt;Relationship Id=&quot;rId3&quot; Type=&quot;http://schemas.openxmlformats.org/officeDocument/2006/relationships/the [rest of string was truncated]&quot;;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.footer1">
+        <member name="P:AD.IO.Properties.Resources.footer1">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;w:ftr xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
@@ -858,7 +858,7 @@
             &lt;/w:ftr&gt;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.footer2">
+        <member name="P:AD.IO.Properties.Resources.footer2">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;w:ftr xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
@@ -878,7 +878,7 @@
             &lt;/w:ftr&gt;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.footnotes">
+        <member name="P:AD.IO.Properties.Resources.footnotes">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;w:footnotes xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
@@ -898,7 +898,7 @@
                     &lt;w:spacing w:after=&quot;0&quot; w:line=&quot;240&quot; w:lineRule= [rest of string was truncated]&quot;;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.footnotes_xml_rels">
+        <member name="P:AD.IO.Properties.Resources.footnotes_xml_rels">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;Relationships xmlns=&quot;http://schemas.openxmlformats.org/package/2006/relationships&quot;&gt;
@@ -906,7 +906,7 @@
             &lt;/Relationships&gt;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.header1">
+        <member name="P:AD.IO.Properties.Resources.header1">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;w:hdr xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
@@ -928,7 +928,7 @@
                 &lt;w:fldSimple w:instr=&quot; STYLEREF   [rest of string was truncated]&quot;;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.header2">
+        <member name="P:AD.IO.Properties.Resources.header2">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;w:hdr xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
@@ -944,7 +944,7 @@
             &lt;/w:hdr&gt;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.rels">
+        <member name="P:AD.IO.Properties.Resources.rels">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;Relationships xmlns=&quot;http://schemas.openxmlformats.org/package/2006/relationships&quot;&gt;
@@ -953,7 +953,7 @@
               &lt;Relationship Id=&quot;rId3&quot; Type=&quot;http://schemas.openxmlformats.org/officeDo [rest of string was truncated]&quot;;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.settings">
+        <member name="P:AD.IO.Properties.Resources.settings">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;w:settings xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
@@ -965,7 +965,7 @@
                         x [rest of string was truncated]&quot;;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.styles">
+        <member name="P:AD.IO.Properties.Resources.styles">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;w:styles xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
@@ -979,7 +979,7 @@
                     &lt;w:rFonts w:asciiTheme=&quot;minor [rest of string was truncated]&quot;;.
              </summary>
         </member>
-        <member name="P:AD.IO.Standard.Properties.Resources.theme1">
+        <member name="P:AD.IO.Properties.Resources.theme1">
              <summary>
                Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
             &lt;a:theme xmlns:a=&quot;http://schemas.openxmlformats.org/drawingml/2006/main&quot; name=&quot;Office Theme&quot;&gt;
@@ -1000,12 +1000,12 @@
                    [rest of string was truncated]&quot;;.
              </summary>
         </member>
-        <member name="T:AD.IO.Standard.ReadAsXmlExtensions">
+        <member name="T:AD.IO.ReadAsXmlExtensions">
             <summary>
             Extension methods to import files as XML nodes.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.ReadAsXmlExtensions.ReadAsXml(AD.IO.Standard.DelimitedFilePath)">
+        <member name="M:AD.IO.ReadAsXmlExtensions.ReadAsXml(AD.IO.DelimitedFilePath)">
             <summary>
             Parses a delimited file into an <see cref="T:System.Collections.Generic.IEnumerable`1"/>. File must include a header row.
             </summary>
@@ -1021,7 +1021,7 @@
             <exception cref="T:System.Security.SecurityException"/>
             <exception cref="T:System.UnauthorizedAccessException"/>
         </member>
-        <member name="M:AD.IO.Standard.ReadAsXmlExtensions.ReadAsXml(AD.IO.Standard.DocxFilePath,System.String)">
+        <member name="M:AD.IO.ReadAsXmlExtensions.ReadAsXml(AD.IO.DocxFilePath,System.String)">
             <summary>
             Opens a Microsoft Word document (.docx) as an <see cref="T:System.Xml.Linq.XElement"/>.
             </summary>
@@ -1039,7 +1039,7 @@
             <exception cref="T:System.IO.PathTooLongException"/>
             <exception cref="T:System.UnauthorizedAccessException"/>
         </member>
-        <member name="M:AD.IO.Standard.ReadAsXmlExtensions.ReadAsXml(System.Collections.Generic.IEnumerable{AD.IO.Standard.DocxFilePath})">
+        <member name="M:AD.IO.ReadAsXmlExtensions.ReadAsXml(System.Collections.Generic.IEnumerable{AD.IO.DocxFilePath})">
             <summary>
             Opens Microsoft Word documents (.docx) as an <see cref="T:System.Collections.Generic.IEnumerable`1"/>. 
             </summary>
@@ -1056,7 +1056,7 @@
             <exception cref="T:System.IO.PathTooLongException"/>
             <exception cref="T:System.UnauthorizedAccessException"/>
         </member>
-        <member name="M:AD.IO.Standard.ReadAsXmlExtensions.ReadAsXml(System.Linq.ParallelQuery{AD.IO.Standard.DocxFilePath})">
+        <member name="M:AD.IO.ReadAsXmlExtensions.ReadAsXml(System.Linq.ParallelQuery{AD.IO.DocxFilePath})">
             <summary>
             Opens Microsoft Word documents (.docx) as a <see cref="T:System.Linq.ParallelQuery`1"/>. 
             </summary>
@@ -1074,24 +1074,24 @@
             <exception cref="T:System.IO.PathTooLongException"/>
             <exception cref="T:System.UnauthorizedAccessException"/>
         </member>
-        <member name="T:AD.IO.Standard.ReadDataExtensions">
+        <member name="T:AD.IO.ReadDataExtensions">
             <summary>
             Extension methods to import files as XML nodes.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.ReadDataExtensions.ReadData(AD.IO.Standard.DelimitedFilePath)">
+        <member name="M:AD.IO.ReadDataExtensions.ReadData(AD.IO.DelimitedFilePath)">
             <summary>
             Read the delimited file as a dictionary of columns whose values are doubles.
             </summary>
             <param name="delimitedFilePath">The file to read.</param>
             <returns>An IDictionary where each column from the delimited file is stored as a key entry.</returns>
         </member>
-        <member name="T:AD.IO.Standard.SplitDelimitedExtensions">
+        <member name="T:AD.IO.SplitDelimitedExtensions">
             <summary>
             Extension methods to split delimited strings into enumerable collections.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.SplitDelimitedExtensions.SplitDelimitedLine(System.String,System.Char)">
+        <member name="M:AD.IO.SplitDelimitedExtensions.SplitDelimitedLine(System.String,System.Char)">
             <summary>
             Splits a string on the delimiter character. Preserves delimiters embeded in double quotation marks.
             </summary>
@@ -1099,7 +1099,7 @@
             <param name="delimiter">The character that delimits the string.</param>
             <returns>An enumerable collection of the strings between comma characters.</returns>
         </member>
-        <member name="M:AD.IO.Standard.SplitDelimitedExtensions.SplitDelimitedLine(System.Collections.Generic.IEnumerable{System.String},System.Char)">
+        <member name="M:AD.IO.SplitDelimitedExtensions.SplitDelimitedLine(System.Collections.Generic.IEnumerable{System.String},System.Char)">
             <summary>
             Splits the strings of an the enumerable on the delimiter characters. Preserves delimiters embeded in double quotation marks.
             </summary>
@@ -1107,7 +1107,7 @@
             <param name="delimiter">The character delimiting the strings.</param>
             <returns>An enumerable of enumerable collections of the split strings.</returns>
         </member>
-        <member name="M:AD.IO.Standard.SplitDelimitedExtensions.SplitDelimitedLine(System.Linq.ParallelQuery{System.String},System.Char)">
+        <member name="M:AD.IO.SplitDelimitedExtensions.SplitDelimitedLine(System.Linq.ParallelQuery{System.String},System.Char)">
             <summary>
             Splits the strings of an the enumerable on the delimiter characters. Preserves delimiters embeded in double quotation marks.
             </summary>
@@ -1115,31 +1115,31 @@
             <param name="delimiter">The character delimiting the strings.</param>
             <returns>An enumerable of enumerable collections of the split strings.</returns>
         </member>
-        <member name="T:AD.IO.Standard.ToCapitalizedExtensions">
+        <member name="T:AD.IO.ToCapitalizedExtensions">
             <summary>
             Extension method providing capitalization utilities.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.ToCapitalizedExtensions.ToCapitalizeFirst(System.String)">
+        <member name="M:AD.IO.ToCapitalizedExtensions.ToCapitalizeFirst(System.String)">
             <summary>
             Capitalizes the first character of the string.
             </summary>
             <param name="value">The string to be capitalized.</param>
             <returns>The input string with its first character converted to its uppercase equivalent.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToCapitalizedExtensions.ToCapitalizeAllFirst(System.String)">
+        <member name="M:AD.IO.ToCapitalizedExtensions.ToCapitalizeAllFirst(System.String)">
             <summary>
             Capitalizes the first letter character following each period of the string.
             </summary>
             <param name="value">The string to be capitalized.</param>
             <returns>The input string with each first character following a period converted to its uppercase equivalent.</returns>
         </member>
-        <member name="T:AD.IO.Standard.ToDelimitedExtensions">
+        <member name="T:AD.IO.ToDelimitedExtensions">
             <summary>
             Extension methods to create delimited strings from various collections.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.MakeSafeString(System.String,System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.MakeSafeString(System.String,System.String)">
             <summary>
             Provides safe handling for string components.
             </summary>
@@ -1147,7 +1147,7 @@
             <param name="delimiter">The string delimiter.</param>
             <returns>The original string, an empty string, or the original string wrapped in double quotes.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.String},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.String},System.String)">
             <summary>
             Appends the strings of the enumerable collection by a delimiter. 
             Strings containing the delimiter are enclosed in double quotation marks.
@@ -1156,7 +1156,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited(System.Linq.ParallelQuery{System.String},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Linq.ParallelQuery{System.String},System.String)">
             <summary>
             Appends the strings of the enumerable collection by a delimiter. 
             Strings containing the delimiter are enclosed in double quotation marks.
@@ -1165,14 +1165,14 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited(System.Xml.Linq.XElement,System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Xml.Linq.XElement,System.String)">
             <summary>
             Returns the delimited values of the <see cref="T:System.Xml.Linq.XElement"/>.
             </summary>
             <param name="source">The <see cref="T:System.Xml.Linq.XElement"/> from which values are retrieved.</param>
             <param name="delimiter">The character to delimit the values of the child elements.</param>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},System.String)">
             <summary>
             Returns the delimiter delimited values of the children each <see cref="T:System.Xml.Linq.XElement"/> delimited by new lines.
             </summary>
@@ -1180,7 +1180,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter and new lines.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited(System.Linq.ParallelQuery{System.Xml.Linq.XElement},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Linq.ParallelQuery{System.Xml.Linq.XElement},System.String)">
             <summary>
             Returns the delimiter delimited values of the children each <see cref="T:System.Xml.Linq.XElement"/> delimited by new lines.
             </summary>
@@ -1188,7 +1188,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter and new lines.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimitedString``1(``0,System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimitedString``1(``0,System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1196,7 +1196,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited``1(System.Collections.Generic.IEnumerable{``0},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Collections.Generic.IEnumerable{``0},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1204,7 +1204,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited``1(System.Linq.ParallelQuery{``0},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Linq.ParallelQuery{``0},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1212,7 +1212,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{System.String}},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{System.String}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1220,7 +1220,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.Linq.ParallelQuery{System.String}},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Collections.Generic.IEnumerable{System.Linq.ParallelQuery{System.String}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1228,7 +1228,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited(System.Linq.ParallelQuery{System.Collections.Generic.IEnumerable{System.String}},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Linq.ParallelQuery{System.Collections.Generic.IEnumerable{System.String}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1236,7 +1236,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited(System.Linq.ParallelQuery{System.Linq.ParallelQuery{System.String}},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Linq.ParallelQuery{System.Linq.ParallelQuery{System.String}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1244,7 +1244,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1252,7 +1252,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited``1(System.Collections.Generic.IEnumerable{System.Linq.ParallelQuery{``0}},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Collections.Generic.IEnumerable{System.Linq.ParallelQuery{``0}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1260,7 +1260,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited``1(System.Linq.ParallelQuery{System.Collections.Generic.IEnumerable{``0}},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Linq.ParallelQuery{System.Collections.Generic.IEnumerable{``0}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1268,7 +1268,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited``1(System.Linq.ParallelQuery{System.Linq.ParallelQuery{``0}},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Linq.ParallelQuery{System.Linq.ParallelQuery{``0}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1276,7 +1276,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited``1(System.Collections.Immutable.IImmutableList{System.Collections.Immutable.IImmutableList{``0}},System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited``1(System.Collections.Immutable.IImmutableList{System.Collections.Immutable.IImmutableList{``0}},System.String)">
             <summary>
             Appends the elements of the enumerable collection by a delimiter.
             </summary>
@@ -1284,7 +1284,7 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="M:AD.IO.Standard.ToDelimitedExtensions.ToDelimited(System.Xml.Linq.XDocument,System.String)">
+        <member name="M:AD.IO.ToDelimitedExtensions.ToDelimited(System.Xml.Linq.XDocument,System.String)">
             <summary>
             Appends the elements of the document by a delimiter.
             </summary>
@@ -1292,12 +1292,12 @@
             <param name="delimiter">The delimiter used to delimit the collection.</param>
             <returns>A string delimited by the delimiter.</returns>
         </member>
-        <member name="T:AD.IO.Standard.WriteDelimitedExtensions">
+        <member name="T:AD.IO.WriteDelimitedExtensions">
             <summary>
             Extension methods to write an <see cref="T:System.Collections.Generic.IEnumerable`1"/> to a delimited file.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.WriteDelimitedExtensions.WriteDelimited``1(System.Collections.Generic.IEnumerable{``0},AD.IO.Standard.DelimitedFilePath,System.String,System.Boolean)">
+        <member name="M:AD.IO.WriteDelimitedExtensions.WriteDelimited``1(System.Collections.Generic.IEnumerable{``0},AD.IO.DelimitedFilePath,System.String,System.Boolean)">
             <summary>
             Writes the <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a delimited file.
             </summary>
@@ -1306,7 +1306,7 @@
             <param name="delimiter">The character used to delimit values.</param>
             <param name="overwrite">True to overwrite an existing file.</param>
         </member>
-        <member name="M:AD.IO.Standard.WriteDelimitedExtensions.WriteDelimited``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}},AD.IO.Standard.DelimitedFilePath,System.String,System.Boolean)">
+        <member name="M:AD.IO.WriteDelimitedExtensions.WriteDelimited``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}},AD.IO.DelimitedFilePath,System.String,System.Boolean)">
             <summary>
             Writes the <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a delimited file.
             </summary>
@@ -1315,7 +1315,7 @@
             <param name="delimiter">The character used to delimit values.</param>
             <param name="overwrite">True to overwrite an existing file.</param>
         </member>
-        <member name="M:AD.IO.Standard.WriteDelimitedExtensions.WriteDelimited(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.Standard.DelimitedFilePath,System.String,System.Boolean)">
+        <member name="M:AD.IO.WriteDelimitedExtensions.WriteDelimited(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.DelimitedFilePath,System.String,System.Boolean)">
             <summary>
             Writes the <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a delimited file.
             </summary>
@@ -1324,7 +1324,7 @@
             <param name="delimiter">The character used to delimit values.</param>
             <param name="overwrite">True to overwrite an existing file.</param>
         </member>
-        <member name="M:AD.IO.Standard.WriteDelimitedExtensions.WriteDelimited(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.Standard.DelimitedFilePath,System.String,System.String,System.Boolean)">
+        <member name="M:AD.IO.WriteDelimitedExtensions.WriteDelimited(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.DelimitedFilePath,System.String,System.String,System.Boolean)">
             <summary>
             Writes the <see cref="T:System.Collections.Generic.IEnumerable`1"/> as a delimited file.
             </summary>
@@ -1334,51 +1334,51 @@
             <param name="delimiter">The character used to delimit values.</param>
             <param name="overwrite">True to overwrite an existing file.</param>
         </member>
-        <member name="T:AD.IO.Standard.WriteHtmlExtensions">
+        <member name="T:AD.IO.WriteHtmlExtensions">
             <summary>
             Extension methods to write <see cref="T:System.Xml.Linq.XElement"/> objects to HTML files.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.WriteHtmlExtensions.WriteHtml(System.Xml.Linq.XElement,AD.IO.Standard.HtmlFilePath,System.Boolean)">
+        <member name="M:AD.IO.WriteHtmlExtensions.WriteHtml(System.Xml.Linq.XElement,AD.IO.HtmlFilePath,System.Boolean)">
             <summary>
-            Writes the &lt;html&gt; as "&lt;!DOCTYPE html&gt;&lt;html&gt;...&lt;/html&gt;" to the <see cref="T:AD.IO.Standard.HtmlFilePath"/>.
+            Writes the &lt;html&gt; as "&lt;!DOCTYPE html&gt;&lt;html&gt;...&lt;/html&gt;" to the <see cref="T:AD.IO.HtmlFilePath"/>.
             </summary>
-            <param name="element">The HTML element to be written to the <see cref="T:AD.IO.Standard.HtmlFilePath"/>.</param>
+            <param name="element">The HTML element to be written to the <see cref="T:AD.IO.HtmlFilePath"/>.</param>
             <param name="htmlFilePath">The HTML file path to which the element is written.</param>
             <param name="overwrite">Overwrite if the file already exists.</param>
         </member>
-        <member name="M:AD.IO.Standard.WriteHtmlExtensions.WriteHtml(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.Standard.HtmlFilePath,System.Boolean)">
+        <member name="M:AD.IO.WriteHtmlExtensions.WriteHtml(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.HtmlFilePath,System.Boolean)">
             <summary>
-            Wraps the elements in an &lt;html&gt; tag and writes "&lt;!DOCTYPE html&gt;&lt;html&gt;...&lt;/html&gt;" to the <see cref="T:AD.IO.Standard.HtmlFilePath"/>.
+            Wraps the elements in an &lt;html&gt; tag and writes "&lt;!DOCTYPE html&gt;&lt;html&gt;...&lt;/html&gt;" to the <see cref="T:AD.IO.HtmlFilePath"/>.
             </summary>
-            <param name="elements">The HTML elements to be written to the <see cref="T:AD.IO.Standard.HtmlFilePath"/>.</param>
+            <param name="elements">The HTML elements to be written to the <see cref="T:AD.IO.HtmlFilePath"/>.</param>
             <param name="htmlFilePath">The HTML file path to which the elements are written.</param>
             <param name="overwrite">Overwrite if the file already exists.</param>
         </member>
-        <member name="M:AD.IO.Standard.WriteHtmlExtensions.WriteHtml(System.Xml.Linq.XElement,AD.IO.Standard.HtmlFilePath,System.String,System.Boolean)">
+        <member name="M:AD.IO.WriteHtmlExtensions.WriteHtml(System.Xml.Linq.XElement,AD.IO.HtmlFilePath,System.String,System.Boolean)">
             <summary>
-            Writes the &lt;html&gt; as "&lt;!DOCTYPE html&gt;&lt;html&gt;...&lt;/html&gt;" to the <see cref="T:AD.IO.Standard.HtmlFilePath"/>.
+            Writes the &lt;html&gt; as "&lt;!DOCTYPE html&gt;&lt;html&gt;...&lt;/html&gt;" to the <see cref="T:AD.IO.HtmlFilePath"/>.
             </summary>
-            <param name="element">The HTML element to be written to the <see cref="T:AD.IO.Standard.HtmlFilePath"/>.</param>
+            <param name="element">The HTML element to be written to the <see cref="T:AD.IO.HtmlFilePath"/>.</param>
             <param name="htmlFilePath">The HTML file path to which the element is written.</param>
             <param name="completedMessage">A message written to SDTOUT upon completion. If present, {0} is replaced with the current DateTime.Now.TimeOfDay</param>
             <param name="overwrite">Overwrite if the file already exists.</param>
         </member>
-        <member name="M:AD.IO.Standard.WriteHtmlExtensions.WriteHtml(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.Standard.HtmlFilePath,System.String,System.Boolean)">
+        <member name="M:AD.IO.WriteHtmlExtensions.WriteHtml(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.HtmlFilePath,System.String,System.Boolean)">
             <summary>
-            Writes the enumerable of HTML elements as children of &lt;html&gt;...&lt;/html&gt; to the <see cref="T:AD.IO.Standard.HtmlFilePath"/>.
+            Writes the enumerable of HTML elements as children of &lt;html&gt;...&lt;/html&gt; to the <see cref="T:AD.IO.HtmlFilePath"/>.
             </summary>
-            <param name="elements">The HTML elements to be written to the <see cref="T:AD.IO.Standard.HtmlFilePath"/>.</param>
+            <param name="elements">The HTML elements to be written to the <see cref="T:AD.IO.HtmlFilePath"/>.</param>
             <param name="htmlFilePath">The HTML file path to which the elements are written.</param>
             <param name="completedMessage">A message written to SDTOUT upon completion. If present, {0} is replaced with the current DateTime.Now.TimeOfDay</param>
             <param name="overwrite">Overwrite if the file already exists.</param>
         </member>
-        <member name="T:AD.IO.Standard.WriteIntoExtensions">
+        <member name="T:AD.IO.WriteIntoExtensions">
             <summary>
-            Extension methods to save XML content into the <see cref="T:System.IO.Compression.ZipArchive"/> of a <see cref="T:AD.IO.Standard.DocxFilePath"/>.
+            Extension methods to save XML content into the <see cref="T:System.IO.Compression.ZipArchive"/> of a <see cref="T:AD.IO.DocxFilePath"/>.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.WriteIntoExtensions.WriteInto(System.Xml.Linq.XElement,AD.IO.Standard.DocxFilePath,System.String)">
+        <member name="M:AD.IO.WriteIntoExtensions.WriteInto(System.Xml.Linq.XElement,AD.IO.DocxFilePath,System.String)">
             <summary>
             Saves the <paramref name="element"/> into the <paramref name="toFilePath"/> at the <paramref name="entryPath"/>.
             </summary>
@@ -1386,7 +1386,7 @@
             <param name="toFilePath">The file into which the <see cref="T:System.Xml.Linq.XElement"/> is written.</param>
             <param name="entryPath">The location to which the <see cref="T:System.Xml.Linq.XElement"/> is written.</param>
         </member>
-        <member name="M:AD.IO.Standard.WriteIntoExtensions.WriteInto(AD.IO.Standard.DocxFilePath,AD.IO.Standard.DocxFilePath,System.String)">
+        <member name="M:AD.IO.WriteIntoExtensions.WriteInto(AD.IO.DocxFilePath,AD.IO.DocxFilePath,System.String)">
             <summary>
             Saves the <paramref name="fromFilePath"/> into the <paramref name="toFilePath"/> at the <paramref name="entryPath"/>.
             </summary>
@@ -1394,7 +1394,7 @@
             <param name="toFilePath">The file into which <paramref name="fromFilePath"/> is copied.</param>
             <param name="entryPath">The location to which the <paramref name="toFilePath"/> is copied.</param>
         </member>
-        <member name="M:AD.IO.Standard.WriteIntoExtensions.WriteInto(AD.IO.Standard.DocxFilePath,AD.IO.Standard.DocxFilePath,System.String,System.String)">
+        <member name="M:AD.IO.WriteIntoExtensions.WriteInto(AD.IO.DocxFilePath,AD.IO.DocxFilePath,System.String,System.String)">
             <summary>
             Saves a doucment part from one file into another file at the given path.
             </summary>
@@ -1403,19 +1403,19 @@
             <param name="fromEntryPath">The location that is copied to the file.</param>
             <param name="toEntryPath">The location to which the file is copied.</param>
         </member>
-        <member name="M:AD.IO.Standard.WriteIntoExtensions.WriteInto(AD.IO.Standard.DocxFilePath,AD.IO.Standard.DocxFilePath)">
+        <member name="M:AD.IO.WriteIntoExtensions.WriteInto(AD.IO.DocxFilePath,AD.IO.DocxFilePath)">
             <summary>
             Saves the <paramref name="fromFilePath"/> into the <paramref name="toFilePath"/> at 'word/[name][extension]'.
             </summary>
             <param name="fromFilePath">The file that is copied.</param>
             <param name="toFilePath">The file into which <paramref name="fromFilePath"/> is copied.</param>
         </member>
-        <member name="T:AD.IO.Standard.WriteXmlExtensions">
+        <member name="T:AD.IO.WriteXmlExtensions">
             <summary>
             Extension methods to write an <see cref="T:System.Collections.Generic.IEnumerable`1"/> to an XML file.
             </summary>
         </member>
-        <member name="M:AD.IO.Standard.WriteXmlExtensions.WriteXml(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.Standard.XmlFilePath,System.Xml.Linq.SaveOptions,System.Boolean)">
+        <member name="M:AD.IO.WriteXmlExtensions.WriteXml(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.XmlFilePath,System.Xml.Linq.SaveOptions,System.Boolean)">
             <summary>
             Writes the <see cref="T:System.Collections.Generic.IEnumerable`1"/> as an XML file.
             </summary>
@@ -1424,7 +1424,7 @@
             <param name="saveOptions">Specifies serialization options.</param>
             <param name="overwrite">True to overwrite an existing file.</param>
         </member>
-        <member name="M:AD.IO.Standard.WriteXmlExtensions.WriteXml(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.Standard.XmlFilePath,System.String,System.Xml.Linq.SaveOptions,System.Boolean)">
+        <member name="M:AD.IO.WriteXmlExtensions.WriteXml(System.Collections.Generic.IEnumerable{System.Xml.Linq.XElement},AD.IO.XmlFilePath,System.String,System.Xml.Linq.SaveOptions,System.Boolean)">
             <summary>
             Writes the <see cref="T:System.Collections.Generic.IEnumerable`1"/> as an XML file.
             </summary>

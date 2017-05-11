@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO.Standard;
+using AD.IO;
 using AD.OpenXml.Elements;
 using AD.Xml.Standard;
 using JetBrains.Annotations;

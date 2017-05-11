@@ -90,7 +90,7 @@
 
   <ItemGroup>
     <PackageReference Include="AD.Collections" Version="1.2.0" />
-    <PackageReference Include="AD.IO.Standard" Version="1.0.0.1" />
+    <PackageReference Include="AD.IO" Version="1.2.0" />
     <PackageReference Include="AD.Xml.Standard" Version="1.0.0" />
     <PackageReference Include="JetBrains.Annotations" Version="10.4.0" />
     <PackageReference Include="System.ValueTuple" Version="4.3.1" />
