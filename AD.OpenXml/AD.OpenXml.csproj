@@ -89,7 +89,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AD.IO" Version="1.2.0.2" />
+    <PackageReference Include="AD.Xml" Version="1.2.0" />
     <PackageReference Include="JetBrains.Annotations" Version="10.4.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -160,7 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AD.OpenXml\AD.OpenXml.csproj">
-      <Project>{5e86904c-f80f-40a5-bf48-5ea4790ce7af}</Project>
+      <Project>{5E86904C-F80F-40A5-BF48-5EA4790CE7AF}</Project>
       <Name>AD.OpenXml</Name>
     </ProjectReference>
   </ItemGroup>
