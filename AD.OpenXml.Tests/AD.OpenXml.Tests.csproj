@@ -42,9 +42,6 @@
     <Reference Include="AD.IO, Version=1.2.0.2, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AD.IO.1.2.0.2\lib\netstandard1.6\AD.IO.dll</HintPath>
     </Reference>
-    <Reference Include="AD.Xml.Standard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AD.Xml.Standard.1.0.0\lib\netstandard1.6\AD.Xml.Standard.dll</HintPath>
-    </Reference>
     <Reference Include="JetBrains.Annotations, Version=10.4.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\packages\JetBrains.Annotations.10.4.0\lib\net\JetBrains.Annotations.dll</HintPath>
     </Reference>
@@ -162,7 +159,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AD.OpenXml.Standard\AD.OpenXml.csproj">
+    <ProjectReference Include="..\AD.OpenXml\AD.OpenXml.csproj">
       <Project>{5e86904c-f80f-40a5-bf48-5ea4790ce7af}</Project>
       <Name>AD.OpenXml</Name>
     </ProjectReference>

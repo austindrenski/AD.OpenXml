@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
-using AD.IO.Standard;
+using AD.IO;
 using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
 
@@ -84,7 +84,7 @@ namespace AD.OpenXml
         /// Writes the <see cref="IOpenXmlVisitor"/> to the <see cref="DocxFilePath"/>.
         /// </summary>
         /// <param name="result">
-        /// The file to which the <see cref="IOpenXmlVisitor"/> is written.
+        /// The file to which the <see cref="DocxFilePath"/> is written.
         /// </param>
         void Save([NotNull] DocxFilePath result);
 

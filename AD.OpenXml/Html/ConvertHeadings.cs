@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using AD.Xml.Standard;
+using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Html

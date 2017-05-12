@@ -175,11 +175,29 @@
   <data name="FigureTableSourceNote" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Styles\FigureTableSourceNote.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="footer1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Templates\footer1.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="footer2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Templates\footer2.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="FootnoteReference" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Styles\FootnoteReference.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="footnotes" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Templates\footnotes.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="footnotes_xml_rels" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Templates\footnotes.xml.rels.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="FootnoteText" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Styles\FootnoteText.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="header1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Templates\header1.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="header2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Templates\header2.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="Heading1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Styles\Heading1.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
@@ -213,6 +231,9 @@
   </data>
   <data name="ListBullet" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Styles\ListBullet.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="ListParagraph" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Styles\ListParagraph.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="Normal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Styles\Normal.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
@@ -268,22 +289,7 @@
   <data name="TOCHeading" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Styles\TOCHeading.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="footnotes" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Templates\footnotes.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
   <data name="_Content_Types_" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Templates\[Content_Types].xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="footer1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Templates\footer1.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="footer2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Templates\footer2.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="header1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Templates\header1.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="header2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Templates\header2.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
 </root>

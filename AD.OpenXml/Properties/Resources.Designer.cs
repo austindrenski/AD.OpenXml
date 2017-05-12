@@ -8,10 +8,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System.Reflection;
+
 namespace AD.OpenXml.Properties {
-    using System;
-    
-    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -39,7 +38,7 @@ namespace AD.OpenXml.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AD.OpenXml.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AD.OpenXml.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -517,6 +516,18 @@ namespace AD.OpenXml.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+        ///&lt;Relationships xmlns=&quot;http://schemas.openxmlformats.org/package/2006/relationships&quot;&gt;
+        ///  
+        ///&lt;/Relationships&gt;.
+        /// </summary>
+        internal static string footnotes_xml_rels {
+            get {
+                return ResourceManager.GetString("footnotes_xml_rels", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
         ///&lt;w:style w:type=&quot;paragraph&quot; w:styleId=&quot;FootnoteText&quot; xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot; &gt;
         ///  &lt;w:basedOn w:val=&quot;Normal&quot;/&gt;
         ///  &lt;w:locked/&gt;
@@ -827,6 +838,28 @@ namespace AD.OpenXml.Properties {
         internal static string ListBullet {
             get {
                 return ResourceManager.GetString("ListBullet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+        ///&lt;w:style w:type=&quot;paragraph&quot; w:styleId=&quot;ListParagraph&quot; xmlns:w=&quot;http://schemas.openxmlformats.org/wordprocessingml/2006/main&quot;&gt;
+        ///  &lt;w:name w:val=&quot;List Paragraph&quot;/&gt;
+        ///  &lt;w:basedOn w:val=&quot;Normal&quot;/&gt;
+        ///  &lt;w:uiPriority w:val=&quot;34&quot;/&gt;
+        ///  &lt;w:qFormat/&gt;
+        ///  &lt;w:locked/&gt;
+        ///  &lt;w:rsid w:val=&quot;002D6035&quot;/&gt;
+        ///  &lt;w:pPr&gt;
+        ///    &lt;w:spacing w:after=&quot;240&quot;/&gt;
+        ///    &lt;w:ind w:left=&quot;720&quot;/&gt;
+        ///    &lt;w:contextualSpacing/&gt;
+        ///  &lt;/w:pPr&gt;
+        ///&lt;/w:style&gt;.
+        /// </summary>
+        internal static string ListParagraph {
+            get {
+                return ResourceManager.GetString("ListParagraph", resourceCulture);
             }
         }
         

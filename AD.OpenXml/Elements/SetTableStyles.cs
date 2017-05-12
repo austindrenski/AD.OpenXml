@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using AD.IO.Standard;
-using AD.Xml.Standard;
+using AD.IO;
+using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Elements

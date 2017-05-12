@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO.Standard;
+using AD.IO;
 using AD.OpenXml.Properties;
-using AD.Xml.Standard;
+using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
