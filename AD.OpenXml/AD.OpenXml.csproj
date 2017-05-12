@@ -21,11 +21,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard1.6\AD.OpenXml.Standard.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard1.6\AD.OpenXml.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard1.6\AD.OpenXml.Standard.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard1.6\AD.OpenXml.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -86,14 +86,6 @@
     <Content Include="Templates\styles.xml" />
     <Content Include="Templates\theme1.xml" />
     <Content Include="Templates\[Content_Types].xml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="AD.Collections" Version="1.2.0" />
-    <PackageReference Include="AD.IO" Version="1.2.0.2" />
-    <PackageReference Include="ad.xml" Version="1.2.0" />
-    <PackageReference Include="JetBrains.Annotations" Version="10.4.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>
