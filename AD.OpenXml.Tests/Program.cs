@@ -18,7 +18,7 @@ namespace AD.OpenXml.Tests
             const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\editorial review";
 
             // Declare version
-            const string version = "3_6";
+            const string version = "3_7";
 
             //Process chapters
             ProcessChapter(version, $"{workingDirectory}\\ch0");
