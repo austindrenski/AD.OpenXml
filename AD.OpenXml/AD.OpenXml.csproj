@@ -29,6 +29,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Templates\theme332.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Styles\Appendix.xml" />
     <Content Include="Styles\Bibliography.xml" />
     <Content Include="Styles\Box.xml" />

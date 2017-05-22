@@ -8,9 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.Reflection;
-
 namespace AD.OpenXml.Properties {
+    using System;
+    using System.Reflection;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -1111,6 +1113,31 @@ namespace AD.OpenXml.Properties {
         internal static string theme1 {
             get {
                 return ResourceManager.GetString("theme1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+        ///&lt;a:theme xmlns:a=&quot;http://schemas.openxmlformats.org/drawingml/2006/main&quot; name=&quot;Office Theme&quot;&gt;
+        ///  &lt;a:themeElements&gt;
+        ///    &lt;a:clrScheme name=&quot;332 Reports&quot;&gt;
+        ///      &lt;a:dk1&gt;
+        ///        &lt;a:sysClr val=&quot;windowText&quot; lastClr=&quot;000000&quot;/&gt;
+        ///      &lt;/a:dk1&gt;
+        ///      &lt;a:lt1&gt;
+        ///        &lt;a:sysClr val=&quot;window&quot; lastClr=&quot;FFFFFF&quot;/&gt;
+        ///      &lt;/a:lt1&gt;
+        ///      &lt;a:dk2&gt;
+        ///        &lt;a:srgbClr val=&quot;005070&quot;/&gt;
+        ///      &lt;/a:dk2&gt;
+        ///      &lt;a:lt2&gt;
+        ///        &lt;a:srgbClr val=&quot;EEECE1&quot;/&gt;
+        ///      &lt;/a:lt2&gt;
+        ///  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string theme332 {
+            get {
+                return ResourceManager.GetString("theme332", resourceCulture);
             }
         }
         

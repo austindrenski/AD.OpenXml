@@ -6,6 +6,7 @@ using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Elements;
+using AD.OpenXml.Properties;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -335,6 +336,8 @@ namespace AD.OpenXml.Visitors
             {
                 item.Chart.WriteInto(result, $"word/{item.Name}");
             }
+
+            XElement.Parse(Resources.theme332).WriteInto(result, "word/theme/theme1.xml");
         }
 
         /// <summary>
