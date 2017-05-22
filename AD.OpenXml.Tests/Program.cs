@@ -15,7 +15,7 @@ namespace AD.OpenXml.Tests
         public static void Main()
         {
             // Declare working directory
-            const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\editorial review";
+            const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\senior checkoff";
 
             // Declare version
             const string version = "3_7";
