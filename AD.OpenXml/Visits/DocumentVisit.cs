@@ -192,12 +192,12 @@ namespace AD.OpenXml.Visits
 
             source.Descendants(W + "tr").Attributes().Remove();
 
-            if (source.Element(W + "body")?.Elements().First().Name == W + "sectPr")
+            if (source.Element(W + "body")?.Elements().FirstOrDefault()?.Name == W + "sectPr")
             {
                 source.Element(W + "body")?.Elements().First().Remove();
             }
 
-            if (source.Element(W + "body")?.Elements().Last().Name == W + "sectPr")
+            if (source.Element(W + "body")?.Elements().LastOrDefault()?.Name == W + "sectPr")
             {
                 XElement sectionProperties = source.Element(W + "body")?.Elements().Last();
 
