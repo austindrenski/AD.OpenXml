@@ -41,9 +41,7 @@ namespace AD.OpenXml.Documents
             {
                 series.Element(C + "idx")?.SetAttributeValue("val", (string)series.Element(C + "order")?.Attribute("val"));
             }
-
-
-
+            
             element.Descendants(C + "userShapes").Remove();
             element.Descendants(C + "clrMapOvr").Remove();
             element.Descendants().Where(x => x.Name.LocalName == "docPr").Remove();
