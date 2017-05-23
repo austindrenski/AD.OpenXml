@@ -36,6 +36,14 @@ namespace AD.OpenXml.Documents
             {
                 return element;
             }
+
+            foreach (XElement series in element.Descendants(C + "ser"))
+            {
+                series.Element(C + "idx")?.SetAttributeValue("val", (string)series.Element(C + "order")?.Attribute("val"));
+            }
+
+
+
             element.Descendants(C + "userShapes").Remove();
             element.Descendants(C + "clrMapOvr").Remove();
             element.Descendants().Where(x => x.Name.LocalName == "docPr").Remove();
@@ -54,7 +62,7 @@ namespace AD.OpenXml.Documents
             element.Descendants(C + "autoTitleDeleted").Remove();
             element.Descendants(C + "noMultiLvlLbl").Remove();
 
-            element.Descendants(C + "varyColors").SetAttributeValues("val", "0");
+            element.Descendants(C + "varyColors").SetAttributeValues("val", "1");
             element.Descendants(C + "gapWidth").SetAttributeValues("val", "150");
             element.Descendants(C + "majorTickMark").SetAttributeValues("val", "out");
             element.Descendants(C + "minorTickMark").SetAttributeValues("val", "none");
