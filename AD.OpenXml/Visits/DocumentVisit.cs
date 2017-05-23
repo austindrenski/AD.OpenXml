@@ -138,7 +138,7 @@ namespace AD.OpenXml.Visits
                     .RemoveByAll(W + "headerReference")
 
                     // Add soft breaks to headings
-                    .AddLineBreakToHeadings()
+                    //.AddLineBreakToHeadings()
 
                     // Tidy up the XML for review.
                     .MergeRuns();

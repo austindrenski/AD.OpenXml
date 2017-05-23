@@ -80,7 +80,7 @@ namespace AD.OpenXml.Visits
                     XElement.Parse(Resources.Heading6),
                     XElement.Parse(Resources.Heading7),
                     XElement.Parse(Resources.Heading8),
-                    XElement.Parse(Resources.Heading9),
+                    //XElement.Parse(Resources.Heading9),
                     XElement.Parse(Resources.Hyperlink),
                     XElement.Parse(Resources.ListBullet),
                     XElement.Parse(Resources.PreHeading),

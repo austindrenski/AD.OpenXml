@@ -38,9 +38,15 @@ namespace AD.OpenXml.Elements
 
                 item.Parent?
                     .Element(W + "pPr")?
-                    .Element(W + "pStyle")?.SetAttributeValue(W + "val", "Appendix");
+                    .Element(W + "pStyle")?.SetAttributeValue(W + "val", "Heading9");
 
                 XElement text = item.Element(W + "t");
+
+                if (text is null)
+                {
+                    continue;
+                }
+
                 text.Value = text.Value.Replace("{", null);
                 text.Value = text.Value.Replace("APPENDIX", null);
                 text.Value = text.Value.Replace("}", null);
@@ -66,6 +72,12 @@ namespace AD.OpenXml.Elements
                     .Element(W + "pStyle")?.SetAttributeValue(W + "val", "PreHeading");
 
                 XElement text = item.Element(W + "t");
+
+                if (text is null)
+                {
+                    continue;
+                }
+
                 text.Value = text.Value.Replace("{", null);
                 text.Value = text.Value.Replace("BIBLIOGRAPHY", "Bibliography");
                 text.Value = text.Value.Replace("}", null);

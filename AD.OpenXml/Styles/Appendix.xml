@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:style w:type="paragraph" w:styleId="Appendix" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:name w:val="Appendix"/>
+<w:style w:type="paragraph" w:styleId="Heading9" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:name w:val="heading 9"/>
   <w:next w:val="Normal"/>
   <w:locked/>
   <w:pPr>

@@ -20,7 +20,7 @@ namespace AD.OpenXml.Elements
         /// <param name="element"></param>
         public static void AddTableCaption(this XElement element)
         {
-            string style = element.Value.Contains("[APPENDIX]") ? "Appendix" : "1";
+            string style = element.Value.Contains("[APPENDIX]") ? "Heading9" : "1";
 
             XElement runProperies =
                 new XElement(W + "rPr",
@@ -72,7 +72,7 @@ namespace AD.OpenXml.Elements
             XElement label8 =
                 new XElement(W + "r",
                     runProperies,
-                    new XElement(W + "instrText", preserve, " SEQ Table \\* ARABIC \\s 1 "));
+                    new XElement(W + "instrText", preserve, $" SEQ Table \\* ARABIC \\s {style} "));
             XElement label9 =
                 new XElement(W + "r",
                     runProperies,
