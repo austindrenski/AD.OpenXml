@@ -21,34 +21,34 @@ namespace AD.OpenXml.Tests
             const string version = "3_7";
 
             //Process chapters
-            //ProcessChapter(version, $"{workingDirectory}\\ch0");
+            ProcessChapter(version, $"{workingDirectory}\\ch0");
             ProcessChapter(version, $"{workingDirectory}\\ch1");
-            //ProcessChapter(version, $"{workingDirectory}\\ch2");
-            //ProcessChapter(version, $"{workingDirectory}\\ch3");
-            //ProcessChapter(version, $"{workingDirectory}\\ch4");
-            //ProcessChapter(version, $"{workingDirectory}\\ch5");
-            //ProcessChapter(version, $"{workingDirectory}\\ch6");
-            //ProcessChapter(version, $"{workingDirectory}\\ch7");
+            ProcessChapter(version, $"{workingDirectory}\\ch2");
+            ProcessChapter(version, $"{workingDirectory}\\ch3");
+            ProcessChapter(version, $"{workingDirectory}\\ch4");
+            ProcessChapter(version, $"{workingDirectory}\\ch5");
+            ProcessChapter(version, $"{workingDirectory}\\ch6");
+            ProcessChapter(version, $"{workingDirectory}\\ch7");
 
-            //// Copy new files into report folder
-            //foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7" })
-            //{
-            //    Console.WriteLine(
-            //        Directory.GetFiles($"{workingDirectory}\\{chapter}\\_output", "*.docx", SearchOption.TopDirectoryOnly)
-            //                 .Where(x => !x.Contains('~'))
-            //                 .OrderByDescending(x => x.ParseLong())
-            //                 .First());
+            // Copy new files into report folder
+            foreach (string chapter in new string[] { "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7" })
+            {
+                Console.WriteLine(
+                    Directory.GetFiles($"{workingDirectory}\\{chapter}\\_output", "*.docx", SearchOption.TopDirectoryOnly)
+                             .Where(x => !x.Contains('~'))
+                             .OrderByDescending(x => x.ParseLong())
+                             .First());
 
-            //    File.Copy(
-            //        Directory.GetFiles($"{workingDirectory}\\{chapter}\\_output", "*.docx", SearchOption.TopDirectoryOnly)
-            //                 .Where(x => !x.Contains('~'))
-            //                 .OrderByDescending(x => x.ParseLong())
-            //                 .First(),
-            //        $"{workingDirectory}\\_report\\{chapter.ParseInt()} - {Path.GetFileName(chapter)}.docx",
-            //        true);
-            //}
+                File.Copy(
+                    Directory.GetFiles($"{workingDirectory}\\{chapter}\\_output", "*.docx", SearchOption.TopDirectoryOnly)
+                             .Where(x => !x.Contains('~'))
+                             .OrderByDescending(x => x.ParseLong())
+                             .First(),
+                    $"{workingDirectory}\\_report\\{chapter.ParseInt()} - {Path.GetFileName(chapter)}.docx",
+                    true);
+            }
 
-            ////Process report
+            //Process report
             //ProcessChapter(version, $"{workingDirectory}\\_report");
 
             ////Delete old files in report folder
