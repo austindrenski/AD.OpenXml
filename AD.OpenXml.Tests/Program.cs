@@ -49,7 +49,7 @@ namespace AD.OpenXml.Tests
             }
 
             //Process report
-            //ProcessChapter(version, $"{workingDirectory}\\_report");
+            ProcessChapter(version, $"{workingDirectory}\\_report");
 
             ////Delete old files in report folder
             //foreach (string section in Directory.GetFiles($"{workingDirectory}\\_report", "*.docx", SearchOption.TopDirectoryOnly))
