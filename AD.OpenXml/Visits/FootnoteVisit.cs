@@ -173,8 +173,8 @@ namespace AD.OpenXml.Visits
 
             foreach ((string oldId, string newId) map in footnoteMapping)
             {
-                document.Descendants(W + "footnoteReference").Attributes(W + "id").Single(x => x.Value == map.oldId).SetValue(map.newId);
-                modifiedFootnotes.Descendants(W + "footnote").Attributes(W + "id").Single(x => x.Value == map.oldId).SetValue(map.newId);
+                document.Descendants(W + "footnoteReference").Attributes(W + "id").SingleOrDefault(x => x.Value == map.oldId)?.SetValue(map.newId);
+                modifiedFootnotes.Descendants(W + "footnote").Attributes(W + "id").SingleOrDefault(x => x.Value == map.oldId)?.SetValue(map.newId);
             }
 
             var revisionMapping =
