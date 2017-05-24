@@ -212,6 +212,22 @@ namespace AD.OpenXml.Visits
                 previous?.Element(W + "pPr")?.Add(sectionProperties);
             }
 
+            IEnumerable<XElement> charts =
+                source.Descendants(W + "drawing")
+                       .Select(x => x.Ancestors(W + "p").FirstOrDefault())
+                       .Where(x => x != null)
+                       .ToArray();
+
+            foreach (XElement item in charts)
+            {
+                item.RemoveBy(W + "pStyle");
+                if (!item.Elements(W + "pPr").Any())
+                {
+                    item.AddFirst(new XElement(W + "pPr"));
+                }
+                item.Element(W + "pPr")?.AddFirst(new XElement(W + "pStyle", new XAttribute(W + "val", "FiguresTablesSourceNote")));
+            }
+
             return source;
         }
     }

@@ -18,7 +18,7 @@ namespace AD.OpenXml.Tests
             const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\senior checkoff";
 
             // Declare version
-            const string version = "3_7";
+            const string version = "3_8";
 
             //Process chapters
             ProcessChapter(version, $"{workingDirectory}\\ch0");
@@ -125,6 +125,9 @@ namespace AD.OpenXml.Tests
 
             // Set the style of bar chart objects
             output.ModifyBarChartStyles();
+
+            // Set the style of pie chart objects
+            output.ModifyPieChartStyles();
 
             // Set the style of line chart objects
             output.ModifyLineChartStyles();

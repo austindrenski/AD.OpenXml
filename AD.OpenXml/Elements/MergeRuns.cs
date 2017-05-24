@@ -39,6 +39,10 @@ namespace AD.OpenXml.Elements
                     {
                         continue;
                     }
+                    if (run.Element(W + "drawing") != null)
+                    {
+                        continue;
+                    }
                     if (run.Element(W + "fldChar") != null)
                     {
                         continue;
