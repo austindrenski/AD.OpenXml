@@ -8,7 +8,7 @@
     <w:keepNext/>
   </w:pPr>
   <w:rPr>
-    <w:sz w:val="20" />
+    <w:sz w:val="16" />
   </w:rPr>
   <w:tblPr>
     <w:tblStyleRowBandSize w:val="1" />
@@ -32,6 +32,7 @@
   <w:tblStylePr w:type="firstRow">
     <w:rPr>
       <w:b />
+      <w:sz w:val="20" />
     </w:rPr>
     <w:tblPr />
     <w:trPr>
