@@ -1,6 +1,6 @@
 
 before_build:
-  - cmd: nuget restore HeaderArrayConverter\HeaderArrayConverter.sln
+  - cmd: nuget restore AD.OpenXml.sln
 
 configuration: 
   - Release
