@@ -1,0 +1,12 @@
+
+before_build:
+  - cmd: nuget restore HeaderArrayConverter\HeaderArrayConverter.sln
+
+configuration: 
+  - Release
+
+image: 
+  - Visual Studio 2017
+
+platform: 
+  - Any CPU
