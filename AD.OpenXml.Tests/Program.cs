@@ -14,6 +14,10 @@ namespace AD.OpenXml.Tests
         [UsedImplicitly]
         public static void Main()
         {
+            const string cberaTest = "g:\\data\\austin d\\cbera test";
+            ProcessChapter("1_0", $"{cberaTest}\\_report");
+            Console.ReadLine();
+
             // Declare working directory
             const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\senior checkoff";
 
