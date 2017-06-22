@@ -112,7 +112,8 @@ namespace AD.OpenXml.Visits
                         })
                     .OrderBy(x => x.newId.Value.ParseInt())
                     .Select(
-                        x => new ChartInformation(x.newTarget.Value, charts.Single(y => y.Name == x.oldTarget.Value).Chart))
+                    // TODO: fix this...should be single
+                        x => new ChartInformation(x.newTarget.Value, charts.First(y => y.Name == x.oldTarget.Value).Chart))
                     .Select(
                         x =>
                         {
@@ -139,7 +140,8 @@ namespace AD.OpenXml.Visits
                     .Ancestors(W + "drawing")
                     .Descendants()
                     .Attributes("id")
-                    .SingleOrDefault()?
+                    // TODO: fix this...should be single
+                    .FirstOrDefault()?
                     .SetValue(map.newId.Value.ParseInt().ToString());
             }
 
