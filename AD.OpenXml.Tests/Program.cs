@@ -16,7 +16,7 @@ namespace AD.OpenXml.Tests
         {
             // Declare directory and version
             const string workingDirectory = "g:\\data\\austin d\\cbera test";
-            const string version = "1_1";
+            const string version = "1_2";
 
             //// Declare directory and version
             //const string workingDirectory = "z:\\records\\operations\\economics\\sec 332\\active cases\\otap 2016\\draft report\\senior checkoff";
@@ -26,9 +26,9 @@ namespace AD.OpenXml.Tests
                 new string[]
                 {
                     //"ch0",
-                    //"ch1",
+                    "ch1",
                     "ch2",
-                    //"ch3",
+                    "ch3",
                     "ch4",
                     //"ch5",
                     //"ch6",
