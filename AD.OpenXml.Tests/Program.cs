@@ -14,6 +14,9 @@ namespace AD.OpenXml.Tests
         [UsedImplicitly]
         public static void Main()
         {
+
+            ProcessChapter("2", "G:\\data\\Austin D\\CBERA test");
+
             // Declare directory and version
             const string workingDirectory = "g:\\data\\austin d\\cbera test";
             const string version = "1_2";
