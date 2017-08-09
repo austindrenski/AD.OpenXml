@@ -27,7 +27,7 @@ namespace CompilerAPI
             IConfigurationBuilder builder =
                 new ConfigurationBuilder()
                     .SetBasePath(env.ContentRootPath)
-                    .AddJsonFile($"Properties/appsettings.{env.EnvironmentName}.json", true, true)
+                    .AddJsonFile($"./{nameof(CompilerAPI)}/Properties/appsettings.{env.EnvironmentName}.json", true, true)
                     .AddEnvironmentVariables();
 
             Configuration = builder.Build();
