@@ -7,6 +7,6 @@ by editing this MSBuild file. In order to learn more about this please visit htt
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
     <_NewBackgroundProfile>False</_NewBackgroundProfile>
-    <_PublishTargetUrl>C:\ado\CompilerApi</_PublishTargetUrl>
+    <_PublishTargetUrl>C:\api\CompilerApi</_PublishTargetUrl>
   </PropertyGroup>
 </Project>
