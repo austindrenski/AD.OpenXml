@@ -16,7 +16,7 @@ namespace CompilerAPI
             IConfigurationRoot configuration =
                 new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile($"./{nameof(CompilerAPI)}/Properties/hosting.{environment}.json", true, true)
+                    .AddJsonFile($"Properties/hosting.{environment}.json", true, true)
                     .Build();
 
             IWebHost host =
