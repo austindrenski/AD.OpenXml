@@ -39,7 +39,7 @@ namespace CompilerAPI.Controllers
 
             if (uploadedFiles.Length == 0)
             {
-                return BadRequest("No .");
+                return BadRequest("No files uploaded.");
             }
             if (uploadedFiles.Any(x => x.Length <= 0))
             {
