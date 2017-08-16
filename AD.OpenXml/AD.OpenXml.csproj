@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PackageLicenseUrl>https://github.com/austindrenski/AD.OpenXml/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/austindrenski/AD.OpenXml</PackageProjectUrl>
     <RepositoryUrl>https://github.com/austindrenski/AD.OpenXml</RepositoryUrl>
     <Authors>Austin Drenski</Authors>
     <Company>Austin Drenski</Company>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <Description>C# extension library for OpenXML manipulation.</Description>
     <PackageTags>xml open-xml docx xlsx read-xml write-xml write-docx create-docx</PackageTags>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>Version 1.3.0.0 targets .NET Standard 2.0.</PackageReleaseNotes>
     <Copyright>Copyright (c) 2017 Austin Drenski</Copyright>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
