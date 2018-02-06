@@ -26,7 +26,7 @@
     <None Include="Styles\*" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AD.IO" Version="1.4.1" />
+    <PackageReference Include="AD.IO" Version="1.4.2" />
     <PackageReference Include="AD.Xml" Version="1.3.0" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
   </ItemGroup>

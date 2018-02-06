@@ -16,15 +16,27 @@ namespace CompilerAPI.Controllers
 {
     [PublicAPI]
     [ApiVersion("1.0")]
-    [Route("[controller]")]
     public class UploadController : Controller
     {
         private static MediaTypeHeaderValue _microsoftWordDocument = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult Post()
         {
-            return View("~/Views/UploadForm.cshtml");
+            return View();
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>
+        ///
+        /// </returns>
+        [NotNull]
+        [HttpGet]
+        public IActionResult StreamTest()
+        {
+            return View();
         }
 
         /// <summary>
@@ -35,25 +47,7 @@ namespace CompilerAPI.Controllers
         /// </returns>
         [NotNull]
         [HttpPost]
-        public async Task<IActionResult> Upload([NotNull] [ItemNotNull] IEnumerable<IFormFile> files, [CanBeNull] [FromForm] string format)
-        {
-            if (format != null)
-            {
-                Request.QueryString = Request.QueryString + QueryString.Create(nameof(format), format);
-            }
-
-            return await InternalUpload(files);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns>
-        ///
-        /// </returns>
-        [NotNull]
-        [HttpPost]
-        private async Task<IActionResult> InternalUpload([NotNull] [ItemNotNull] IEnumerable<IFormFile> files)
+        public async Task<IActionResult> StreamTest([NotNull] [ItemNotNull] IEnumerable<IFormFile> files)
         {
             if (files is null)
             {
@@ -86,7 +80,7 @@ namespace CompilerAPI.Controllers
                 documentQueue.Enqueue(memoryStream);
             }
 
-            MemoryStream output = Process(documentQueue, "[REPORT TITLE HERE]");
+            MemoryStream output = await Process(documentQueue, "[REPORT TITLE HERE]");
 
             return new FileStreamResult(output, _microsoftWordDocument);
         }
@@ -102,29 +96,29 @@ namespace CompilerAPI.Controllers
                 await visitor.Save()
                              .AddHeaders(reportTitle);
 
-            // Add footers
-            result.AddFooters();
-
-            // Set all chart objects inline
-            result.PositionChartsInline();
-
-            // Set the inner positions of chart objects
-            result.PositionChartsInner();
-
-            // Set the outer positions of chart objects
-            result.PositionChartsOuter();
-
-            // Set the style of bar chart objects
-            result.ModifyBarChartStyles();
-
-            // Set the style of pie chart objects
-            result.ModifyPieChartStyles();
-
-            // Set the style of line chart objects
-            result.ModifyLineChartStyles();
-
-            // Set the style of area chart objects
-            result.ModifyAreaChartStyles();
+//            // Add footers
+//            result.AddFooters();
+//
+//            // Set all chart objects inline
+//            result.PositionChartsInline();
+//
+//            // Set the inner positions of chart objects
+//            result.PositionChartsInner();
+//
+//            // Set the outer positions of chart objects
+//            result.PositionChartsOuter();
+//
+//            // Set the style of bar chart objects
+//            result.ModifyBarChartStyles();
+//
+//            // Set the style of pie chart objects
+//            result.ModifyPieChartStyles();
+//
+//            // Set the style of line chart objects
+//            result.ModifyLineChartStyles();
+//
+//            // Set the style of area chart objects
+//            result.ModifyAreaChartStyles();
 
             return result;
         }
