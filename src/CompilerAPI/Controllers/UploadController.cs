@@ -91,18 +91,16 @@ namespace CompilerAPI.Controllers
             return new FileStreamResult(output, _microsoftWordDocument);
         }
 
-        private static MemoryStream Process(IEnumerable<MemoryStream> files, string reportTitle)
+        private static async Task<MemoryStream> Process(IEnumerable<MemoryStream> files, string reportTitle)
         {
-            MemoryStream output = new MemoryStream();
-
             // Create a ReportVisitor based on the result path and visit the component doucments.
-            IOpenXmlVisitor visitor = new ReportVisitor(output).VisitAndFold(files);
+            IOpenXmlVisitor visitor = new ReportVisitor(new MemoryStream()).VisitAndFold(files);
 
             // Save the visitor results to result path.
-            MemoryStream result = visitor.Save();
-
             // Add headers
-            result.AddHeaders(reportTitle);
+            MemoryStream result =
+                await visitor.Save()
+                             .AddHeaders(reportTitle);
 
             // Add footers
             result.AddFooters();
