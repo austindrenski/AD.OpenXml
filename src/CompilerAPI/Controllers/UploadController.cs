@@ -27,6 +27,110 @@ namespace CompilerAPI.Controllers
             return View("~/Views/UploadForm.cshtml");
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>
+        ///
+        /// </returns>
+        [NotNull]
+        [HttpPost]
+        public async Task<IActionResult> Upload([NotNull] [ItemNotNull] IEnumerable<IFormFile> files, [CanBeNull] [FromForm] string format)
+        {
+            if (format != null)
+            {
+                Request.QueryString = Request.QueryString + QueryString.Create(nameof(format), format);
+            }
+
+            return await InternalUpload(files);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>
+        ///
+        /// </returns>
+        [NotNull]
+        [HttpPost]
+        private async Task<IActionResult> InternalUpload([NotNull] [ItemNotNull] IEnumerable<IFormFile> files)
+        {
+            if (files is null)
+            {
+                throw new ArgumentNullException(nameof(files));
+            }
+
+            IFormFile[] uploadedFiles = files.ToArray();
+
+            if (uploadedFiles.Length == 0)
+            {
+                return BadRequest("No files uploaded.");
+            }
+
+            if (uploadedFiles.Any(x => x.Length <= 0))
+            {
+                return BadRequest("Invalid file length.");
+            }
+
+            if (uploadedFiles.Any(x => !Path.GetExtension(x.FileName).Equals(".docx", StringComparison.OrdinalIgnoreCase)))
+            {
+                return BadRequest("Invalid file format.");
+            }
+
+            Queue<MemoryStream> documentQueue = new Queue<MemoryStream>(uploadedFiles.Length);
+
+            foreach (IFormFile file in uploadedFiles)
+            {
+                MemoryStream memoryStream = new MemoryStream();
+                await file.CopyToAsync(memoryStream);
+                documentQueue.Enqueue(memoryStream);
+            }
+
+            MemoryStream output = Process(documentQueue, "[REPORT TITLE HERE]");
+
+            return new FileStreamResult(output, _microsoftWordDocument);
+        }
+
+        private static MemoryStream Process(IEnumerable<MemoryStream> files, string reportTitle)
+        {
+            MemoryStream output = new MemoryStream();
+
+            // Create a ReportVisitor based on the result path and visit the component doucments.
+            IOpenXmlVisitor visitor = new ReportVisitor(output).VisitAndFold(files);
+
+            // Save the visitor results to result path.
+            MemoryStream result = visitor.Save();
+
+            // Add headers
+            result.AddHeaders(reportTitle);
+
+            // Add footers
+            result.AddFooters();
+
+            // Set all chart objects inline
+            result.PositionChartsInline();
+
+            // Set the inner positions of chart objects
+            result.PositionChartsInner();
+
+            // Set the outer positions of chart objects
+            result.PositionChartsOuter();
+
+            // Set the style of bar chart objects
+            result.ModifyBarChartStyles();
+
+            // Set the style of pie chart objects
+            result.ModifyPieChartStyles();
+
+            // Set the style of line chart objects
+            result.ModifyLineChartStyles();
+
+            // Set the style of area chart objects
+            result.ModifyAreaChartStyles();
+
+            return result;
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([NotNull] IEnumerable<IFormFile> files)
         {
@@ -73,7 +177,6 @@ namespace CompilerAPI.Controllers
 
         private static void Process(IEnumerable<DocxFilePath> files, DocxFilePath output, string reportTitle)
         {
-
             // Create a ReportVisitor based on the result path and visit the component doucments.
             IOpenXmlVisitor visitor = new ReportVisitor(output).VisitAndFold(files);
 

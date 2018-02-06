@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Xml.Linq;
 using AD.IO.Paths;
 using AD.OpenXml.Visitors;
@@ -89,6 +90,27 @@ namespace AD.OpenXml
         void Save([NotNull] DocxFilePath result);
 
         /// <summary>
+        /// Writes the <see cref="IOpenXmlVisitor"/> to the <see cref="DocxFilePath"/>.
+        /// </summary>
+        /// <returns>
+        /// The stream to which the <see cref="DocxFilePath"/> is written.
+        /// </returns>
+        [Pure]
+        [NotNull]
+        MemoryStream Save();
+
+        /// <summary>
+        /// Visit and join the component document into this <see cref="IOpenXmlVisitor"/>.
+        /// </summary>
+        /// <param name="stream">
+        /// The stream to visit.
+        /// </param>
+        [Pure]
+        [NotNull]
+        IOpenXmlVisitor Visit([NotNull] MemoryStream stream);
+
+
+        /// <summary>
         /// Visit and join the component document into this <see cref="IOpenXmlVisitor"/>.
         /// </summary>
         /// <param name="file">
@@ -107,6 +129,16 @@ namespace AD.OpenXml
         [Pure]
         [NotNull]
         IOpenXmlVisitor Fold([NotNull] IOpenXmlVisitor subject);
+
+        /// <summary>
+        /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
+        /// </summary>
+        /// <param name="streams">
+        /// The streams to visit.
+        /// </param>
+        [Pure]
+        [NotNull]
+        IOpenXmlVisitor VisitAndFold([ItemNotNull][NotNull] IEnumerable<MemoryStream> streams);
 
         /// <summary>
         /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.

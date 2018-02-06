@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using AD.IO.Paths;
 using AD.OpenXml.Visits;
 using JetBrains.Annotations;
@@ -11,6 +12,14 @@ namespace AD.OpenXml.Visitors
     [PublicAPI]
     public sealed class ReportVisitor : OpenXmlVisitor
     {
+        /// <summary>
+        /// Initialize a <see cref="ReportVisitor"/> based on the supplied <see cref="DocxFilePath"/>.
+        /// </summary>
+        /// <param name="result">
+        /// The base path used to initialize the new <see cref="ReportVisitor"/>.
+        /// </param>
+        public ReportVisitor([NotNull] MemoryStream result) : base(result) { }
+
         /// <summary>
         /// Initialize a <see cref="ReportVisitor"/> based on the supplied <see cref="DocxFilePath"/>.
         /// </summary>
