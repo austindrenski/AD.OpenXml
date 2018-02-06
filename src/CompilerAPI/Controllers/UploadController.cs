@@ -89,8 +89,13 @@ namespace CompilerAPI.Controllers
         private static async Task<MemoryStream> Process(IEnumerable<MemoryStream> files, string reportTitle)
         {
             // Create a ReportVisitor based on the result path and visit the component doucments.
+            MemoryStream source = files.First();
+            if (source.CanSeek)
+            {
+                source.Seek(0, SeekOrigin.Begin);
+            }
             MemoryStream ms = new MemoryStream();
-            files.First().CopyToAsync(ms).Wait();
+            source.CopyToAsync(ms).Wait();
             IOpenXmlVisitor visitor = new ReportVisitor(ms).VisitAndFold(files);
 
             // Save the visitor results to result path.
