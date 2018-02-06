@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO.Paths;
 using AD.OpenXml.Visitors;
@@ -97,7 +98,7 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [NotNull]
-        MemoryStream Save();
+        Task<MemoryStream> Save();
 
         /// <summary>
         /// Visit and join the component document into this <see cref="IOpenXmlVisitor"/>.

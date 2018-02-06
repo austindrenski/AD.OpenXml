@@ -11,6 +11,7 @@
     <PackageIconUrl />
     <RepositoryUrl>https://github.com/austindrenski/AD.OpenXml</RepositoryUrl>
     <RootNamespace>CompilerAPI</RootNamespace>
+    <UserSecretsId>a09aa823-5be9-41bc-a565-0083049d68a4</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\AD.OpenXml\AD.OpenXml.csproj" />
@@ -20,6 +21,7 @@
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="1.1.0" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.6.362" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
@@ -375,30 +376,30 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <inheritdoc />
-        public MemoryStream Save()
+        public async Task<MemoryStream> Save()
         {
             MemoryStream stream = new MemoryStream();
 
-            Document.WriteInto(stream, "word/document.xml");
+            stream = await Document.WriteInto(stream, "word/document.xml");
 
-            Footnotes.WriteInto(stream, "word/footnotes.xml");
+            stream = await Footnotes.WriteInto(stream, "word/footnotes.xml");
 
-            ContentTypes.WriteInto(stream, "[Content_Types].xml");
+            stream = await ContentTypes.WriteInto(stream, "[Content_Types].xml");
 
-            DocumentRelations.WriteInto(stream, "word/_rels/document.xml.rels");
+            stream = await DocumentRelations.WriteInto(stream, "word/_rels/document.xml.rels");
 
-            FootnoteRelations.WriteInto(stream, "word/_rels/footnotes.xml.rels");
+            stream = await FootnoteRelations.WriteInto(stream, "word/_rels/footnotes.xml.rels");
 
-            Styles.WriteInto(stream, "word/styles.xml");
+            stream = await Styles.WriteInto(stream, "word/styles.xml");
 
-            Numbering.WriteInto(stream, "word/numbering.xml");
+            stream = await Numbering.WriteInto(stream, "word/numbering.xml");
 
             foreach (ChartInformation item in Charts)
             {
-                item.Chart.WriteInto(stream, $"word/{item.Name}");
+                stream = await item.Chart.WriteInto(stream, $"word/{item.Name}");
             }
 
-            XElement.Parse(Resources.theme332).WriteInto(stream, "word/theme/theme1.xml");
+            stream = await XElement.Parse(Resources.theme332).WriteInto(stream, "word/theme/theme1.xml");
 
             return stream;
         }
