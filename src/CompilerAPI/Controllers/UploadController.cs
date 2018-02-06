@@ -16,6 +16,7 @@ namespace CompilerAPI.Controllers
 {
     [PublicAPI]
     [ApiVersion("1.0")]
+    [Route("[controller]/[action]")]
     public class UploadController : Controller
     {
         private static MediaTypeHeaderValue _microsoftWordDocument = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
@@ -88,7 +89,9 @@ namespace CompilerAPI.Controllers
         private static async Task<MemoryStream> Process(IEnumerable<MemoryStream> files, string reportTitle)
         {
             // Create a ReportVisitor based on the result path and visit the component doucments.
-            IOpenXmlVisitor visitor = new ReportVisitor(new MemoryStream()).VisitAndFold(files);
+            MemoryStream ms = new MemoryStream();
+            files.First().CopyToAsync(ms).Wait();
+            IOpenXmlVisitor visitor = new ReportVisitor(ms).VisitAndFold(files);
 
             // Save the visitor results to result path.
             // Add headers
