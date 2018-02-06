@@ -19,16 +19,17 @@
     <PackageReference Include="AD.IO" Version="1.4.1" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.6.362"/>
-    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0"/>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0"/>
+    <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.6.362" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="wwwroot/css/min"/>
-    <Folder Include="wwwroot/css/min"/>
-    <None Include="wwwroot/css/min/*" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always"/>
-    <None Include="wwwroot/js/min/*" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always"/>
+    <Folder Include="wwwroot/css/min" />
+    <Folder Include="wwwroot/css/min" />
+    <None Include="wwwroot/css/min/*" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+    <None Include="wwwroot/js/min/*" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
   </ItemGroup>
 </Project>

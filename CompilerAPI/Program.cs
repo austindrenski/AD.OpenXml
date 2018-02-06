@@ -1,39 +1,47 @@
 ﻿using System.IO;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Net.Http.Server;
 
 namespace CompilerAPI
 {
+    /// <summary>
+    ///
+    /// </summary>
     [PublicAPI]
     public static class Program
     {
-        public static void Main(string[] args)
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="args"></param>
+        public static void Main([NotNull] [ItemNotNull] string[] args)
         {
-            string environment = args.Length > 0 ? args[0] : "Production";
+            BuildWebHost(args).Run();
+        }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        [Pure]
+        [NotNull]
+        public static IWebHost BuildWebHost([NotNull] [ItemNotNull] string[] args)
+        {
             IConfigurationRoot configuration =
                 new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile($"Properties/hosting.{environment}.json", true, true)
+                    .AddCommandLine(args)
                     .Build();
 
-            IWebHost host =
-                new WebHostBuilder()
-                    .UseConfiguration(configuration)
-                    .UseContentRoot(Directory.GetCurrentDirectory())
-                    .UseStartup<Startup>()
-                    .UseWebListener(
-                        options =>
-                        {
-                            options.ListenerSettings.Authentication.Schemes = AuthenticationSchemes.NTLM;
-                            options.ListenerSettings.Authentication.AllowAnonymous = true;
-                        })
-                    .UseApplicationInsights()
-                    .Build();
-
-            host.Run();
+            return
+                WebHost.CreateDefaultBuilder(args)
+                       .UseHttpSys()
+                       .UseConfiguration(configuration)
+                       .UseContentRoot(Directory.GetCurrentDirectory())
+                       .UseStartup<Startup>()
+                       .Build();
         }
     }
 }

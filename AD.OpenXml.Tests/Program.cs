@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using AD.IO;
+using AD.IO.Paths;
 using AD.OpenXml.Documents;
 using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
