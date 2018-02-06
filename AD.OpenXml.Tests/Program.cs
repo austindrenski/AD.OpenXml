@@ -116,7 +116,7 @@ namespace AD.OpenXml.Tests
 
             // Create output file
             DocxFilePath output = DocxFilePath.Create($"{workingDirectory}\\_output\\OTAP_2016_v_{version}.docx", true);
-            
+
             // Create a ReportVisitor based on the result path and visit the component doucments.
             IOpenXmlVisitor visitor = new ReportVisitor(output).VisitAndFold(files);
 
@@ -146,7 +146,7 @@ namespace AD.OpenXml.Tests
 
             // Set the style of line chart objects
             output.ModifyLineChartStyles();
-            
+
             // Set the style of area chart objects
             output.ModifyAreaChartStyles();
 

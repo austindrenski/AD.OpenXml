@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
+using AD.IO.Paths;
 using AD.OpenXml.Elements;
 using AD.OpenXml.Properties;
 using AD.Xml;
@@ -16,11 +17,11 @@ namespace AD.OpenXml.Visitors
     /// Represents a visitor or rewriter for OpenXML documents.
     /// </summary>
     /// <remarks>
-    /// This class is modeled after the <see cref="System.Linq.Expressions.ExpressionVisitor"/>. 
-    /// 
+    /// This class is modeled after the <see cref="System.Linq.Expressions.ExpressionVisitor"/>.
+    ///
     /// The goal is to encapsulate OpenXML manipulations within immutable objects. Every visit operation should be a pure function.
     /// Access to <see cref="XElement"/> objects should be done with care, ensuring that objects are cloned prior to any in-place mainpulations.
-    /// 
+    ///
     /// The derived visitor class should provide:
     ///   1) A public constructor that delegates to <see cref="OpenXmlVisitor(DocxFilePath)"/>.
     ///   2) A private constructor that delegates to <see cref="OpenXmlVisitor(IOpenXmlVisitor)"/>.
@@ -60,7 +61,7 @@ namespace AD.OpenXml.Visitors
         /// [Content_Types].xml
         /// </summary>
         public XElement ContentTypes { get; }
-        
+
         /// <summary>
         /// word/document.xml
         /// </summary>
@@ -142,9 +143,9 @@ namespace AD.OpenXml.Visitors
             ContentTypes =
                 result.ReadAsXml("[Content_Types].xml") ?? throw new FileNotFoundException("[Content_Types].xml");
 
-            Document = 
+            Document =
                 result.ReadAsXml() ?? throw new FileNotFoundException("document.xml");
-            
+
             DocumentRelations =
                 result.ReadAsXml("word/_rels/document.xml.rels") ?? throw new FileNotFoundException("word/_rels/document.xml.rels");
 
@@ -221,27 +222,27 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Initializes a new <see cref="OpenXmlVisitor"/> from the supplied components. 
+        /// Initializes a new <see cref="OpenXmlVisitor"/> from the supplied components.
         /// </summary>
         /// <param name="contentTypes">
-        /// 
+        ///
         /// </param>
         /// <param name="document">
-        /// 
+        ///
         /// </param>
         /// <param name="documentRelations">
-        /// 
+        ///
         /// </param>
         /// <param name="footnotes">
-        /// 
+        ///
         /// </param>
         /// <param name="footnoteRelations">
-        /// 
+        ///
         /// </param>
         /// <param name="styles"></param>
         /// <param name="numbering"></param>
         /// <param name="charts">
-        /// 
+        ///
         /// </param>
         public OpenXmlVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] IEnumerable<ChartInformation> charts)
         {
@@ -289,7 +290,7 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="subject"></param>
         /// <returns></returns>
@@ -401,7 +402,7 @@ namespace AD.OpenXml.Visitors
 
             return files.Aggregate(this as IOpenXmlVisitor, (current, next) => current.Fold(current.Visit(next)));
         }
-        
+
         /// <summary>
         /// Folds <paramref name="subject"/> into this <paramref name="source"/>.
         /// </summary>

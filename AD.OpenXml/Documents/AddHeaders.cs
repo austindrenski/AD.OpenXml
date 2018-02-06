@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
+using AD.IO.Paths;
 using AD.OpenXml.Properties;
 using AD.Xml;
 using JetBrains.Annotations;

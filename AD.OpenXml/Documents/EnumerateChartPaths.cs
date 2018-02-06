@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
-using AD.IO;
+using AD.IO.Paths;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents

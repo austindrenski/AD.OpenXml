@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
-using AD.IO;
+using AD.IO.Paths;
 using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
 
@@ -79,7 +79,7 @@ namespace AD.OpenXml
         /// The current revision number incremented by one.
         /// </summary>
         int NextRevisionId { get; }
-        
+
         /// <summary>
         /// Writes the <see cref="IOpenXmlVisitor"/> to the <see cref="DocxFilePath"/>.
         /// </summary>
@@ -107,7 +107,7 @@ namespace AD.OpenXml
         [Pure]
         [NotNull]
         IOpenXmlVisitor Fold([NotNull] IOpenXmlVisitor subject);
-        
+
         /// <summary>
         /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
         /// </summary>

@@ -1,5 +1,5 @@
 ﻿using System;
-using AD.IO;
+using AD.IO.Paths;
 using AD.OpenXml.Visits;
 using JetBrains.Annotations;
 
@@ -28,7 +28,7 @@ namespace AD.OpenXml.Visitors
         private ReportVisitor([NotNull] IOpenXmlVisitor subject) : base(subject) { }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="subject"></param>
         /// <returns></returns>

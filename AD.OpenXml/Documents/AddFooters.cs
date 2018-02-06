@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
+using AD.IO.Paths;
 using AD.OpenXml.Properties;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -37,7 +38,7 @@ namespace AD.OpenXml.Documents
         /// </summary>
         [NotNull]
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-        
+
         /// <summary>
         /// Add footers to a Word document.
         /// </summary>
