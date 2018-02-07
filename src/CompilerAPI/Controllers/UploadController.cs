@@ -76,9 +76,13 @@ namespace CompilerAPI.Controllers
                 return BadRequest("Invalid file length.");
             }
 
-            if (uploadedFiles.Any(x => !Path.GetExtension(x.FileName).Equals(".docx", StringComparison.OrdinalIgnoreCase)))
+            if (uploadedFiles.Any(x => x.ContentType != _microsoftWordDocument.ToString()))
             {
-                return BadRequest("Invalid file format.");
+                string error =
+                    uploadedFiles.Where(x => x.ContentType != _microsoftWordDocument.ToString())
+                                 .Aggregate(string.Empty, (x, c) => string.Join(x, $"{c.FileName} ({c.ContentType})"));
+
+                return BadRequest($"Invalid file format: {error}");
             }
 
             Queue<MemoryStream> documentQueue = new Queue<MemoryStream>(uploadedFiles.Length);
