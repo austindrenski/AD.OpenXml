@@ -1,10 +1,11 @@
 ﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model object
 <nav class="navbar navbar-default">
 
     <div class="container-fluid">
 
         <div class="navbar-header">
-            <a class="navbar-brand" asp-controller="Home" asp-action="Index">USITC Questionnaires API</a>
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">@ViewData["Title"]</a>
         </div>
 
         <ul class="nav navbar-nav">
@@ -22,30 +23,15 @@
 
             <li>
                 <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    Upload Questionnaires
+                    Upload Documents
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
                     <li>
-                        <a asp-controller="Upload" asp-action="Controls">Conent controls (.docx)</a>
+                        <a asp-controller="Upload" asp-action="Post">Production</a>
                     </li>
                     <li>
-                        <a asp-controller="Upload" asp-action="Forms">Form fields (.docx)</a>
-                    </li>
-                </ul>
-            </li>
-
-            <li>
-                <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    Create Questionnaires
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li>
-                        <a asp-controller="Home" asp-action="Index">Content controls (.docx)</a>
-                    </li>
-                    <li>
-                        <a asp-controller="Home" asp-action="Index">Form fields (.docx)</a>
+                        <a asp-controller="Upload" asp-action="StreamTest">Testing</a>
                     </li>
                 </ul>
             </li>

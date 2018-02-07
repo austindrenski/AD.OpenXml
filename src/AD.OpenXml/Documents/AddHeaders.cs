@@ -104,7 +104,7 @@ namespace AD.OpenXml.Documents
             result = await documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
 
             // Modify document.xml
-            XElement document = result.ReadAsXml("document.xml");
+            XElement document = result.ReadAsXml();
             document.Descendants(W + "sectPr")
                     .Elements(W + "headerReference")
                     .Remove();
@@ -181,7 +181,7 @@ namespace AD.OpenXml.Documents
                     new XAttribute("Target", "header2.xml")));
             result = await documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
 
-            XElement document = result.ReadAsXml("document.xml");
+            XElement document = result.ReadAsXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.AddFirst(
@@ -272,7 +272,7 @@ namespace AD.OpenXml.Documents
                     new XAttribute("Target", "header1.xml")));
             result = await documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
 
-            XElement document = result.ReadAsXml("document.xml");
+            XElement document = result.ReadAsXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.AddFirst(

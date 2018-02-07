@@ -123,7 +123,7 @@ namespace AD.OpenXml.Visitors
                 stream.ReadAsXml("[Content_Types].xml") ?? throw new FileNotFoundException("[Content_Types].xml");
 
             Document =
-                stream.ReadAsXml("document.xml") ?? throw new FileNotFoundException("document.xml");
+                stream.ReadAsXml() ?? throw new FileNotFoundException("word/document.xml");
 
             DocumentRelations =
                 stream.ReadAsXml("word/_rels/document.xml.rels") ?? throw new FileNotFoundException("word/_rels/document.xml.rels");
