@@ -14,6 +14,11 @@ using Microsoft.Net.Http.Headers;
 
 namespace CompilerAPI.Controllers
 {
+    // TODO: document UploadController
+    /// <inheritdoc />
+    /// <summary>
+    ///
+    /// </summary>
     [PublicAPI]
     [ApiVersion("1.0")]
     [Route("[controller]/[action]")]
@@ -21,6 +26,10 @@ namespace CompilerAPI.Controllers
     {
         private static MediaTypeHeaderValue _microsoftWordDocument = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult Post()
         {
@@ -89,14 +98,7 @@ namespace CompilerAPI.Controllers
         private static async Task<MemoryStream> Process(IEnumerable<MemoryStream> files, string reportTitle)
         {
             // Create a ReportVisitor based on the result path and visit the component doucments.
-            MemoryStream source = files.First();
-            if (source.CanSeek)
-            {
-                source.Seek(0, SeekOrigin.Begin);
-            }
-            MemoryStream ms = new MemoryStream();
-            source.CopyToAsync(ms).Wait();
-            IOpenXmlVisitor visitor = new ReportVisitor(ms).VisitAndFold(files);
+            IOpenXmlVisitor visitor = new ReportVisitor(DocxFilePath.Create($"{Path.GetTempFileName()}.docx")).VisitAndFold(files);
 
             // Save the visitor results to result path.
             // Add headers
@@ -131,6 +133,12 @@ namespace CompilerAPI.Controllers
             return result;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="files"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"/>
         [HttpPost]
         public async Task<IActionResult> Post([NotNull] IEnumerable<IFormFile> files)
         {
