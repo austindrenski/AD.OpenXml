@@ -8,7 +8,6 @@ using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
 using AD.OpenXml.Elements;
-using AD.OpenXml.Properties;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -73,6 +72,9 @@ namespace AD.OpenXml.Visitors
         public XElement Numbering { get; }
 
         /// <inheritdoc />
+        public XElement Theme1 { get; }
+
+        /// <inheritdoc />
         public int NextDocumentRelationId => DocumentRelations.Elements().Count() + 1;
 
         /// <inheritdoc />
@@ -94,6 +96,14 @@ namespace AD.OpenXml.Visitors
                          .Select(x => x.Attribute(W + "id")?.Value.ParseInt() ?? 0)
                          .DefaultIfEmpty(0)
                          .Max()) + 1;
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Initializes an <see cref="T:AD.OpenXml.Visitors.OpenXmlVisitor" /> by reading document parts into memory from a default <see cref="MemoryStream"/>.
+        /// </summary>
+        public OpenXmlVisitor() : this(DocxFilePath.Create())
+        {
+        }
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
@@ -129,6 +139,9 @@ namespace AD.OpenXml.Visitors
 
             Numbering =
                 stream.ReadAsXml("word/numbering.xml");
+
+            Theme1 =
+                stream.ReadAsXml("word/theme/theme1.xml");
 
             if (Numbering is null)
             {
@@ -201,6 +214,9 @@ namespace AD.OpenXml.Visitors
             Numbering =
                 result.ReadAsXml("word/numbering.xml");
 
+            Theme1 =
+                result.ReadAsXml("word/theme/theme1.xml");
+
             if (Numbering is null)
             {
                 Numbering = new XElement(W + "numbering");
@@ -258,6 +274,7 @@ namespace AD.OpenXml.Visitors
             FootnoteRelations = subject.FootnoteRelations.Clone();
             Styles = subject.Styles.Clone();
             Numbering = subject.Numbering.Clone();
+            Theme1 = subject.Theme1.Clone();
             Charts = subject.Charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
         }
 
@@ -279,12 +296,19 @@ namespace AD.OpenXml.Visitors
         /// <param name="footnoteRelations">
         ///
         /// </param>
-        /// <param name="styles"></param>
-        /// <param name="numbering"></param>
+        /// <param name="styles">
+        ///
+        /// </param>
+        /// <param name="numbering">
+        ///
+        /// </param>
+        /// <param name="theme1">
+        ///
+        /// </param>
         /// <param name="charts">
         ///
         /// </param>
-        public OpenXmlVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] IEnumerable<ChartInformation> charts)
+        public OpenXmlVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] XElement theme1, [NotNull] IEnumerable<ChartInformation> charts)
         {
             if (contentTypes is null)
             {
@@ -314,6 +338,10 @@ namespace AD.OpenXml.Visitors
             {
                 throw new ArgumentNullException(nameof(numbering));
             }
+            if (theme1 is null)
+            {
+                throw new ArgumentNullException(nameof(theme1));
+            }
             if (charts is null)
             {
                 throw new ArgumentNullException(nameof(charts));
@@ -326,6 +354,7 @@ namespace AD.OpenXml.Visitors
             FootnoteRelations = footnoteRelations.Clone();
             Styles = styles.Clone();
             Numbering = numbering.Clone();
+            Theme1 = theme1.Clone();
             Charts = charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
         }
 
@@ -354,52 +383,38 @@ namespace AD.OpenXml.Visitors
             }
 
             Document.WriteInto(result, "word/document.xml");
-
             Footnotes.WriteInto(result, "word/footnotes.xml");
-
             ContentTypes.WriteInto(result, "[Content_Types].xml");
-
             DocumentRelations.WriteInto(result, "word/_rels/document.xml.rels");
-
             FootnoteRelations.WriteInto(result, "word/_rels/footnotes.xml.rels");
-
             Styles.WriteInto(result, "word/styles.xml");
-
             Numbering.WriteInto(result, "word/numbering.xml");
+            Theme1.WriteInto(result, "word/theme/theme1.xml");
 
             foreach (ChartInformation item in Charts)
             {
                 item.Chart.WriteInto(result, $"word/{item.Name}");
             }
-
-            XElement.Parse(Resources.theme332).WriteInto(result, "word/theme/theme1.xml");
         }
 
         /// <inheritdoc />
         public async Task<MemoryStream> Save()
         {
-            MemoryStream stream = new MemoryStream();
+            MemoryStream stream = DocxFilePath.Create();
 
             stream = await Document.WriteInto(stream, "word/document.xml");
-
             stream = await Footnotes.WriteInto(stream, "word/footnotes.xml");
-
             stream = await ContentTypes.WriteInto(stream, "[Content_Types].xml");
-
             stream = await DocumentRelations.WriteInto(stream, "word/_rels/document.xml.rels");
-
             stream = await FootnoteRelations.WriteInto(stream, "word/_rels/footnotes.xml.rels");
-
             stream = await Styles.WriteInto(stream, "word/styles.xml");
-
             stream = await Numbering.WriteInto(stream, "word/numbering.xml");
+            stream = await Theme1.WriteInto(stream, "word/theme/theme1.xml");
 
             foreach (ChartInformation item in Charts)
             {
                 stream = await item.Chart.WriteInto(stream, $"word/{item.Name}");
             }
-
-            stream = await XElement.Parse(Resources.theme332).WriteInto(stream, "word/theme/theme1.xml");
 
             return stream;
         }
@@ -577,13 +592,33 @@ namespace AD.OpenXml.Visitors
                               subject.Numbering.Elements(),
                               XNode.EqualityComparer));
 
+            XElement theme1 =
+                new XElement(
+                    source.Theme1.Name,
+                    source.Theme1.Attributes(),
+                    source.Theme1
+                          .Elements()
+                          .Union(
+                              subject.Theme1.Elements(),
+                              XNode.EqualityComparer));
+
             IEnumerable<ChartInformation> charts =
                 source.Charts
                       .Union(
                           subject.Charts,
                           ChartInformation.Comparer);
 
-            return new OpenXmlVisitor(contentTypes, document, documentRelations, footnotes, footnoteRelations, styles, numbering, charts);
+            return
+                new OpenXmlVisitor(
+                    contentTypes,
+                    document,
+                    documentRelations,
+                    footnotes,
+                    footnoteRelations,
+                    styles,
+                    numbering,
+                    theme1,
+                    charts);
         }
 
         /// <summary>

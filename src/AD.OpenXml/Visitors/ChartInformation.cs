@@ -5,13 +5,13 @@ using JetBrains.Annotations;
 namespace AD.OpenXml.Visitors
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     [PublicAPI]
     public struct ChartInformation
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public static IEqualityComparer<ChartInformation> Comparer = new ChartInformationComparer();
 
@@ -26,7 +26,7 @@ namespace AD.OpenXml.Visitors
         public XElement Chart { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="name"></param>
         /// <param name="chart"></param>
@@ -37,7 +37,7 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public override string ToString()
@@ -46,7 +46,7 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -56,7 +56,7 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public override int GetHashCode()
@@ -67,9 +67,7 @@ namespace AD.OpenXml.Visitors
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <inheritdoc />
         private class ChartInformationComparer : IEqualityComparer<ChartInformation>
         {
             public bool Equals(ChartInformation x, ChartInformation y)

@@ -14,95 +14,26 @@
     <Description>C# extension library for OpenXML manipulation.</Description>
     <RepositoryUrl>https://github.com/austindrenski/AD.OpenXml</RepositoryUrl>
     <PackageTags>xml open-xml docx xlsx read-xml write-xml write-docx create-docx</PackageTags>
-    <AssemblyVersion>1.4.0</AssemblyVersion>
-    <FileVersion>1.4.0</FileVersion>
-    <Version>1.4.0</Version>
+    <AssemblyVersion>1.4.1</AssemblyVersion>
+    <FileVersion>1.4.1</FileVersion>
+    <Version>1.4.1</Version>
     <Authors>Austin Drenski</Authors>
     <Company>Austin Drenski</Company>
     <DocumentationFile>bin\Release\netstandard2.0\AD.OpenXml.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="Templates\*" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always" />
-    <None Include="Styles\*" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="AD.IO" Version="1.4.7" />
-    <PackageReference Include="AD.Xml" Version="1.3.0" />
-    <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    <EmbeddedResource Include="Templates\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Styles\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Templates\theme332.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Styles\Appendix.xml" />
-    <Content Include="Styles\Bibliography.xml" />
-    <Content Include="Styles\Box.xml" />
-    <Content Include="Styles\BoxCaption.xml" />
-    <Content Include="Styles\BoxListBullet.xml" />
-    <Content Include="Styles\BoxSourceNote.xml" />
-    <Content Include="Styles\CaptionFigure.xml" />
-    <Content Include="Styles\CaptionTable.xml" />
-    <Content Include="Styles\DocDefaults.xml" />
-    <Content Include="Styles\Emphasis.xml" />
-    <Content Include="Styles\ExecutiveSummary1stParagraph.xml" />
-    <Content Include="Styles\ExecutiveSummaryHighlights.xml" />
-    <Content Include="Styles\ExecutiveSummarySidebars.xml" />
-    <Content Include="Styles\FigureTableSourceNote.xml" />
-    <Content Include="Styles\FootnoteReference.xml" />
-    <Content Include="Styles\FootnoteText.xml" />
-    <Content Include="Styles\Heading1.xml" />
-    <Content Include="Styles\Heading2.xml" />
-    <Content Include="Styles\Heading3.xml" />
-    <Content Include="Styles\Heading4.xml" />
-    <Content Include="Styles\Heading5.xml" />
-    <Content Include="Styles\Heading6.xml" />
-    <Content Include="Styles\Heading7.xml" />
-    <Content Include="Styles\Heading8.xml" />
-    <Content Include="Styles\Heading9.xml" />
-    <Content Include="Styles\Hyperlink.xml" />
-    <Content Include="Styles\ListBullet.xml" />
-    <Content Include="Styles\ListParagraph.xml" />
-    <Content Include="Styles\Normal.xml" />
-    <Content Include="Styles\Numbering.xml" />
-    <Content Include="Styles\PreHeading.xml" />
-    <Content Include="Styles\Strong.xml" />
-    <Content Include="Styles\StyleNotImplemented.xml" />
-    <Content Include="Styles\Styles.xml" />
-    <Content Include="Styles\Subscript.xml" />
-    <Content Include="Styles\Superscript.xml" />
-    <Content Include="Styles\TableOfFigures.xml" />
-    <Content Include="Styles\TOC1.xml" />
-    <Content Include="Styles\TOC2.xml" />
-    <Content Include="Styles\TOC3.xml" />
-    <Content Include="Styles\TOC4.xml" />
-    <Content Include="Styles\TOCHeading.xml" />
-    <Content Include="Templates\app.xml" />
-    <Content Include="Templates\core.xml" />
-    <Content Include="Templates\document.xml" />
-    <Content Include="Templates\document.xml.rels.xml" />
-    <Content Include="Templates\footer1.xml" />
-    <Content Include="Templates\footer2.xml" />
-    <Content Include="Templates\footnotes.xml" />
-    <Content Include="Templates\footnotes.xml.rels.xml" />
-    <Content Include="Templates\header1.xml" />
-    <Content Include="Templates\header2.xml" />
-    <Content Include="Templates\rels.xml" />
-    <Content Include="Templates\settings.xml" />
-    <Content Include="Templates\styles.xml" />
-    <Content Include="Templates\theme1.xml" />
-    <Content Include="Templates\[Content_Types].xml" />
+    <PackageReference Include="AD.IO" Version="1.4.8" />
+    <PackageReference Include="AD.Xml" Version="1.3.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
   </ItemGroup>
 </Project>

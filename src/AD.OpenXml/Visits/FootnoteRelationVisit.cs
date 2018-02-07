@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits
 {
+    /// <inheritdoc />
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
@@ -21,9 +22,7 @@ namespace AD.OpenXml.Visits
         [NotNull]
         private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <inheritdoc />
         public IOpenXmlVisitor Result { get; }
 
         /// <summary>
@@ -45,6 +44,7 @@ namespace AD.OpenXml.Visits
                     footnoteRelations,
                     subject.Styles,
                     subject.Numbering,
+                    subject.Theme1,
                     subject.Charts);
         }
 

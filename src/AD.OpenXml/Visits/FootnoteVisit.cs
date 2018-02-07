@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.OpenXml.Elements;
 using AD.OpenXml.Visitors;
 using AD.Xml;
@@ -10,17 +9,16 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits
 {
+    /// <inheritdoc />
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
     public sealed class FootnoteVisit : IOpenXmlVisit
     {
-        [NotNull]
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-        
-        [NotNull]
-        private static readonly IEnumerable<XName> Revisions =
+        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
+        [NotNull] private static readonly IEnumerable<XName> Revisions =
             new XName[]
             {
                 W + "ins",
@@ -31,9 +29,7 @@ namespace AD.OpenXml.Visits
                 W + "moveTo"
             };
 
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <inheritdoc />
         public IOpenXmlVisitor Result { get; }
 
         /// <summary>
@@ -55,7 +51,7 @@ namespace AD.OpenXml.Visits
         {
             (var document, var footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId, revisionId);
 
-             Result =
+            Result =
                 new OpenXmlVisitor(
                     subject.ContentTypes,
                     document,
@@ -64,6 +60,7 @@ namespace AD.OpenXml.Visits
                     subject.FootnoteRelations,
                     subject.Styles,
                     subject.Numbering,
+                    subject.Theme1,
                     subject.Charts);
         }
 
@@ -109,7 +106,7 @@ namespace AD.OpenXml.Visits
                     .RemoveByAll(W + "commentRangeStart")
                     .RemoveByAll(W + "commentRangeEnd")
                     .RemoveByAll(W + "commentReference")
-                    .RemoveByAll(x => (string)x.Attribute(W + "val") == "CommentReference")
+                    .RemoveByAll(x => (string) x.Attribute(W + "val") == "CommentReference")
 
                     // Remove elements that should almost never exist.
                     .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
@@ -140,7 +137,6 @@ namespace AD.OpenXml.Visits
                     .RemoveByAllIfEmpty(W + "t")
                     .RemoveByAllIfEmpty(W + "r")
                     .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false))
-
                     .RemoveBy(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0") < 1);
 
             modifiedFootnotes.Descendants(W + "p")
@@ -160,42 +156,32 @@ namespace AD.OpenXml.Visits
                 runProperties.AddFirst(distinct);
             }
 
-            IEnumerable<(string oldId, string newId)> footnoteMapping =
+            IEnumerable<(int oldId, int newId)> footnoteMapping =
                 modifiedFootnotes.Elements(W + "footnote")
-                                 .Select(
-                                    x => x.Attribute(W + "id"))
-                                 .OrderBy(
-                                    x => x?.Value.ParseInt())
-                                 .Select(
-                                     (x, i) => (oldId: x.Value, newId: $"{footnoteId + i}"))
-                                 .OrderByDescending(x => x.oldId.ParseInt())
+                                 .Select(x => (int) x.Attribute(W + "id"))
+                                 .OrderBy(x => x)
+                                 .Select((x, i) => (oldId: x, newId: i + footnoteId))
                                  .ToArray();
 
-            foreach ((string oldId, string newId) map in footnoteMapping)
+            foreach ((int oldId, int newId) in footnoteMapping)
             {
-                document.Descendants(W + "footnoteReference").Attributes(W + "id").SingleOrDefault(x => x.Value == map.oldId)?.SetValue(map.newId);
-                modifiedFootnotes.Descendants(W + "footnote").Attributes(W + "id").SingleOrDefault(x => x.Value == map.oldId)?.SetValue(map.newId);
+                document.Descendants(W + "footnoteReference").Attributes(W + "id").SingleOrDefault(x => (int) x == oldId)?.SetValue(newId);
+                modifiedFootnotes.Descendants(W + "footnote").Attributes(W + "id").SingleOrDefault(x => (int) x == oldId)?.SetValue(newId);
             }
 
-            var revisionMapping =
+            (int oldId, int newId)[] revisionMapping =
                 modifiedFootnotes.Descendants()
                                  .Where(x => Revisions.Contains(x.Name))
-                                 .OrderBy(x => x.Attribute(W + "id")?.Value.ParseInt())
-                                 .Select(
-                                     x => new
-                                     {
-                                         type = x.Name,
-                                         oldId = x.Attribute(W + "id"),
-                                         newId = new XAttribute(W + "id", $"{revisionId + x.Attribute(W + "id")?.Value.ParseInt()}")
-                                     })
-                                 .OrderByDescending(x => x.oldId.Value.ParseInt())
+                                 .Select(x => (int) x.Attribute(W + "id"))
+                                 .OrderBy(x => x)
+                                 .Select(x => (oldId: x, newId: x + revisionId))
                                  .ToArray();
 
             foreach (XName revision in Revisions)
             {
-                foreach (var map in revisionMapping)
+                foreach ((int oldId, int newId) in revisionMapping)
                 {
-                    modifiedFootnotes = modifiedFootnotes.ChangeXAttributeValues(revision, W + "id", (string) map.oldId, (string) map.newId);
+                    modifiedFootnotes = modifiedFootnotes.ChangeXAttributeValues(revision, W + "id", oldId.ToString(), newId.ToString());
                 }
             }
 
@@ -203,7 +189,7 @@ namespace AD.OpenXml.Visits
                 new XElement(
                     modifiedFootnotes.Name,
                     modifiedFootnotes.Elements()
-                                     .OrderBy(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0")));
+                                     .OrderBy(x => (int) x.Attribute(W + "id")));
 
             return (document, resultFootnotes);
         }

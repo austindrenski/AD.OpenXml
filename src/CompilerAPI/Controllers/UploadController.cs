@@ -98,7 +98,7 @@ namespace CompilerAPI.Controllers
         private static async Task<MemoryStream> Process(IEnumerable<MemoryStream> files, string reportTitle)
         {
             // Create a ReportVisitor based on the result path and visit the component doucments.
-            IOpenXmlVisitor visitor = new ReportVisitor(DocxFilePath.Create($"{Path.GetTempFileName()}.docx")).VisitAndFold(files);
+            IOpenXmlVisitor visitor = new ReportVisitor().VisitAndFold(files);
 
             // Save the visitor results to result path.
             // Add headers

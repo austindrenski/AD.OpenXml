@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
-using AD.OpenXml.Properties;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -36,6 +37,27 @@ namespace AD.OpenXml.Documents
         /// Represents the 'w:' prefix seen in raw OpenXML documents.
         /// </summary>
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
+        [NotNull] private static readonly XElement Header1;
+        [NotNull] private static readonly XElement Header2;
+
+        /// <summary>
+        ///
+        /// </summary>
+        static AddHeadersExtensions()
+        {
+            Assembly assembly = typeof(AddHeadersExtensions).GetTypeInfo().Assembly;
+
+            using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Templates.Header1.xml"), Encoding.UTF8))
+            {
+                Header1 = XElement.Parse(reader.ReadToEnd());
+            }
+
+            using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Templates.Header2.xml"), Encoding.UTF8))
+            {
+                Header2 = XElement.Parse(reader.ReadToEnd());
+            }
+        }
 
         /// <summary>
         /// Add headers to a Word document.
@@ -150,8 +172,7 @@ namespace AD.OpenXml.Documents
             MemoryStream result = new MemoryStream();
             await stream.CopyToAsync(result);
 
-            XElement element = XElement.Parse(Resources.header2);
-            result = await element.WriteInto(result, "word/header2.xml");
+            result = await Header2.WriteInto(result, "word/header2.xml");
 
             XElement documentRelation = result.ReadAsXml("word/_rels/document.xml.rels");
             documentRelation.Add(
@@ -194,8 +215,7 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(headerId));
             }
 
-            XElement element = XElement.Parse(Resources.header2);
-            element.WriteInto(toFilePath, "word/header2.xml");
+            Header2.WriteInto(toFilePath, "word/header2.xml");
 
             XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
             documentRelation.Add(
@@ -242,8 +262,9 @@ namespace AD.OpenXml.Documents
             MemoryStream result = new MemoryStream();
             await stream.CopyToAsync(result);
 
-            XElement element = XElement.Parse(string.Format(Resources.header1, title));
-            result = await element.WriteInto(result, "word/header1.xml");
+            XElement header1 = Header1.Clone();
+            header1.Element(W + "p").Element(W + "r").Element(W + "t").Value = title;
+            result = await header1.WriteInto(result, "word/header1.xml");
 
             XElement documentRelation = result.ReadAsXml("word/_rels/document.xml.rels");
             documentRelation.Add(
@@ -290,8 +311,9 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(title));
             }
 
-            XElement element = XElement.Parse(string.Format(Resources.header1, title));
-            element.WriteInto(toFilePath, "word/header1.xml");
+            XElement header1 = Header1.Clone();
+            header1.Element(W + "p").Element(W + "r").Element(W + "t").Value = title;
+            header1.WriteInto(toFilePath, "word/header1.xml");
 
             XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
             documentRelation.Add(

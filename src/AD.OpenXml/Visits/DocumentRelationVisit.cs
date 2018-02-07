@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits
 {
+    /// <inheritdoc />
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
@@ -33,9 +34,9 @@ namespace AD.OpenXml.Visits
         [NotNull]
         private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
 
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <inheritdoc />
+        ///  <summary>
+        ///  </summary>
         public IOpenXmlVisitor Result { get; }
 
         /// <summary>
@@ -46,10 +47,10 @@ namespace AD.OpenXml.Visits
         /// <returns>The updated document node of the source file.</returns>
         public DocumentRelationVisit(IOpenXmlVisitor subject, int documentRelationId)
         {
-            (var document, var documentRelations, var contentTypes, var charts) = 
+            (var document, var documentRelations, var contentTypes, var charts) =
                 Execute(subject.Document, subject.DocumentRelations, subject.ContentTypes, subject.Charts, documentRelationId);
 
-            Result = 
+            Result =
                 new OpenXmlVisitor(
                     contentTypes,
                     document,
@@ -58,6 +59,7 @@ namespace AD.OpenXml.Visits
                     subject.FootnoteRelations,
                     subject.Styles,
                     subject.Numbering,
+                    subject.Theme1,
                     charts);
         }
 
@@ -122,7 +124,7 @@ namespace AD.OpenXml.Visits
                         })
                     .ToArray();
 
-            XElement modifiedDocument = 
+            XElement modifiedDocument =
                 document.RemoveRsidAttributes();
 
             foreach (XAttribute item in modifiedDocument.Descendants().Attributes(R + "id"))

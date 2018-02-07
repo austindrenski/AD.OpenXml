@@ -63,6 +63,12 @@ namespace AD.OpenXml
         XElement Numbering { get; }
 
         /// <summary>
+        /// word/theme/theme1.xml
+        /// </summary>
+        [NotNull]
+        XElement Theme1 { get; }
+
+        /// <summary>
         /// The current document relation number incremented by one.
         /// </summary>
         int NextDocumentRelationId { get; }
@@ -139,7 +145,7 @@ namespace AD.OpenXml
         /// </param>
         [Pure]
         [NotNull]
-        IOpenXmlVisitor VisitAndFold([ItemNotNull][NotNull] IEnumerable<MemoryStream> streams);
+        IOpenXmlVisitor VisitAndFold([ItemNotNull] [NotNull] IEnumerable<MemoryStream> streams);
 
         /// <summary>
         /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
@@ -149,6 +155,6 @@ namespace AD.OpenXml
         /// </param>
         [Pure]
         [NotNull]
-        IOpenXmlVisitor VisitAndFold([ItemNotNull][NotNull] IEnumerable<DocxFilePath> files);
+        IOpenXmlVisitor VisitAndFold([ItemNotNull] [NotNull] IEnumerable<DocxFilePath> files);
     }
 }
