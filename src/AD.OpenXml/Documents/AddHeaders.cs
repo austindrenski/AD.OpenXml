@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
+using AD.IO.Streams;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -85,8 +86,7 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(title));
             }
 
-            MemoryStream result = new MemoryStream();
-            await stream.CopyToAsync(result);
+            MemoryStream result = await stream.CopyPure();
 
             // Modify [Content_Types].xml
             XElement packageRelation = result.ReadAsXml("[Content_Types].xml");
@@ -169,8 +169,7 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(headerId));
             }
 
-            MemoryStream result = new MemoryStream();
-            await stream.CopyToAsync(result);
+            MemoryStream result = await stream.CopyPure();
 
             result = await Header2.WriteInto(result, "word/header2.xml");
 
@@ -259,8 +258,7 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(title));
             }
 
-            MemoryStream result = new MemoryStream();
-            await stream.CopyToAsync(result);
+            MemoryStream result = await stream.CopyPure();
 
             XElement header1 = Header1.Clone();
             header1.Element(W + "p").Element(W + "r").Element(W + "t").Value = title;

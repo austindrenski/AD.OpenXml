@@ -171,7 +171,7 @@ namespace AD.OpenXml.Visitors
             }
 
             Charts =
-                stream.ReadAsXml("word/_rels/document.xml.rels")
+                stream.ReadAsXml("word/_rels/document.xml.rels", "word/_rels/document.xml.rels")
                       .Elements()
                       .Select(x => x.Attribute("Target")?.Value)
                       .Where(x => x?.StartsWith("charts/") ?? false)

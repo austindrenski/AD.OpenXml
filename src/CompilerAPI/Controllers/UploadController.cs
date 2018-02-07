@@ -92,6 +92,8 @@ namespace CompilerAPI.Controllers
 
             MemoryStream output = await Process(documentQueue, "[REPORT TITLE HERE]");
 
+            output.Seek(0, SeekOrigin.Begin);
+
             return new FileStreamResult(output, _microsoftWordDocument);
         }
 
@@ -129,6 +131,8 @@ namespace CompilerAPI.Controllers
 //
 //            // Set the style of area chart objects
 //            result.ModifyAreaChartStyles();
+
+            result.Seek(0, SeekOrigin.Begin);
 
             return result;
         }

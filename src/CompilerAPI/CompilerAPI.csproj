@@ -4,8 +4,7 @@
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <Authors>Austin Drenski</Authors>
     <Company>Austin Drenski</Company>
-    <Description>CompilerAPI is a lightweight ASP.NET Core API designed for document submission and formatting.
-        </Description>
+    <Description>CompilerAPI is a lightweight ASP.NET Core API designed for document formatting.</Description>
     <Copyright>Copyright (c) 2017 Austin Drenski</Copyright>
     <PackageLicenseUrl>https://github.com/austindrenski/AD.OpenXml/raw/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/austindrenski/AD.OpenXml</PackageProjectUrl>
@@ -19,7 +18,7 @@
     <ProjectReference Include="..\AD.OpenXml\AD.OpenXml.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AD.IO" Version="1.4.8" />
+    <PackageReference Include="AD.IO" Version="1.4.10" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.1.0" />
@@ -31,9 +30,9 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="wwwroot/css/min" />
-    <Folder Include="wwwroot/css/min" />
-    <None Include="wwwroot/css/min/*" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
-    <None Include="wwwroot/js/min/*" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+    <Folder Include="wwwroot/css" />
+    <Folder Include="wwwroot/js" />
+    <Folder Include="wwwroot/min" />
+    <None Include="wwwroot/min/*" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
   </ItemGroup>
 </Project>
