@@ -8,7 +8,7 @@ using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
 using AD.OpenXml.Elements;
-using AD.OpenXml.Structure;
+using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -79,7 +79,7 @@ namespace AD.OpenXml.Visitors
         public int NextDocumentRelationId => DocumentRelations.Elements().Count() + 1;
 
         /// <inheritdoc />
-        public int NextFootnoteId => Footnotes.Elements(W + "footnote").Count(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0") > 0) + 1;
+        public int NextFootnoteId => Footnotes.Elements(W + "footnote").Count(x => (int) x.Attribute(W + "id") > 0) + 1;
 
         /// <inheritdoc />
         public int NextFootnoteRelationId => FootnoteRelations.Elements().Count() + 1;
@@ -89,12 +89,12 @@ namespace AD.OpenXml.Visitors
             Math.Max(
                 Document.Descendants()
                         .Where(x => Revisions.Contains(x.Name))
-                        .Select(x => x.Attribute(W + "id")?.Value.ParseInt() ?? 0)
+                        .Select(x => (int) x.Attribute(W + "id"))
                         .DefaultIfEmpty(0)
                         .Max(),
                 Footnotes.Descendants()
                          .Where(x => Revisions.Contains(x.Name))
-                         .Select(x => x.Attribute(W + "id")?.Value.ParseInt() ?? 0)
+                         .Select(x => (int) x.Attribute(W + "id"))
                          .DefaultIfEmpty(0)
                          .Max()) + 1;
 
@@ -172,7 +172,7 @@ namespace AD.OpenXml.Visitors
             }
 
             Charts =
-                stream.ReadAsXml(DocumentRelsInfo.Path, DocumentRelsInfo.Path)
+                stream.ReadAsXml(DocumentRelsInfo.Path)
                       .Elements()
                       .Select(x => x.Attribute("Target")?.Value)
                       .Where(x => x?.StartsWith("charts/") ?? false)
@@ -198,7 +198,7 @@ namespace AD.OpenXml.Visitors
                 result.ReadAsXml(ContentTypesInfo.Path) ?? throw new FileNotFoundException(ContentTypesInfo.Path);
 
             Document =
-                result.ReadAsXml() ?? throw new FileNotFoundException("document.xml");
+                result.ReadAsXml() ?? throw new FileNotFoundException("word/document.xml");
 
             DocumentRelations =
                 result.ReadAsXml(DocumentRelsInfo.Path) ?? throw new FileNotFoundException(DocumentRelsInfo.Path);
@@ -593,15 +593,16 @@ namespace AD.OpenXml.Visitors
                               subject.Numbering.Elements(),
                               XNode.EqualityComparer));
 
-            XElement theme1 =
-                new XElement(
-                    source.Theme1.Name,
-                    source.Theme1.Attributes(),
-                    source.Theme1
-                          .Elements()
-                          .Union(
-                              subject.Theme1.Elements(),
-                              XNode.EqualityComparer));
+            // TODO: write a ThemeVisit
+//            XElement theme1 =
+//                new XElement(
+//                    source.Theme1.Name,
+//                    source.Theme1.Attributes(),
+//                    source.Theme1
+//                          .Elements()
+//                          .Union(
+//                              subject.Theme1.Elements(),
+//                              XNode.EqualityComparer));
 
             IEnumerable<ChartInformation> charts =
                 source.Charts
@@ -618,7 +619,7 @@ namespace AD.OpenXml.Visitors
                     footnoteRelations,
                     styles,
                     numbering,
-                    theme1,
+                    subject.Theme1,
                     charts);
         }
 

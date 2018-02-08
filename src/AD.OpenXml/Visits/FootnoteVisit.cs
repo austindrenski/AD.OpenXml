@@ -171,6 +171,7 @@ namespace AD.OpenXml.Visits
                                  .Select(x => (int) x.Attribute(W + "id"))
                                  .OrderBy(x => x)
                                  .Select((x, i) => (oldId: x, newId: i + footnoteId))
+                                 .OrderByDescending(x => x.oldId)
                                  .ToArray();
 
             foreach ((int oldId, int newId) in footnoteMapping)
@@ -185,6 +186,7 @@ namespace AD.OpenXml.Visits
                                  .Select(x => (int) x.Attribute(W + "id"))
                                  .OrderBy(x => x)
                                  .Select(x => (oldId: x, newId: x + revisionId))
+                                 .OrderByDescending(x => x.oldId)
                                  .ToArray();
 
             foreach (XName revision in Revisions)

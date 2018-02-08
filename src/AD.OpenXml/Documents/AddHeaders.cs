@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Streams;
-using AD.OpenXml.Structure;
+using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -19,11 +19,15 @@ namespace AD.OpenXml.Documents
     [PublicAPI]
     public static class AddHeadersExtensions
     {
-
         /// <summary>
         /// Represents the 'w:' prefix seen in raw OpenXML documents.
         /// </summary>
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
+        /// <summary>
+        /// Represents the 'r:' prefix seen in the markup of document.xml.
+        /// </summary>
+        [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
         /// <summary>
         /// The content media type of an OpenXML header.
@@ -88,7 +92,7 @@ namespace AD.OpenXml.Documents
             // Remove headers from [Content_Types].xml
             result =
                 await result.ReadAsXml(ContentTypesInfo.Path)
-                            .Recurse(x => ContentTypesInfo.Attributes.ContentType != HeaderContentType)
+                            .Recurse(x => (string) x.Attribute(ContentTypesInfo.Attributes.ContentType) != HeaderContentType)
                             .WriteInto(result, ContentTypesInfo.Path);
 
             // Remove headers from document.xml.rels
@@ -158,12 +162,8 @@ namespace AD.OpenXml.Documents
                 sectionProperties.AddFirst(
                     new XElement(
                         W + "headerReference",
-                        new XAttribute(
-                            W + "type",
-                            "default"),
-                        new XAttribute(
-                            DocumentRelsInfo.Namespace + "id",
-                            headerId)));
+                        new XAttribute(W + "type", "default"),
+                        new XAttribute(R + "id", headerId)));
             }
 
             result = await document.WriteInto(result, "word/document.xml");
@@ -231,12 +231,8 @@ namespace AD.OpenXml.Documents
                 sectionProperties.AddFirst(
                     new XElement(
                         W + "headerReference",
-                        new XAttribute(
-                            W + "type",
-                            "even"),
-                        new XAttribute(
-                            DocumentRelsInfo.Namespace + "id",
-                            headerId)));
+                        new XAttribute(W + "type", "even"),
+                        new XAttribute(R + "id", headerId)));
             }
 
             result = await document.WriteInto(result, "word/document.xml");

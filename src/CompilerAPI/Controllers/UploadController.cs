@@ -108,10 +108,10 @@ namespace CompilerAPI.Controllers
             // Add footers
             MemoryStream result =
                 await new ReportVisitor()
-                      .VisitAndFold(files)
-                      .Save()
-                      .AddHeaders(reportTitle)
-                      .AddFooters();
+                    .VisitAndFold(files)
+                    .Save()
+                    .AddHeaders(reportTitle)
+                    .AddFooters();
 
 //            // Set all chart objects inline
 //            result.PositionChartsInline();

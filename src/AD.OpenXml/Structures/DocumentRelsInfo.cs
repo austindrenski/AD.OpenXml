@@ -1,6 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿using System.Xml.Linq;
+using JetBrains.Annotations;
 
-namespace AD.OpenXml.Structure
+namespace AD.OpenXml.Structures
 {
     // TODO: document DocumentRelsInfo file.
     /// <summary>
@@ -17,17 +18,12 @@ namespace AD.OpenXml.Structure
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public const string Namespace = "http://schemas.openxmlformats.org/package/2006/relationships";
+        [NotNull] public static readonly XNamespace Namespace = "http://schemas.openxmlformats.org/package/2006/relationships";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public const string Root = "Relationships";
-
-        /// <summary>
-        ///
-        /// </summary>
-        public const bool IsNamespacePrefixed = false;
+        [NotNull] public static readonly XName Root = "Relationships";
 
         /// <summary>
         ///
@@ -38,17 +34,17 @@ namespace AD.OpenXml.Structure
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public const string Id = "Id";
+            [NotNull] public static readonly XName Id = "Id";
 
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public const string Type = "Type";
+            [NotNull] public static readonly XName Type = "Type";
 
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public const string Target = "Target";
+            [NotNull] public static readonly XName Target = "Target";
         }
 
         /// <summary>
@@ -60,7 +56,7 @@ namespace AD.OpenXml.Structure
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public const string Relationship = "Relationship";
+            [NotNull] public static readonly XName Relationship = Namespace + "Relationship";
         }
     }
 }

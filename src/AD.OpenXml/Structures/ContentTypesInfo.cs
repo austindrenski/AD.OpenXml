@@ -1,6 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿using System.Xml.Linq;
+using JetBrains.Annotations;
 
-namespace AD.OpenXml.Structure
+namespace AD.OpenXml.Structures
 {
     // TODO: document ContentTypesInfo file.
     /// <summary>
@@ -17,17 +18,12 @@ namespace AD.OpenXml.Structure
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public const string Namespace = "http://schemas.openxmlformats.org/package/2006/content-types";
+        [NotNull] public static readonly XNamespace Namespace = "http://schemas.openxmlformats.org/package/2006/content-types";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public const string Root = "Types";
-
-        /// <summary>
-        ///
-        /// </summary>
-        public const bool IsNamespacePrefixed = false;
+        [NotNull] public static readonly XName Root = "Types";
 
         /// <summary>
         ///
@@ -38,17 +34,17 @@ namespace AD.OpenXml.Structure
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public const string ContentType = "ContentType";
+            [NotNull] public static readonly XName ContentType = "ContentType";
 
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public const string Extension = "Extension";
+            [NotNull] public static readonly XName Extension = "Extension";
 
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public const string PartName = "PartName";
+            [NotNull] public static readonly XName PartName = "PartName";
         }
 
         /// <summary>
@@ -60,12 +56,12 @@ namespace AD.OpenXml.Structure
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public const string Default = "Default";
+            [NotNull] public static readonly XName Default = Namespace + "Default";
 
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public const string Override = "Override";
+            [NotNull] public static readonly XName Override = Namespace + "Override";
         }
     }
 }

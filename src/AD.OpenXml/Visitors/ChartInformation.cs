@@ -52,7 +52,7 @@ namespace AD.OpenXml.Visitors
         /// <returns></returns>
         public override bool Equals(object obj)
         {
-            return obj is ChartInformation chart && (Name.Equals(chart.Name) && XNode.DeepEquals(Chart, chart.Chart));
+            return obj is ChartInformation chart && Name.Equals(chart.Name) && XNode.DeepEquals(Chart, chart.Chart);
         }
 
         /// <summary>
