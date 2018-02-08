@@ -200,7 +200,17 @@ namespace CompilerAPI.Controllers
             visitor.Save(output);
 
             // Add headers
-            output.AddHeaders(reportTitle);
+            using (FileStream fileStream = new FileStream(output, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
+            {
+                MemoryStream stream = new MemoryStream();
+
+                fileStream.CopyTo(stream);
+                fileStream.SetLength(0);
+
+                stream.AddHeaders(reportTitle)
+                      .Result
+                      .CopyTo(fileStream);
+            }
 
             // Add footers
             output.AddFooters();

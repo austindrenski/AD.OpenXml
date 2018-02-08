@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
 using AD.OpenXml.Elements;
+using AD.OpenXml.Structure;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -120,13 +121,13 @@ namespace AD.OpenXml.Visitors
             }
 
             ContentTypes =
-                stream.ReadAsXml("[Content_Types].xml") ?? throw new FileNotFoundException("[Content_Types].xml");
+                stream.ReadAsXml(ContentTypesInfo.Path) ?? throw new FileNotFoundException(ContentTypesInfo.Path);
 
             Document =
                 stream.ReadAsXml() ?? throw new FileNotFoundException("word/document.xml");
 
             DocumentRelations =
-                stream.ReadAsXml("word/_rels/document.xml.rels") ?? throw new FileNotFoundException("word/_rels/document.xml.rels");
+                stream.ReadAsXml(DocumentRelsInfo.Path) ?? throw new FileNotFoundException(DocumentRelsInfo.Path);
 
             Footnotes =
                 stream.ReadAsXml("word/footnotes.xml") ?? new XElement(W + "footnotes");
@@ -171,7 +172,7 @@ namespace AD.OpenXml.Visitors
             }
 
             Charts =
-                stream.ReadAsXml("word/_rels/document.xml.rels", "word/_rels/document.xml.rels")
+                stream.ReadAsXml(DocumentRelsInfo.Path, DocumentRelsInfo.Path)
                       .Elements()
                       .Select(x => x.Attribute("Target")?.Value)
                       .Where(x => x?.StartsWith("charts/") ?? false)
@@ -194,13 +195,13 @@ namespace AD.OpenXml.Visitors
             }
 
             ContentTypes =
-                result.ReadAsXml("[Content_Types].xml") ?? throw new FileNotFoundException("[Content_Types].xml");
+                result.ReadAsXml(ContentTypesInfo.Path) ?? throw new FileNotFoundException(ContentTypesInfo.Path);
 
             Document =
                 result.ReadAsXml() ?? throw new FileNotFoundException("document.xml");
 
             DocumentRelations =
-                result.ReadAsXml("word/_rels/document.xml.rels") ?? throw new FileNotFoundException("word/_rels/document.xml.rels");
+                result.ReadAsXml(DocumentRelsInfo.Path) ?? throw new FileNotFoundException(DocumentRelsInfo.Path);
 
             Footnotes =
                 result.ReadAsXml("word/footnotes.xml") ?? new XElement(W + "footnotes");
@@ -245,7 +246,7 @@ namespace AD.OpenXml.Visitors
             }
 
             Charts =
-                result.ReadAsXml("word/_rels/document.xml.rels")
+                result.ReadAsXml(DocumentRelsInfo.Path)
                       .Elements()
                       .Select(x => x.Attribute("Target")?.Value)
                       .Where(x => x?.StartsWith("charts/") ?? false)
@@ -384,8 +385,8 @@ namespace AD.OpenXml.Visitors
 
             Document.WriteInto(result, "word/document.xml");
             Footnotes.WriteInto(result, "word/footnotes.xml");
-            ContentTypes.WriteInto(result, "[Content_Types].xml");
-            DocumentRelations.WriteInto(result, "word/_rels/document.xml.rels");
+            ContentTypes.WriteInto(result, ContentTypesInfo.Path);
+            DocumentRelations.WriteInto(result, DocumentRelsInfo.Path);
             FootnoteRelations.WriteInto(result, "word/_rels/footnotes.xml.rels");
             Styles.WriteInto(result, "word/styles.xml");
             Numbering.WriteInto(result, "word/numbering.xml");
@@ -404,8 +405,8 @@ namespace AD.OpenXml.Visitors
 
             stream = await Document.WriteInto(stream, "word/document.xml");
             stream = await Footnotes.WriteInto(stream, "word/footnotes.xml");
-            stream = await ContentTypes.WriteInto(stream, "[Content_Types].xml");
-            stream = await DocumentRelations.WriteInto(stream, "word/_rels/document.xml.rels");
+            stream = await ContentTypes.WriteInto(stream, ContentTypesInfo.Path);
+            stream = await DocumentRelations.WriteInto(stream, DocumentRelsInfo.Path);
             stream = await FootnoteRelations.WriteInto(stream, "word/_rels/footnotes.xml.rels");
             stream = await Styles.WriteInto(stream, "word/styles.xml");
             stream = await Numbering.WriteInto(stream, "word/numbering.xml");

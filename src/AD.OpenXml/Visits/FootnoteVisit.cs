@@ -49,7 +49,7 @@ namespace AD.OpenXml.Visits
         /// </returns>
         public FootnoteVisit(IOpenXmlVisitor subject, int footnoteId, int revisionId)
         {
-            (var document, var footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId, revisionId);
+            (XElement document, XElement footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId, revisionId);
 
             Result =
                 new OpenXmlVisitor(
@@ -65,12 +65,13 @@ namespace AD.OpenXml.Visits
         }
 
         [Pure]
-        private static (XElement Document, XElement Footnotes) Execute(XElement footnotes, XElement document, int footnoteId, int revisionId)
+        private static (XElement Document, XElement Footnotes) Execute([NotNull] XElement footnotes, [NotNull] XElement document, int footnoteId, int revisionId)
         {
             if (footnotes is null)
             {
                 throw new ArgumentNullException(nameof(footnotes));
             }
+
             if (document is null)
             {
                 throw new ArgumentNullException(nameof(document));
@@ -109,10 +110,10 @@ namespace AD.OpenXml.Visits
                     .RemoveByAll(x => (string) x.Attribute(W + "val") == "CommentReference")
 
                     // Remove elements that should almost never exist.
-                    .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("Default", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name.Equals(W + "jc") && !x.Ancestors(W + "tbl").Any())
+                    .RemoveByAll(x => x.Name == W + "br" && (string) x.Attribute(W + "type") == "page")
+                    .RemoveByAll(x => x.Name == W + "pStyle" && (string) x.Attribute(W + "val") == "BodyTextSSFinal")
+                    .RemoveByAll(x => x.Name == W + "pStyle" && (string) x.Attribute(W + "val") == "Default")
+                    .RemoveByAll(x => x.Name == W + "jc" && !x.Ancestors(W + "tbl").Any())
 
                     // Alter bold, italic, and underline elements.
                     .ChangeBoldToStrong()
@@ -136,8 +137,8 @@ namespace AD.OpenXml.Visits
                     .RemoveByAllIfEmpty(W + "pPr")
                     .RemoveByAllIfEmpty(W + "t")
                     .RemoveByAllIfEmpty(W + "r")
-                    .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false))
-                    .RemoveBy(x => int.Parse(x.Attribute(W + "id")?.Value ?? "0") < 1);
+                    .RemoveByAll(x => x.Name == W + "p" && !x.HasElements && x.Parent?.Name != W + "tc")
+                    .RemoveBy(x => (int) x.Attribute(W + "id") < 1);
 
             modifiedFootnotes.Descendants(W + "p")
                              .Attributes()
@@ -146,17 +147,26 @@ namespace AD.OpenXml.Visits
             // There shouldn't be more than one run style.
             foreach (XElement runProperties in modifiedFootnotes.Descendants(W + "rPr").Where(x => x.Elements(W + "rStyle").Count() > 1))
             {
-                IEnumerable<XElement> styles = runProperties.Elements(W + "rStyle").ToArray();
+                XElement[] styles =
+                    runProperties.Elements(W + "rStyle")
+                                 .ToArray();
+
                 styles.Remove();
-                IEnumerable<XElement> distinct = styles.Distinct(XNode.EqualityComparer).Cast<XElement>().ToArray();
-                if (distinct.Any(x => x.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false))
+
+                IEnumerable<XElement> distinct =
+                    styles.Distinct(XNode.EqualityComparer)
+                          .Cast<XElement>()
+                          .ToArray();
+
+                if (distinct.Any(x => (string) x.Attribute(W + "val") == "FootnoteReference"))
                 {
-                    distinct = distinct.Where(x => x.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false);
+                    distinct = distinct.Where(x => (string) x.Attribute(W + "val") == "FootnoteReference");
                 }
+
                 runProperties.AddFirst(distinct);
             }
 
-            IEnumerable<(int oldId, int newId)> footnoteMapping =
+            (int oldId, int newId)[] footnoteMapping =
                 modifiedFootnotes.Elements(W + "footnote")
                                  .Select(x => (int) x.Attribute(W + "id"))
                                  .OrderBy(x => x)

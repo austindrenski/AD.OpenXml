@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
-using AD.IO.Paths;
 using AD.IO.Streams;
+using AD.OpenXml.Structure;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -19,25 +19,21 @@ namespace AD.OpenXml.Documents
     [PublicAPI]
     public static class AddHeadersExtensions
     {
-        /// <summary>
-        /// The namespace declared on the [Content_Types].xml
-        /// </summary>
-        [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
-
-        /// <summary>
-        /// Represents the 'r:' prefix seen in the markup of [Content_Types].xml
-        /// </summary>
-        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
-        /// <summary>
-        /// Represents the 'r:' prefix seen in the markup of document.xml.
-        /// </summary>
-        [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
         /// <summary>
         /// Represents the 'w:' prefix seen in raw OpenXML documents.
         /// </summary>
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
+        /// <summary>
+        /// The content media type of an OpenXML header.
+        /// </summary>
+        [NotNull] private static readonly string HeaderContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml";
+
+        /// <summary>
+        /// The schema type for an OpenXML header relationship.
+        /// </summary>
+        [NotNull] private static readonly string HeaderRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header";
 
         [NotNull] private static readonly XElement Header1;
         [NotNull] private static readonly XElement Header2;
@@ -81,6 +77,7 @@ namespace AD.OpenXml.Documents
             {
                 throw new ArgumentNullException(nameof(stream));
             }
+
             if (title is null)
             {
                 throw new ArgumentNullException(nameof(title));
@@ -88,171 +85,118 @@ namespace AD.OpenXml.Documents
 
             MemoryStream result = await stream.CopyPure();
 
-            // Modify [Content_Types].xml
-            XElement packageRelation = result.ReadAsXml("[Content_Types].xml");
-            packageRelation.Descendants(T + "Override")
-                           .Where(x => x.Attribute("PartName")?.Value.StartsWith("/word/header") ?? false)
-                           .Remove();
-            result = await packageRelation.WriteInto(result, "[Content_Types].xml");
+            // Remove headers from [Content_Types].xml
+            result =
+                await result.ReadAsXml(ContentTypesInfo.Path)
+                            .Recurse(x => ContentTypesInfo.Attributes.ContentType != HeaderContentType)
+                            .WriteInto(result, ContentTypesInfo.Path);
 
-            // Modify document.xml.rels and grab the current header id number
-            XElement documentRelation = result.ReadAsXml("word/_rels/document.xml.rels");
-            documentRelation.Descendants(R + "Relationship")
-                            .Where(x => x.Attribute("Target")?.Value.Contains("header") ?? false)
-                            .Remove();
-            int currentHeaderId = documentRelation.Elements().Attributes("Id").Select(x => int.Parse(x.Value.Substring(3))).DefaultIfEmpty(0).Max();
-            result = await documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
+            // Remove headers from document.xml.rels
+            result =
+                await result.ReadAsXml(DocumentRelsInfo.Path)
+                            .Recurse(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) != HeaderRelationshipType)
+                            .WriteInto(result, DocumentRelsInfo.Path);
 
-            // Modify document.xml
-            XElement document = result.ReadAsXml();
-            document.Descendants(W + "sectPr")
-                    .Elements(W + "headerReference")
-                    .Remove();
-            result = await document.WriteInto(result, "word/document.xml");
+            // Remove headers from document.xml
+            result =
+                await result.ReadAsXml()
+                            .Recurse(x => x.Name != W + "headerReference")
+                            .WriteInto(result, "word/document.xml");
+
+            // Store the current relationship id number
+            int currentRelationshipId =
+                result.ReadAsXml(DocumentRelsInfo.Path)
+                      .Elements()
+                      .Attributes("Id")
+                      .Select(x => int.Parse(x.Value.Substring(3)))
+                      .DefaultIfEmpty(0)
+                      .Max();
 
             // Add headers
-            result = await result.AddOddPageHeader($"rId{++currentHeaderId}");
-            result = await result.AddEvenPageHeader($"rId{++currentHeaderId}", title);
+            result = await AddOddPageHeader(result, $"rId{++currentRelationshipId}");
+            result = await AddEvenPageHeader(result, $"rId{++currentRelationshipId}", title);
 
             return result;
         }
 
-        /// <summary>
-        /// Add headers to a Word document.
-        /// </summary>
-        public static void AddHeaders([NotNull] this DocxFilePath toFilePath, [NotNull] string title)
-        {
-            if (toFilePath is null)
-            {
-                throw new ArgumentNullException(nameof(toFilePath));
-            }
-            if (title is null)
-            {
-                throw new ArgumentNullException(nameof(title));
-            }
-
-            // Modify [Content_Types].xml
-            XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");
-            packageRelation.Descendants(T + "Override")
-                           .Where(x => x.Attribute("PartName")?.Value.StartsWith("/word/header") ?? false)
-                           .Remove();
-            packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
-
-            // Modify document.xml.rels and grab the current header id number
-            XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
-            documentRelation.Descendants(R + "Relationship")
-                            .Where(x => x.Attribute("Target")?.Value.Contains("header") ?? false)
-                            .Remove();
-            int currentHeaderId = documentRelation.Elements().Attributes("Id").Select(x => int.Parse(x.Value.Substring(3))).DefaultIfEmpty(0).Max();
-            documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
-
-            // Modify document.xml
-            XElement document = toFilePath.ReadAsXml();
-            document.Descendants(W + "sectPr")
-                    .Elements(W + "headerReference")
-                    .Remove();
-            document.WriteInto(toFilePath, "word/document.xml");
-
-            // Add headers
-            toFilePath.AddOddPageHeader($"rId{++currentHeaderId}");
-            toFilePath.AddEvenPageHeader($"rId{++currentHeaderId}", title);
-        }
-
-        private static async Task<MemoryStream> AddOddPageHeader([NotNull] this MemoryStream stream, [NotNull] string headerId)
+        [Pure]
+        [NotNull]
+        private static async Task<MemoryStream> AddOddPageHeader([NotNull] MemoryStream stream, [NotNull] string headerId)
         {
             if (stream is null)
             {
                 throw new ArgumentNullException(nameof(stream));
             }
+
             if (headerId is null)
             {
                 throw new ArgumentNullException(nameof(headerId));
             }
 
-            MemoryStream result = await stream.CopyPure();
+            MemoryStream result = await Header2.WriteInto(stream, "word/header2.xml");
 
-            result = await Header2.WriteInto(result, "word/header2.xml");
+            XElement documentRelation = result.ReadAsXml(DocumentRelsInfo.Path);
 
-            XElement documentRelation = result.ReadAsXml("word/_rels/document.xml.rels");
             documentRelation.Add(
-                new XElement(P + "Relationship",
-                    new XAttribute("Id", headerId),
-                    new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"),
-                    new XAttribute("Target", "header2.xml")));
-            result = await documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
+                new XElement(
+                    DocumentRelsInfo.Elements.Relationship,
+                    new XAttribute(
+                        DocumentRelsInfo.Attributes.Id,
+                        headerId),
+                    new XAttribute(
+                        DocumentRelsInfo.Attributes.Type,
+                        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"),
+                    new XAttribute(
+                        DocumentRelsInfo.Attributes.Target,
+                        "header2.xml")));
+
+            result = await documentRelation.WriteInto(result, DocumentRelsInfo.Path);
 
             XElement document = result.ReadAsXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.AddFirst(
-                    new XElement(W + "headerReference",
-                        new XAttribute(W + "type", "default"),
-                        new XAttribute(R + "id", headerId)));
+                    new XElement(
+                        W + "headerReference",
+                        new XAttribute(
+                            W + "type",
+                            "default"),
+                        new XAttribute(
+                            DocumentRelsInfo.Namespace + "id",
+                            headerId)));
             }
 
             result = await document.WriteInto(result, "word/document.xml");
 
-            XElement packageRelation = result.ReadAsXml("[Content_Types].xml");
-            packageRelation.Add(
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/header2.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
-            result = await packageRelation.WriteInto(result, "[Content_Types].xml");
+            XElement packageRelation = result.ReadAsXml(ContentTypesInfo.Path);
 
-            return result;
+            packageRelation.Add(
+                new XElement(
+                    ContentTypesInfo.Elements.Override,
+                    new XAttribute(
+                        ContentTypesInfo.Attributes.PartName,
+                        "/word/header2.xml"),
+                    new XAttribute(
+                        ContentTypesInfo.Attributes.ContentType,
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
+
+            return await packageRelation.WriteInto(result, ContentTypesInfo.Path);
         }
 
-
-        private static void AddOddPageHeader([NotNull] this DocxFilePath toFilePath, [NotNull] string headerId)
-        {
-            if (toFilePath is null)
-            {
-                throw new ArgumentNullException(nameof(toFilePath));
-            }
-            if (headerId is null)
-            {
-                throw new ArgumentNullException(nameof(headerId));
-            }
-
-            Header2.WriteInto(toFilePath, "word/header2.xml");
-
-            XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
-            documentRelation.Add(
-                new XElement(P + "Relationship",
-                    new XAttribute("Id", headerId),
-                    new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"),
-                    new XAttribute("Target", "header2.xml")));
-            documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
-
-            XElement document = toFilePath.ReadAsXml();
-            foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
-            {
-                sectionProperties.AddFirst(
-                    new XElement(W + "headerReference",
-                        new XAttribute(W + "type", "default"),
-                        new XAttribute(R + "id", headerId)));
-            }
-
-            document.WriteInto(toFilePath, "word/document.xml");
-
-            XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");
-            packageRelation.Add(
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/header2.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
-            packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
-        }
-
-        private static async Task<MemoryStream> AddEvenPageHeader([NotNull] this MemoryStream stream, [NotNull] string headerId, [NotNull] string title)
+        [Pure]
+        [NotNull]
+        private static async Task<MemoryStream> AddEvenPageHeader([NotNull] MemoryStream stream, [NotNull] string headerId, [NotNull] string title)
         {
             if (stream is null)
             {
                 throw new ArgumentNullException(nameof(stream));
             }
+
             if (headerId is null)
             {
                 throw new ArgumentNullException(nameof(headerId));
             }
+
             if (title is null)
             {
                 throw new ArgumentNullException(nameof(title));
@@ -264,80 +208,52 @@ namespace AD.OpenXml.Documents
             header1.Element(W + "p").Element(W + "r").Element(W + "t").Value = title;
             result = await header1.WriteInto(result, "word/header1.xml");
 
-            XElement documentRelation = result.ReadAsXml("word/_rels/document.xml.rels");
+            XElement documentRelation = result.ReadAsXml(DocumentRelsInfo.Path);
+
             documentRelation.Add(
-                new XElement(P + "Relationship",
-                    new XAttribute("Id", headerId),
-                    new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"),
-                    new XAttribute("Target", "header1.xml")));
-            result = await documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
+                new XElement(
+                    DocumentRelsInfo.Elements.Relationship,
+                    new XAttribute(
+                        DocumentRelsInfo.Attributes.Id,
+                        headerId),
+                    new XAttribute(
+                        DocumentRelsInfo.Attributes.Type,
+                        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"),
+                    new XAttribute(
+                        DocumentRelsInfo.Attributes.Target,
+                        "header1.xml")));
+
+            result = await documentRelation.WriteInto(result, DocumentRelsInfo.Path);
 
             XElement document = result.ReadAsXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.AddFirst(
-                    new XElement(W + "headerReference",
-                        new XAttribute(W + "type", "even"),
-                        new XAttribute(R + "id", headerId)));
+                    new XElement(
+                        W + "headerReference",
+                        new XAttribute(
+                            W + "type",
+                            "even"),
+                        new XAttribute(
+                            DocumentRelsInfo.Namespace + "id",
+                            headerId)));
             }
 
             result = await document.WriteInto(result, "word/document.xml");
 
-            XElement packageRelation = result.ReadAsXml("[Content_Types].xml");
+            XElement packageRelation = result.ReadAsXml(ContentTypesInfo.Path);
+
             packageRelation.Add(
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/header1.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
-            result = await packageRelation.WriteInto(result, "[Content_Types].xml");
+                new XElement(
+                    ContentTypesInfo.Elements.Override,
+                    new XAttribute(
+                        ContentTypesInfo.Attributes.PartName,
+                        "/word/header1.xml"),
+                    new XAttribute(
+                        ContentTypesInfo.Attributes.ContentType,
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
 
-            return result;
-        }
-
-
-        private static void AddEvenPageHeader([NotNull] this DocxFilePath toFilePath, [NotNull] string headerId, [NotNull] string title)
-        {
-            if (toFilePath is null)
-            {
-                throw new ArgumentNullException(nameof(toFilePath));
-            }
-            if (headerId is null)
-            {
-                throw new ArgumentNullException(nameof(headerId));
-            }
-            if (title is null)
-            {
-                throw new ArgumentNullException(nameof(title));
-            }
-
-            XElement header1 = Header1.Clone();
-            header1.Element(W + "p").Element(W + "r").Element(W + "t").Value = title;
-            header1.WriteInto(toFilePath, "word/header1.xml");
-
-            XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
-            documentRelation.Add(
-                new XElement(P + "Relationship",
-                    new XAttribute("Id", headerId),
-                    new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"),
-                    new XAttribute("Target", "header1.xml")));
-            documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
-
-            XElement document = toFilePath.ReadAsXml();
-            foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
-            {
-                sectionProperties.AddFirst(
-                    new XElement(W + "headerReference",
-                        new XAttribute(W + "type", "even"),
-                        new XAttribute(R + "id", headerId)));
-            }
-
-            document.WriteInto(toFilePath, "word/document.xml");
-
-            XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");
-            packageRelation.Add(
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/header1.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
-            packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
+            return await packageRelation.WriteInto(result, ContentTypesInfo.Path);
         }
     }
 }

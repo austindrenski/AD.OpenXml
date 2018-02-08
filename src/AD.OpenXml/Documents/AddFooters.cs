@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
 using AD.IO.Streams;
+using AD.OpenXml.Structure;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -38,6 +39,16 @@ namespace AD.OpenXml.Documents
         /// Represents the 'w:' prefix seen in raw OpenXML documents.
         /// </summary>
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
+        /// <summary>
+        /// The content media type of an OpenXML footer.
+        /// </summary>
+        [NotNull] private static readonly string FooterContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml";
+
+        /// <summary>
+        /// The schema type for an OpenXML footer relationship.
+        /// </summary>
+        [NotNull] private static readonly string FooterRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer";
 
         [NotNull] private static readonly XElement Footer1;
         [NotNull] private static readonly XElement Footer2;
@@ -84,39 +95,36 @@ namespace AD.OpenXml.Documents
 
             MemoryStream result = await stream.CopyPure();
 
-            // Modify [Content_Types].xml
-            XElement packageRelation = result.ReadAsXml("[Content_Types].xml");
+            // Remove footers from [Content_Types].xml
+            result =
+                await result.ReadAsXml(ContentTypesInfo.Path)
+                            .Recurse(x => ContentTypesInfo.Attributes.ContentType != FooterContentType)
+                            .WriteInto(result, ContentTypesInfo.Path);
 
-            packageRelation.Descendants(T + "Override")
-                           .Where(x => x.Attribute("PartName")?.Value.StartsWith("/word/footer") ?? false)
-                           .Remove();
+            // Remove footers from document.xml.rels
+            result =
+                await result.ReadAsXml(DocumentRelsInfo.Path)
+                            .Recurse(x => (string) x.Attribute("Type") != FooterRelationshipType)
+                            .WriteInto(result, DocumentRelsInfo.Path);
 
-            result = await packageRelation.WriteInto(result, "[Content_Types].xml");
+            // Remove footers from document.xml
+            result =
+                await result.ReadAsXml()
+                            .Recurse(x => x.Name != W + "footerReference")
+                            .WriteInto(result, "word/document.xml");
 
-            // Modify document.xml.rels and grab the current header id number
-            XElement documentRelation = result.ReadAsXml("word/_rels/document.xml.rels");
-
-            documentRelation.Descendants(P + "Relationship")
-                            .Where(x => x.Attribute("Target")?.Value.Contains("footer") ?? false)
-                            .Remove();
-
-            int currentFooterId =
-                documentRelation.Elements().Count();
-
-            result = await documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
-
-            // Modify document.xml
-            XElement document = result.ReadAsXml();
-
-            document.Descendants(W + "sectPr")
-                    .Elements(W + "footerReference")
-                    .Remove();
-
-            result = await document.WriteInto(result, "word/document.xml");
+            // Store the current relationship id number
+            int currentRelationshipId =
+                result.ReadAsXml(DocumentRelsInfo.Path)
+                      .Elements()
+                      .Attributes("Id")
+                      .Select(x => int.Parse(x.Value.Substring(3)))
+                      .DefaultIfEmpty(0)
+                      .Max();
 
             // Add footers
-            result = await AddEvenPageFooter(result, $"rId{++currentFooterId}");
-            result = await AddOddPageFooter(result, $"rId{++currentFooterId}");
+            result = await AddEvenPageFooter(result, $"rId{++currentRelationshipId}");
+            result = await AddOddPageFooter(result, $"rId{++currentRelationshipId}");
 
             return result;
         }
@@ -132,16 +140,16 @@ namespace AD.OpenXml.Documents
             }
 
             // Modify [Content_Types].xml
-            XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");
+            XElement packageRelation = toFilePath.ReadAsXml(ContentTypesInfo.Path);
 
             packageRelation.Descendants(T + "Override")
                            .Where(x => x.Attribute("PartName")?.Value.StartsWith("/word/footer") ?? false)
                            .Remove();
 
-            packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
+            packageRelation.WriteInto(toFilePath, ContentTypesInfo.Path);
 
             // Modify document.xml.rels and grab the current header id number
-            XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
+            XElement documentRelation = toFilePath.ReadAsXml(DocumentRelsInfo.Path);
 
             documentRelation.Descendants(P + "Relationship")
                             .Where(x => x.Attribute("Target")?.Value.Contains("footer") ?? false)
@@ -150,7 +158,7 @@ namespace AD.OpenXml.Documents
             int currentFooterId =
                 documentRelation.Elements().Count();
 
-            documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
+            documentRelation.WriteInto(toFilePath, DocumentRelsInfo.Path);
 
             // Modify document.xml
             XElement document = toFilePath.ReadAsXml();
@@ -184,7 +192,7 @@ namespace AD.OpenXml.Documents
 
             result = await Footer1.WriteInto(result, "word/footer1.xml");
 
-            XElement documentRelation = result.ReadAsXml("word/_rels/document.xml.rels");
+            XElement documentRelation = result.ReadAsXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(P + "Relationship",
@@ -192,7 +200,7 @@ namespace AD.OpenXml.Documents
                              new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
                              new XAttribute("Target", "footer1.xml")));
 
-            result = await documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
+            result = await documentRelation.WriteInto(result, DocumentRelsInfo.Path);
 
             XElement document = result.ReadAsXml();
 
@@ -208,14 +216,14 @@ namespace AD.OpenXml.Documents
 
             result = await document.WriteInto(result, "word/document.xml");
 
-            XElement packageRelation = result.ReadAsXml("[Content_Types].xml");
+            XElement packageRelation = result.ReadAsXml(ContentTypesInfo.Path);
 
             packageRelation.Add(
                 new XElement(T + "Override",
                              new XAttribute("PartName", "/word/footer1.xml"),
                              new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
 
-            result = await packageRelation.WriteInto(result, "[Content_Types].xml");
+            result = await packageRelation.WriteInto(result, ContentTypesInfo.Path);
 
             return result;
         }
@@ -234,13 +242,13 @@ namespace AD.OpenXml.Documents
 
             Footer1.WriteInto(toFilePath, "word/footer1.xml");
 
-            XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
+            XElement documentRelation = toFilePath.ReadAsXml(DocumentRelsInfo.Path);
             documentRelation.Add(
                 new XElement(P + "Relationship",
                              new XAttribute("Id", footerId),
                              new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
                              new XAttribute("Target", "footer1.xml")));
-            documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
+            documentRelation.WriteInto(toFilePath, DocumentRelsInfo.Path);
 
             XElement document = toFilePath.ReadAsXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
@@ -255,14 +263,14 @@ namespace AD.OpenXml.Documents
 
             document.WriteInto(toFilePath, "word/document.xml");
 
-            XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");
+            XElement packageRelation = toFilePath.ReadAsXml(ContentTypesInfo.Path);
 
             packageRelation.Add(
                 new XElement(T + "Override",
                              new XAttribute("PartName", "/word/footer1.xml"),
                              new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
 
-            packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
+            packageRelation.WriteInto(toFilePath, ContentTypesInfo.Path);
         }
 
         [Pure]
@@ -283,7 +291,7 @@ namespace AD.OpenXml.Documents
 
             result = await Footer2.WriteInto(result, "word/footer2.xml");
 
-            XElement documentRelation = result.ReadAsXml("word/_rels/document.xml.rels");
+            XElement documentRelation = result.ReadAsXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(P + "Relationship",
@@ -291,7 +299,7 @@ namespace AD.OpenXml.Documents
                              new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
                              new XAttribute("Target", "footer2.xml")));
 
-            result = await documentRelation.WriteInto(result, "word/_rels/document.xml.rels");
+            result = await documentRelation.WriteInto(result, DocumentRelsInfo.Path);
 
             XElement document = result.ReadAsXml();
 
@@ -306,14 +314,14 @@ namespace AD.OpenXml.Documents
 
             result = await document.WriteInto(result, "word/document.xml");
 
-            XElement packageRelation = result.ReadAsXml("[Content_Types].xml");
+            XElement packageRelation = result.ReadAsXml(ContentTypesInfo.Path);
 
             packageRelation.Add(
                 new XElement(T + "Override",
                              new XAttribute("PartName", "/word/footer2.xml"),
                              new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
 
-            result = await packageRelation.WriteInto(result, "[Content_Types].xml");
+            result = await packageRelation.WriteInto(result, ContentTypesInfo.Path);
 
             return result;
         }
@@ -332,7 +340,7 @@ namespace AD.OpenXml.Documents
 
             Footer2.WriteInto(toFilePath, "word/footer2.xml");
 
-            XElement documentRelation = toFilePath.ReadAsXml("word/_rels/document.xml.rels");
+            XElement documentRelation = toFilePath.ReadAsXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(P + "Relationship",
@@ -340,7 +348,7 @@ namespace AD.OpenXml.Documents
                              new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
                              new XAttribute("Target", "footer2.xml")));
 
-            documentRelation.WriteInto(toFilePath, "word/_rels/document.xml.rels");
+            documentRelation.WriteInto(toFilePath, DocumentRelsInfo.Path);
 
             XElement document = toFilePath.ReadAsXml();
 
@@ -355,14 +363,14 @@ namespace AD.OpenXml.Documents
 
             document.WriteInto(toFilePath, "word/document.xml");
 
-            XElement packageRelation = toFilePath.ReadAsXml("[Content_Types].xml");
+            XElement packageRelation = toFilePath.ReadAsXml(ContentTypesInfo.Path);
 
             packageRelation.Add(
                 new XElement(T + "Override",
                              new XAttribute("PartName", "/word/footer2.xml"),
                              new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
 
-            packageRelation.WriteInto(toFilePath, "[Content_Types].xml");
+            packageRelation.WriteInto(toFilePath, ContentTypesInfo.Path);
         }
     }
 }
