@@ -100,12 +100,6 @@ namespace CompilerAPI.Controllers
                 throw new ArgumentNullException(nameof(reportTitle));
             }
 
-            // Save the visitor results to result path.
-            // Add headers
-            // Add footers
-            // Set all chart objects inline
-            // Set the inner positions of chart objects
-            // Set the outer positions of chart objects
             return
                 await new ReportVisitor()
                     .VisitAndFold(files)
@@ -114,19 +108,11 @@ namespace CompilerAPI.Controllers
                     .AddFooters()
                     .PositionChartsInline()
                     .PositionChartsInner()
-                    .PositionChartsOuter();
-
-//            // Set the style of bar chart objects
-//            result.ModifyBarChartStyles();
-//
-//            // Set the style of pie chart objects
-//            result.ModifyPieChartStyles();
-//
-//            // Set the style of line chart objects
-//            result.ModifyLineChartStyles();
-//
-//            // Set the style of area chart objects
-//            result.ModifyAreaChartStyles();
+                    .PositionChartsOuter()
+                    .ModifyBarChartStyles()
+                    .ModifyPieChartStyles()
+                    .ModifyLineChartStyles()
+                    .ModifyAreaChartStyles();
         }
     }
 }

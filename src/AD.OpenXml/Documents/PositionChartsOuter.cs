@@ -31,7 +31,10 @@ namespace AD.OpenXml.Documents
         /// <returns>
         ///
         /// </returns>
-        public static async Task<MemoryStream> PositionChartsOuter(this Task<MemoryStream> stream)
+        [Pure]
+        [NotNull]
+        [ItemNotNull]
+        public static async Task<MemoryStream> PositionChartsOuter([NotNull] this Task<MemoryStream> stream)
         {
             if (stream is null)
             {
@@ -47,7 +50,10 @@ namespace AD.OpenXml.Documents
         /// <param name="stream">
         ///
         /// </param>
-        public static async Task<MemoryStream> PositionChartsOuter(this MemoryStream stream)
+        [Pure]
+        [NotNull]
+        [ItemNotNull]
+        public static async Task<MemoryStream> PositionChartsOuter([NotNull] this MemoryStream stream)
         {
             if (stream is null)
             {

@@ -16,12 +16,12 @@ namespace AD.OpenXml.Visitors
         public static IEqualityComparer<ChartInformation> Comparer = new ChartInformationComparer();
 
         /// <summary>
-        /// /
+        ///
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// /
+        ///
         /// </summary>
         public XElement Chart { get; }
 
@@ -34,6 +34,38 @@ namespace AD.OpenXml.Visitors
         {
             Name = name;
             Chart = chart;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="id">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [NotNull]
+        public static string FormatPath(int id)
+        {
+            return $"word/charts/chart{id}.xml";
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="id">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [NotNull]
+        public static string FormatPartName(int id)
+        {
+            return $"/{FormatPath(id)}";
         }
 
         /// <summary>
