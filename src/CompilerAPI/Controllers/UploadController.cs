@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using AD.IO.Paths;
-using AD.OpenXml;
 using AD.OpenXml.Documents;
 using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
@@ -29,22 +27,12 @@ namespace CompilerAPI.Controllers
         /// <summary>
         ///
         /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public IActionResult Post()
-        {
-            return View();
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
         /// <returns>
         ///
         /// </returns>
         [NotNull]
         [HttpGet]
-        public IActionResult StreamTest()
+        public IActionResult Index()
         {
             return View();
         }
@@ -57,7 +45,8 @@ namespace CompilerAPI.Controllers
         /// </returns>
         [NotNull]
         [HttpPost]
-        public async Task<IActionResult> StreamTest([NotNull] [ItemNotNull] IEnumerable<IFormFile> files)
+        [ItemNotNull]
+        public async Task<IActionResult> Index([NotNull] [ItemNotNull] IEnumerable<IFormFile> files)
         {
             if (files is null)
             {
@@ -78,11 +67,7 @@ namespace CompilerAPI.Controllers
 
             if (uploadedFiles.Any(x => x.ContentType != _microsoftWordDocument.ToString()))
             {
-                string error =
-                    uploadedFiles.Where(x => x.ContentType != _microsoftWordDocument.ToString())
-                                 .Aggregate(string.Empty, (x, c) => string.Join(x, $"{c.FileName} ({c.ContentType})"));
-
-                return BadRequest($"Invalid file format: {error}");
+                return BadRequest("Invalid file format.");
             }
 
             Queue<MemoryStream> documentQueue = new Queue<MemoryStream>(uploadedFiles.Length);
@@ -101,27 +86,36 @@ namespace CompilerAPI.Controllers
             return new FileStreamResult(output, _microsoftWordDocument);
         }
 
-        private static async Task<MemoryStream> Process(IEnumerable<MemoryStream> files, string reportTitle)
+        [Pure]
+        [NotNull]
+        [ItemNotNull]
+        private static async Task<MemoryStream> Process([NotNull] [ItemNotNull] IEnumerable<MemoryStream> files, [NotNull] string reportTitle)
         {
+            if (files is null)
+            {
+                throw new ArgumentNullException(nameof(files));
+            }
+            if (reportTitle is null)
+            {
+                throw new ArgumentNullException(nameof(reportTitle));
+            }
+
             // Save the visitor results to result path.
             // Add headers
             // Add footers
-            MemoryStream result =
+            // Set all chart objects inline
+            // Set the inner positions of chart objects
+            // Set the outer positions of chart objects
+            return
                 await new ReportVisitor()
                     .VisitAndFold(files)
                     .Save()
                     .AddHeaders(reportTitle)
-                    .AddFooters();
+                    .AddFooters()
+                    .PositionChartsInline()
+                    .PositionChartsInner()
+                    .PositionChartsOuter();
 
-//            // Set all chart objects inline
-//            result.PositionChartsInline();
-//
-//            // Set the inner positions of chart objects
-//            result.PositionChartsInner();
-//
-//            // Set the outer positions of chart objects
-//            result.PositionChartsOuter();
-//
 //            // Set the style of bar chart objects
 //            result.ModifyBarChartStyles();
 //
@@ -133,108 +127,6 @@ namespace CompilerAPI.Controllers
 //
 //            // Set the style of area chart objects
 //            result.ModifyAreaChartStyles();
-
-            result.Seek(0, SeekOrigin.Begin);
-
-            return result;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="files"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"/>
-        [HttpPost]
-        public async Task<IActionResult> Post([NotNull] IEnumerable<IFormFile> files)
-        {
-            if (files is null)
-            {
-                throw new ArgumentNullException(nameof(files));
-            }
-
-            IFormFile[] uploadedFiles = files.ToArray();
-
-            if (uploadedFiles.Length == 0)
-            {
-                return BadRequest("No files uploaded.");
-            }
-
-            if (uploadedFiles.Any(x => x.Length <= 0))
-            {
-                return BadRequest("Invalid file length.");
-            }
-
-            if (uploadedFiles.Any(x => !Path.GetExtension(x.FileName).Equals(".docx", StringComparison.OrdinalIgnoreCase)))
-            {
-                return BadRequest("Invalid file format.");
-            }
-
-            Queue<DocxFilePath> inputQueue = new Queue<DocxFilePath>(uploadedFiles.Length);
-
-            foreach (IFormFile file in uploadedFiles)
-            {
-                DocxFilePath input = DocxFilePath.Create(Path.ChangeExtension(Path.GetTempFileName(), "docx"), true);
-
-                using (FileStream fileStream = new FileStream(input, FileMode.Open))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
-
-                inputQueue.Enqueue(input);
-            }
-
-            DocxFilePath output = DocxFilePath.Create(Path.ChangeExtension(Path.GetTempFileName(), "docx"), true);
-
-            Process(inputQueue, output, "[REPORT TITLE HERE]");
-
-            return new FileStreamResult(new FileStream(output, FileMode.Open), _microsoftWordDocument);
-        }
-
-        private static void Process(IEnumerable<DocxFilePath> files, DocxFilePath output, string reportTitle)
-        {
-            // Create a ReportVisitor based on the result path and visit the component doucments.
-            IOpenXmlVisitor visitor = new ReportVisitor(output).VisitAndFold(files);
-
-            // Save the visitor results to result path.
-            visitor.Save(output);
-
-            // Add headers
-            using (FileStream fileStream = new FileStream(output, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
-            {
-                MemoryStream stream = new MemoryStream();
-
-                fileStream.CopyTo(stream);
-                fileStream.SetLength(0);
-
-                stream.AddHeaders(reportTitle)
-                      .Result
-                      .CopyTo(fileStream);
-            }
-
-            // Add footers
-            output.AddFooters();
-
-            // Set all chart objects inline
-            output.PositionChartsInline();
-
-            // Set the inner positions of chart objects
-            output.PositionChartsInner();
-
-            // Set the outer positions of chart objects
-            output.PositionChartsOuter();
-
-            // Set the style of bar chart objects
-            output.ModifyBarChartStyles();
-
-            // Set the style of pie chart objects
-            output.ModifyPieChartStyles();
-
-            // Set the style of line chart objects
-            output.ModifyLineChartStyles();
-
-            // Set the style of area chart objects
-            output.ModifyAreaChartStyles();
         }
     }
 }

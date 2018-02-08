@@ -13,6 +13,7 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
+    // TODO: write a HeaderVisit and document.
     /// <summary>
     /// Add headers to a Word document.
     /// </summary>
@@ -39,7 +40,14 @@ namespace AD.OpenXml.Documents
         /// </summary>
         [NotNull] private static readonly string HeaderRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header";
 
+        /// <summary>
+        ///
+        /// </summary>
         [NotNull] private static readonly XElement Header1;
+
+        /// <summary>
+        ///
+        /// </summary>
         [NotNull] private static readonly XElement Header2;
 
         /// <summary>
@@ -123,6 +131,13 @@ namespace AD.OpenXml.Documents
             return result;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="headerId"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         [Pure]
         [NotNull]
         private static async Task<MemoryStream> AddOddPageHeader([NotNull] MemoryStream stream, [NotNull] string headerId)
@@ -183,6 +198,14 @@ namespace AD.OpenXml.Documents
             return await packageRelation.WriteInto(result, ContentTypesInfo.Path);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="headerId"></param>
+        /// <param name="title"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         [Pure]
         [NotNull]
         private static async Task<MemoryStream> AddEvenPageHeader([NotNull] MemoryStream stream, [NotNull] string headerId, [NotNull] string title)

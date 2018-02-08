@@ -1,29 +1,60 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
-using AD.IO.Paths;
+using AD.IO.Streams;
 using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     [PublicAPI]
-    public static class PositionChartsInternalExtensions
+    public static class PositionChartsInnerExtensions
     {
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
-        /// <param name="toFilePath"></param>
-        public static void PositionChartsInner(this DocxFilePath toFilePath)
+        /// <param name="stream">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        public static async Task<MemoryStream> PositionChartsInner(this Task<MemoryStream> stream)
         {
-            foreach (string item in toFilePath.EnumerateChartPaths())
+            if (stream is null)
             {
-                XElement element = toFilePath.ReadAsXml(item);
+                throw new ArgumentNullException(nameof(stream));
+            }
+
+            return await PositionChartsInner(await stream);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="stream">
+        ///
+        /// </param>
+        public static async Task<MemoryStream> PositionChartsInner(this MemoryStream stream)
+        {
+            if (stream is null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
+
+            MemoryStream result = await stream.CopyPure();
+
+            foreach (string item in await result.EnumerateChartPartNames())
+            {
+                XElement element = result.ReadAsXml(item);
 
                 XElement plotArea = element.Descendants(C + "plotArea").First();
 
@@ -47,8 +78,10 @@ namespace AD.OpenXml.Documents
                             new XElement(C + "h",
                                 new XAttribute("val", "-0.9")))));
 
-                element.WriteInto(toFilePath, item);
+                result = await element.WriteInto(result, item);
             }
+
+            return result;
         }
     }
 }
