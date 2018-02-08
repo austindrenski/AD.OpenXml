@@ -103,18 +103,16 @@ namespace CompilerAPI.Controllers
 
         private static async Task<MemoryStream> Process(IEnumerable<MemoryStream> files, string reportTitle)
         {
-            // Create a ReportVisitor based on the result path and visit the component doucments.
-            IOpenXmlVisitor visitor = new ReportVisitor().VisitAndFold(files);
-
             // Save the visitor results to result path.
             // Add headers
+            // Add footers
             MemoryStream result =
-                await visitor.Save()
-                             .AddHeaders(reportTitle);
+                await new ReportVisitor()
+                      .VisitAndFold(files)
+                      .Save()
+                      .AddHeaders(reportTitle)
+                      .AddFooters();
 
-//            // Add footers
-//            result.AddFooters();
-//
 //            // Set all chart objects inline
 //            result.PositionChartsInline();
 //
@@ -161,10 +159,12 @@ namespace CompilerAPI.Controllers
             {
                 return BadRequest("No files uploaded.");
             }
+
             if (uploadedFiles.Any(x => x.Length <= 0))
             {
                 return BadRequest("Invalid file length.");
             }
+
             if (uploadedFiles.Any(x => !Path.GetExtension(x.FileName).Equals(".docx", StringComparison.OrdinalIgnoreCase)))
             {
                 return BadRequest("Invalid file format.");
