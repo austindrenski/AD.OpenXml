@@ -1,14 +1,17 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
-using AD.IO.Paths;
+using AD.IO.Streams;
 using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Documents
 {
     /// <summary>
-    /// Modifies bar chart styling in the target document.
+    /// Modifies pie chart styling in the target document.
     /// </summary>
     [PublicAPI]
     public static class ModifyPieChartStylesExtensions
@@ -18,21 +21,71 @@ namespace AD.OpenXml.Documents
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
         /// <summary>
-        /// Modifies bar chart styling in the target document.
+        /// Modifies pie chart styling in the target stream.
         /// </summary>
-        /// <param name="toFilePath"></param>
-        public static void ModifyPieChartStyles(this DocxFilePath toFilePath)
+        /// <param name="stream">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [NotNull]
+        [ItemNotNull]
+        public static async Task<MemoryStream> ModifyPieChartStyles([NotNull] [ItemNotNull] this Task<MemoryStream> stream)
         {
-            foreach (string item in toFilePath.EnumerateChartPaths())
+            if (stream is null)
             {
-                XElement element = toFilePath.ReadAsXml(item);
-                XElement result = element.ModifyPieChartStyles();
-                result.WriteInto(toFilePath, item);
+                throw new ArgumentNullException(nameof(stream));
             }
+
+            return await ModifyPieChartStyles(await stream);
         }
 
-        private static XElement ModifyPieChartStyles(this XElement element)
+        /// <summary>
+        /// Modifies pie chart styling in the target stream.
+        /// </summary>
+        /// <param name="stream">
+        ///
+        /// </param>
+        [Pure]
+        [NotNull]
+        [ItemNotNull]
+        public static async Task<MemoryStream> ModifyPieChartStyles([NotNull] this MemoryStream stream)
         {
+            if (stream is null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
+
+            MemoryStream result = await stream.CopyPure();
+
+            foreach (string item in await result.EnumerateChartPartNames())
+            {
+                result =
+                    await result.ReadAsXml(item)
+                                .ModifyPieChartStyles()
+                                .WriteInto(result, item);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Modifies pie chart styling in the target stream.
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        [Pure]
+        [NotNull]
+        private static XElement ModifyPieChartStyles([NotNull] this XElement element)
+        {
+            if (element is null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
             if (!element.Descendants(C + "pieChart").Any())
             {
                 return element;
@@ -40,7 +93,7 @@ namespace AD.OpenXml.Documents
 
             foreach (XElement series in element.Descendants(C + "ser"))
             {
-                series.Element(C + "idx")?.SetAttributeValue("val", (string)series.Element(C + "order")?.Attribute("val"));
+                series.Element(C + "idx")?.SetAttributeValue("val", (string) series.Element(C + "order")?.Attribute("val"));
             }
 
             element.Descendants(C + "userShapes").Remove();

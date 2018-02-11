@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
-using AD.IO.Paths;
+using AD.IO.Streams;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -18,21 +21,71 @@ namespace AD.OpenXml.Documents
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
         /// <summary>
-        /// Modifies line chart styling in the target document.
+        /// Modifies line chart styling in the target stream.
         /// </summary>
-        /// <param name="toFilePath"></param>
-        public static void ModifyLineChartStyles(this DocxFilePath toFilePath)
+        /// <param name="stream">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [NotNull]
+        [ItemNotNull]
+        public static async Task<MemoryStream> ModifyLineChartStyles([NotNull] [ItemNotNull] this Task<MemoryStream> stream)
         {
-            foreach (string item in toFilePath.EnumerateChartPaths())
+            if (stream is null)
             {
-                XElement element = toFilePath.ReadAsXml(item);
-                XElement result = element.ModifyLineChartStyles();
-                result.WriteInto(toFilePath, item);
+                throw new ArgumentNullException(nameof(stream));
             }
+
+            return await ModifyLineChartStyles(await stream);
         }
 
-        private static XElement ModifyLineChartStyles(this XElement element)
+        /// <summary>
+        /// Modifies line chart styling in the target stream.
+        /// </summary>
+        /// <param name="stream">
+        ///
+        /// </param>
+        [Pure]
+        [NotNull]
+        [ItemNotNull]
+        public static async Task<MemoryStream> ModifyLineChartStyles([NotNull] this MemoryStream stream)
         {
+            if (stream is null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
+
+            MemoryStream result = await stream.CopyPure();
+
+            foreach (string item in await result.EnumerateChartPartNames())
+            {
+                result =
+                    await result.ReadAsXml(item)
+                                .ModifyLineChartStyles()
+                                .WriteInto(result, item);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Modifies line chart styling in the target stream.
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        [Pure]
+        [NotNull]
+        private static XElement ModifyLineChartStyles([NotNull] this XElement element)
+        {
+            if (element is null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
             if (!element.Descendants(C + "lineChart").Any())
             {
                 return element;
@@ -40,7 +93,7 @@ namespace AD.OpenXml.Documents
 
             foreach (XElement series in element.Descendants(C + "ser"))
             {
-                series.Element(C + "idx")?.SetAttributeValue("val", (string)series.Element(C + "order")?.Attribute("val"));
+                series.Element(C + "idx")?.SetAttributeValue("val", (string) series.Element(C + "order")?.Attribute("val"));
             }
 
             element.Descendants(C + "userShapes").Remove();

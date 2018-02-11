@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using AD.IO.Paths;
-using AD.OpenXml;
 using AD.OpenXml.Documents;
 using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
@@ -14,6 +12,11 @@ using Microsoft.Net.Http.Headers;
 
 namespace CompilerAPI.Controllers
 {
+    // TODO: document UploadController
+    /// <inheritdoc />
+    /// <summary>
+    ///
+    /// </summary>
     [PublicAPI]
     [ApiVersion("1.0")]
     [Route("[controller]")]
@@ -21,14 +24,29 @@ namespace CompilerAPI.Controllers
     {
         private static MediaTypeHeaderValue _microsoftWordDocument = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
-        [HttpGet]
-        public IActionResult Get()
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>
+        ///
+        /// </returns>
+        [NotNull]
+        [HttpGet("")]
+        public IActionResult Index()
         {
-            return View("~/Views/UploadForm.cshtml");
+            return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post([NotNull] IEnumerable<IFormFile> files)
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>
+        ///
+        /// </returns>
+        [NotNull]
+        [HttpPost("")]
+        [ItemNotNull]
+        public async Task<IActionResult> Index([NotNull] [ItemNotNull] IEnumerable<IFormFile> files, [CanBeNull] string title, [CanBeNull] string publisher, [CanBeNull] string website)
         {
             if (files is null)
             {
@@ -41,71 +59,66 @@ namespace CompilerAPI.Controllers
             {
                 return BadRequest("No files uploaded.");
             }
+
             if (uploadedFiles.Any(x => x.Length <= 0))
             {
                 return BadRequest("Invalid file length.");
             }
-            if (uploadedFiles.Any(x => !Path.GetExtension(x.FileName).Equals(".docx", StringComparison.OrdinalIgnoreCase)))
+
+            if (uploadedFiles.Any(x => x.ContentType != _microsoftWordDocument.ToString()))
             {
                 return BadRequest("Invalid file format.");
             }
 
-            Queue<DocxFilePath> inputQueue = new Queue<DocxFilePath>(uploadedFiles.Length);
+            Queue<MemoryStream> documentQueue = new Queue<MemoryStream>(uploadedFiles.Length);
 
             foreach (IFormFile file in uploadedFiles)
             {
-                DocxFilePath input = DocxFilePath.Create(Path.ChangeExtension(Path.GetTempFileName(), "docx"), true);
-
-                using (FileStream fileStream = new FileStream(input, FileMode.Open))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
-
-                inputQueue.Enqueue(input);
+                MemoryStream memoryStream = new MemoryStream();
+                await file.CopyToAsync(memoryStream);
+                documentQueue.Enqueue(memoryStream);
             }
 
-            DocxFilePath output = DocxFilePath.Create(Path.ChangeExtension(Path.GetTempFileName(), "docx"), true);
+            MemoryStream output =
+                await Process(
+                    documentQueue,
+                    title ?? "[REPORT TITLE]",
+                    publisher ?? "[PUBLISHER]",
+                    website ?? "[PUBLISHER WEBSITE]");
 
-            Process(inputQueue, output, "[REPORT TITLE HERE]");
+            output.Seek(0, SeekOrigin.Begin);
 
-            return new FileStreamResult(new FileStream(output, FileMode.Open), _microsoftWordDocument);
+            return new FileStreamResult(output, _microsoftWordDocument);
         }
 
-        private static void Process(IEnumerable<DocxFilePath> files, DocxFilePath output, string reportTitle)
+        [Pure]
+        [NotNull]
+        [ItemNotNull]
+        private static async Task<MemoryStream> Process([NotNull] [ItemNotNull] IEnumerable<MemoryStream> files, [NotNull] string title, [NotNull] string publisher, [NotNull] string website)
         {
+            if (files is null)
+            {
+                throw new ArgumentNullException(nameof(files));
+            }
 
-            // Create a ReportVisitor based on the result path and visit the component doucments.
-            IOpenXmlVisitor visitor = new ReportVisitor(output).VisitAndFold(files);
+            if (title is null)
+            {
+                throw new ArgumentNullException(nameof(title));
+            }
 
-            // Save the visitor results to result path.
-            visitor.Save(output);
-
-            // Add headers
-            output.AddHeaders(reportTitle);
-
-            // Add footers
-            output.AddFooters();
-
-            // Set all chart objects inline
-            output.PositionChartsInline();
-
-            // Set the inner positions of chart objects
-            output.PositionChartsInner();
-
-            // Set the outer positions of chart objects
-            output.PositionChartsOuter();
-
-            // Set the style of bar chart objects
-            output.ModifyBarChartStyles();
-
-            // Set the style of pie chart objects
-            output.ModifyPieChartStyles();
-
-            // Set the style of line chart objects
-            output.ModifyLineChartStyles();
-
-            // Set the style of area chart objects
-            output.ModifyAreaChartStyles();
+            return
+                await new ReportVisitor()
+                      .VisitAndFold(files)
+                      .Save()
+                      .AddHeaders(title)
+                      .AddFooters(publisher, website)
+                      .PositionChartsInline()
+                      .PositionChartsInner()
+                      .PositionChartsOuter()
+                      .ModifyBarChartStyles()
+                      .ModifyPieChartStyles()
+                      .ModifyLineChartStyles()
+                      .ModifyAreaChartStyles();
         }
     }
 }

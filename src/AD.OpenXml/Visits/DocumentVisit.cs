@@ -10,6 +10,7 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits
 {
+    /// <inheritdoc />
     /// <summary>
     /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
@@ -31,9 +32,7 @@ namespace AD.OpenXml.Visits
                 W + "moveTo"
             };
 
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <inheritdoc />
         public IOpenXmlVisitor Result { get; }
 
         /// <summary>
@@ -57,6 +56,7 @@ namespace AD.OpenXml.Visits
                     subject.FootnoteRelations,
                     subject.Styles,
                     subject.Numbering,
+                    subject.Theme1,
                     subject.Charts);
         }
 
@@ -207,7 +207,7 @@ namespace AD.OpenXml.Visits
 
                 if (!previous?.Elements(W + "pPr").Any() ?? false)
                 {
-                    previous?.AddFirst(new XElement(W + "pPr", sectionProperties));
+                    previous.AddFirst(new XElement(W + "pPr", sectionProperties));
                 }
                 previous?.Element(W + "pPr")?.Add(sectionProperties);
             }
@@ -221,10 +221,12 @@ namespace AD.OpenXml.Visits
             foreach (XElement item in charts)
             {
                 item.RemoveBy(W + "pStyle");
+
                 if (!item.Elements(W + "pPr").Any())
                 {
                     item.AddFirst(new XElement(W + "pPr"));
                 }
+
                 item.Element(W + "pPr")?.AddFirst(new XElement(W + "pStyle", new XAttribute(W + "val", "FiguresTablesSourceNote")));
             }
 

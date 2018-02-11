@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO.Paths;
 using AD.OpenXml.Visitors;
@@ -61,6 +63,12 @@ namespace AD.OpenXml
         XElement Numbering { get; }
 
         /// <summary>
+        /// word/theme/theme1.xml
+        /// </summary>
+        [NotNull]
+        XElement Theme1 { get; }
+
+        /// <summary>
         /// The current document relation number incremented by one.
         /// </summary>
         int NextDocumentRelationId { get; }
@@ -89,6 +97,27 @@ namespace AD.OpenXml
         void Save([NotNull] DocxFilePath result);
 
         /// <summary>
+        /// Writes the <see cref="IOpenXmlVisitor"/> to the <see cref="DocxFilePath"/>.
+        /// </summary>
+        /// <returns>
+        /// The stream to which the <see cref="DocxFilePath"/> is written.
+        /// </returns>
+        [Pure]
+        [NotNull]
+        Task<MemoryStream> Save();
+
+        /// <summary>
+        /// Visit and join the component document into this <see cref="IOpenXmlVisitor"/>.
+        /// </summary>
+        /// <param name="stream">
+        /// The stream to visit.
+        /// </param>
+        [Pure]
+        [NotNull]
+        IOpenXmlVisitor Visit([NotNull] MemoryStream stream);
+
+
+        /// <summary>
         /// Visit and join the component document into this <see cref="IOpenXmlVisitor"/>.
         /// </summary>
         /// <param name="file">
@@ -111,11 +140,21 @@ namespace AD.OpenXml
         /// <summary>
         /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
         /// </summary>
+        /// <param name="streams">
+        /// The streams to visit.
+        /// </param>
+        [Pure]
+        [NotNull]
+        IOpenXmlVisitor VisitAndFold([ItemNotNull] [NotNull] IEnumerable<MemoryStream> streams);
+
+        /// <summary>
+        /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
+        /// </summary>
         /// <param name="files">
         /// The files to visit.
         /// </param>
         [Pure]
         [NotNull]
-        IOpenXmlVisitor VisitAndFold([ItemNotNull][NotNull] IEnumerable<DocxFilePath> files);
+        IOpenXmlVisitor VisitAndFold([ItemNotNull] [NotNull] IEnumerable<DocxFilePath> files);
     }
 }

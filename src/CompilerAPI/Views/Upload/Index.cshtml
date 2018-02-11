@@ -1,0 +1,41 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Upload Reports";
+}
+<form asp-controller="Upload" asp-action="Index" method="post" enctype="multipart/form-data">
+
+    <div class="input-group mb-3 mt-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">Report title:</span>
+        </div>
+        <input type="text" name="title" class="form-control" aria-label="Title of the report being created" placeholder="[REPORT TITLE]">
+    </div>
+
+    <div class="input-group mb-3 mt-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">Publisher:</span>
+        </div>
+        <input type="text" name="publisher" class="form-control" aria-label="Name of the publishing agency" placeholder="[PUBLISHER]">
+    </div>
+
+    <div class="input-group mb-3 mt-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">Publisher website:</span>
+        </div>
+        <input type="text" name="website" class="form-control" aria-label="URL to the publisher's website" placeholder="[PUBLISHER WEBSITE]">
+    </div>
+
+    <div class="input-group mb-3 mt-3">
+        <div class="custom-file">
+            <input id="files" name="files" type="file" class="custom-file-input" accept=".docx" multiple>
+            <label class="custom-file-label" for="files">Choose files</label>
+        </div>
+        <div class="input-group-append">
+            <button class="btn btn-outline-primary" type="submit">Upload</button>
+        </div>
+    </div>
+
+    <ul id="file-names"></ul>
+
+</form>
