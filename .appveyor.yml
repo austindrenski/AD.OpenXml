@@ -4,9 +4,6 @@ image:
 platform:
   - Any CPU
 
-before_build:
-  - cmd: dotnet restore AD.OpenXml.sln
-
 build_script:
   - cmd: dotnet build --configuration Release
-  - cmd: dotnet test
+  - cmd: dotnet test test/AD.OpenXML.Tests --configuration Release
