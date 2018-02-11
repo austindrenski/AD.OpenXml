@@ -109,7 +109,7 @@ namespace CompilerAPI
                             x.IncludeXmlComments($"{Path.Combine(ApplicationEnvironment.ApplicationBasePath, nameof(CompilerAPI))}.xml");
                             x.IgnoreObsoleteActions();
                             x.IgnoreObsoleteProperties();
-                            x.SwaggerDoc("v1", new Info { Title = "USTIC Reports API", Version = "v1" });
+                            x.SwaggerDoc("v1", new Info { Title = "Reports API", Version = "v1" });
 //                            x.OperationFilter<SwaggerOptionalFilter>();
                         });
         }

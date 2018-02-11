@@ -2,59 +2,93 @@
 @model object
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8"/>
+    <head>
+        <meta charset="utf-8"/>
 
-    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"/>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"/>
 
-    <title>@ViewData["Title"]</title>
+        <title>@ViewData["Title"]</title>
 
-    <link rel="icon" type="image/x-icon" href="~/favicon.ico" sizes="32x32">
+        <link rel="icon" type="image/x-icon" href="~/assets/favicon.ico" sizes="32x32">
 
-    <environment include="Development">
-        <link rel="stylesheet" type="text/css" href="~/css/site.css" asp-append-version="true"/>
+        <environment include="Development">
+            <link rel="stylesheet"
+                  type="text/css"
+                  href="~/css/site.css"
+                  asp-append-version="true"/>
 
-        <link rel="stylesheet" type="text/css" href="~/css/bootstrap-3.3.7.css" asp-append-version="true"/>
+            <link rel="stylesheet"
+                  type="text/css"
+                  href="~/css/bootstrap-4.0.0.css"
+                  asp-append-version="true"/>
+        </environment>
 
-        <script src="~/js/site.js" asp-append-version="true">
-        </script>
+        <environment include="Production">
+            <link rel="stylesheet"
+                  type="text/css"
+                  href="~/min/site.min.css"
+                  asp-append-version="true"/>
 
-        <script src="~/js/jquery-3.1.1.js" asp-append-version="true">
-        </script>
+            <link rel="stylesheet"
+                  href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+                  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+                  crossorigin="anonymous"
+                  asp-append-version="true"/>
 
-        <script src="~/js/bootstrap-3.3.7.js" asp-append-version="true">
-        </script>
-    </environment>
+            <script src="~/min/site.min.js"
+                    asp-append-version="true">
+            </script>
+        </environment>
+    </head>
+    <body>
+        <header>
+            @await Html.PartialAsync("Navigation")
+        </header>
+        <div id="container" class="container">
+            @RenderBody()
+        </div>
+        <footer>
+            <hr/>
+        </footer>
+        <environment include="Development">
+            <script src="~/js/jquery-3.2.1.js"
+                    asp-append-version="true">
+            </script>
 
-    <environment include="Production">
-        <link rel="stylesheet" type="text/css" href="~/min/site.min.css" asp-append-version="true"/>
+            <script src="~/js/popper-1.12.9.js"
+                    asp-append-version="true">
+            </script>
 
-        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+            <script src="~/js/bootstrap-4.0.0.js"
+                    asp-append-version="true">
+            </script>
 
-        <script src="~/min/site.min.js"
-                asp-append-version="true">
-        </script>
+            <script src="~/js/site.js"
+                    asp-append-version="true">
+            </script>
+        </environment>
+        <environment include="Production">
+            <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+                    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+                    crossorigin="anonymous"
+                    asp-append-version="true">
+            </script>
 
-        <script src="https://code.jquery.com/jquery-3.1.1.min.js"
-                crossorigin="anonymous"
-                integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=">
-        </script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+                    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+                    crossorigin="anonymous"
+                    asp-append-version="true">
+            </script>
 
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-                crossorigin="anonymous"
-                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
-        </script>
-    </environment>
-</head>
-<body>
-<header>
-    @await Html.PartialAsync("Navigation")
-</header>
-<div id="container" class="container">
-    @RenderBody()
-</div>
-<footer>
-    <hr/>
-</footer>
-</body>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+                    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+                    crossorigin="anonymous"
+                    asp-append-version="true">
+            </script>
+
+            <script src="~/min/site.min.js"
+                    asp-append-version="true">
+            </script>
+        </environment>
+    </body>
 </html>

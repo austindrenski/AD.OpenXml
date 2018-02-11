@@ -19,7 +19,7 @@ namespace CompilerAPI.Controllers
     /// </summary>
     [PublicAPI]
     [ApiVersion("1.0")]
-    [Route("[controller]/[action]")]
+    [Route("[controller]")]
     public class UploadController : Controller
     {
         private static MediaTypeHeaderValue _microsoftWordDocument = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
@@ -31,7 +31,7 @@ namespace CompilerAPI.Controllers
         ///
         /// </returns>
         [NotNull]
-        [HttpGet]
+        [HttpGet("")]
         public IActionResult Index()
         {
             return View();
@@ -44,9 +44,9 @@ namespace CompilerAPI.Controllers
         ///
         /// </returns>
         [NotNull]
-        [HttpPost]
+        [HttpPost("")]
         [ItemNotNull]
-        public async Task<IActionResult> Index([NotNull] [ItemNotNull] IEnumerable<IFormFile> files)
+        public async Task<IActionResult> Index([NotNull] [ItemNotNull] IEnumerable<IFormFile> files, [CanBeNull] string title, [CanBeNull] string publisher, [CanBeNull] string website)
         {
             if (files is null)
             {
@@ -79,7 +79,12 @@ namespace CompilerAPI.Controllers
                 documentQueue.Enqueue(memoryStream);
             }
 
-            MemoryStream output = await Process(documentQueue, "[REPORT TITLE HERE]");
+            MemoryStream output =
+                await Process(
+                    documentQueue,
+                    title ?? "[REPORT TITLE]",
+                    publisher ?? "[PUBLISHER]",
+                    website ?? "[PUBLISHER WEBSITE]");
 
             output.Seek(0, SeekOrigin.Begin);
 
@@ -89,30 +94,31 @@ namespace CompilerAPI.Controllers
         [Pure]
         [NotNull]
         [ItemNotNull]
-        private static async Task<MemoryStream> Process([NotNull] [ItemNotNull] IEnumerable<MemoryStream> files, [NotNull] string reportTitle)
+        private static async Task<MemoryStream> Process([NotNull] [ItemNotNull] IEnumerable<MemoryStream> files, [NotNull] string title, [NotNull] string publisher, [NotNull] string website)
         {
             if (files is null)
             {
                 throw new ArgumentNullException(nameof(files));
             }
-            if (reportTitle is null)
+
+            if (title is null)
             {
-                throw new ArgumentNullException(nameof(reportTitle));
+                throw new ArgumentNullException(nameof(title));
             }
 
             return
                 await new ReportVisitor()
-                    .VisitAndFold(files)
-                    .Save()
-                    .AddHeaders(reportTitle)
-                    .AddFooters()
-                    .PositionChartsInline()
-                    .PositionChartsInner()
-                    .PositionChartsOuter()
-                    .ModifyBarChartStyles()
-                    .ModifyPieChartStyles()
-                    .ModifyLineChartStyles()
-                    .ModifyAreaChartStyles();
+                      .VisitAndFold(files)
+                      .Save()
+                      .AddHeaders(title)
+                      .AddFooters(publisher, website)
+                      .PositionChartsInline()
+                      .PositionChartsInner()
+                      .PositionChartsOuter()
+                      .ModifyBarChartStyles()
+                      .ModifyPieChartStyles()
+                      .ModifyLineChartStyles()
+                      .ModifyAreaChartStyles();
         }
     }
 }

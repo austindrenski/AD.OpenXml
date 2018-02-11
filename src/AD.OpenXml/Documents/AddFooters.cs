@@ -76,9 +76,9 @@ namespace AD.OpenXml.Documents
         /// </summary>
         [Pure]
         [NotNull]
-        public static async Task<MemoryStream> AddFooters([NotNull] this Task<MemoryStream> stream)
+        public static async Task<MemoryStream> AddFooters([NotNull] this Task<MemoryStream> stream, [NotNull] string publisher, [NotNull] string website)
         {
-            return await AddFooters(await stream);
+            return await AddFooters(await stream, publisher, website);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace AD.OpenXml.Documents
         /// </summary>
         [Pure]
         [NotNull]
-        public static async Task<MemoryStream> AddFooters([NotNull] this MemoryStream stream)
+        public static async Task<MemoryStream> AddFooters([NotNull] this MemoryStream stream, [NotNull] string publisher, [NotNull] string website)
         {
             if (stream is null)
             {
@@ -123,15 +123,15 @@ namespace AD.OpenXml.Documents
                       .Max();
 
             // Add footers
-            result = await AddEvenPageFooter(result, $"rId{++currentRelationshipId}");
-            result = await AddOddPageFooter(result, $"rId{++currentRelationshipId}");
+            result = await AddEvenPageFooter(result, $"rId{++currentRelationshipId}", website);
+            result = await AddOddPageFooter(result, $"rId{++currentRelationshipId}", publisher);
 
             return result;
         }
 
         [Pure]
         [NotNull]
-        private static async Task<MemoryStream> AddOddPageFooter([NotNull] MemoryStream stream, [NotNull] string footerId)
+        private static async Task<MemoryStream> AddOddPageFooter([NotNull] MemoryStream stream, [NotNull] string footerId, [NotNull] string publisher)
         {
             if (stream is null)
             {
@@ -143,17 +143,25 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(footerId));
             }
 
+            if (publisher is null)
+            {
+                throw new ArgumentNullException(nameof(publisher));
+            }
+
             MemoryStream result = await stream.CopyPure();
 
-            result = await Footer1.WriteInto(result, "word/footer1.xml");
+            XElement footer1 = Footer1.Clone();
+            footer1.Element(W + "p").Elements(W + "r").First().Element(W + "t").Value = publisher;
+
+            result = await footer1.WriteInto(result, "word/footer1.xml");
 
             XElement documentRelation = result.ReadAsXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(P + "Relationship",
-                    new XAttribute("Id", footerId),
-                    new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
-                    new XAttribute("Target", "footer1.xml")));
+                             new XAttribute("Id", footerId),
+                             new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
+                             new XAttribute("Target", "footer1.xml")));
 
             result = await documentRelation.WriteInto(result, DocumentRelsInfo.Path);
 
@@ -187,8 +195,8 @@ namespace AD.OpenXml.Documents
 
             packageRelation.Add(
                 new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/footer1.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
+                             new XAttribute("PartName", "/word/footer1.xml"),
+                             new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
 
             result = await packageRelation.WriteInto(result, ContentTypesInfo.Path);
 
@@ -197,7 +205,7 @@ namespace AD.OpenXml.Documents
 
         [Pure]
         [NotNull]
-        private static async Task<MemoryStream> AddEvenPageFooter([NotNull] MemoryStream stream, [NotNull] string footerId)
+        private static async Task<MemoryStream> AddEvenPageFooter([NotNull] MemoryStream stream, [NotNull] string footerId, [NotNull] string website)
         {
             if (stream is null)
             {
@@ -209,17 +217,25 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(footerId));
             }
 
+            if (website is null)
+            {
+                throw new ArgumentNullException(nameof(website));
+            }
+
             MemoryStream result = await stream.CopyPure();
 
-            result = await Footer2.WriteInto(result, "word/footer2.xml");
+            XElement footer2 = Footer2.Clone();
+            footer2.Element(W + "p").Elements(W + "r").Last().Element(W + "t").Value = website;
+
+            result = await footer2.WriteInto(result, "word/footer2.xml");
 
             XElement documentRelation = result.ReadAsXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(P + "Relationship",
-                    new XAttribute("Id", footerId),
-                    new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
-                    new XAttribute("Target", "footer2.xml")));
+                             new XAttribute("Id", footerId),
+                             new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
+                             new XAttribute("Target", "footer2.xml")));
 
             result = await documentRelation.WriteInto(result, DocumentRelsInfo.Path);
 
@@ -253,8 +269,8 @@ namespace AD.OpenXml.Documents
 
             packageRelation.Add(
                 new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/footer2.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
+                             new XAttribute("PartName", "/word/footer2.xml"),
+                             new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
 
             result = await packageRelation.WriteInto(result, ContentTypesInfo.Path);
 
