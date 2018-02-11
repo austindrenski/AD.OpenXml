@@ -140,11 +140,11 @@ namespace CompilerAPI
                    x =>
                    {
                        x.RoutePrefix = "docs";
-                       x.DocumentTitle("USITC Reports API Documentation");
+                       x.DocumentTitle("Reports API Documentation");
                        x.InjectStylesheet("swagger-ui/swagger.css");
                        x.ShowJsonEditor();
                        x.ShowRequestHeaders();
-                       x.SwaggerEndpoint("v1/swagger.json", "USITC Reports API Documentation");
+                       x.SwaggerEndpoint("v1/swagger.json", "Reports API Documentation");
                    })
                .UseMvc();
         }
