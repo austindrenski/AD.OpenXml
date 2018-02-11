@@ -4,6 +4,9 @@ image:
 platform:
   - Any CPU
 
+install:
+  - pwsh: mkdir src/QuestionnairesAPI/wwwroot/min
+
 build_script:
-  - cmd: dotnet build --configuration Release
-  - cmd: dotnet test test/AD.OpenXML.Tests --configuration Release
+  - pwsh: dotnet build --configuration Release
+  - pwsh: dotnet test test/AD.OpenXML.Tests --configuration Release
