@@ -1,12 +1,12 @@
-
-before_build:
-  - cmd: nuget restore AD.OpenXml.sln
-
-configuration: 
-  - Release
-
-image: 
+image:
   - Visual Studio 2017
 
-platform: 
+platform:
   - Any CPU
+
+before_build:
+  - cmd: dotnet restore AD.OpenXml.sln
+
+build_script:
+  - cmd: dotnet build --configuration Release
+  - cmd: dotnet test
