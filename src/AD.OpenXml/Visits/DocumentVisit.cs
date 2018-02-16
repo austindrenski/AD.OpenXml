@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.OpenXml.Elements;
 using AD.OpenXml.Visitors;
 using AD.Xml;
@@ -102,9 +101,9 @@ namespace AD.OpenXml.Visits
                     .RemoveByAll(x => (string) x.Attribute(W + "val") == "CommentReference")
 
                     // Remove elements that should almost never exist.
-                    .RemoveByAll(x => x.Name == W + "br" && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name == W + "pStyle" && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name == W + "pStyle" && (x.Attribute(W + "val")?.Value.Equals("Default", StringComparison.OrdinalIgnoreCase) ?? false))
+                    .RemoveByAll(x => x.Name == W + "br" && (string) x.Attribute(W + "type") == "page")
+                    .RemoveByAll(x => x.Name == W + "pStyle" && (string) x.Attribute(W + "val") == "BodyTextSSFinal")
+                    .RemoveByAll(x => x.Name == W + "pStyle" && (string) x.Attribute(W + "val") == "Default")
                     .RemoveByAll(x => x.Name == W + "jc" && !x.Ancestors(W + "tbl").Any())
 
                     // Alter bold, italic, and underline elements.
@@ -136,7 +135,7 @@ namespace AD.OpenXml.Visits
                     .RemoveByAll(W + "headerReference")
 
                     // Add soft breaks to headings
-                    //.AddLineBreakToHeadings()
+                    .AddLineBreakToHeadings()
 
                     // Tidy up the XML for review.
                     .MergeRuns();
@@ -155,9 +154,9 @@ namespace AD.OpenXml.Visits
                 IEnumerable<XElement> styles = runProperties.Elements(W + "rStyle").ToArray();
                 styles.Remove();
                 IEnumerable<XElement> distinct = styles.Distinct(XNode.EqualityComparer).Cast<XElement>().ToArray();
-                if (distinct.Any(x => x.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false))
+                if (distinct.Any(x => (string) x.Attribute(W + "val") == "FootnoteReference"))
                 {
-                    distinct = distinct.Where(x => x.Attribute(W + "val")?.Value.Equals("FootnoteReference") ?? false);
+                    distinct = distinct.Where(x => (string) x.Attribute(W + "val") == "FootnoteReference");
                 }
                 runProperties.AddFirst(distinct);
             }
@@ -221,7 +220,13 @@ namespace AD.OpenXml.Visits
                     item.AddFirst(new XElement(W + "pPr"));
                 }
 
-                item.Element(W + "pPr")?.AddFirst(new XElement(W + "pStyle", new XAttribute(W + "val", "FiguresTablesSourceNote")));
+                item.Element(W + "pPr")?
+                    .AddFirst(
+                        new XElement(
+                            W + "pStyle",
+                            new XAttribute(
+                                W + "val",
+                                "FiguresTablesSourceNote")));
             }
 
             return source;
