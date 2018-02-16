@@ -17,11 +17,9 @@ namespace AD.OpenXml.Visits
     [PublicAPI]
     public sealed class DocumentVisit : IOpenXmlVisit
     {
-        [NotNull]
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        [NotNull]
-        private static readonly IEnumerable<XName> Revisions =
+        [NotNull] private static readonly IEnumerable<XName> Revisions =
             new XName[]
             {
                 W + "ins",
@@ -104,10 +102,10 @@ namespace AD.OpenXml.Visits
                     .RemoveByAll(x => (string) x.Attribute(W + "val") == "CommentReference")
 
                     // Remove elements that should almost never exist.
-                    .RemoveByAll(x => x.Name.Equals(W + "br") && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name.Equals(W + "pStyle") && (x.Attribute(W + "val")?.Value.Equals("Default", StringComparison.OrdinalIgnoreCase) ?? false))
-                    .RemoveByAll(x => x.Name.Equals(W + "jc") && !x.Ancestors(W + "tbl").Any())
+                    .RemoveByAll(x => x.Name == W + "br" && (x.Attribute(W + "type")?.Value.Equals("page", StringComparison.OrdinalIgnoreCase) ?? false))
+                    .RemoveByAll(x => x.Name == W + "pStyle" && (x.Attribute(W + "val")?.Value.Equals("BodyTextSSFinal", StringComparison.OrdinalIgnoreCase) ?? false))
+                    .RemoveByAll(x => x.Name == W + "pStyle" && (x.Attribute(W + "val")?.Value.Equals("Default", StringComparison.OrdinalIgnoreCase) ?? false))
+                    .RemoveByAll(x => x.Name == W + "jc" && !x.Ancestors(W + "tbl").Any())
 
                     // Alter bold, italic, and underline elements.
                     .ChangeBoldToStrong()
@@ -131,7 +129,7 @@ namespace AD.OpenXml.Visits
                     .RemoveByAllIfEmpty(W + "pPr")
                     .RemoveByAllIfEmpty(W + "t")
                     .RemoveByAllIfEmpty(W + "r")
-                    .RemoveByAll(x => x.Name.Equals(W + "p") && !x.HasElements && (!x.Parent?.Name.Equals(W + "tc") ?? false))
+                    .RemoveByAll(x => x.Name == W + "p" && !x.HasElements && x.Parent?.Name != W + "tc")
 
                     // Remove for this stage
                     .RemoveByAll(W + "footerReference")
@@ -164,25 +162,21 @@ namespace AD.OpenXml.Visits
                 runProperties.AddFirst(distinct);
             }
 
-            var revisionMapping =
+            (int oldId, int newId)[] revisionMapping =
                 source.Descendants()
                       .Where(x => Revisions.Contains(x.Name))
                       .Attributes(W + "id")
-                      .OrderBy(x => x.Value.ParseInt())
-                      .Select(
-                          x => new
-                          {
-                              oldId = x,
-                              newId = new XAttribute(W + "id", $"{revisionId + x.Value.ParseInt()}")
-                          })
-                      .OrderByDescending(x => x.oldId.Value.ParseInt())
+                      .Select(x => (int) x)
+                      .OrderBy(x => x)
+                      .Select(x => (oldId: x, newId: x + revisionId))
+                      .OrderByDescending(x => x.oldId)
                       .ToArray();
 
             foreach (XName revision in Revisions)
             {
-                foreach (var map in revisionMapping)
+                foreach ((int oldId, int newId) in revisionMapping)
                 {
-                    source = source.ChangeXAttributeValues(revision, W + "id", (string)map.oldId, (string)map.newId);
+                    source = source.ChangeXAttributeValues(revision, W + "id", oldId.ToString(), newId.ToString());
                 }
             }
 
@@ -214,9 +208,9 @@ namespace AD.OpenXml.Visits
 
             IEnumerable<XElement> charts =
                 source.Descendants(W + "drawing")
-                       .Select(x => x.Ancestors(W + "p").FirstOrDefault())
-                       .Where(x => x != null)
-                       .ToArray();
+                      .Select(x => x.Ancestors(W + "p").FirstOrDefault())
+                      .Where(x => x != null)
+                      .ToArray();
 
             foreach (XElement item in charts)
             {
