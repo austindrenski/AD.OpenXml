@@ -1,6 +1,4 @@
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    Layout = "_Layout";
     ViewData["Title"] = "Upload Reports";
 }
 <form asp-controller="Upload" asp-action="Index" method="post" enctype="multipart/form-data">
@@ -37,5 +35,4 @@
     </div>
 
     <ul id="file-names"></ul>
-
 </form>
