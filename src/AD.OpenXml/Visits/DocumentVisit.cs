@@ -57,6 +57,31 @@ namespace AD.OpenXml.Visits
                     subject.Charts);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="cell">
+        ///
+        /// </param>
+        /// <param name="revisionId">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [NotNull]
+        public static XElement ExecuteForTableRecursion([NotNull] XElement cell, int revisionId)
+        {
+            if (cell is null)
+            {
+                throw new ArgumentNullException(nameof(cell));
+            }
+
+            return Execute(cell, revisionId);
+        }
+
         [Pure]
         [NotNull]
         private static XElement Execute([NotNull] XElement document, int revisionId)
@@ -119,7 +144,7 @@ namespace AD.OpenXml.Visits
                     .HighlightInsertRequests()
 
                     // Set table styles.
-                    .SetTableStyles()
+                    .SetTableStyles(revisionId)
 
                     // Remove elements used above, but not needed in the output.
                     .RemoveByAll(W + "u")
@@ -153,11 +178,14 @@ namespace AD.OpenXml.Visits
             {
                 IEnumerable<XElement> styles = runProperties.Elements(W + "rStyle").ToArray();
                 styles.Remove();
+
                 IEnumerable<XElement> distinct = styles.Distinct(XNode.EqualityComparer).Cast<XElement>().ToArray();
+
                 if (distinct.Any(x => (string) x.Attribute(W + "val") == "FootnoteReference"))
                 {
                     distinct = distinct.Where(x => (string) x.Attribute(W + "val") == "FootnoteReference");
                 }
+
                 runProperties.AddFirst(distinct);
             }
 

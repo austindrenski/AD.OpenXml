@@ -128,7 +128,7 @@ namespace AD.OpenXml.Visits
                     .HighlightInsertRequests()
 
                     // Set table styles.
-                    .SetTableStyles()
+                    .SetTableStyles(revisionId)
 
                     // Remove elements used above, but not needed in the output.
                     .RemoveByAll(W + "u")

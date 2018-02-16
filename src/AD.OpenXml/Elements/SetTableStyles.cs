@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using AD.IO;
+using AD.OpenXml.Visits;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -20,9 +20,17 @@ namespace AD.OpenXml.Elements
         /// Set table styles to BlueTableBasic and perform basic cleaning.
         /// </summary>
         /// <param name="source">The source content element. This should be the document-node of document.xml.</param>
+        /// <param name="revisionId">
+        ///
+        /// </param>
         /// <returns></returns>
-        public static XElement SetTableStyles(this XElement source)
+        public static XElement SetTableStyles(this XElement source, int revisionId)
         {
+            if (source.Name != W + "document")
+            {
+                return source;
+            }
+
             foreach (XElement item in source.Descendants(W + "tblPr"))
             {
                 item.RemoveAll();
@@ -42,21 +50,19 @@ namespace AD.OpenXml.Elements
                         new XAttribute(W + "noVBand", "1")));
             }
 
-            foreach (XElement item in source.Descendants(W + "tc"))
+            foreach (XElement cell in source.Descendants(W + "tc"))
             {
-                foreach (XElement text in item.Descendants(W + "t"))
-                {
-                    text.Value = Regex.Replace(text.Value, "(\\s\\s)+", "");
-                    text.Value = Regex.Replace(text.Value, "(\\s\\s)+", "");
-                    text.Value = text.Value.Trim();
-                }
+                XElement result = DocumentVisit.ExecuteForTableRecursion(cell, revisionId);
 
-                if (!item.Value.Contains("@>"))
+                cell.RemoveNodes();
+                cell.Add(result.Elements());
+
+                if (!cell.Value.Contains("@>"))
                 {
                     continue;
                 }
 
-                foreach (XElement paragraphWithSymbol in item.Elements(W + "p").Where(x => x.Value.Contains("@>")))
+                foreach (XElement paragraphWithSymbol in cell.Elements(W + "p").Where(x => x.Value.Contains("@>")))
                 {
                     if (paragraphWithSymbol.Element(W + "pPr") is null)
                     {
@@ -73,7 +79,7 @@ namespace AD.OpenXml.Elements
                         XElement indent = textToIndent.Ancestors(W + "p").First().Element(W + "pPr")?.Element(W + "ind");
 
                         int count = textToIndent.Parent?.Parent?.Value.SkipWhile(x => x != '@').Skip(1).TakeWhile(x => x == '>').Count() ?? 0;
-                        
+
                         if (indent is null)
                         {
                             throw new ArgumentException("Indentation symbol code error.");
@@ -91,6 +97,11 @@ namespace AD.OpenXml.Elements
             //source.Descendants(W + "tcPr").Descendants().Where(x => x.Name != W + "vAlign").Remove();
             source.Descendants(W + "trPr").Remove();
             //source.Descendants(W + "gridCol").Attributes(W + "w").Remove();
+
+            foreach (XElement table in source.Element(W + "body").Elements(W + "tbl"))
+            {
+                table.RemoveBy(W + "pPr");
+            }
 
             return source;
         }

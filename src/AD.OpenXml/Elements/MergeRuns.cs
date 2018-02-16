@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -55,6 +56,28 @@ namespace AD.OpenXml.Elements
             return element;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="text">
+        ///
+        /// </param>
+        /// <exception cref="ArgumentNullException"/>
+        public static void RemoveDuplicateSpacing([NotNull] XElement text)
+        {
+            if (text is null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            text.Value = Spaces.Replace((string) text, " ");
+
+            if (text.Value.StartsWith(" ") || text.Value.EndsWith(" "))
+            {
+                text.SetAttributeValue(XNamespace.Xml + "space", "preserve");
+            }
+        }
+
         private static void ProcessRuns(XElement paragraph)
         {
             IEnumerable<XElement> runs = paragraph.Elements(W + "r").ToArray();
@@ -106,16 +129,6 @@ namespace AD.OpenXml.Elements
                 }
 
                 run.Remove();
-            }
-        }
-
-        private static void RemoveDuplicateSpacing(XElement text)
-        {
-            text.Value = Spaces.Replace((string) text, " ");
-
-            if (text.Value.StartsWith(" ") || text.Value.EndsWith(" "))
-            {
-                text.SetAttributeValue(XNamespace.Xml + "space", "preserve");
             }
         }
     }
