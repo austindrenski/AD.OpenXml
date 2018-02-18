@@ -34,20 +34,41 @@ namespace AD.OpenXml.Elements
             foreach (XElement item in source.Descendants(W + "tblPr"))
             {
                 item.RemoveAll();
-                item.Add(
-                    new XElement(W + "tblStyle",
-                        new XAttribute(W + "val", "BlueTableBasic")),
-                    new XElement(W + "tblW",
-                        new XAttribute(W + "type", "pct"),
-                        new XAttribute(W + "w", "5000")),
-                    new XElement(W + "tblLook",
-                        new XAttribute(W + "val", "04A0"),
-                        new XAttribute(W + "firstRow", "1"),
-                        new XAttribute(W + "lastRow", "0"),
-                        new XAttribute(W + "firstColumn", "0"),
-                        new XAttribute(W + "lastColumn", "0"),
-                        new XAttribute(W + "noHBand", "0"),
-                        new XAttribute(W + "noVBand", "1")));
+
+                if (item.Parent.Element(W + "tblGrid")?.Elements(W + "gridCol")?.Count() == 1)
+                {
+                    item.Add(
+                        new XElement(W + "tblStyle",
+                                     new XAttribute(W + "val", "BoxTable")),
+                        new XElement(W + "tblW",
+                                     new XAttribute(W + "type", "pct"),
+                                     new XAttribute(W + "w", "5000")),
+                        new XElement(W + "tblLook",
+                                     new XAttribute(W + "val", "04A0"),
+                                     new XAttribute(W + "firstRow", "1"),
+                                     new XAttribute(W + "lastRow", "1"),
+                                     new XAttribute(W + "firstColumn", "0"),
+                                     new XAttribute(W + "lastColumn", "0"),
+                                     new XAttribute(W + "noHBand", "1"),
+                                     new XAttribute(W + "noVBand", "1")));
+                }
+                else
+                {
+                    item.Add(
+                        new XElement(W + "tblStyle",
+                                     new XAttribute(W + "val", "BlueTableBasic")),
+                        new XElement(W + "tblW",
+                                     new XAttribute(W + "type", "pct"),
+                                     new XAttribute(W + "w", "5000")),
+                        new XElement(W + "tblLook",
+                                     new XAttribute(W + "val", "04A0"),
+                                     new XAttribute(W + "firstRow", "1"),
+                                     new XAttribute(W + "lastRow", "0"),
+                                     new XAttribute(W + "firstColumn", "0"),
+                                     new XAttribute(W + "lastColumn", "0"),
+                                     new XAttribute(W + "noHBand", "0"),
+                                     new XAttribute(W + "noVBand", "1")));
+                }
             }
 
             foreach (XElement cell in source.Descendants(W + "tc"))

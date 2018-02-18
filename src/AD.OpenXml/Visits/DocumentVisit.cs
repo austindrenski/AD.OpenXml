@@ -226,6 +226,12 @@ namespace AD.OpenXml.Visits
 
                 sectionProperties?.Remove();
 
+                if (previous?.Name != W + "p")
+                {
+                    previous?.AddAfterSelf(new XElement(W + "p"));
+                    previous = previous.Next();
+                }
+
                 if (!previous?.Elements(W + "pPr").Any() ?? false)
                 {
                     previous.AddFirst(new XElement(W + "pPr", sectionProperties));

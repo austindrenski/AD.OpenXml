@@ -25,6 +25,7 @@ namespace AD.OpenXml.Visits
         [NotNull] private static readonly XElement BoxCaption;
         [NotNull] private static readonly XElement BoxListBullet;
         [NotNull] private static readonly XElement BoxSourceNote;
+        [NotNull] private static readonly XElement BoxTable;
         [NotNull] private static readonly XElement BlueTableBasic;
         [NotNull] private static readonly XElement CaptionFigure;
         [NotNull] private static readonly XElement CaptionTable;
@@ -57,7 +58,6 @@ namespace AD.OpenXml.Visits
         [NotNull] private static readonly XElement TOC4;
         [NotNull] private static readonly XElement TOCHeading;
 
-
         /// <inheritdoc />
         public IOpenXmlVisitor Result { get; }
 
@@ -72,154 +72,197 @@ namespace AD.OpenXml.Visits
             {
                 DocDefaults = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Normal.xml"), Encoding.UTF8))
             {
                 Normal = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Appendix.xml"), Encoding.UTF8))
             {
                 Appendix = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Bibliography.xml"), Encoding.UTF8))
             {
                 Bibliography = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Box.xml"), Encoding.UTF8))
             {
                 Box = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.BoxCaption.xml"), Encoding.UTF8))
             {
                 BoxCaption = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.BoxListBullet.xml"), Encoding.UTF8))
             {
                 BoxListBullet = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.BoxSourceNote.xml"), Encoding.UTF8))
             {
                 BoxSourceNote = XElement.Parse(reader.ReadToEnd());
             }
+
+            using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.BoxTable.xml"), Encoding.UTF8))
+            {
+                BoxTable = XElement.Parse(reader.ReadToEnd());
+            }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.BlueTableBasic.xml"), Encoding.UTF8))
             {
                 BlueTableBasic = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.CaptionFigure.xml"), Encoding.UTF8))
             {
                 CaptionFigure = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.CaptionTable.xml"), Encoding.UTF8))
             {
                 CaptionTable = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Emphasis.xml"), Encoding.UTF8))
             {
                 Emphasis = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.ExecutiveSummary1StParagraph.xml"), Encoding.UTF8))
             {
                 ExecutiveSummary1StParagraph = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.ExecutiveSummaryHighlights.xml"), Encoding.UTF8))
             {
                 ExecutiveSummaryHighlights = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.ExecutiveSummarySidebars.xml"), Encoding.UTF8))
             {
                 ExecutiveSummarySidebars = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.FigureTableSourceNote.xml"), Encoding.UTF8))
             {
                 FigureTableSourceNote = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.FootnoteReference.xml"), Encoding.UTF8))
             {
                 FootnoteReference = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.FootnoteText.xml"), Encoding.UTF8))
             {
                 FootnoteText = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Heading1.xml"), Encoding.UTF8))
             {
                 Heading1 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Heading2.xml"), Encoding.UTF8))
             {
                 Heading2 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Heading3.xml"), Encoding.UTF8))
             {
                 Heading3 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Heading4.xml"), Encoding.UTF8))
             {
                 Heading4 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Heading5.xml"), Encoding.UTF8))
             {
                 Heading5 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Heading6.xml"), Encoding.UTF8))
             {
                 Heading6 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Heading7.xml"), Encoding.UTF8))
             {
                 Heading7 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Heading8.xml"), Encoding.UTF8))
             {
                 Heading8 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Hyperlink.xml"), Encoding.UTF8))
             {
                 Hyperlink = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.ListBullet.xml"), Encoding.UTF8))
             {
                 ListBullet = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.PreHeading.xml"), Encoding.UTF8))
             {
                 PreHeading = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Strong.xml"), Encoding.UTF8))
             {
                 Strong = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.StyleNotImplemented.xml"), Encoding.UTF8))
             {
                 StyleNotImplemented = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Subscript.xml"), Encoding.UTF8))
             {
                 Subscript = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Superscript.xml"), Encoding.UTF8))
             {
                 Superscript = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.TableOfFigures.xml"), Encoding.UTF8))
             {
                 TableOfFigures = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.TOC1.xml"), Encoding.UTF8))
             {
                 TOC1 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.TOC2.xml"), Encoding.UTF8))
             {
                 TOC2 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.TOC3.xml"), Encoding.UTF8))
             {
                 TOC3 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.TOC4.xml"), Encoding.UTF8))
             {
                 TOC4 = XElement.Parse(reader.ReadToEnd());
             }
+
             using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.TOCHeading.xml"), Encoding.UTF8))
             {
                 TOCHeading = XElement.Parse(reader.ReadToEnd());
@@ -268,6 +311,7 @@ namespace AD.OpenXml.Visits
                     BoxCaption.Clone(),
                     BoxListBullet.Clone(),
                     BoxSourceNote.Clone(),
+                    BoxTable.Clone(),
                     BlueTableBasic.Clone(),
                     CaptionFigure.Clone(),
                     CaptionTable.Clone(),
@@ -323,7 +367,6 @@ namespace AD.OpenXml.Visits
                 next?.Remove();
                 style.Element(W + "name")?.AddAfterSelf(next);
             }
-
 
             return results;
         }
