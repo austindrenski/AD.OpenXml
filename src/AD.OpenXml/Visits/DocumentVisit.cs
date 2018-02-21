@@ -119,6 +119,7 @@ namespace AD.OpenXml.Visits
                     .RemoveByAll(W + "spacing")
                     .RemoveByAll(W + "sz")
                     .RemoveByAll(W + "szCs")
+                    .RemoveByAll(W + "lang")
                     .RemoveByAll(W + "tblPrEx")
                     .RemoveByAll(W + "commentRangeStart")
                     .RemoveByAll(W + "commentRangeEnd")

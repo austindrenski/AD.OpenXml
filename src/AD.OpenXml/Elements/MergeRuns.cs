@@ -124,7 +124,7 @@ namespace AD.OpenXml.Elements
 
                 if (run.Next()?.Element(W + "t") is XElement nextText)
                 {
-                    nextText.Value = $"{run.Value} {nextText.Value}";
+                    nextText.Value = $"{run.Value}{nextText.Value}";
                     RemoveDuplicateSpacing(nextText);
                 }
 
