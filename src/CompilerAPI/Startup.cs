@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using AD.ApiExtensions.Filters;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -23,7 +24,7 @@ namespace CompilerAPI
     {
         /// <summary>
         ///
-        /// </summary>
+        /// </summary>rm
         public IConfigurationRoot Configuration { get; }
 
         /// <summary>
@@ -110,7 +111,7 @@ namespace CompilerAPI
                             x.IgnoreObsoleteActions();
                             x.IgnoreObsoleteProperties();
                             x.SwaggerDoc("v1", new Info { Title = "Reports API", Version = "v1" });
-//                            x.OperationFilter<SwaggerOptionalFilter>();
+                            x.OperationFilter<SwaggerOptionalOperationFilter>();
                         });
         }
 
