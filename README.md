@@ -8,3 +8,7 @@ C# extension library for OpenXML manipulation.
 ```Powershell 
 dotnet add [<PROJECT>] package AD.OpenXml
 ```
+
+## How to use this project
+
+TODO: create a basic walkthrough
