@@ -1,0 +1,9 @@
+bin/
+obj/
+packages/
+.idea/
+.vscode/
+wwwroot/
+!CompilerApi/wwwroot/css/site.css
+!Compiler/wwwroot/js/site.js
+*.DotSettings.user
