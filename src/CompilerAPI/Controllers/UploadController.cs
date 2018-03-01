@@ -15,7 +15,7 @@ namespace CompilerAPI.Controllers
     // TODO: document UploadController
     /// <inheritdoc />
     /// <summary>
-    ///
+    /// Provides HTTP endpoints to submit and format Word documents. 
     /// </summary>
     [PublicAPI]
     [ApiVersion("1.0")]
@@ -25,10 +25,10 @@ namespace CompilerAPI.Controllers
         private static MediaTypeHeaderValue _microsoftWordDocument = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
         /// <summary>
-        ///
+        /// Returns the webpage with an upload form for documents.
         /// </summary>
         /// <returns>
-        ///
+        /// The index razor view.
         /// </returns>
         [NotNull]
         [HttpGet("")]
@@ -38,11 +38,24 @@ namespace CompilerAPI.Controllers
         }
 
         /// <summary>
-        ///
+        /// Receives file uploads from the user.
         /// </summary>
+        /// <param name="files">
+        /// The collection of files submitted by POST request.
+        /// </param>
+        /// <param name="title">
+        /// The title of the document to be returned.
+        /// </param>
+        /// <param name="publisher">
+        /// The name of the publisher for the document to be returned.
+        /// </param>
+        /// <param name="website">
+        /// The website of the publisher.
+        /// </param>
         /// <returns>
-        ///
+        /// The combined and formatted document.
         /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [NotNull]
         [HttpPost("")]
         [ItemNotNull]
@@ -100,10 +113,20 @@ namespace CompilerAPI.Controllers
             {
                 throw new ArgumentNullException(nameof(files));
             }
-
+            
             if (title is null)
             {
                 throw new ArgumentNullException(nameof(title));
+            }
+            
+            if (publisher is null)
+            {
+                throw new ArgumentNullException(nameof(publisher));
+            }
+            
+            if (website is null)
+            {
+                throw new ArgumentNullException(nameof(website));
             }
 
             return
