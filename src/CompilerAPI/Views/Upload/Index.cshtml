@@ -24,6 +24,25 @@
         <input type="text" name="website" class="form-control" aria-label="URL to the publisher's website" placeholder="[PUBLISHER WEBSITE]">
     </div>
 
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-outline-secondary active">
+            <input type="radio" id="docx" name="format" value="docx" checked>
+            docx
+        </label>
+        <label class="btn btn-outline-secondary">
+            <input type="radio" id="json" name="format" value="json">
+            json
+        </label>
+        <label class="btn btn-outline-secondary">
+            <input type="radio" id="xml" name="format" value="xml">
+            xml
+        </label>
+        <label class="btn btn-outline-secondary">
+            <input type="radio" id="html" name="format" value="html">
+            html
+        </label>
+    </div>
+
     <div class="input-group mb-3 mt-3">
         <div class="custom-file">
             <input id="files" name="files" type="file" class="custom-file-input" accept=".docx" multiple>
