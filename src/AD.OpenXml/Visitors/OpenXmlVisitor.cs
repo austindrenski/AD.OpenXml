@@ -178,6 +178,9 @@ namespace AD.OpenXml.Visitors
                       .Where(x => x?.StartsWith("charts/") ?? false)
                       .Select(x => new ChartInformation(x, stream.ReadAsXml($"word/{x}")))
                       .ToImmutableList();
+
+            // TODO: remove when AD.IO starts resetting position by default.
+            stream.Seek(0, SeekOrigin.Begin);
         }
 
         /// <summary>

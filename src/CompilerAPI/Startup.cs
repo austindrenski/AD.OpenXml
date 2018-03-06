@@ -107,7 +107,7 @@ namespace CompilerAPI
                         x =>
                         {
                             x.DescribeAllEnumsAsStrings();
-                            x.IncludeXmlComments($"{Path.Combine(ApplicationEnvironment.ApplicationBasePath, nameof(CompilerAPI))}.xml");
+                            x.IncludeXmlComments(Path.Combine(ApplicationEnvironment.ApplicationBasePath, $"{nameof(CompilerAPI)}.xml"));
                             x.IgnoreObsoleteActions();
                             x.IgnoreObsoleteProperties();
                             x.SwaggerDoc("v1", new Info { Title = "Reports API", Version = "v1" });
@@ -134,19 +134,18 @@ namespace CompilerAPI
                        context.Response.Headers.Add("x-xss-protection", "1; mode=block");
                        await next();
                    })
-               .UseResponseCompression()
                .UseStaticFiles()
                .UseSwagger(x => x.RouteTemplate = "docs/{documentName}/swagger.json")
                .UseSwaggerUI(
                    x =>
                    {
                        x.RoutePrefix = "docs";
-                       x.DocumentTitle("Reports API Documentation");
-                       x.InjectStylesheet("swagger-ui/swagger.css");
-                       x.ShowJsonEditor();
-                       x.ShowRequestHeaders();
+                       x.DocumentTitle = "Reports API Documentation";
+                       x.HeadContent = "Reports API Documentation";
                        x.SwaggerEndpoint("v1/swagger.json", "Reports API Documentation");
+                       x.DocExpansion(DocExpansion.None);
                    })
+               .UseResponseCompression()
                .UseMvc();
         }
     }
