@@ -8,7 +8,8 @@
     <w:keepNext/>
   </w:pPr>
   <w:rPr>
-    <w:sz w:val="16" />
+      <!-- Changed by request from 16 to 20 on 2018-03-07 -->
+    <w:sz w:val="20" />
   </w:rPr>
   <w:tblPr>
     <w:tblStyleRowBandSize w:val="1" />

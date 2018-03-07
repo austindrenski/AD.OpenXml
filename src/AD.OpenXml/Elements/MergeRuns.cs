@@ -30,6 +30,7 @@ namespace AD.OpenXml.Elements
             {
                 ProcessRuns(paragraph);
 
+                // TODO: this fixes a problem with leading spaces showing up at the start of paragraphs.
                 if (paragraph.Elements(W + "r").FirstOrDefault() is XElement first)
                 {
                     if (first.Element(W + "t") is XElement text)
@@ -117,6 +118,11 @@ namespace AD.OpenXml.Elements
                     continue;
                 }
 
+                if (run.Next()?.Element(W + "footnoteReference") != null)
+                {
+                    continue;
+                }
+
                 if (!run.Next()?.Elements(W + "t").Any() ?? false)
                 {
                     run.Next()?.Add(new XElement(W + "t"));
@@ -124,7 +130,7 @@ namespace AD.OpenXml.Elements
 
                 if (run.Next()?.Element(W + "t") is XElement nextText)
                 {
-                    nextText.Value = $"{run.Value}{nextText.Value}";
+                    nextText.Value = run.Value + nextText.Value;
                     RemoveDuplicateSpacing(nextText);
                 }
 
