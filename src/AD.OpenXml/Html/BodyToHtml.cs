@@ -3,19 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Html
 {
     /// <summary>
-    /// Extension methods to transform a &gt;body&lt;...&gt;/body&lt; element into a well-formed HTML document.
+    /// Extension methods to transform a &gt;body&lt;...&gt;/body&lt; run into a well-formed HTML document.
     /// </summary>
     [PublicAPI]
     public static class BodyToHtmlExtensions
     {
-        private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
 
-        private static readonly HashSet<XName> SupportedAttributes =
+        [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
+
+        [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
+
+        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
+        [NotNull] private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        [NotNull] [ItemNotNull] private static readonly HashSet<XName> SupportedAttributes =
             new HashSet<XName>
             {
                 "id",
@@ -23,7 +32,7 @@ namespace AD.OpenXml.Html
                 "class"
             };
 
-        private static readonly HashSet<XName> SupportedElements =
+        [NotNull] [ItemNotNull] private static readonly HashSet<XName> SupportedElements =
             new HashSet<XName>
             {
                 "a",
@@ -46,18 +55,19 @@ namespace AD.OpenXml.Html
                 "tr"
             };
 
-        private static readonly Dictionary<XName, XName> Renames =
+        [NotNull] private static readonly Dictionary<XName, XName> Renames =
             new Dictionary<XName, XName>
             {
+                { "drawing", "figure" },
                 { "tbl", "table" },
                 { "tc", "td" },
                 { "val", "class" }
             };
 
         /// <summary>
-        /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:body element.
+        /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:body run.
         /// </summary>
-        /// <param name="body">The w:body element.</param>
+        /// <param name="body">The w:body run.</param>
         /// <param name="title">The name of this HTML document.</param>
         /// <param name="stylesheet">The name, relative path, or absolute path to a CSS stylesheet.</param>
         /// <returns>An <see cref="XElement"/> "html</returns>
@@ -88,70 +98,89 @@ namespace AD.OpenXml.Html
         /// <summary>
         /// Visits the node.
         /// </summary>
-        /// <param name="node">
-        /// The node to visit.
+        /// <param name="xObject">
+        /// The XML object to visit.
         /// </param>
         /// <returns>
         /// The visited node.
         /// </returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        [NotNull]
-        private static XObject Visit([NotNull] XNode node)
+        [CanBeNull]
+        private static XObject Visit([CanBeNull] XObject xObject)
         {
-            if (node is null)
+            switch (xObject)
             {
-                throw new ArgumentNullException(nameof(node));
-            }
-
-            switch (node)
-            {
-                case XText text:
+                case null:
                 {
-                    return Visit(text);
+                    return null;
                 }
-                case XElement e when e.Name == "p:" :
+                case XAttribute a:
                 {
-                    return Visit(element);
+                    return VisitAttribute(a);
+                }
+                case XElement e when e.Name == W + "body":
+                {
+                    return VisitBody(e);
+                }
+                case XElement e when e.Name == W + "drawing":
+                {
+                    return VisitDrawing(e);
+                }
+                case XElement e when e.Name == W + "p":
+                {
+                    return VisitParagraph(e);
+                }
+                case XElement e when e.Name == W + "r":
+                {
+                    return VisitRun(e);
+                }
+                case XElement e when e.Name == W + "tbl":
+                {
+                    return VisitTable(e);
+                }
+                case XElement e when e.Name == W + "tr":
+                {
+                    return VisitTableRow(e);
+                }
+                case XElement e when e.Name == W + "tc":
+                {
+                    return VisitTableCell(e);
+                }
+                case XText t:
+                {
+                    return VisitText(t);
                 }
                 default:
                 {
-                    throw new NotImplementedException();
+                    Console.WriteLine($"Skipping unrecognized XObject:\r\n{xObject}");
+                    return null;
                 }
             }
         }
 
-        /// <summary>
-        /// Reconstructs the element with only the local name.
-        /// </summary>
-        /// <param name="element">
-        /// The element to reconstruct.
-        /// </param>
-        /// <returns>
-        /// The reconstructed element.
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
-        private static XObject Visit([NotNull] XElement element)
+        private static XName Visit([NotNull] XName name)
         {
-            if (element is null)
+            if (name is null)
             {
-                throw new ArgumentNullException(nameof(element));
+                throw new ArgumentNullException(nameof(name));
             }
 
-            return
-                new XElement(
-                    element.Name.Visit(),
-                    element.Attributes().Select(Visit),
-                    element.HasElements ? null : element.Value,
-                    element.Elements()
-                           .Select(Visit)
-                           .Select(VisitHeadings)
-                           .Select(VisitParagraphs)
-                           .Select(VisitTables)
-                           .Select(VisitTableRows)
-                           .Select(VisitTableCells));
+            return Renames.TryGetValue(name.LocalName, out XName result) ? result : name.LocalName;
+        }
+
+        [Pure]
+        [CanBeNull]
+        private static XObject Visit([NotNull] this string text)
+        {
+            if (text is null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            return Visit(new XText(text));
         }
 
         /// <summary>
@@ -166,33 +195,228 @@ namespace AD.OpenXml.Html
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        private static XObject Visit([NotNull] this XAttribute attribute)
+        private static XObject VisitAttribute([NotNull] XAttribute attribute)
         {
             if (attribute is null)
             {
                 throw new ArgumentNullException(nameof(attribute));
             }
 
-            XName name = attribute.Name.Visit();
+            XName name = Visit(attribute.Name);
 
             return SupportedAttributes.Contains(name) ? new XAttribute(name, attribute.Value) : null;
         }
 
+        /// <summary>
+        /// Visits the body node.
+        /// </summary>
+        /// <param name="body">
+        /// The body to visit.
+        /// </param>
+        /// <returns>
+        /// The reconstructed attribute.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
-        private static XName Visit([NotNull] this XName name)
+        private static XObject VisitBody([NotNull] XElement body)
         {
-            if (name is null)
+            if (body is null)
             {
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException(nameof(body));
             }
 
-            return Renames.TryGetValue(name.LocalName, out XName result) ? result : name.LocalName;
+            return
+                new XElement(
+                    Visit(body.Name),
+                    body.Nodes().Select(Visit));
         }
 
         [Pure]
         [NotNull]
-        private static XObject Visit([NotNull] this XText text)
+        private static XObject VisitDrawing([NotNull] XElement drawing)
+        {
+            if (drawing is null)
+            {
+                throw new ArgumentNullException(nameof(drawing));
+            }
+
+            XAttribute idAttribute =
+                drawing.Element("inline")?
+                    .Element(A + "graphic")?
+                    .Element(A + "graphicData")?
+                    .Element(C + "chart")?
+                    .Attribute(R + "id");
+
+            return
+                new XElement(
+                    Visit(drawing.Name),
+                    Visit(idAttribute),
+                    Visit($"[figure: {idAttribute?.Value}]"));
+        }
+
+        [Pure]
+        [CanBeNull]
+        private static XObject VisitParagraph([NotNull] XElement paragraph)
+        {
+            if (paragraph is null)
+            {
+                throw new ArgumentNullException(nameof(paragraph));
+            }
+
+            XAttribute classAttribute = paragraph.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
+
+            if (classAttribute != null && HeadingRegex.Match((string) classAttribute) is Match match && match.Success)
+            {
+                return
+                    new XElement(
+                        $"h{match.Groups["level"].Value}",
+                        paragraph.Attributes().Select(Visit),
+                        Visit(paragraph.Value));
+            }
+
+            return
+                new XElement(
+                    Visit(paragraph.Name),
+                    Visit(classAttribute),
+                    paragraph.Attributes().Select(Visit),
+                    paragraph.Nodes().Select(Visit));
+        }
+
+        [Pure]
+        [CanBeNull]
+        private static XObject VisitRun([NotNull] XElement run)
+        {
+            if (run is null)
+            {
+                throw new ArgumentNullException(nameof(run));
+            }
+
+            if ((string) run.Element(W + "footnoteReference")?.Attribute(W + "id") is string footnoteReference)
+            {
+                return
+                    new XElement("sup",
+                        new XAttribute("class", "footnote_ref"),
+                        new XElement("a",
+                            new XAttribute("href", $"#footnote_{footnoteReference}"),
+                            new XAttribute("id", $"footnote_ref_{footnoteReference}"),
+                            Visit(footnoteReference)));
+            }
+
+            if ((string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") == "superscript" ||
+                (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "superscript" ||
+                (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "FootnoteReference")
+            {
+                return
+                    new XElement("sup",
+                        Visit(run.Value));
+            }
+
+            if ((string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") == "subscript" ||
+                (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "subscript")
+            {
+                return
+                    new XElement("sub",
+                        Visit(run.Value));
+            }
+
+            if (run.Element(W + "rPr")?.Element(W + "b") != null ||
+                (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "Strong")
+            {
+                return
+                    new XElement("b",
+                        Visit(run.Value));
+            }
+
+            if (run.Element(W + "rPr")?.Element(W + "i") != null ||
+                (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "Emphasis")
+            {
+                return
+                    new XElement("i",
+                        Visit(run.Value));
+            }
+
+            return Visit(run.Value);
+        }
+
+        [Pure]
+        [NotNull]
+        private static XObject VisitTable([NotNull] XElement element)
+        {
+            if (element is null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            XAttribute classAttribute = element.Element(W + "tblPr")?.Element(W + "tblStyle")?.Attribute(W + "val");
+
+            return
+                new XElement(
+                    Visit(element.Name),
+                    Visit(classAttribute),
+                    element.Attributes().Select(Visit),
+                    element.Nodes().Select(Visit));
+        }
+
+        [Pure]
+        [NotNull]
+        private static XElement VisitTableCell([NotNull] XElement element)
+        {
+            if (element is null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            XAttribute alignment = element.Elements(W + "p").FirstOrDefault()?.Element(W + "pPr")?.Element(W + "jc")?.Attribute(W + "val");
+
+            if (element.Elements(W + "p").Count() != 1)
+            {
+                return
+                    new XElement(
+                        Visit(element.Name),
+                        Visit(alignment),
+                        element.Attributes().Select(Visit),
+                        element.Nodes().Select(Visit));
+            }
+
+            XAttribute style = element.Element(W + "p").Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
+
+            XAttribute alignmentStyle =
+                alignment is null && style is null
+                    ? null
+                    : alignment is null
+                        ? new XAttribute("class", (string) style)
+                        : style is null
+                            ? new XAttribute("class", (string) alignment)
+                            : new XAttribute("class", $"{style} {alignment}");
+
+            return
+                new XElement(
+                    Visit(element.Name),
+                    Visit(alignmentStyle),
+                    element.Attributes().Select(Visit),
+                    element.Nodes().Select(Visit));
+        }
+
+        [Pure]
+        [NotNull]
+        private static XElement VisitTableRow([NotNull] XElement element)
+        {
+            if (element is null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            return
+                new XElement(
+                    Visit(element.Name),
+                    element.Attributes().Select(Visit),
+                    element.Nodes().Select(Visit));
+        }
+
+        [Pure]
+        [CanBeNull]
+        private static XObject VisitText([NotNull] this XText text)
         {
             if (text is null)
             {
@@ -200,171 +424,6 @@ namespace AD.OpenXml.Html
             }
 
             return text;
-        }
-
-        [Pure]
-        [NotNull]
-        private static XObject VisitHeadings([NotNull] XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            if (element.Name != "p")
-            {
-                return element;
-            }
-
-            string value = (string) element.Element("pPr")?.Element("pStyle")?.Attribute("class");
-
-            if (value is null)
-            {
-                return element;
-            }
-
-            Match match = HeadingRegex.Match(value);
-
-            if (!match.Success)
-            {
-                return element;
-            }
-
-            return
-                new XElement(
-                    $"h{match.Groups["level"].Value}",
-                    element.Attributes(),
-                    new XText(element.Value));
-        }
-
-        [Pure]
-        [NotNull]
-        private static XObject VisitParagraphs([NotNull] XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            if (element.Name != "p")
-            {
-                return element;
-            }
-
-            return
-                new XElement(
-                    element.Name,
-                    element.Attributes(),
-                    element.Element("pPr")?.Element("pStyle")?.Attribute("class"),
-                    element.Elements()
-                           .Select(VisitRuns)
-                           .Where(x => x is XText || x is XElement y && SupportedElements.Contains(y.Name)));
-        }
-
-        [Pure]
-        [NotNull]
-        private static XObject VisitRuns([NotNull] XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            if (element.Name != "r")
-            {
-                return element;
-            }
-
-            if ((string) element.Element("footnoteReference")?.Attribute("id") is string footnoteReference)
-            {
-                return
-                    new XElement("sup",
-                        new XElement("a",
-                            new XAttribute("href", $"#footnote{footnoteReference}"),
-                            new XAttribute("id", $"r{footnoteReference}"),
-                            $"[{footnoteReference}]"));
-            }
-
-
-            if (element.Element("rPr")?.Element("b") != null || (string) element.Element("rPr")?.Element("rStyle")?.Attribute("class") == "Strong")
-            {
-                return
-                    new XElement("b",
-                        new XText(element.Value));
-            }
-
-            if (element.Element("rPr")?.Element("i") != null || (string) element.Element("rPr")?.Element("rStyle")?.Attribute("class") == "Emphasis")
-            {
-                return
-                    new XElement("i",
-                        new XText(element.Value));
-            }
-
-            return new XText(element.Value);
-        }
-
-        [Pure]
-        [NotNull]
-        private static XObject VisitTables([NotNull] XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            if (element.Name != "table")
-            {
-                return element;
-            }
-
-            return
-                new XElement(
-                    element.Name,
-                    element.Attributes(),
-                    element.Elements().Where(x => SupportedElements.Contains(x.Name)));
-        }
-
-        [Pure]
-        [NotNull]
-        private static XObject VisitTableRows([NotNull] XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            if (element.Name != "tr")
-            {
-                return element;
-            }
-
-            return
-                new XElement(
-                    element.Name,
-                    element.Attributes(),
-                    element.Elements().Where(x => SupportedElements.Contains(x.Name)));
-        }
-
-        [Pure]
-        [NotNull]
-        private static XObject VisitTableCells([NotNull] XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            if (element.Name != "td")
-            {
-                return element;
-            }
-
-            return
-                new XElement(
-                    element.Name,
-                    element.Attributes(),
-                    element.Element("p")?.Attribute("class"),
-                    new XText(element.Value));
         }
     }
 }
