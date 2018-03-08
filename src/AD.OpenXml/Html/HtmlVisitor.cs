@@ -6,17 +6,21 @@ using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 
+// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
+
 namespace AD.OpenXml.Html
 {
     /// <summary>
     /// Extension methods to transform a &gt;body&lt;...&gt;/body&lt; run into a well-formed HTML document.
     /// </summary>
     [PublicAPI]
-    public static class BodyToHtmlExtensions
+    public class HtmlVisitor
     {
         [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
 
         [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
+
+        [NotNull] private static readonly XNamespace D = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
 
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
@@ -65,17 +69,33 @@ namespace AD.OpenXml.Html
             };
 
         /// <summary>
+        /// Returns a new <see cref="HtmlVisitor"/>.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="HtmlVisitor"/>.
+        /// </returns>
+        public static HtmlVisitor Create()
+        {
+            return new HtmlVisitor();
+        }
+
+        /// <summary>
         /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:body run.
         /// </summary>
         /// <param name="body">The w:body run.</param>
         /// <param name="title">The name of this HTML document.</param>
         /// <param name="stylesheet">The name, relative path, or absolute path to a CSS stylesheet.</param>
         /// <returns>An <see cref="XElement"/> "html</returns>
-        public static XElement BodyToHtml(this XElement body, string title = null, string stylesheet = null)
+        public virtual XElement Visit(XElement body, string title, string stylesheet = null)
         {
             if (body is null)
             {
                 throw new ArgumentNullException(nameof(body));
+            }
+
+            if (title is null)
+            {
+                throw new ArgumentNullException(nameof(title));
             }
 
             return
@@ -87,7 +107,7 @@ namespace AD.OpenXml.Html
                         new XElement("meta",
                             new XAttribute("name", "viewport"),
                             new XAttribute("content", "width=device-width,minimum-scale=1,initial-scale=1")),
-                        new XElement("title", title ?? ""),
+                        new XElement("title", title),
                         new XElement("link",
                             new XAttribute("href", stylesheet ?? ""),
                             new XAttribute("type", "text/css"),
@@ -107,7 +127,7 @@ namespace AD.OpenXml.Html
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        private static XObject Visit([CanBeNull] XObject xObject)
+        protected virtual XObject Visit([CanBeNull] XObject xObject)
         {
             switch (xObject)
             {
@@ -161,7 +181,7 @@ namespace AD.OpenXml.Html
 
         [Pure]
         [NotNull]
-        private static XName Visit([NotNull] XName name)
+        protected virtual XName Visit([NotNull] XName name)
         {
             if (name is null)
             {
@@ -173,13 +193,8 @@ namespace AD.OpenXml.Html
 
         [Pure]
         [CanBeNull]
-        private static XObject Visit([NotNull] this string text)
+        protected virtual XObject Visit([CanBeNull] string text)
         {
-            if (text is null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             return Visit(new XText(text));
         }
 
@@ -195,7 +210,7 @@ namespace AD.OpenXml.Html
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        private static XObject VisitAttribute([NotNull] XAttribute attribute)
+        protected virtual XObject VisitAttribute([NotNull] XAttribute attribute)
         {
             if (attribute is null)
             {
@@ -218,8 +233,8 @@ namespace AD.OpenXml.Html
         /// </returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        [NotNull]
-        private static XObject VisitBody([NotNull] XElement body)
+        [CanBeNull]
+        protected virtual XObject VisitBody([NotNull] XElement body)
         {
             if (body is null)
             {
@@ -233,8 +248,8 @@ namespace AD.OpenXml.Html
         }
 
         [Pure]
-        [NotNull]
-        private static XObject VisitDrawing([NotNull] XElement drawing)
+        [CanBeNull]
+        protected virtual XObject VisitDrawing([NotNull] XElement drawing)
         {
             if (drawing is null)
             {
@@ -242,22 +257,19 @@ namespace AD.OpenXml.Html
             }
 
             XAttribute idAttribute =
-                drawing.Element("inline")?
-                    .Element(A + "graphic")?
-                    .Element(A + "graphicData")?
-                    .Element(C + "chart")?
-                    .Attribute(R + "id");
+                drawing.Element(D + "inline")?.Element(A + "graphic")?.Element(A + "graphicData")?.Element(C + "chart")?.Attribute(R + "id");
 
             return
                 new XElement(
                     Visit(drawing.Name),
                     Visit(idAttribute),
-                    Visit($"[figure: {idAttribute?.Value}]"));
+                    new XElement("div", $"[figure: {idAttribute?.Value}]"),
+                    drawing.Parent?.Elements()?.Where(x => x.Name != W + "drawing").Select(Visit));
         }
 
         [Pure]
         [CanBeNull]
-        private static XObject VisitParagraph([NotNull] XElement paragraph)
+        protected virtual XObject VisitParagraph([NotNull] XElement paragraph)
         {
             if (paragraph is null)
             {
@@ -285,11 +297,16 @@ namespace AD.OpenXml.Html
 
         [Pure]
         [CanBeNull]
-        private static XObject VisitRun([NotNull] XElement run)
+        protected virtual XObject VisitRun([NotNull] XElement run)
         {
             if (run is null)
             {
                 throw new ArgumentNullException(nameof(run));
+            }
+
+            if (run.Element(W + "drawing") is XElement drawing)
+            {
+                return Visit(drawing);
             }
 
             if ((string) run.Element(W + "footnoteReference")?.Attribute(W + "id") is string footnoteReference)
@@ -340,46 +357,46 @@ namespace AD.OpenXml.Html
         }
 
         [Pure]
-        [NotNull]
-        private static XObject VisitTable([NotNull] XElement element)
+        [CanBeNull]
+        protected virtual XObject VisitTable([NotNull] XElement table)
         {
-            if (element is null)
+            if (table is null)
             {
-                throw new ArgumentNullException(nameof(element));
+                throw new ArgumentNullException(nameof(table));
             }
 
-            XAttribute classAttribute = element.Element(W + "tblPr")?.Element(W + "tblStyle")?.Attribute(W + "val");
+            XAttribute classAttribute = table.Element(W + "tblPr")?.Element(W + "tblStyle")?.Attribute(W + "val");
 
             return
                 new XElement(
-                    Visit(element.Name),
+                    Visit(table.Name),
                     Visit(classAttribute),
-                    element.Attributes().Select(Visit),
-                    element.Nodes().Select(Visit));
+                    table.Attributes().Select(Visit),
+                    table.Nodes().Select(Visit));
         }
 
         [Pure]
-        [NotNull]
-        private static XElement VisitTableCell([NotNull] XElement element)
+        [CanBeNull]
+        protected virtual XObject VisitTableCell([NotNull] XElement cell)
         {
-            if (element is null)
+            if (cell is null)
             {
-                throw new ArgumentNullException(nameof(element));
+                throw new ArgumentNullException(nameof(cell));
             }
 
-            XAttribute alignment = element.Elements(W + "p").FirstOrDefault()?.Element(W + "pPr")?.Element(W + "jc")?.Attribute(W + "val");
+            XAttribute alignment = cell.Elements(W + "p").FirstOrDefault()?.Element(W + "pPr")?.Element(W + "jc")?.Attribute(W + "val");
 
-            if (element.Elements(W + "p").Count() != 1)
+            if (cell.Elements(W + "p").Count() != 1)
             {
                 return
                     new XElement(
-                        Visit(element.Name),
+                        Visit(cell.Name),
                         Visit(alignment),
-                        element.Attributes().Select(Visit),
-                        element.Nodes().Select(Visit));
+                        cell.Attributes().Select(Visit),
+                        cell.Nodes().Select(Visit));
             }
 
-            XAttribute style = element.Element(W + "p").Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
+            XAttribute style = cell.Element(W + "p").Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
 
             XAttribute alignmentStyle =
                 alignment is null && style is null
@@ -392,31 +409,31 @@ namespace AD.OpenXml.Html
 
             return
                 new XElement(
-                    Visit(element.Name),
+                    Visit(cell.Name),
                     Visit(alignmentStyle),
-                    element.Attributes().Select(Visit),
-                    element.Nodes().Select(Visit));
-        }
-
-        [Pure]
-        [NotNull]
-        private static XElement VisitTableRow([NotNull] XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            return
-                new XElement(
-                    Visit(element.Name),
-                    element.Attributes().Select(Visit),
-                    element.Nodes().Select(Visit));
+                    cell.Attributes().Select(Visit),
+                    cell.Nodes().Select(Visit).Select(LiftSingleton));
         }
 
         [Pure]
         [CanBeNull]
-        private static XObject VisitText([NotNull] this XText text)
+        protected virtual XObject VisitTableRow([NotNull] XElement row)
+        {
+            if (row is null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            return
+                new XElement(
+                    Visit(row.Name),
+                    row.Attributes().Select(Visit),
+                    row.Nodes().Select(Visit));
+        }
+
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitText([NotNull] XText text)
         {
             if (text is null)
             {
@@ -424,6 +441,18 @@ namespace AD.OpenXml.Html
             }
 
             return text;
+        }
+
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject LiftSingleton([CanBeNull] XObject xObject)
+        {
+            if (xObject is XElement element && element.Elements().Count() <= 1)
+            {
+                return element.FirstNode;
+            }
+
+            return xObject;
         }
     }
 }

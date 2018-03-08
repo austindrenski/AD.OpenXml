@@ -115,7 +115,7 @@ namespace CompilerAPI.Controllers
             return
                 new ContentResult
                 {
-                    Content = visitor.Document.Elements().Single().BodyToHtml().ToString(),
+                    Content = HtmlVisitor.Create().Visit(visitor.Document.Elements().Single(), title ?? "").ToString(),
                     ContentType = "text/html",
                     StatusCode = 200
                 };
