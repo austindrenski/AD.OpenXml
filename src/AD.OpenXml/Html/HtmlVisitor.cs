@@ -179,6 +179,16 @@ namespace AD.OpenXml.Html
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="name">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
         protected virtual XName Visit([NotNull] XName name)
@@ -191,6 +201,15 @@ namespace AD.OpenXml.Html
             return Renames.TryGetValue(name.LocalName, out XName result) ? result : name.LocalName;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="text">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
         [Pure]
         [CanBeNull]
         protected virtual XObject Visit([CanBeNull] string text)
@@ -247,6 +266,16 @@ namespace AD.OpenXml.Html
                     body.Nodes().Select(Visit));
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="drawing">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitDrawing([NotNull] XElement drawing)
@@ -267,6 +296,16 @@ namespace AD.OpenXml.Html
                     drawing.Parent?.Elements()?.Where(x => x.Name != W + "drawing").Select(Visit));
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="paragraph">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitParagraph([NotNull] XElement paragraph)
@@ -295,6 +334,16 @@ namespace AD.OpenXml.Html
                     paragraph.Nodes().Select(Visit));
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="run">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitRun([NotNull] XElement run)
@@ -356,6 +405,16 @@ namespace AD.OpenXml.Html
             return Visit(run.Value);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="table">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitTable([NotNull] XElement table)
@@ -375,6 +434,16 @@ namespace AD.OpenXml.Html
                     table.Nodes().Select(Visit));
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="cell">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitTableCell([NotNull] XElement cell)
@@ -415,6 +484,16 @@ namespace AD.OpenXml.Html
                     cell.Nodes().Select(Visit).Select(LiftSingleton));
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="row">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitTableRow([NotNull] XElement row)
@@ -431,6 +510,16 @@ namespace AD.OpenXml.Html
                     row.Nodes().Select(Visit));
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="text">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitText([NotNull] XText text)
@@ -443,6 +532,15 @@ namespace AD.OpenXml.Html
             return text;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="xObject">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
         [Pure]
         [CanBeNull]
         protected virtual XObject LiftSingleton([CanBeNull] XObject xObject)
