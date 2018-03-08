@@ -15,18 +15,19 @@ namespace AD.OpenXml.Html
     {
         private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly HashSet<string> SupportedAttributes =
-            new HashSet<string>
+        private static readonly HashSet<XName> SupportedAttributes =
+            new HashSet<XName>
             {
                 "id",
                 "name",
-                "val",
                 "class"
             };
 
-        private static readonly HashSet<string> SupportedElements =
-            new HashSet<string>
+        private static readonly HashSet<XName> SupportedElements =
+            new HashSet<XName>
             {
+                "a",
+                "caption",
                 "h1",
                 "h2",
                 "h3",
@@ -34,18 +35,20 @@ namespace AD.OpenXml.Html
                 "h5",
                 "h6",
                 "p",
+                "sub",
+                "sup",
                 "table",
                 "td",
                 "th",
-                "tr",
-                "caption"
+                "tr"
             };
 
-        private static readonly Dictionary<string, string> Renames =
-            new Dictionary<string, string>
+        private static readonly Dictionary<XName, XName> Renames =
+            new Dictionary<XName, XName>
             {
                 { "tbl", "table" },
-                { "tc", "td" }
+                { "tc", "td" },
+                { "val", "class" }
             };
 
         /// <summary>
@@ -76,7 +79,7 @@ namespace AD.OpenXml.Html
                             new XAttribute("href", stylesheet ?? ""),
                             new XAttribute("type", "text/css"),
                             new XAttribute("rel", "stylesheet"))),
-                    new XElement("body", Visit(body)));
+                    Visit(body));
         }
 
         /// <summary>
@@ -100,40 +103,52 @@ namespace AD.OpenXml.Html
 
             return
                 new XElement(
-                    element.Name.LocalName.Rename(),
-                    element.VisitAttributes(),
+                    element.Name.Visit(),
+                    element.Attributes().Select(Visit),
                     element.HasElements ? null : element.Value,
                     element.Elements()
                            .Select(Visit)
                            .Select(VisitHeadings)
                            .Select(VisitParagraphs)
-                           .Select(VisitTables));
+                           .Select(VisitTables)
+                           .Select(VisitTableRows)
+                           .Select(VisitTableCells));
         }
 
         /// <summary>
-        /// Reconstructs the attributes of the element with only the local name.
+        /// Reconstructs the attribute with only the local name.
         /// </summary>
-        /// <param name="element">
-        /// The element from which to reconstruct attributes.
+        /// <param name="attribute">
+        /// The attribute to rename.
         /// </param>
         /// <returns>
-        /// The reconstructed attributes.
+        /// The reconstructed attribute.
         /// </returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        [NotNull]
-        private static IEnumerable<XAttribute> VisitAttributes([NotNull] this XElement element)
+        [CanBeNull]
+        private static XAttribute Visit([NotNull] this XAttribute attribute)
         {
-            if (element is null)
+            if (attribute is null)
             {
-                throw new ArgumentNullException(nameof(element));
+                throw new ArgumentNullException(nameof(attribute));
             }
 
-            return
-                element.Attributes()
-                       .Where(x => !x.IsNamespaceDeclaration)
-                       .Where(x => SupportedAttributes.Contains(x.Name.LocalName))
-                       .Select(x => new XAttribute(x.Name.LocalName.Rename(), x.Value));
+            XName name = attribute.Name.Visit();
+
+            return SupportedAttributes.Contains(name) ? new XAttribute(name, attribute.Value) : null;
+        }
+
+        [Pure]
+        [NotNull]
+        private static XName Visit([NotNull] this XName name)
+        {
+            if (name is null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            return Renames.TryGetValue(name.LocalName, out XName result) ? result : name.LocalName;
         }
 
         [Pure]
@@ -145,12 +160,12 @@ namespace AD.OpenXml.Html
                 throw new ArgumentNullException(nameof(element));
             }
 
-            if (element.Name.LocalName != "p")
+            if (element.Name != "p")
             {
                 return element;
             }
 
-            string value = (string) element.Element("pPr")?.Element("pStyle")?.Attribute("val");
+            string value = (string) element.Element("pPr")?.Element("pStyle")?.Attribute("class");
 
             if (value is null)
             {
@@ -167,7 +182,7 @@ namespace AD.OpenXml.Html
             return
                 new XElement(
                     $"h{match.Groups["level"].Value}",
-                    element.VisitAttributes(),
+                    element.Attributes(),
                     element.Value);
         }
 
@@ -180,19 +195,45 @@ namespace AD.OpenXml.Html
                 throw new ArgumentNullException(nameof(element));
             }
 
-            if (element.Name.LocalName != "p")
+            if (element.Name != "p")
             {
                 return element;
             }
 
-            string alignment = (string) element.Element("pPr")?.Element("jc")?.Attribute("val");
-
             return
                 new XElement(
-                    element.Name.LocalName.Rename(),
-                    element.VisitAttributes(),
-                    alignment != null ? new XAttribute("class", alignment) : null,
-                    element.Value);
+                    element.Name,
+                    element.Attributes(),
+                    element.Element("pPr")?.Element("pStyle")?.Attribute("class"),
+                    element.Elements()
+                           .Select(VisitRuns)
+                           .Where(x => x is string || x is XElement y && SupportedElements.Contains(y.Name)));
+        }
+
+        [Pure]
+        [NotNull]
+        private static object VisitRuns([NotNull] XElement element)
+        {
+            if (element is null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            if (element.Name != "r")
+            {
+                return element;
+            }
+
+            string footnoteReference = (string) element.Element("footnoteReference")?.Attribute("id");
+
+            return
+                footnoteReference is null
+                    ? (object) element.Value
+                    : new XElement("sup",
+                        new XElement("a",
+                            new XAttribute("href", $"#footnote{footnoteReference}"),
+                            new XAttribute("id", $"r{footnoteReference}"),
+                            $"[{footnoteReference}]"));
         }
 
         [Pure]
@@ -204,19 +245,16 @@ namespace AD.OpenXml.Html
                 throw new ArgumentNullException(nameof(element));
             }
 
-            if (element.Name.LocalName != "table")
+            if (element.Name != "table")
             {
                 return element;
             }
 
             return
                 new XElement(
-                    element.Name.LocalName.Rename(),
-                    element.VisitAttributes(),
-                    element.Elements()
-                           .Select(Visit)
-                           .Select(VisitTableRows)
-                           .Where(x => SupportedElements.Contains(x.Name.LocalName)));
+                    element.Name,
+                    element.Attributes(),
+                    element.Elements().Where(x => SupportedElements.Contains(x.Name)));
         }
 
         [Pure]
@@ -228,18 +266,16 @@ namespace AD.OpenXml.Html
                 throw new ArgumentNullException(nameof(element));
             }
 
-            if (element.Name.LocalName != "tr")
+            if (element.Name != "tr")
             {
                 return element;
             }
 
             return
                 new XElement(
-                    element.Name.LocalName.Rename(),
-                    element.VisitAttributes(),
-                    element.Elements()
-                           .Select(Visit)
-                           .Select(VisitTableCells));
+                    element.Name,
+                    element.Attributes(),
+                    element.Elements().Where(x => SupportedElements.Contains(x.Name)));
         }
 
         [Pure]
@@ -251,31 +287,41 @@ namespace AD.OpenXml.Html
                 throw new ArgumentNullException(nameof(element));
             }
 
-            if (element.Name.LocalName != "td")
+            if (element.Name != "td")
             {
                 return element;
             }
 
-            string alignment = (string) element.Element("p")?.Attribute("class");
-
             return
                 new XElement(
-                    element.Name.LocalName.Rename(),
-                    element.VisitAttributes(),
-                    alignment != null ? new XAttribute("class", alignment) : null,
+                    element.Name,
+                    element.Attributes(),
+                    element.Element("p")?.Attribute("class"),
                     element.Value);
         }
 
-        [Pure]
-        [NotNull]
-        private static string Rename([NotNull] this string name)
-        {
-            if (name is null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            return Renames.TryGetValue(name, out string result) ? result : name;
-        }
+//        /// <summary>
+//        /// Reconstructs the attributes with only the local name.
+//        /// </summary>
+//        /// <param name="attributes">
+//        /// The attributes to rename.
+//        /// </param>
+//        /// <returns>
+//        /// The reconstructed attributes.
+//        /// </returns>
+//        /// <exception cref="ArgumentNullException" />
+//        [Pure]
+//        [NotNull]
+//        private static IEnumerable<XAttribute> Visit([NotNull] this IEnumerable<XAttribute> attributes)
+//        {
+//            if (attributes is null)
+//            {
+//                throw new ArgumentNullException(nameof(attributes));
+//            }
+//
+//            return
+//                attributes.Select(x => new XAttribute(x.Name.Visit(), x.Value))
+//                          .Where(x => SupportedAttributes.Contains(x.Name));
+//        }
     }
 }
