@@ -27,13 +27,16 @@ namespace AD.OpenXml.Html
             new HashSet<XName>
             {
                 "a",
+                "b",
                 "caption",
+                "em",
                 "h1",
                 "h2",
                 "h3",
                 "h4",
                 "h5",
                 "h6",
+                "i",
                 "p",
                 "sub",
                 "sup",
@@ -83,6 +86,42 @@ namespace AD.OpenXml.Html
         }
 
         /// <summary>
+        /// Visits the node.
+        /// </summary>
+        /// <param name="node">
+        /// The node to visit.
+        /// </param>
+        /// <returns>
+        /// The visited node.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [NotNull]
+        private static XObject Visit([NotNull] XNode node)
+        {
+            if (node is null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            switch (node)
+            {
+                case XText text:
+                {
+                    return Visit(text);
+                }
+                case XElement e when e.Name == "p:" :
+                {
+                    return Visit(element);
+                }
+                default:
+                {
+                    throw new NotImplementedException();
+                }
+            }
+        }
+
+        /// <summary>
         /// Reconstructs the element with only the local name.
         /// </summary>
         /// <param name="element">
@@ -94,7 +133,7 @@ namespace AD.OpenXml.Html
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
-        private static XElement Visit([NotNull] XElement element)
+        private static XObject Visit([NotNull] XElement element)
         {
             if (element is null)
             {
@@ -127,7 +166,7 @@ namespace AD.OpenXml.Html
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        private static XAttribute Visit([NotNull] this XAttribute attribute)
+        private static XObject Visit([NotNull] this XAttribute attribute)
         {
             if (attribute is null)
             {
@@ -153,7 +192,19 @@ namespace AD.OpenXml.Html
 
         [Pure]
         [NotNull]
-        private static XElement VisitHeadings([NotNull] XElement element)
+        private static XObject Visit([NotNull] this XText text)
+        {
+            if (text is null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            return text;
+        }
+
+        [Pure]
+        [NotNull]
+        private static XObject VisitHeadings([NotNull] XElement element)
         {
             if (element is null)
             {
@@ -183,12 +234,12 @@ namespace AD.OpenXml.Html
                 new XElement(
                     $"h{match.Groups["level"].Value}",
                     element.Attributes(),
-                    element.Value);
+                    new XText(element.Value));
         }
 
         [Pure]
         [NotNull]
-        private static XElement VisitParagraphs([NotNull] XElement element)
+        private static XObject VisitParagraphs([NotNull] XElement element)
         {
             if (element is null)
             {
@@ -207,12 +258,12 @@ namespace AD.OpenXml.Html
                     element.Element("pPr")?.Element("pStyle")?.Attribute("class"),
                     element.Elements()
                            .Select(VisitRuns)
-                           .Where(x => x is string || x is XElement y && SupportedElements.Contains(y.Name)));
+                           .Where(x => x is XText || x is XElement y && SupportedElements.Contains(y.Name)));
         }
 
         [Pure]
         [NotNull]
-        private static object VisitRuns([NotNull] XElement element)
+        private static XObject VisitRuns([NotNull] XElement element)
         {
             if (element is null)
             {
@@ -224,21 +275,37 @@ namespace AD.OpenXml.Html
                 return element;
             }
 
-            string footnoteReference = (string) element.Element("footnoteReference")?.Attribute("id");
-
-            return
-                footnoteReference is null
-                    ? (object) element.Value
-                    : new XElement("sup",
+            if ((string) element.Element("footnoteReference")?.Attribute("id") is string footnoteReference)
+            {
+                return
+                    new XElement("sup",
                         new XElement("a",
                             new XAttribute("href", $"#footnote{footnoteReference}"),
                             new XAttribute("id", $"r{footnoteReference}"),
                             $"[{footnoteReference}]"));
+            }
+
+
+            if (element.Element("rPr")?.Element("b") != null || (string) element.Element("rPr")?.Element("rStyle")?.Attribute("class") == "Strong")
+            {
+                return
+                    new XElement("b",
+                        new XText(element.Value));
+            }
+
+            if (element.Element("rPr")?.Element("i") != null || (string) element.Element("rPr")?.Element("rStyle")?.Attribute("class") == "Emphasis")
+            {
+                return
+                    new XElement("i",
+                        new XText(element.Value));
+            }
+
+            return new XText(element.Value);
         }
 
         [Pure]
         [NotNull]
-        private static XElement VisitTables([NotNull] XElement element)
+        private static XObject VisitTables([NotNull] XElement element)
         {
             if (element is null)
             {
@@ -259,7 +326,7 @@ namespace AD.OpenXml.Html
 
         [Pure]
         [NotNull]
-        private static XElement VisitTableRows([NotNull] XElement element)
+        private static XObject VisitTableRows([NotNull] XElement element)
         {
             if (element is null)
             {
@@ -280,7 +347,7 @@ namespace AD.OpenXml.Html
 
         [Pure]
         [NotNull]
-        private static XElement VisitTableCells([NotNull] XElement element)
+        private static XObject VisitTableCells([NotNull] XElement element)
         {
             if (element is null)
             {
@@ -297,31 +364,7 @@ namespace AD.OpenXml.Html
                     element.Name,
                     element.Attributes(),
                     element.Element("p")?.Attribute("class"),
-                    element.Value);
+                    new XText(element.Value));
         }
-
-//        /// <summary>
-//        /// Reconstructs the attributes with only the local name.
-//        /// </summary>
-//        /// <param name="attributes">
-//        /// The attributes to rename.
-//        /// </param>
-//        /// <returns>
-//        /// The reconstructed attributes.
-//        /// </returns>
-//        /// <exception cref="ArgumentNullException" />
-//        [Pure]
-//        [NotNull]
-//        private static IEnumerable<XAttribute> Visit([NotNull] this IEnumerable<XAttribute> attributes)
-//        {
-//            if (attributes is null)
-//            {
-//                throw new ArgumentNullException(nameof(attributes));
-//            }
-//
-//            return
-//                attributes.Select(x => new XAttribute(x.Name.Visit(), x.Value))
-//                          .Where(x => SupportedAttributes.Contains(x.Name));
-//        }
     }
 }
