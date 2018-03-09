@@ -13,7 +13,6 @@ using Microsoft.Net.Http.Headers;
 
 namespace CompilerAPI.Controllers
 {
-    // TODO: document UploadController
     /// <inheritdoc />
     /// <summary>
     /// Provides HTTP endpoints to submit and format Word documents.
@@ -32,7 +31,7 @@ namespace CompilerAPI.Controllers
         /// The index razor view.
         /// </returns>
         [NotNull]
-        [HttpGet("")]
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
@@ -61,7 +60,7 @@ namespace CompilerAPI.Controllers
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [NotNull]
-        [HttpPost("")]
+        [HttpPost]
         [ItemNotNull]
         public async Task<IActionResult> Index([NotNull] [ItemNotNull] IEnumerable<IFormFile> files, [CanBeNull] string format, [CanBeNull] string title, [CanBeNull] string publisher, [CanBeNull] string website)
         {
@@ -105,20 +104,39 @@ namespace CompilerAPI.Controllers
 
             output.Seek(0, SeekOrigin.Begin);
 
-            if (format != "html")
+            switch (format)
             {
-                return new FileStreamResult(output, _microsoftWordDocument);
-            }
-
-            ReportVisitor visitor = new ReportVisitor(output);
-
-            return
-                new ContentResult
+                case "docx":
                 {
-                    Content = HtmlVisitor.Create().Visit(visitor.Document.Elements().Single(), title ?? "").ToString(),
-                    ContentType = "text/html",
-                    StatusCode = 200
-                };
+                    return new FileStreamResult(output, _microsoftWordDocument);
+                }
+                case "html":
+                {
+                    ReportVisitor visitor = new ReportVisitor(output);
+                    return
+                        new ContentResult
+                        {
+                            Content = HtmlVisitor.Create().Visit(visitor.Document.Elements().Single(), title ?? "").ToString(),
+                            ContentType = "text/html",
+                            StatusCode = 200
+                        };
+                }
+                case "xml":
+                {
+                    ReportVisitor visitor = new ReportVisitor(output);
+                    return
+                        new ContentResult
+                        {
+                            Content = visitor.Document.ToString(),
+                            ContentType = "text/xml",
+                            StatusCode = 200
+                        };
+                }
+                default:
+                {
+                    return BadRequest(ModelState);
+                }
+            }
         }
 
         [Pure]
