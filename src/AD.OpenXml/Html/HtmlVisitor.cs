@@ -11,44 +11,71 @@ using JetBrains.Annotations;
 namespace AD.OpenXml.Html
 {
     /// <summary>
-    /// Extension methods to transform a &gt;body&lt;...&gt;/body&lt; run into a well-formed HTML document.
+    /// Extension methods to transform an OpenXML body node into a well-formed HTML document.
     /// </summary>
     [PublicAPI]
     public class HtmlVisitor
     {
+        /// <summary>
+        /// Represents the 'a:' prefix seen in the markup for chart[#].xml
+        /// </summary>
         [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
 
+        /// <summary>
+        /// Represents the 'c:' prefix seen in the markup for chart[#].xml
+        /// </summary>
         [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
+        /// <summary>
+        /// Represents the 'wp:' prefix seen in the markup for 'drawing' elements.
+        /// </summary>
         [NotNull] private static readonly XNamespace D = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
 
+        /// <summary>
+        /// Represents the 'r:' prefix seen in the markup of document.xml.
+        /// </summary>
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
+        /// <summary>
+        /// Represents the 'w:' prefix seen in raw OpenXML documents.
+        /// </summary>
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
+        /// <summary>
+        /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
+        /// </summary>
         [NotNull] private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The 'charset' tage value.
         /// </summary>
-        [NotNull] protected string CharacterSet = "utf-8";
+        [NotNull]
+        protected string CharacterSet { get; } = "utf-8";
 
         /// <summary>
         /// The 'lang' tage value.
         /// </summary>
-        [NotNull] protected string Language = "en";
+        [NotNull]
+        protected string Language { get; } = "en";
 
         /// <summary>
         /// The value for the 'name' attribute on the 'meta' tag.
         /// </summary>
-        [NotNull] protected string MetaName = "viewport";
+        [NotNull]
+        protected string MetaName { get; } = "viewport";
 
         /// <summary>
         /// The value for the 'content' attribute on the 'meta' tag.
         /// </summary>
-        [NotNull] protected string MetaContent = "width=device-width,minimum-scale=1,initial-scale=1";
+        [NotNull]
+        protected string MetaContent { get; } = "width=device-width,minimum-scale=1,initial-scale=1";
 
-        [NotNull] [ItemNotNull] private static readonly HashSet<XName> SupportedAttributes =
+        /// <summary>
+        /// The HTML attributes that may be returned.
+        /// </summary>
+        [NotNull]
+        [ItemNotNull]
+        protected static ISet<XName> SupportedAttributes { get; } =
             new HashSet<XName>
             {
                 "id",
@@ -56,7 +83,12 @@ namespace AD.OpenXml.Html
                 "class"
             };
 
-        [NotNull] [ItemNotNull] private static readonly HashSet<XName> SupportedElements =
+        /// <summary>
+        /// The HTML elements that may be returned.
+        /// </summary>
+        [NotNull]
+        [ItemNotNull]
+        protected static ISet<XName> SupportedElements { get; } =
             new HashSet<XName>
             {
                 "a",
@@ -79,7 +111,11 @@ namespace AD.OpenXml.Html
                 "tr"
             };
 
-        [NotNull] private static readonly Dictionary<XName, XName> Renames =
+        /// <summary>
+        /// The mapping between OpenXML names and HTML names.
+        /// </summary>
+        [NotNull]
+        protected static IDictionary<XName, XName> Renames { get; } =
             new Dictionary<XName, XName>
             {
                 { "drawing", "figure" },
@@ -102,11 +138,20 @@ namespace AD.OpenXml.Html
         /// <summary>
         /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:body run.
         /// </summary>
-        /// <param name="body">The w:body run.</param>
-        /// <param name="title">The name of this HTML document.</param>
-        /// <param name="stylesheet">The name, relative path, or absolute path to a CSS stylesheet.</param>
-        /// <returns>An <see cref="XElement"/> "html</returns>
-        public virtual XElement Visit(XElement body, string title, string stylesheet = null)
+        /// <param name="body">
+        /// The w:body run.
+        /// </param>
+        /// <param name="title">
+        /// The name of this HTML document.
+        /// </param>
+        /// <param name="stylesheet">
+        /// The name, relative path, or absolute path to a CSS stylesheet.
+        /// </param>
+        /// <returns>
+        /// An <see cref="XElement"/> "html
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        public virtual XObject Visit(XElement body, string title, string stylesheet = null)
         {
             if (body is null)
             {
@@ -119,20 +164,22 @@ namespace AD.OpenXml.Html
             }
 
             return
-                new XElement("html",
-                    new XAttribute("lang", Language),
-                    new XElement("head",
-                        new XElement("meta",
-                            new XAttribute("charset", CharacterSet)),
-                        new XElement("meta",
-                            new XAttribute("name", MetaName),
-                            new XAttribute("content", MetaContent)),
-                        new XElement("title", title),
-                        new XElement("link",
-                            new XAttribute("href", stylesheet ?? ""),
-                            new XAttribute("type", "text/css"),
-                            new XAttribute("rel", "stylesheet"))),
-                    Visit(body));
+                new XDocument(
+                    new XDocumentType("html", null, null, null),
+                    new XElement("html",
+                        new XAttribute("lang", Language),
+                        new XElement("head",
+                            new XElement("meta",
+                                new XAttribute("charset", CharacterSet)),
+                            new XElement("meta",
+                                new XAttribute("name", MetaName),
+                                new XAttribute("content", MetaContent)),
+                            new XElement("title", title),
+                            new XElement("link",
+                                new XAttribute("href", stylesheet ?? ""),
+                                new XAttribute("type", "text/css"),
+                                new XAttribute("rel", "stylesheet"))),
+                        Visit(body)));
         }
 
         /// <summary>
@@ -200,13 +247,29 @@ namespace AD.OpenXml.Html
         }
 
         /// <summary>
-        ///
+        /// Visits the text as an <see cref="XText"/> node.
         /// </summary>
-        /// <param name="name">
-        ///
+        /// <param name="text">
+        /// The text to visit.
         /// </param>
         /// <returns>
-        ///
+        /// A visited <see cref="XObject"/>.
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject Visit([CanBeNull] string text)
+        {
+            return Visit(new XText(text));
+        }
+
+        /// <summary>
+        /// Visits the <see cref="XName"/> for renaming and localization.
+        /// </summary>
+        /// <param name="name">
+        /// The name to visit.
+        /// </param>
+        /// <returns>
+        /// A visited <see cref="XName"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
@@ -219,22 +282,6 @@ namespace AD.OpenXml.Html
             }
 
             return Renames.TryGetValue(name.LocalName, out XName result) ? result : name.LocalName;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="text">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject Visit([CanBeNull] string text)
-        {
-            return Visit(new XText(text));
         }
 
         /// <summary>
@@ -565,9 +612,9 @@ namespace AD.OpenXml.Html
         [CanBeNull]
         protected virtual XObject LiftSingleton([CanBeNull] XObject xObject)
         {
-            if (xObject is XElement element && element.Elements().Count() <= 1)
+            if (xObject is XContainer container && container.Nodes().Count() <= 1)
             {
-                return element.FirstNode;
+                return container.FirstNode;
             }
 
             return xObject;
