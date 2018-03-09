@@ -104,6 +104,9 @@ namespace AD.OpenXml
                 { "val", "class" }
             };
 
+        /// <inheritdoc />
+        protected override IDictionary<string, XElement> Charts { get; set; }
+
         /// <summary>
         /// The 'charset' tage value.
         /// </summary>
@@ -140,25 +143,28 @@ namespace AD.OpenXml
         }
 
         /// <summary>
-        /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
+        ///  Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
         /// </summary>
         /// <param name="document">
-        /// The w:document node.
+        ///  The w:document node.
         /// </param>
         /// <param name="footnotes">
         ///
         /// </param>
+        /// <param name="charts">
+        ///
+        /// </param>
         /// <param name="title">
-        /// The name of this HTML document.
+        ///  The name of this HTML document.
         /// </param>
         /// <param name="stylesheet">
-        /// The name, relative path, or absolute path to a CSS stylesheet.
+        ///  The name, relative path, or absolute path to a CSS stylesheet.
         /// </param>
         /// <returns>
-        /// An <see cref="XElement"/> "html
+        ///  An <see cref="XElement"/> "html
         /// </returns>
         /// <exception cref="ArgumentNullException" />
-        public XObject Visit(XElement document, XElement footnotes, string title, string stylesheet = null)
+        public XObject Visit(XElement document, XElement footnotes, IDictionary<string, XElement> charts, string title, string stylesheet = default)
         {
             if (document is null)
             {
@@ -169,6 +175,8 @@ namespace AD.OpenXml
             {
                 throw new ArgumentNullException(nameof(title));
             }
+
+            Charts = new Dictionary<string, XElement>(charts);
 
             return
                 new XDocument(
@@ -182,6 +190,10 @@ namespace AD.OpenXml
                                 new XAttribute("name", MetaName),
                                 new XAttribute("content", MetaContent)),
                             new XElement("title", title),
+                            new XElement("link",
+                                new XAttribute("href", stylesheet ?? ""),
+                                new XAttribute("type", "text/css"),
+                                new XAttribute("rel", "stylesheet")),
                             new XElement("style",
                                 new XText("article, section { counter-reset: footnote_counter; }"),
                                 new XText("footer :target { background: yellow; }"),
@@ -191,11 +203,7 @@ namespace AD.OpenXml
                                 new XText("a[aria-describedby=\"footnote-label\"] { font-size: 0.5em; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { margin-left: 1px; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { text-decoration: none; }"),
-                                new XText("a[aria-describedby=\"footnote-label\"] { vertical-align: super; }")),
-                            new XElement("link",
-                                new XAttribute("href", stylesheet ?? ""),
-                                new XAttribute("type", "text/css"),
-                                new XAttribute("rel", "stylesheet"))),
+                                new XText("a[aria-describedby=\"footnote-label\"] { vertical-align: super; }"))),
                         new XElement("body",
                             new XElement("article",
                                 Visit(document.Element(W + "body").Nodes()))),
@@ -234,7 +242,10 @@ namespace AD.OpenXml
                 new XElement(
                     Visit(drawing.Name),
                     Visit(idAttribute),
-                    new XElement("div", $"[figure: {idAttribute?.Value}]"),
+                    new XElement("div",
+                        Charts.TryGetValue((string) idAttribute, out XElement chart)
+                            ? (object) chart
+                            : new XText($"[figure: {(string) idAttribute}]")),
                     Visit(drawing.Parent?.Elements()?.Where(x => x.Name != W + "drawing")));
         }
 
@@ -328,14 +339,6 @@ namespace AD.OpenXml
                         new XAttribute("href", $"#footnote_{footnoteReference}"),
                         new XAttribute("aria-describedby", "footnote-label"),
                         Visit(footnoteReference));
-
-//                return
-//                    new XElement("sup",
-//                        new XAttribute("class", "footnote_ref"),
-//                        new XElement("a",
-//                            new XAttribute("href", $"#footnote_{footnoteReference}"),
-//                            new XAttribute("id", $"footnote_ref_{footnoteReference}"),
-//                            Visit(footnoteReference)));
             }
 
             if ((string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") == "superscript" ||

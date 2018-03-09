@@ -99,6 +99,17 @@ namespace AD.OpenXml
                          .DefaultIfEmpty(0)
                          .Max()) + 1;
 
+        /// <summary>
+        /// Maps chart reference id to chart node.
+        /// </summary>
+        [NotNull]
+        public IDictionary<string, XElement> ChartReferences =>
+            DocumentRelations.Elements()
+                             .Where(x => x.Attribute("Target").Value.Contains("chart"))
+                             .ToDictionary(
+                                 x => (string) x.Attribute("Id"),
+                                 x => Charts.Single(y => y.Name == (string) x.Attribute("Target")).Chart);
+
         /// <inheritdoc />
         /// <summary>
         /// Initializes an <see cref="T:AD.OpenXml.OpenXmlPackageVisitor" /> by reading document parts into memory from a default <see cref="MemoryStream"/>.
@@ -319,34 +330,42 @@ namespace AD.OpenXml
             {
                 throw new ArgumentNullException(nameof(contentTypes));
             }
+
             if (document is null)
             {
                 throw new ArgumentNullException(nameof(document));
             }
+
             if (documentRelations is null)
             {
                 throw new ArgumentNullException(nameof(documentRelations));
             }
+
             if (footnotes is null)
             {
                 throw new ArgumentNullException(nameof(footnotes));
             }
+
             if (footnoteRelations is null)
             {
                 throw new ArgumentNullException(nameof(footnoteRelations));
             }
+
             if (styles is null)
             {
                 throw new ArgumentNullException(nameof(styles));
             }
+
             if (numbering is null)
             {
                 throw new ArgumentNullException(nameof(numbering));
             }
+
             if (theme1 is null)
             {
                 throw new ArgumentNullException(nameof(theme1));
             }
+
             if (charts is null)
             {
                 throw new ArgumentNullException(nameof(charts));
@@ -518,6 +537,7 @@ namespace AD.OpenXml
             {
                 throw new ArgumentNullException(nameof(source));
             }
+
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));

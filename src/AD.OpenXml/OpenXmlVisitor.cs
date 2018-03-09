@@ -35,6 +35,12 @@ namespace AD.OpenXml
         protected abstract IDictionary<XName, XName> Renames { get; }
 
         /// <summary>
+        /// The mapping of chart id to node.
+        /// </summary>
+        [NotNull]
+        protected abstract IDictionary<string, XElement> Charts { get; set; }
+
+        /// <summary>
         /// Visits the node.
         /// </summary>
         /// <param name="xObject">
