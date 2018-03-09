@@ -183,39 +183,15 @@ namespace AD.OpenXml
                                 new XAttribute("content", MetaContent)),
                             new XElement("title", title),
                             new XElement("style",
-                                new XText(@"
-                                    article {
-                                      counter-reset: footnote_counter;
-                                    }
-
-                                    section {
-                                      counter-reset: footnote_counter;
-                                    }
-
-                                    a[aria-describedby=""footnote-label""] {
-                                        counter-increment: footnote_counter;
-                                        text-decoration: none;
-                                        color: inherit;
-                                        cursor: default;
-                                        outline: none;
-                                    }
-
-                                    a[aria-describedby=""footnote-label""]::after {
-                                        content: counter(footnote_counter);
-                                        vertical-align: super;
-                                        font-size: 0.5em;
-                                        margin-left: 2px;
-                                        cursor: pointer;
-                                    }
-
-                                    a[aria-describedby=""footnote-label""]:focus::after {
-                                        outline: thin dotted;
-                                        outline-offset: 2px;
-                                    }
-
-                                    footer :target {
-                                        background: yellow;
-                                    }")),
+                                new XText("article, section { counter-reset: footnote_counter; }"),
+                                new XText("footer :target { background: yellow; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"]::before { content: '['; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"]::after { content: ']'; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"] { counter-increment: footnote_counter; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"] { font-size: 0.5em; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"] { margin-left: 1px; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"] { text-decoration: none; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"] { vertical-align: super; }")),
                             new XElement("link",
                                 new XAttribute("href", stylesheet ?? ""),
                                 new XAttribute("type", "text/css"),
@@ -229,32 +205,7 @@ namespace AD.OpenXml
                                 new XAttribute("id", "footnote-label"),
                                 new XText("Footnotes")),
                             new XElement("ol",
-                                Visit(footnotes.Nodes())))));
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        /// Visits the body node and skips the attributes.
-        /// </summary>
-        /// <param name="body">
-        /// The body to visit.
-        /// </param>
-        /// <returns>
-        /// The reconstructed attribute.
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        protected override XObject VisitBody(XElement body)
-        {
-            if (body is null)
-            {
-                throw new ArgumentNullException(nameof(body));
-            }
-
-            return
-                new XElement(
-                    Visit(body.Name),
-                    Visit(body.Nodes()));
+                                Visit(footnotes.Elements().Where(x => (int) x.Attribute(W + "id") > 0))))));
         }
 
         /// <inheritdoc />
@@ -305,37 +256,6 @@ namespace AD.OpenXml
                         new XAttribute("href", $"#footnote_ref_{footnoteReference}"),
                         new XAttribute("aria-label", "Return to content"),
                         Visit(footnote.Nodes())));
-        }
-
-        /// <inheritdoc />
-        [Pure]
-        protected override XObject VisitFootnoteReferenceEarly(XElement run)
-        {
-            if (run is null)
-            {
-                throw new ArgumentNullException(nameof(run));
-            }
-
-            string footnoteReference = (string) run.Next()?.Element(W + "footnoteReference")?.Attribute(W + "id");
-
-            return
-                new XElement("a",
-                    new XAttribute("id", $"footnote_ref_{footnoteReference}"),
-                    new XAttribute("href", $"#footnote_{footnoteReference}"),
-                    new XAttribute("aria-describedby", "footnote-label"),
-                    Visit(run));
-        }
-
-        /// <inheritdoc />
-        [Pure]
-        protected override XObject VisitFootnoteReference(XElement run)
-        {
-            if (run is null)
-            {
-                throw new ArgumentNullException(nameof(run));
-            }
-
-            return null;
         }
 
         /// <inheritdoc />
@@ -400,23 +320,23 @@ namespace AD.OpenXml
                 return Visit(drawing);
             }
 
-//            if ((string) run.Next()?.Element(W + "footnoteReference")?.Attribute(W + "id") is string footnoteReference)
-//            {
+            if ((string) run.Element(W + "footnoteReference")?.Attribute(W + "id") is string footnoteReference)
+            {
+                return
+                    new XElement("a",
+                        new XAttribute("id", $"footnote_ref_{footnoteReference}"),
+                        new XAttribute("href", $"#footnote_{footnoteReference}"),
+                        new XAttribute("aria-describedby", "footnote-label"),
+                        Visit(footnoteReference));
+
 //                return
-//                    new XElement("a",
-//                        new XAttribute("id", $"footnote_ref_{footnoteReference}"),
-//                        new XAttribute("href", $"#footnote_{footnoteReference}"),
-//                        new XAttribute("aria-describedby", "footnote-label"),
-//                        Visit(footnoteReference));
-//
-////                return
-////                    new XElement("sup",
-////                        new XAttribute("class", "footnote_ref"),
-////                        new XElement("a",
-////                            new XAttribute("href", $"#footnote_{footnoteReference}"),
-////                            new XAttribute("id", $"footnote_ref_{footnoteReference}"),
-////                            Visit(footnoteReference)));
-//            }
+//                    new XElement("sup",
+//                        new XAttribute("class", "footnote_ref"),
+//                        new XElement("a",
+//                            new XAttribute("href", $"#footnote_{footnoteReference}"),
+//                            new XAttribute("id", $"footnote_ref_{footnoteReference}"),
+//                            Visit(footnoteReference)));
+            }
 
             if ((string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") == "superscript" ||
                 (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "superscript" ||

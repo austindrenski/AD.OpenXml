@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using AD.Xml;
 using JetBrains.Annotations;
 
 // ReSharper disable VirtualMemberNeverOverridden.Global
@@ -44,6 +43,24 @@ namespace AD.OpenXml
         /// <returns>
         /// The visited node.
         /// </returns>
+        /// <remarks>
+        /// To dispatch to new items in a derived class:
+        /// <code>
+        /// XObject baseResult = base.Visit(xObject);
+        ///
+        /// switch(xObject)
+        /// {
+        ///     case XElement e when e.Name.LocalName == "document":
+        ///     {
+        ///         return VisitDocument(e);
+        ///     }
+        ///     default:
+        ///     {
+        ///         return xObject;
+        ///     }
+        /// }
+        /// </code>
+        /// </remarks>
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
@@ -71,19 +88,6 @@ namespace AD.OpenXml
                 {
                     return VisitParagraph(e);
                 }
-                case XElement e when e.Name.LocalName == "r" && (e.Next()?.Elements()?.Any(x => x.Name.LocalName == "footnoteReference") ?? false):
-                {
-                    // OpenXML places footnote references in a trailing run.
-                    // This provides an opportunity to catch the reference before the content.
-                    // By default, this returns null.
-                    // If you override this, then you must override VisitFootnoteReference.
-                    return VisitFootnoteReferenceEarly(e);
-                }
-                case XElement e when e.Name.LocalName == "r" && e.Elements().Any(x => x.Name.LocalName == "footnoteReference"):
-                {
-                    // If VisitFootnoteReferenceEarly was overridden, you must override this too..
-                    return VisitFootnoteReference(e);
-                }
                 case XElement e when e.Name.LocalName == "r":
                 {
                     return VisitRun(e);
@@ -100,17 +104,13 @@ namespace AD.OpenXml
                 {
                     return VisitTableCell(e);
                 }
-                case XElement e:
-                {
-                    return VisitElement(e);
-                }
                 case XText t:
                 {
                     return VisitText(t);
                 }
                 default:
                 {
-                    return xObject;
+                    return null;
                 }
             }
         }
@@ -271,50 +271,6 @@ namespace AD.OpenXml
             }
 
             return VisitElement(footnote);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="run">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitFootnoteReference([NotNull] XElement run)
-        {
-            if (run is null)
-            {
-                throw new ArgumentNullException(nameof(run));
-            }
-
-            return VisitElement(run);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="run">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitFootnoteReferenceEarly([NotNull] XElement run)
-        {
-            if (run is null)
-            {
-                throw new ArgumentNullException(nameof(run));
-            }
-
-            return null;
         }
 
         /// <summary>
