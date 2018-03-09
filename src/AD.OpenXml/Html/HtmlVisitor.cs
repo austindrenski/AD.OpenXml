@@ -28,6 +28,14 @@ namespace AD.OpenXml.Html
 
         [NotNull] private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        [NotNull] protected string CharacterSet = "utf-8";
+
+        [NotNull] protected string Language = "en";
+
+        [NotNull] protected string MetaName = "viewport";
+
+        [NotNull] protected string MetaContent = "width=device-width,minimum-scale=1,initial-scale=1";
+
         [NotNull] [ItemNotNull] private static readonly HashSet<XName> SupportedAttributes =
             new HashSet<XName>
             {
@@ -100,13 +108,13 @@ namespace AD.OpenXml.Html
 
             return
                 new XElement("html",
-                    new XAttribute("lang", "en"),
+                    new XAttribute("lang", Language),
                     new XElement("head",
                         new XElement("meta",
-                            new XAttribute("charset", "utf-8")),
+                            new XAttribute("charset", CharacterSet)),
                         new XElement("meta",
-                            new XAttribute("name", "viewport"),
-                            new XAttribute("content", "width=device-width,minimum-scale=1,initial-scale=1")),
+                            new XAttribute("name", MetaName),
+                            new XAttribute("content", MetaContent)),
                         new XElement("title", title),
                         new XElement("link",
                             new XAttribute("href", stylesheet ?? ""),

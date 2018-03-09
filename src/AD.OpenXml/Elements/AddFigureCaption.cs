@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace AD.OpenXml.Elements
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     [PublicAPI]
     public static class AddFigureCaptionExtensions
@@ -15,7 +15,7 @@ namespace AD.OpenXml.Elements
         private static readonly XNamespace Xml = XNamespace.Xml;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="element"></param>
         public static void AddFigureCaption(this XElement element)
@@ -72,7 +72,7 @@ namespace AD.OpenXml.Elements
             XElement label8 =
                 new XElement(W + "r",
                     runProperies,
-                    new XElement(W + "instrText", preserve, $" SEQ Table \\* ARABIC \\s {style} "));
+                    new XElement(W + "instrText", preserve, $" SEQ Figure \\* ARABIC \\s {style} "));
             XElement label9 =
                 new XElement(W + "r",
                     runProperies,
