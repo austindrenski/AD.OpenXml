@@ -13,7 +13,7 @@ namespace AD.OpenXml.Visits
     /// <inheritdoc />
     /// <summary>
     /// </summary>
-    public sealed class StyleVisit : IOpenXmlVisit
+    public sealed class StyleVisit : IOpenXmlPackageVisit
     {
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -59,7 +59,7 @@ namespace AD.OpenXml.Visits
         [NotNull] private static readonly XElement TOCHeading;
 
         /// <inheritdoc />
-        public IOpenXmlVisitor Result { get; }
+        public IOpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         ///
@@ -273,12 +273,12 @@ namespace AD.OpenXml.Visits
         ///
         /// </summary>
         /// <param name="subject"></param>
-        public StyleVisit(IOpenXmlVisitor subject)
+        public StyleVisit(IOpenXmlPackageVisitor subject)
         {
             XElement styles = Execute(subject.Styles.Clone());
 
             Result =
-                new OpenXmlVisitor(
+                new OpenXmlPackageVisitor(
                     subject.ContentTypes,
                     subject.Document,
                     subject.DocumentRelations,

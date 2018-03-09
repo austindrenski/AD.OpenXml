@@ -12,7 +12,7 @@ namespace AD.OpenXml.Visits
     /// <summary>
     /// </summary>
     [PublicAPI]
-    public sealed class NumberingVisit : IOpenXmlVisit
+    public sealed class NumberingVisit : IOpenXmlPackageVisit
     {
         [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
@@ -20,7 +20,7 @@ namespace AD.OpenXml.Visits
         [NotNull] private static readonly XElement Numbering;
 
         /// <inheritdoc />
-        public IOpenXmlVisitor Result { get; }
+        public IOpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         ///
@@ -39,12 +39,12 @@ namespace AD.OpenXml.Visits
         ///
         /// </summary>
         /// <param name="subject"></param>
-        public NumberingVisit(IOpenXmlVisitor subject)
+        public NumberingVisit(IOpenXmlPackageVisitor subject)
         {
             XElement numbering = Numbering.Clone();
 
             Result =
-                new OpenXmlVisitor(
+                new OpenXmlPackageVisitor(
                     subject.ContentTypes,
                     subject.Document,
                     subject.DocumentRelations,

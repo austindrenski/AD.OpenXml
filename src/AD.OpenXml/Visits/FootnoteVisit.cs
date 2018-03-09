@@ -14,7 +14,7 @@ namespace AD.OpenXml.Visits
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public sealed class FootnoteVisit : IOpenXmlVisit
+    public sealed class FootnoteVisit : IOpenXmlPackageVisit
     {
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -30,7 +30,7 @@ namespace AD.OpenXml.Visits
             };
 
         /// <inheritdoc />
-        public IOpenXmlVisitor Result { get; }
+        public IOpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
@@ -47,12 +47,12 @@ namespace AD.OpenXml.Visits
         /// <returns>
         /// The updated document node of the source file.
         /// </returns>
-        public FootnoteVisit(IOpenXmlVisitor subject, int footnoteId, int revisionId)
+        public FootnoteVisit(IOpenXmlPackageVisitor subject, int footnoteId, int revisionId)
         {
             (XElement document, XElement footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId, revisionId);
 
             Result =
-                new OpenXmlVisitor(
+                new OpenXmlPackageVisitor(
                     subject.ContentTypes,
                     document,
                     subject.DocumentRelations,
