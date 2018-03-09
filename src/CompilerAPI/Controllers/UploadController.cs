@@ -130,10 +130,20 @@ namespace CompilerAPI.Controllers
             {
                 throw new ArgumentNullException(nameof(files));
             }
-
+            
             if (title is null)
             {
                 throw new ArgumentNullException(nameof(title));
+            }
+            
+            if (publisher is null)
+            {
+                throw new ArgumentNullException(nameof(publisher));
+            }
+            
+            if (website is null)
+            {
+                throw new ArgumentNullException(nameof(website));
             }
 
             if (publisher is null)

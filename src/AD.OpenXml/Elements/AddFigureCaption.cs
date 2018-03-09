@@ -20,6 +20,8 @@ namespace AD.OpenXml.Elements
         /// <param name="element"></param>
         public static void AddFigureCaption(this XElement element)
         {
+            string style = element.Value.Contains("[APPENDIX]") ? "\"Heading 9\"" : "1";
+
             XElement runProperies =
                 new XElement(W + "rPr",
                     new XElement(W + "rStyle",
@@ -46,7 +48,7 @@ namespace AD.OpenXml.Elements
             XElement label2 =
                 new XElement(W + "r",
                     runProperies,
-                    new XElement(W + "instrText", preserve, " STYLEREF 1 \\s "));
+                    new XElement(W + "instrText", preserve, $" STYLEREF {style} \\s "));
             XElement label3 =
                 new XElement(W + "r",
                     runProperies,
@@ -70,7 +72,7 @@ namespace AD.OpenXml.Elements
             XElement label8 =
                 new XElement(W + "r",
                     runProperies,
-                    new XElement(W + "instrText", preserve, " SEQ Figure \\* ARABIC \\s 1 "));
+                    new XElement(W + "instrText", preserve, $" SEQ Table \\* ARABIC \\s {style} "));
             XElement label9 =
                 new XElement(W + "r",
                     runProperies,
@@ -101,6 +103,13 @@ namespace AD.OpenXml.Elements
                 label10,
                 label11,
                 label12);
+
+            foreach (XElement text in element.Descendants(W + "t"))
+            {
+                text.Value = text.Value.Replace("[", null);
+                text.Value = text.Value.Replace("APPENDIX", null);
+                text.Value = text.Value.Replace("]", null);
+            }
         }
     }
 }
