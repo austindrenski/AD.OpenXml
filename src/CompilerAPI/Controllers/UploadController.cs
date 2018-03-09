@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AD.OpenXml.Documents;
-using AD.OpenXml.Html;
 using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;

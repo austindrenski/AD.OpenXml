@@ -42,7 +42,7 @@ namespace AD.OpenXml
                 new XElement(
                     element.Name,
                     element.Attributes(),
-                    element.HasElements ? null : element.Value,
+                    element.HasElements ? null : new XText(element.Value),
                     element.Elements()
                            .Where(predicate)
                            .Select(x => x.Recurse(predicate)));
