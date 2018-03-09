@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AD.OpenXml.Documents;
+using AD.OpenXml.Html;
 using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +16,7 @@ namespace CompilerAPI.Controllers
     // TODO: document UploadController
     /// <inheritdoc />
     /// <summary>
-    /// Provides HTTP endpoints to submit and format Word documents. 
+    /// Provides HTTP endpoints to submit and format Word documents.
     /// </summary>
     [PublicAPI]
     [ApiVersion("1.0")]
@@ -43,6 +44,9 @@ namespace CompilerAPI.Controllers
         /// <param name="files">
         /// The collection of files submitted by POST request.
         /// </param>
+        /// <param name="format">
+        /// The format to produce
+        /// </param>
         /// <param name="title">
         /// The title of the document to be returned.
         /// </param>
@@ -59,7 +63,7 @@ namespace CompilerAPI.Controllers
         [NotNull]
         [HttpPost("")]
         [ItemNotNull]
-        public async Task<IActionResult> Index([NotNull] [ItemNotNull] IEnumerable<IFormFile> files, [CanBeNull] string title, [CanBeNull] string publisher, [CanBeNull] string website)
+        public async Task<IActionResult> Index([NotNull] [ItemNotNull] IEnumerable<IFormFile> files, [CanBeNull] string format, [CanBeNull] string title, [CanBeNull] string publisher, [CanBeNull] string website)
         {
             if (files is null)
             {
@@ -101,7 +105,20 @@ namespace CompilerAPI.Controllers
 
             output.Seek(0, SeekOrigin.Begin);
 
-            return new FileStreamResult(output, _microsoftWordDocument);
+            if (format != "html")
+            {
+                return new FileStreamResult(output, _microsoftWordDocument);
+            }
+
+            ReportVisitor visitor = new ReportVisitor(output);
+
+            return
+                new ContentResult
+                {
+                    Content = visitor.Document.Elements().Single().BodyToHtml().ToString(),
+                    ContentType = "text/html",
+                    StatusCode = 200
+                };
         }
 
         [Pure]
@@ -124,6 +141,16 @@ namespace CompilerAPI.Controllers
                 throw new ArgumentNullException(nameof(publisher));
             }
             
+            if (website is null)
+            {
+                throw new ArgumentNullException(nameof(website));
+            }
+
+            if (publisher is null)
+            {
+                throw new ArgumentNullException(nameof(publisher));
+            }
+
             if (website is null)
             {
                 throw new ArgumentNullException(nameof(website));
