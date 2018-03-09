@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 // ReSharper disable VirtualMemberNeverOverridden.Global
 
-namespace AD.OpenXml.Html
+namespace AD.OpenXml
 {
     /// <summary>
     /// Defines an abstract base class to visit and rewrite an OpenXML node.

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using AD.OpenXml.Html;
 using AD.Xml;
 using JetBrains.Annotations;
 
 // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
 
-namespace AD.OpenXml.Html
+namespace AD.OpenXml.Visitors
 {
     /// <inheritdoc />
     /// <summary>
