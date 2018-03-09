@@ -146,6 +146,16 @@ namespace CompilerAPI.Controllers
                 throw new ArgumentNullException(nameof(website));
             }
 
+            if (publisher is null)
+            {
+                throw new ArgumentNullException(nameof(publisher));
+            }
+
+            if (website is null)
+            {
+                throw new ArgumentNullException(nameof(website));
+            }
+
             return
                 await new ReportVisitor()
                       .VisitAndFold(files)
