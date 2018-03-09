@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml
 {
     /// <inheritdoc />
     /// <summary>
@@ -46,6 +46,11 @@ namespace AD.OpenXml.Visitors
         /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
         /// </summary>
         [NotNull] private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// The !DOCTYPE declaration.
+        /// </summary>
+        [NotNull] private static readonly XDocumentType DocumentTypeDeclaration = new XDocumentType("html", null, null, null);
 
         /// <inheritdoc />
         /// <summary>
@@ -135,10 +140,13 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:body run.
+        /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
         /// </summary>
-        /// <param name="body">
-        /// The w:body run.
+        /// <param name="document">
+        /// The w:document node.
+        /// </param>
+        /// <param name="footnotes">
+        ///
         /// </param>
         /// <param name="title">
         /// The name of this HTML document.
@@ -150,11 +158,11 @@ namespace AD.OpenXml.Visitors
         /// An <see cref="XElement"/> "html
         /// </returns>
         /// <exception cref="ArgumentNullException" />
-        public virtual XObject Visit(XElement body, string title, string stylesheet = null)
+        public XObject Visit(XElement document, XElement footnotes, string title, string stylesheet = null)
         {
-            if (body is null)
+            if (document is null)
             {
-                throw new ArgumentNullException(nameof(body));
+                throw new ArgumentNullException(nameof(document));
             }
 
             if (title is null)
@@ -164,7 +172,7 @@ namespace AD.OpenXml.Visitors
 
             return
                 new XDocument(
-                    new XDocumentType("html", null, null, null),
+                    DocumentTypeDeclaration,
                     new XElement("html",
                         new XAttribute("lang", Language),
                         new XElement("head",
@@ -174,11 +182,54 @@ namespace AD.OpenXml.Visitors
                                 new XAttribute("name", MetaName),
                                 new XAttribute("content", MetaContent)),
                             new XElement("title", title),
+                            new XElement("style",
+                                new XText(@"
+                                    article {
+                                      counter-reset: footnote_counter;
+                                    }
+
+                                    section {
+                                      counter-reset: footnote_counter;
+                                    }
+
+                                    a[aria-describedby=""footnote-label""] {
+                                        counter-increment: footnote_counter;
+                                        text-decoration: none;
+                                        color: inherit;
+                                        cursor: default;
+                                        outline: none;
+                                    }
+
+                                    a[aria-describedby=""footnote-label""]::after {
+                                        content: counter(footnote_counter);
+                                        vertical-align: super;
+                                        font-size: 0.5em;
+                                        margin-left: 2px;
+                                        cursor: pointer;
+                                    }
+
+                                    a[aria-describedby=""footnote-label""]:focus::after {
+                                        outline: thin dotted;
+                                        outline-offset: 2px;
+                                    }
+
+                                    footer :target {
+                                        background: yellow;
+                                    }")),
                             new XElement("link",
                                 new XAttribute("href", stylesheet ?? ""),
                                 new XAttribute("type", "text/css"),
                                 new XAttribute("rel", "stylesheet"))),
-                        Visit(body)));
+                        new XElement("body",
+                            new XElement("article",
+                                Visit(document.Element(W + "body").Nodes()))),
+                        new XElement("footer",
+                            new XAttribute("class", "footnotes"),
+                            new XElement("h2",
+                                new XAttribute("id", "footnote-label"),
+                                new XText("Footnotes")),
+                            new XElement("ol",
+                                Visit(footnotes.Nodes())))));
         }
 
         /// <inheritdoc />
@@ -203,7 +254,7 @@ namespace AD.OpenXml.Visitors
             return
                 new XElement(
                     Visit(body.Name),
-                    body.Nodes().Select(Visit));
+                    Visit(body.Nodes()));
         }
 
         /// <inheritdoc />
@@ -233,7 +284,58 @@ namespace AD.OpenXml.Visitors
                     Visit(drawing.Name),
                     Visit(idAttribute),
                     new XElement("div", $"[figure: {idAttribute?.Value}]"),
-                    drawing.Parent?.Elements()?.Where(x => x.Name != W + "drawing").Select(Visit));
+                    Visit(drawing.Parent?.Elements()?.Where(x => x.Name != W + "drawing")));
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitFootnote(XElement footnote)
+        {
+            if (footnote is null)
+            {
+                throw new ArgumentNullException(nameof(footnote));
+            }
+
+            string footnoteReference = (string) footnote.Attribute(W + "id");
+
+            return
+                new XElement("li",
+                    new XAttribute("id", $"footnote_{footnoteReference}"),
+                    new XElement("a",
+                        new XAttribute("href", $"#footnote_ref_{footnoteReference}"),
+                        new XAttribute("aria-label", "Return to content"),
+                        Visit(footnote.Nodes())));
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitFootnoteReferenceEarly(XElement run)
+        {
+            if (run is null)
+            {
+                throw new ArgumentNullException(nameof(run));
+            }
+
+            string footnoteReference = (string) run.Next()?.Element(W + "footnoteReference")?.Attribute(W + "id");
+
+            return
+                new XElement("a",
+                    new XAttribute("id", $"footnote_ref_{footnoteReference}"),
+                    new XAttribute("href", $"#footnote_{footnoteReference}"),
+                    new XAttribute("aria-describedby", "footnote-label"),
+                    Visit(run));
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitFootnoteReference(XElement run)
+        {
+            if (run is null)
+            {
+                throw new ArgumentNullException(nameof(run));
+            }
+
+            return null;
         }
 
         /// <inheritdoc />
@@ -262,7 +364,7 @@ namespace AD.OpenXml.Visitors
                 return
                     new XElement(
                         $"h{match.Groups["level"].Value}",
-                        paragraph.Attributes().Select(Visit),
+                        Visit(paragraph.Attributes()),
                         Visit(paragraph.Value));
             }
 
@@ -270,8 +372,8 @@ namespace AD.OpenXml.Visitors
                 new XElement(
                     Visit(paragraph.Name),
                     Visit(classAttribute),
-                    paragraph.Attributes().Select(Visit),
-                    paragraph.Nodes().Select(Visit));
+                    Visit(paragraph.Attributes()),
+                    Visit(paragraph.Nodes()));
         }
 
         /// <inheritdoc />
@@ -298,16 +400,23 @@ namespace AD.OpenXml.Visitors
                 return Visit(drawing);
             }
 
-            if ((string) run.Element(W + "footnoteReference")?.Attribute(W + "id") is string footnoteReference)
-            {
-                return
-                    new XElement("sup",
-                        new XAttribute("class", "footnote_ref"),
-                        new XElement("a",
-                            new XAttribute("href", $"#footnote_{footnoteReference}"),
-                            new XAttribute("id", $"footnote_ref_{footnoteReference}"),
-                            Visit(footnoteReference)));
-            }
+//            if ((string) run.Next()?.Element(W + "footnoteReference")?.Attribute(W + "id") is string footnoteReference)
+//            {
+//                return
+//                    new XElement("a",
+//                        new XAttribute("id", $"footnote_ref_{footnoteReference}"),
+//                        new XAttribute("href", $"#footnote_{footnoteReference}"),
+//                        new XAttribute("aria-describedby", "footnote-label"),
+//                        Visit(footnoteReference));
+//
+////                return
+////                    new XElement("sup",
+////                        new XAttribute("class", "footnote_ref"),
+////                        new XElement("a",
+////                            new XAttribute("href", $"#footnote_{footnoteReference}"),
+////                            new XAttribute("id", $"footnote_ref_{footnoteReference}"),
+////                            Visit(footnoteReference)));
+//            }
 
             if ((string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") == "superscript" ||
                 (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "superscript" ||
@@ -370,8 +479,8 @@ namespace AD.OpenXml.Visitors
                 new XElement(
                     Visit(table.Name),
                     Visit(classAttribute),
-                    table.Attributes().Select(Visit),
-                    table.Nodes().Select(Visit));
+                    Visit(table.Attributes()),
+                    Visit(table.Nodes()));
         }
 
         /// <inheritdoc />
@@ -401,8 +510,8 @@ namespace AD.OpenXml.Visitors
                     new XElement(
                         Visit(cell.Name),
                         Visit(alignment),
-                        cell.Attributes().Select(Visit),
-                        cell.Nodes().Select(Visit));
+                        Visit(cell.Attributes()),
+                        Visit(cell.Nodes()));
             }
 
             XAttribute style = cell.Element(W + "p").Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
@@ -420,8 +529,8 @@ namespace AD.OpenXml.Visitors
                 new XElement(
                     Visit(cell.Name),
                     Visit(alignmentStyle),
-                    cell.Attributes().Select(Visit),
-                    cell.Nodes().Select(Visit).Select(LiftSingleton));
+                    Visit(cell.Attributes()),
+                    Visit(cell.Nodes()).Select(LiftSingleton));
         }
     }
 }

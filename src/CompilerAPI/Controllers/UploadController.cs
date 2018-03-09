@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AD.OpenXml;
 using AD.OpenXml.Documents;
-using AD.OpenXml.Visitors;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -115,7 +115,7 @@ namespace CompilerAPI.Controllers
                     return
                         new ContentResult
                         {
-                            Content = HtmlVisitor.Create().Visit(visitor.Document.Elements().Single(), title ?? "").ToString(),
+                            Content = HtmlVisitor.Create().Visit(visitor.Document, visitor.Footnotes, title ?? "").ToString(),
                             ContentType = "text/html",
                             StatusCode = 200
                         };

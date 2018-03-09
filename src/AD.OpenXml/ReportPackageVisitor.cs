@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using AD.IO.Paths;
 using AD.OpenXml.Visits;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml
 {
     /// <inheritdoc />
     /// <summary>
@@ -23,10 +24,10 @@ namespace AD.OpenXml.Visitors
 
         /// <inheritdoc />
         /// <summary>
-        /// Initialize a <see cref="T:AD.OpenXml.Visitors.ReportPackageVisitor" /> based on the supplied <see cref="T:AD.IO.Paths.DocxFilePath" />.
+        /// Initialize a <see cref="T:AD.OpenXml.ReportPackageVisitor" /> based on the supplied <see cref="T:AD.IO.Paths.DocxFilePath" />.
         /// </summary>
         /// <param name="result">
-        /// The base path used to initialize the new <see cref="T:AD.OpenXml.Visitors.ReportPackageVisitor" />.
+        /// The base path used to initialize the new <see cref="T:AD.OpenXml.ReportPackageVisitor" />.
         /// </param>
         public ReportPackageVisitor([NotNull] MemoryStream result) : base(result)
         {

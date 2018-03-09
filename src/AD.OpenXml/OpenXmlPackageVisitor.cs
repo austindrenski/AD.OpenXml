@@ -9,10 +9,11 @@ using AD.IO;
 using AD.IO.Paths;
 using AD.OpenXml.Elements;
 using AD.OpenXml.Structures;
+using AD.OpenXml.Visitors;
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml
 {
     /// <inheritdoc />
     ///  <summary>
@@ -23,9 +24,9 @@ namespace AD.OpenXml.Visitors
     ///  The goal is to encapsulate OpenXML manipulations within immutable objects. Every visit operation should be a pure function.
     ///  Access to <see cref="T:System.Xml.Linq.XElement" /> objects should be done with care, ensuring that objects are cloned prior to any in-place mainpulations.
     ///  The derived visitor class should provide:
-    ///    1) A public constructor that delegates to <see cref="M:AD.OpenXml.Visitors.OpenXmlPackageVisitor.#ctor(AD.IO.Paths.DocxFilePath)" />.
-    ///    2) A private constructor that delegates to <see cref="M:AD.OpenXml.Visitors.OpenXmlPackageVisitor.#ctor(AD.OpenXml.IOpenXmlPackageVisitor)" />.
-    ///    3) Override <see cref="M:AD.OpenXml.Visitors.OpenXmlPackageVisitor.Create(AD.OpenXml.IOpenXmlPackageVisitor)" />.
+    ///    1) A public constructor that delegates to <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.#ctor(AD.IO.Paths.DocxFilePath)" />.
+    ///    2) A private constructor that delegates to <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.#ctor(AD.OpenXml.IOpenXmlPackageVisitor)" />.
+    ///    3) Override <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.Create(AD.OpenXml.IOpenXmlPackageVisitor)" />.
     ///    4) An optional override for each desired visitor method.
     ///  </remarks>
     [PublicAPI]
@@ -100,7 +101,7 @@ namespace AD.OpenXml.Visitors
 
         /// <inheritdoc />
         /// <summary>
-        /// Initializes an <see cref="T:AD.OpenXml.Visitors.OpenXmlPackageVisitor" /> by reading document parts into memory from a default <see cref="MemoryStream"/>.
+        /// Initializes an <see cref="T:AD.OpenXml.OpenXmlPackageVisitor" /> by reading document parts into memory from a default <see cref="MemoryStream"/>.
         /// </summary>
         public OpenXmlPackageVisitor() : this(DocxFilePath.Create())
         {

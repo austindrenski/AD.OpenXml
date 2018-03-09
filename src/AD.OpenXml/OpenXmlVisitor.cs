@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using AD.Xml;
 using JetBrains.Annotations;
 
 // ReSharper disable VirtualMemberNeverOverridden.Global
@@ -44,6 +45,7 @@ namespace AD.OpenXml
         /// The visited node.
         /// </returns>
         /// <exception cref="ArgumentNullException" />
+        [Pure]
         [CanBeNull]
         protected virtual XObject Visit([CanBeNull] XObject xObject)
         {
@@ -61,9 +63,26 @@ namespace AD.OpenXml
                 {
                     return VisitDrawing(e);
                 }
+                case XElement e when e.Name.LocalName == "footnote":
+                {
+                    return VisitFootnote(e);
+                }
                 case XElement e when e.Name.LocalName == "p":
                 {
                     return VisitParagraph(e);
+                }
+                case XElement e when e.Name.LocalName == "r" && (e.Next()?.Elements()?.Any(x => x.Name.LocalName == "footnoteReference") ?? false):
+                {
+                    // OpenXML places footnote references in a trailing run.
+                    // This provides an opportunity to catch the reference before the content.
+                    // By default, this returns null.
+                    // If you override this, then you must override VisitFootnoteReference.
+                    return VisitFootnoteReferenceEarly(e);
+                }
+                case XElement e when e.Name.LocalName == "r" && e.Elements().Any(x => x.Name.LocalName == "footnoteReference"):
+                {
+                    // If VisitFootnoteReferenceEarly was overridden, you must override this too..
+                    return VisitFootnoteReference(e);
                 }
                 case XElement e when e.Name.LocalName == "r":
                 {
@@ -105,10 +124,37 @@ namespace AD.OpenXml
         /// <returns>
         /// A visited <see cref="XObject"/>.
         /// </returns>
+        [Pure]
         [CanBeNull]
         protected virtual XObject Visit([CanBeNull] string text)
         {
             return Visit(new XText(text));
+        }
+
+        /// <summary>
+        /// Visits the <see cref="XObject"/> collection.
+        /// </summary>
+        /// <param name="source">
+        /// The <see cref="XObject"/> collection to visit.
+        /// </param>
+        /// <returns>
+        /// A visited <see cref="XObject"/> collection.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [NotNull]
+        [ItemCanBeNull]
+        protected virtual IEnumerable<XObject> Visit([CanBeNull] [ItemCanBeNull] IEnumerable<XObject> source)
+        {
+            if (source is null)
+            {
+                yield break;
+            }
+
+            foreach (XObject item in source)
+            {
+                yield return Visit(item);
+            }
         }
 
         /// <summary>
@@ -121,6 +167,7 @@ namespace AD.OpenXml
         /// A visited <see cref="XName"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         [NotNull]
         protected virtual XName Visit([NotNull] XName name)
         {
@@ -142,6 +189,7 @@ namespace AD.OpenXml
         /// The reconstructed attribute.
         /// </returns>
         /// <exception cref="ArgumentNullException" />
+        [Pure]
         [CanBeNull]
         protected virtual XObject VisitAttribute([NotNull] XAttribute attribute)
         {
@@ -165,6 +213,7 @@ namespace AD.OpenXml
         /// The reconstructed attribute.
         /// </returns>
         /// <exception cref="ArgumentNullException" />
+        [Pure]
         [CanBeNull]
         protected virtual XObject VisitBody([NotNull] XElement body)
         {
@@ -186,6 +235,7 @@ namespace AD.OpenXml
         /// The visited <see cref="XElement"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         [CanBeNull]
         protected virtual XObject VisitElement([NotNull] XElement element)
         {
@@ -197,8 +247,74 @@ namespace AD.OpenXml
             return
                 new XElement(
                     Visit(element.Name),
-                    element.Attributes().Select(Visit),
-                    element.Nodes().Select(Visit));
+                    Visit(element.Attributes()),
+                    Visit(element.Nodes()));
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="footnote">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitFootnote([NotNull] XElement footnote)
+        {
+            if (footnote is null)
+            {
+                throw new ArgumentNullException(nameof(footnote));
+            }
+
+            return VisitElement(footnote);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="run">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitFootnoteReference([NotNull] XElement run)
+        {
+            if (run is null)
+            {
+                throw new ArgumentNullException(nameof(run));
+            }
+
+            return VisitElement(run);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="run">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitFootnoteReferenceEarly([NotNull] XElement run)
+        {
+            if (run is null)
+            {
+                throw new ArgumentNullException(nameof(run));
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -211,6 +327,7 @@ namespace AD.OpenXml
         ///
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         [CanBeNull]
         protected virtual XObject VisitDrawing([NotNull] XElement drawing)
         {
@@ -232,6 +349,7 @@ namespace AD.OpenXml
         ///
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         [CanBeNull]
         protected virtual XObject VisitParagraph([NotNull] XElement paragraph)
         {
@@ -253,6 +371,7 @@ namespace AD.OpenXml
         ///
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         [CanBeNull]
         protected virtual XObject VisitRun([NotNull] XElement run)
         {
@@ -274,6 +393,7 @@ namespace AD.OpenXml
         ///
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         [CanBeNull]
         protected virtual XObject VisitTable([NotNull] XElement table)
         {
@@ -295,6 +415,7 @@ namespace AD.OpenXml
         ///
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         [CanBeNull]
         protected virtual XObject VisitTableCell([NotNull] XElement cell)
         {
@@ -316,6 +437,7 @@ namespace AD.OpenXml
         ///
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         [CanBeNull]
         protected virtual XObject VisitTableRow([NotNull] XElement row)
         {
@@ -337,6 +459,7 @@ namespace AD.OpenXml
         ///
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         [CanBeNull]
         protected virtual XObject VisitText([NotNull] XText text)
         {
@@ -357,6 +480,7 @@ namespace AD.OpenXml
         /// <returns>
         ///
         /// </returns>
+        [Pure]
         [CanBeNull]
         protected virtual XObject LiftSingleton([CanBeNull] XObject xObject)
         {
