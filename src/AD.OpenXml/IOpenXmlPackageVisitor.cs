@@ -9,10 +9,10 @@ using JetBrains.Annotations;
 namespace AD.OpenXml
 {
     /// <summary>
-    /// Represents a visitor or rewriter for OpenXML documents.
+    /// Represents a visitor or rewriter for packaged OpenXML documents.
     /// </summary>
     [PublicAPI]
-    public interface IOpenXmlVisitor
+    public interface IOpenXmlPackageVisitor
     {
         /// <summary>
         /// word/charts/chart#.xml.
@@ -89,7 +89,7 @@ namespace AD.OpenXml
         int NextRevisionId { get; }
 
         /// <summary>
-        /// Writes the <see cref="IOpenXmlVisitor"/> to the <see cref="DocxFilePath"/>.
+        /// Writes the <see cref="IOpenXmlPackageVisitor"/> to the <see cref="DocxFilePath"/>.
         /// </summary>
         /// <param name="result">
         /// The file to which the <see cref="DocxFilePath"/> is written.
@@ -97,7 +97,7 @@ namespace AD.OpenXml
         void Save([NotNull] DocxFilePath result);
 
         /// <summary>
-        /// Writes the <see cref="IOpenXmlVisitor"/> to the <see cref="DocxFilePath"/>.
+        /// Writes the <see cref="IOpenXmlPackageVisitor"/> to the <see cref="DocxFilePath"/>.
         /// </summary>
         /// <returns>
         /// The stream to which the <see cref="DocxFilePath"/> is written.
@@ -107,54 +107,54 @@ namespace AD.OpenXml
         Task<MemoryStream> Save();
 
         /// <summary>
-        /// Visit and join the component document into this <see cref="IOpenXmlVisitor"/>.
+        /// Visit and join the component document into this <see cref="IOpenXmlPackageVisitor"/>.
         /// </summary>
         /// <param name="stream">
         /// The stream to visit.
         /// </param>
         [Pure]
         [NotNull]
-        IOpenXmlVisitor Visit([NotNull] MemoryStream stream);
+        IOpenXmlPackageVisitor Visit([NotNull] MemoryStream stream);
 
 
         /// <summary>
-        /// Visit and join the component document into this <see cref="IOpenXmlVisitor"/>.
+        /// Visit and join the component document into this <see cref="IOpenXmlPackageVisitor"/>.
         /// </summary>
         /// <param name="file">
         /// The files to visit.
         /// </param>
         [Pure]
         [NotNull]
-        IOpenXmlVisitor Visit([NotNull] DocxFilePath file);
+        IOpenXmlPackageVisitor Visit([NotNull] DocxFilePath file);
 
         /// <summary>
-        /// Folds <paramref name="subject"/> into this <see cref="IOpenXmlVisitor"/>.
+        /// Folds <paramref name="subject"/> into this <see cref="IOpenXmlPackageVisitor"/>.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="IOpenXmlVisitor"/> that is folded into this <see cref="IOpenXmlVisitor"/>.
+        /// The <see cref="IOpenXmlPackageVisitor"/> that is folded into this <see cref="IOpenXmlPackageVisitor"/>.
         /// </param>
         [Pure]
         [NotNull]
-        IOpenXmlVisitor Fold([NotNull] IOpenXmlVisitor subject);
+        IOpenXmlPackageVisitor Fold([NotNull] IOpenXmlPackageVisitor subject);
 
         /// <summary>
-        /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
+        /// Visit and fold the component documents into this <see cref="IOpenXmlPackageVisitor"/>.
         /// </summary>
         /// <param name="streams">
         /// The streams to visit.
         /// </param>
         [Pure]
         [NotNull]
-        IOpenXmlVisitor VisitAndFold([ItemNotNull] [NotNull] IEnumerable<MemoryStream> streams);
+        IOpenXmlPackageVisitor VisitAndFold([ItemNotNull] [NotNull] IEnumerable<MemoryStream> streams);
 
         /// <summary>
-        /// Visit and fold the component documents into this <see cref="IOpenXmlVisitor"/>.
+        /// Visit and fold the component documents into this <see cref="IOpenXmlPackageVisitor"/>.
         /// </summary>
         /// <param name="files">
         /// The files to visit.
         /// </param>
         [Pure]
         [NotNull]
-        IOpenXmlVisitor VisitAndFold([ItemNotNull] [NotNull] IEnumerable<DocxFilePath> files);
+        IOpenXmlPackageVisitor VisitAndFold([ItemNotNull] [NotNull] IEnumerable<DocxFilePath> files);
     }
 }
