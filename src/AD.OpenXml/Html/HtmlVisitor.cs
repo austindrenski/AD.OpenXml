@@ -28,12 +28,24 @@ namespace AD.OpenXml.Html
 
         [NotNull] private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        /// <summary>
+        /// The 'charset' tage value.
+        /// </summary>
         [NotNull] protected string CharacterSet = "utf-8";
 
+        /// <summary>
+        /// The 'lang' tage value.
+        /// </summary>
         [NotNull] protected string Language = "en";
 
+        /// <summary>
+        /// The value for the 'name' attribute on the 'meta' tag.
+        /// </summary>
         [NotNull] protected string MetaName = "viewport";
 
+        /// <summary>
+        /// The value for the 'content' attribute on the 'meta' tag.
+        /// </summary>
         [NotNull] protected string MetaContent = "width=device-width,minimum-scale=1,initial-scale=1";
 
         [NotNull] [ItemNotNull] private static readonly HashSet<XName> SupportedAttributes =
