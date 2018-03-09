@@ -14,7 +14,7 @@ namespace AD.OpenXml.Visits
     /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
     [PublicAPI]
-    public sealed class DocumentVisit : IOpenXmlVisit
+    public sealed class DocumentVisit : IOpenXmlPackageVisit
     {
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -30,7 +30,7 @@ namespace AD.OpenXml.Visits
             };
 
         /// <inheritdoc />
-        public IOpenXmlVisitor Result { get; }
+        public IOpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         /// Marshals content from the source document to be added into the container.
@@ -40,12 +40,12 @@ namespace AD.OpenXml.Visits
         /// The current revision number incremented by one.
         /// </param>
         /// <returns>The updated document node of the source file.</returns>
-        public DocumentVisit(IOpenXmlVisitor subject, int revisionId)
+        public DocumentVisit(IOpenXmlPackageVisitor subject, int revisionId)
         {
             XElement document = Execute(subject.Document, revisionId);
 
             Result =
-                new OpenXmlVisitor(
+                new OpenXmlPackageVisitor(
                     subject.ContentTypes,
                     document,
                     subject.DocumentRelations,

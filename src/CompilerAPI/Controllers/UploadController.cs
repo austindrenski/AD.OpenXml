@@ -112,7 +112,7 @@ namespace CompilerAPI.Controllers
                 }
                 case "html":
                 {
-                    ReportVisitor visitor = new ReportVisitor(output);
+                    ReportPackageVisitor visitor = new ReportPackageVisitor(output);
                     return
                         new ContentResult
                         {
@@ -123,7 +123,7 @@ namespace CompilerAPI.Controllers
                 }
                 case "xml":
                 {
-                    ReportVisitor visitor = new ReportVisitor(output);
+                    ReportPackageVisitor visitor = new ReportPackageVisitor(output);
                     return
                         new ContentResult
                         {
@@ -175,7 +175,7 @@ namespace CompilerAPI.Controllers
             }
 
             return
-                await new ReportVisitor()
+                await new ReportPackageVisitor()
                       .VisitAndFold(files)
                       .Save()
                       .AddHeaders(title)

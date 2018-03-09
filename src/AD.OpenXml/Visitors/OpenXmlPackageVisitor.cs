@@ -23,13 +23,13 @@ namespace AD.OpenXml.Visitors
     ///  The goal is to encapsulate OpenXML manipulations within immutable objects. Every visit operation should be a pure function.
     ///  Access to <see cref="T:System.Xml.Linq.XElement" /> objects should be done with care, ensuring that objects are cloned prior to any in-place mainpulations.
     ///  The derived visitor class should provide:
-    ///    1) A public constructor that delegates to <see cref="M:AD.OpenXml.Visitors.OpenXmlVisitor.#ctor(AD.IO.Paths.DocxFilePath)" />.
-    ///    2) A private constructor that delegates to <see cref="M:AD.OpenXml.Visitors.OpenXmlVisitor.#ctor(AD.OpenXml.IOpenXmlVisitor)" />.
-    ///    3) Override <see cref="M:AD.OpenXml.Visitors.OpenXmlVisitor.Create(AD.OpenXml.IOpenXmlVisitor)" />.
+    ///    1) A public constructor that delegates to <see cref="M:AD.OpenXml.Visitors.OpenXmlPackageVisitor.#ctor(AD.IO.Paths.DocxFilePath)" />.
+    ///    2) A private constructor that delegates to <see cref="M:AD.OpenXml.Visitors.OpenXmlPackageVisitor.#ctor(AD.OpenXml.IOpenXmlPackageVisitor)" />.
+    ///    3) Override <see cref="M:AD.OpenXml.Visitors.OpenXmlPackageVisitor.Create(AD.OpenXml.IOpenXmlPackageVisitor)" />.
     ///    4) An optional override for each desired visitor method.
     ///  </remarks>
     [PublicAPI]
-    public class OpenXmlVisitor : IOpenXmlVisitor
+    public class OpenXmlPackageVisitor : IOpenXmlPackageVisitor
     {
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
@@ -100,20 +100,20 @@ namespace AD.OpenXml.Visitors
 
         /// <inheritdoc />
         /// <summary>
-        /// Initializes an <see cref="T:AD.OpenXml.Visitors.OpenXmlVisitor" /> by reading document parts into memory from a default <see cref="MemoryStream"/>.
+        /// Initializes an <see cref="T:AD.OpenXml.Visitors.OpenXmlPackageVisitor" /> by reading document parts into memory from a default <see cref="MemoryStream"/>.
         /// </summary>
-        public OpenXmlVisitor() : this(DocxFilePath.Create())
+        public OpenXmlPackageVisitor() : this(DocxFilePath.Create())
         {
         }
 
         /// <summary>
-        /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
+        /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
         /// </summary>
         /// <param name="stream">
         /// The stream to which changes can be saved.
         /// </param>
         /// <exception cref="ArgumentNullException"/>
-        public OpenXmlVisitor([NotNull] MemoryStream stream)
+        public OpenXmlPackageVisitor([NotNull] MemoryStream stream)
         {
             if (stream is null)
             {
@@ -184,13 +184,13 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Initializes an <see cref="OpenXmlVisitor"/> by reading document parts into memory.
+        /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
         /// </summary>
         /// <param name="result">
         /// The file to which changes can be saved.
         /// </param>
         /// <exception cref="ArgumentNullException"/>
-        public OpenXmlVisitor([NotNull] DocxFilePath result)
+        public OpenXmlPackageVisitor([NotNull] DocxFilePath result)
         {
             if (result is null)
             {
@@ -258,13 +258,13 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Initializes a new <see cref="OpenXmlVisitor"/> from an existing <see cref="IOpenXmlVisitor"/>.
+        /// Initializes a new <see cref="OpenXmlPackageVisitor"/> from an existing <see cref="IOpenXmlPackageVisitor"/>.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="IOpenXmlVisitor"/> to visit.
+        /// The <see cref="IOpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <exception cref="ArgumentNullException"/>
-        public OpenXmlVisitor([NotNull] IOpenXmlVisitor subject)
+        public OpenXmlPackageVisitor([NotNull] IOpenXmlPackageVisitor subject)
         {
             if (subject is null)
             {
@@ -283,7 +283,7 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Initializes a new <see cref="OpenXmlVisitor"/> from the supplied components.
+        /// Initializes a new <see cref="OpenXmlPackageVisitor"/> from the supplied components.
         /// </summary>
         /// <param name="contentTypes">
         ///
@@ -312,7 +312,7 @@ namespace AD.OpenXml.Visitors
         /// <param name="charts">
         ///
         /// </param>
-        public OpenXmlVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] XElement theme1, [NotNull] IEnumerable<ChartInformation> charts)
+        public OpenXmlPackageVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] XElement theme1, [NotNull] IEnumerable<ChartInformation> charts)
         {
             if (contentTypes is null)
             {
@@ -368,14 +368,14 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"/>
-        protected virtual IOpenXmlVisitor Create([NotNull] IOpenXmlVisitor subject)
+        protected virtual IOpenXmlPackageVisitor Create([NotNull] IOpenXmlPackageVisitor subject)
         {
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new OpenXmlVisitor(subject);
+            return new OpenXmlPackageVisitor(subject);
         }
 
         /// <inheritdoc />
@@ -425,47 +425,47 @@ namespace AD.OpenXml.Visitors
 
         /// <inheritdoc />
         [Pure]
-        public virtual IOpenXmlVisitor Visit(MemoryStream stream)
+        public virtual IOpenXmlPackageVisitor Visit(MemoryStream stream)
         {
             if (stream is null)
             {
                 throw new ArgumentNullException(nameof(stream));
             }
 
-            IOpenXmlVisitor subject = new OpenXmlVisitor(stream);
-            IOpenXmlVisitor documentVisitor = VisitDocument(subject, NextRevisionId);
-            IOpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId, NextRevisionId);
-            IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteVisitor, NextDocumentRelationId);
-            IOpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(documentRelationVisitor, NextFootnoteRelationId);
-            IOpenXmlVisitor styleVisitor = VisitStyles(footnoteRelationVisitor);
-            IOpenXmlVisitor numberingVisitor = VisitNumbering(styleVisitor);
+            IOpenXmlPackageVisitor subject = new OpenXmlPackageVisitor(stream);
+            IOpenXmlPackageVisitor documentVisitor = VisitDocument(subject, NextRevisionId);
+            IOpenXmlPackageVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId, NextRevisionId);
+            IOpenXmlPackageVisitor documentRelationVisitor = VisitDocumentRelations(footnoteVisitor, NextDocumentRelationId);
+            IOpenXmlPackageVisitor footnoteRelationVisitor = VisitFootnoteRelations(documentRelationVisitor, NextFootnoteRelationId);
+            IOpenXmlPackageVisitor styleVisitor = VisitStyles(footnoteRelationVisitor);
+            IOpenXmlPackageVisitor numberingVisitor = VisitNumbering(styleVisitor);
 
             return numberingVisitor;
         }
 
         /// <inheritdoc />
         [Pure]
-        public virtual IOpenXmlVisitor Visit(DocxFilePath file)
+        public virtual IOpenXmlPackageVisitor Visit(DocxFilePath file)
         {
             if (file is null)
             {
                 throw new ArgumentNullException(nameof(file));
             }
 
-            IOpenXmlVisitor subject = new OpenXmlVisitor(file);
-            IOpenXmlVisitor documentVisitor = VisitDocument(subject, NextRevisionId);
-            IOpenXmlVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId, NextRevisionId);
-            IOpenXmlVisitor documentRelationVisitor = VisitDocumentRelations(footnoteVisitor, NextDocumentRelationId);
-            IOpenXmlVisitor footnoteRelationVisitor = VisitFootnoteRelations(documentRelationVisitor, NextFootnoteRelationId);
-            IOpenXmlVisitor styleVisitor = VisitStyles(footnoteRelationVisitor);
-            IOpenXmlVisitor numberingVisitor = VisitNumbering(styleVisitor);
+            IOpenXmlPackageVisitor subject = new OpenXmlPackageVisitor(file);
+            IOpenXmlPackageVisitor documentVisitor = VisitDocument(subject, NextRevisionId);
+            IOpenXmlPackageVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId, NextRevisionId);
+            IOpenXmlPackageVisitor documentRelationVisitor = VisitDocumentRelations(footnoteVisitor, NextDocumentRelationId);
+            IOpenXmlPackageVisitor footnoteRelationVisitor = VisitFootnoteRelations(documentRelationVisitor, NextFootnoteRelationId);
+            IOpenXmlPackageVisitor styleVisitor = VisitStyles(footnoteRelationVisitor);
+            IOpenXmlPackageVisitor numberingVisitor = VisitNumbering(styleVisitor);
 
             return numberingVisitor;
         }
 
         /// <inheritdoc />
         [Pure]
-        public virtual IOpenXmlVisitor Fold(IOpenXmlVisitor subject)
+        public virtual IOpenXmlPackageVisitor Fold(IOpenXmlPackageVisitor subject)
         {
             if (subject is null)
             {
@@ -477,41 +477,41 @@ namespace AD.OpenXml.Visitors
 
         /// <inheritdoc />
         [Pure]
-        public virtual IOpenXmlVisitor VisitAndFold(IEnumerable<MemoryStream> files)
+        public virtual IOpenXmlPackageVisitor VisitAndFold(IEnumerable<MemoryStream> files)
         {
             if (files is null)
             {
                 throw new ArgumentNullException(nameof(files));
             }
 
-            return files.Aggregate(this as IOpenXmlVisitor, (current, next) => current.Fold(current.Visit(next)));
+            return files.Aggregate(this as IOpenXmlPackageVisitor, (current, next) => current.Fold(current.Visit(next)));
         }
 
         /// <inheritdoc />
         [Pure]
-        public virtual IOpenXmlVisitor VisitAndFold(IEnumerable<DocxFilePath> files)
+        public virtual IOpenXmlPackageVisitor VisitAndFold(IEnumerable<DocxFilePath> files)
         {
             if (files is null)
             {
                 throw new ArgumentNullException(nameof(files));
             }
 
-            return files.Aggregate(this as IOpenXmlVisitor, (current, next) => current.Fold(current.Visit(next)));
+            return files.Aggregate(this as IOpenXmlPackageVisitor, (current, next) => current.Fold(current.Visit(next)));
         }
 
         /// <summary>
         /// Folds <paramref name="subject"/> into this <paramref name="source"/>.
         /// </summary>
         /// <param name="source">
-        /// The <see cref="IOpenXmlVisitor"/> into which the <paramref name="subject"/> is folded.
+        /// The <see cref="IOpenXmlPackageVisitor"/> into which the <paramref name="subject"/> is folded.
         /// </param>
         /// <param name="subject">
-        /// The <see cref="IOpenXmlVisitor"/> that is folded into the <paramref name="source"/>.
+        /// The <see cref="IOpenXmlPackageVisitor"/> that is folded into the <paramref name="source"/>.
         /// </param>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        private static OpenXmlVisitor StaticFold([NotNull] IOpenXmlVisitor source, [NotNull] IOpenXmlVisitor subject)
+        private static OpenXmlPackageVisitor StaticFold([NotNull] IOpenXmlPackageVisitor source, [NotNull] IOpenXmlPackageVisitor subject)
         {
             if (source is null)
             {
@@ -614,7 +614,7 @@ namespace AD.OpenXml.Visitors
                           ChartInformation.Comparer);
 
             return
-                new OpenXmlVisitor(
+                new OpenXmlPackageVisitor(
                     contentTypes,
                     document,
                     documentRelations,
@@ -630,18 +630,18 @@ namespace AD.OpenXml.Visitors
         /// Visit the <see cref="Document"/> of the subject.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <param name="revisionId">
         /// The current revision number incremented by one.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="OpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual IOpenXmlVisitor VisitDocument([NotNull] IOpenXmlVisitor subject, int revisionId)
+        protected virtual IOpenXmlPackageVisitor VisitDocument([NotNull] IOpenXmlPackageVisitor subject, int revisionId)
         {
             if (subject is null)
             {
@@ -655,7 +655,7 @@ namespace AD.OpenXml.Visitors
         /// Visit the <see cref="Footnotes"/> of the subject.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <param name="footnoteId">
         /// The current footnote identifier.
@@ -664,12 +664,12 @@ namespace AD.OpenXml.Visitors
         /// The current revision number incremented by one.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="OpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual IOpenXmlVisitor VisitFootnotes([NotNull] IOpenXmlVisitor subject, int footnoteId, int revisionId)
+        protected virtual IOpenXmlPackageVisitor VisitFootnotes([NotNull] IOpenXmlPackageVisitor subject, int footnoteId, int revisionId)
         {
             if (subject is null)
             {
@@ -683,18 +683,18 @@ namespace AD.OpenXml.Visitors
         /// Visit the <see cref="Document"/> and <see cref="DocumentRelations"/> of the subject to modify hyperlinks in the main document.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <param name="documentRelationId">
         /// The current document relationship identifier.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="OpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual IOpenXmlVisitor VisitDocumentRelations([NotNull] IOpenXmlVisitor subject, int documentRelationId)
+        protected virtual IOpenXmlPackageVisitor VisitDocumentRelations([NotNull] IOpenXmlPackageVisitor subject, int documentRelationId)
         {
             if (subject is null)
             {
@@ -708,18 +708,18 @@ namespace AD.OpenXml.Visitors
         /// Visit the <see cref="Footnotes"/> and <see cref="FootnoteRelations"/> of the subject to modify hyperlinks in the main document.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <param name="footnoteRelationId">
         /// The current footnote relationship identifier.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="OpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual IOpenXmlVisitor VisitFootnoteRelations([NotNull] IOpenXmlVisitor subject, int footnoteRelationId)
+        protected virtual IOpenXmlPackageVisitor VisitFootnoteRelations([NotNull] IOpenXmlPackageVisitor subject, int footnoteRelationId)
         {
             if (subject is null)
             {
@@ -733,15 +733,15 @@ namespace AD.OpenXml.Visitors
         /// Visit the <see cref="Styles"/> of the subject.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="OpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual IOpenXmlVisitor VisitStyles([NotNull] IOpenXmlVisitor subject)
+        protected virtual IOpenXmlPackageVisitor VisitStyles([NotNull] IOpenXmlPackageVisitor subject)
         {
             if (subject is null)
             {
@@ -755,15 +755,15 @@ namespace AD.OpenXml.Visitors
         /// Visit the <see cref="Numbering"/> of the subject.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="OpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual IOpenXmlVisitor VisitNumbering([NotNull] IOpenXmlVisitor subject)
+        protected virtual IOpenXmlPackageVisitor VisitNumbering([NotNull] IOpenXmlPackageVisitor subject)
         {
             if (subject is null)
             {

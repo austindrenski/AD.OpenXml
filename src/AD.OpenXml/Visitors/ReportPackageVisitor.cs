@@ -11,46 +11,46 @@ namespace AD.OpenXml.Visitors
     /// Represents a visitor or rewriter for OpenXML documents.
     /// </summary>
     [PublicAPI]
-    public sealed class ReportVisitor : OpenXmlVisitor
+    public sealed class ReportPackageVisitor : OpenXmlPackageVisitor
     {
         /// <inheritdoc />
         /// <summary>
-        /// Initialize a <see cref="ReportVisitor"/> based on a default DOCX <see cref="MemoryStream"/>.
+        /// Initialize a <see cref="ReportPackageVisitor"/> based on a default DOCX <see cref="MemoryStream"/>.
         /// </summary>
-        public ReportVisitor()
+        public ReportPackageVisitor()
         {
         }
 
         /// <inheritdoc />
         /// <summary>
-        /// Initialize a <see cref="T:AD.OpenXml.Visitors.ReportVisitor" /> based on the supplied <see cref="T:AD.IO.Paths.DocxFilePath" />.
-        /// </summary>
-        /// <param name="result">
-        /// The base path used to initialize the new <see cref="T:AD.OpenXml.Visitors.ReportVisitor" />.
-        /// </param>
-        public ReportVisitor([NotNull] MemoryStream result) : base(result)
-        {
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        /// Initialize a <see cref="ReportVisitor"/> based on the supplied <see cref="DocxFilePath"/>.
+        /// Initialize a <see cref="T:AD.OpenXml.Visitors.ReportPackageVisitor" /> based on the supplied <see cref="T:AD.IO.Paths.DocxFilePath" />.
         /// </summary>
         /// <param name="result">
-        /// The base path used to initialize the new <see cref="ReportVisitor"/>.
+        /// The base path used to initialize the new <see cref="T:AD.OpenXml.Visitors.ReportPackageVisitor" />.
         /// </param>
-        public ReportVisitor([NotNull] DocxFilePath result) : base(result)
+        public ReportPackageVisitor([NotNull] MemoryStream result) : base(result)
         {
         }
 
         /// <inheritdoc />
         /// <summary>
-        /// Initialize a new <see cref="ReportVisitor"/> from the supplied <see cref="OpenXmlVisitor"/>.
+        /// Initialize a <see cref="ReportPackageVisitor"/> based on the supplied <see cref="DocxFilePath"/>.
+        /// </summary>
+        /// <param name="result">
+        /// The base path used to initialize the new <see cref="ReportPackageVisitor"/>.
+        /// </param>
+        public ReportPackageVisitor([NotNull] DocxFilePath result) : base(result)
+        {
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Initialize a new <see cref="ReportPackageVisitor"/> from the supplied <see cref="OpenXmlPackageVisitor"/>.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> used to initialize the new <see cref="ReportVisitor"/>.
+        /// The <see cref="OpenXmlPackageVisitor"/> used to initialize the new <see cref="ReportPackageVisitor"/>.
         /// </param>
-        private ReportVisitor([NotNull] IOpenXmlVisitor subject) : base(subject)
+        private ReportPackageVisitor([NotNull] IOpenXmlPackageVisitor subject) : base(subject)
         {
         }
 
@@ -61,32 +61,32 @@ namespace AD.OpenXml.Visitors
         /// <param name="subject"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"/>
-        protected override IOpenXmlVisitor Create(IOpenXmlVisitor subject)
+        protected override IOpenXmlPackageVisitor Create(IOpenXmlPackageVisitor subject)
         {
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return new ReportVisitor(subject);
+            return new ReportPackageVisitor(subject);
         }
 
         /// <inheritdoc />
         /// <summary>
-        /// Visit the <see cref="IOpenXmlVisitor.Document"/> of the subject.
+        /// Visit the <see cref="IOpenXmlPackageVisitor.Document"/> of the subject.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="IOpenXmlVisitor"/> to visit.
+        /// The <see cref="IOpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <param name="revisionId">
         /// The current revision number incremented by one.
         /// </param>
         /// <returns>
-        /// A new <see cref="IOpenXmlVisitor"/>.
+        /// A new <see cref="IOpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override IOpenXmlVisitor VisitDocument(IOpenXmlVisitor subject, int revisionId)
+        protected override IOpenXmlPackageVisitor VisitDocument(IOpenXmlPackageVisitor subject, int revisionId)
         {
             if (subject is null)
             {
@@ -98,10 +98,10 @@ namespace AD.OpenXml.Visitors
 
         /// <inheritdoc />
         /// <summary>
-        /// Visit the <see cref="IOpenXmlVisitor.Footnotes"/> of the subject.
+        /// Visit the <see cref="IOpenXmlPackageVisitor.Footnotes"/> of the subject.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="IOpenXmlVisitor"/> to visit.
+        /// The <see cref="IOpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <param name="footnoteId">
         /// The current footnote identifier.
@@ -110,11 +110,11 @@ namespace AD.OpenXml.Visitors
         /// The current revision number incremented by one.
         /// </param>
         /// <returns>
-        /// A new <see cref="IOpenXmlVisitor"/>.
+        /// A new <see cref="IOpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override IOpenXmlVisitor VisitFootnotes(IOpenXmlVisitor subject, int footnoteId, int revisionId)
+        protected override IOpenXmlPackageVisitor VisitFootnotes(IOpenXmlPackageVisitor subject, int footnoteId, int revisionId)
         {
             if (subject is null)
             {
@@ -126,20 +126,20 @@ namespace AD.OpenXml.Visitors
 
         /// <inheritdoc />
         /// <summary>
-        /// Visit the <see cref="IOpenXmlVisitor.Document"/> and <see cref="IOpenXmlVisitor.DocumentRelations"/> of the subject to modify hyperlinks in the main document.
+        /// Visit the <see cref="IOpenXmlPackageVisitor.Document"/> and <see cref="IOpenXmlPackageVisitor.DocumentRelations"/> of the subject to modify hyperlinks in the main document.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="IOpenXmlVisitor"/> to visit.
+        /// The <see cref="IOpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <param name="documentRelationId">
         /// The current document relationship identifier.
         /// </param>
         /// <returns>
-        /// A new <see cref="IOpenXmlVisitor"/>.
+        /// A new <see cref="IOpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override IOpenXmlVisitor VisitDocumentRelations(IOpenXmlVisitor subject, int documentRelationId)
+        protected override IOpenXmlPackageVisitor VisitDocumentRelations(IOpenXmlPackageVisitor subject, int documentRelationId)
         {
             if (subject is null)
             {
@@ -151,20 +151,20 @@ namespace AD.OpenXml.Visitors
 
         /// <inheritdoc />
         /// <summary>
-        /// Visit the <see cref="IOpenXmlVisitor.Footnotes"/> and <see cref="IOpenXmlVisitor.FootnoteRelations"/> of the subject to modify hyperlinks in the main document.
+        /// Visit the <see cref="IOpenXmlPackageVisitor.Footnotes"/> and <see cref="IOpenXmlPackageVisitor.FootnoteRelations"/> of the subject to modify hyperlinks in the main document.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="IOpenXmlVisitor"/> to visit.
+        /// The <see cref="IOpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <param name="footnoteRelationId">
         /// The current footnote relationship identifier.
         /// </param>
         /// <returns>
-        /// A new <see cref="IOpenXmlVisitor"/>.
+        /// A new <see cref="IOpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override IOpenXmlVisitor VisitFootnoteRelations(IOpenXmlVisitor subject, int footnoteRelationId)
+        protected override IOpenXmlPackageVisitor VisitFootnoteRelations(IOpenXmlPackageVisitor subject, int footnoteRelationId)
         {
             if (subject is null)
             {
@@ -176,17 +176,17 @@ namespace AD.OpenXml.Visitors
 
         /// <inheritdoc />
         /// <summary>
-        /// Visit the <see cref="OpenXmlVisitor.Styles"/> of the subject.
+        /// Visit the <see cref="OpenXmlPackageVisitor.Styles"/> of the subject.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="OpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override IOpenXmlVisitor VisitStyles(IOpenXmlVisitor subject)
+        protected override IOpenXmlPackageVisitor VisitStyles(IOpenXmlPackageVisitor subject)
         {
             if (subject is null)
             {
@@ -198,17 +198,17 @@ namespace AD.OpenXml.Visitors
 
         /// <inheritdoc />
         /// <summary>
-        /// Visit the <see cref="OpenXmlVisitor.Numbering"/> of the subject.
+        /// Visit the <see cref="OpenXmlPackageVisitor.Numbering"/> of the subject.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="OpenXmlVisitor"/> to visit.
+        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <returns>
-        /// A new <see cref="OpenXmlVisitor"/>.
+        /// A new <see cref="OpenXmlPackageVisitor"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override IOpenXmlVisitor VisitNumbering(IOpenXmlVisitor subject)
+        protected override IOpenXmlPackageVisitor VisitNumbering(IOpenXmlPackageVisitor subject)
         {
             if (subject is null)
             {

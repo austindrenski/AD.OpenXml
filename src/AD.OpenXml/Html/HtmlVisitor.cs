@@ -10,11 +10,12 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Html
 {
+    /// <inheritdoc />
     /// <summary>
-    /// Extension methods to transform an OpenXML body node into a well-formed HTML document.
+    /// Represents an <see cref="OpenXmlVisitor"/> that can transform an OpenXML body node into a well-formed HTML document.
     /// </summary>
     [PublicAPI]
-    public class HtmlVisitor
+    public class HtmlVisitor : OpenXmlVisitor
     {
         /// <summary>
         /// Represents the 'a:' prefix seen in the markup for chart[#].xml
@@ -46,6 +47,58 @@ namespace AD.OpenXml.Html
         /// </summary>
         [NotNull] private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        /// <inheritdoc />
+        /// <summary>
+        /// The HTML attributes that may be returned.
+        /// </summary>
+        protected override ISet<XName> SupportedAttributes { get; } =
+            new HashSet<XName>
+            {
+                "id",
+                "name",
+                "class"
+            };
+
+        /// <inheritdoc />
+        /// <summary>
+        /// The HTML elements that may be returned.
+        /// </summary>
+        protected override ISet<XName> SupportedElements { get; } =
+            new HashSet<XName>
+            {
+                "a",
+                "b",
+                "caption",
+                "em",
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+                "i",
+                "p",
+                "sub",
+                "sup",
+                "table",
+                "td",
+                "th",
+                "tr"
+            };
+
+        /// <inheritdoc />
+        /// <summary>
+        /// The mapping between OpenXML names and HTML names.
+        /// </summary>
+        protected override IDictionary<XName, XName> Renames { get; } =
+            new Dictionary<XName, XName>
+            {
+                { "drawing", "figure" },
+                { "tbl", "table" },
+                { "tc", "td" },
+                { "val", "class" }
+            };
+
         /// <summary>
         /// The 'charset' tage value.
         /// </summary>
@@ -69,60 +122,6 @@ namespace AD.OpenXml.Html
         /// </summary>
         [NotNull]
         protected string MetaContent { get; } = "width=device-width,minimum-scale=1,initial-scale=1";
-
-        /// <summary>
-        /// The HTML attributes that may be returned.
-        /// </summary>
-        [NotNull]
-        [ItemNotNull]
-        protected static ISet<XName> SupportedAttributes { get; } =
-            new HashSet<XName>
-            {
-                "id",
-                "name",
-                "class"
-            };
-
-        /// <summary>
-        /// The HTML elements that may be returned.
-        /// </summary>
-        [NotNull]
-        [ItemNotNull]
-        protected static ISet<XName> SupportedElements { get; } =
-            new HashSet<XName>
-            {
-                "a",
-                "b",
-                "caption",
-                "em",
-                "h1",
-                "h2",
-                "h3",
-                "h4",
-                "h5",
-                "h6",
-                "i",
-                "p",
-                "sub",
-                "sup",
-                "table",
-                "td",
-                "th",
-                "tr"
-            };
-
-        /// <summary>
-        /// The mapping between OpenXML names and HTML names.
-        /// </summary>
-        [NotNull]
-        protected static IDictionary<XName, XName> Renames { get; } =
-            new Dictionary<XName, XName>
-            {
-                { "drawing", "figure" },
-                { "tbl", "table" },
-                { "tc", "td" },
-                { "val", "class" }
-            };
 
         /// <summary>
         /// Returns a new <see cref="HtmlVisitor"/>.
@@ -182,134 +181,9 @@ namespace AD.OpenXml.Html
                         Visit(body)));
         }
 
+        /// <inheritdoc />
         /// <summary>
-        /// Visits the node.
-        /// </summary>
-        /// <param name="xObject">
-        /// The XML object to visit.
-        /// </param>
-        /// <returns>
-        /// The visited node.
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject Visit([CanBeNull] XObject xObject)
-        {
-            switch (xObject)
-            {
-                case null:
-                {
-                    return null;
-                }
-                case XAttribute a:
-                {
-                    return VisitAttribute(a);
-                }
-                case XElement e when e.Name == W + "body":
-                {
-                    return VisitBody(e);
-                }
-                case XElement e when e.Name == W + "drawing":
-                {
-                    return VisitDrawing(e);
-                }
-                case XElement e when e.Name == W + "p":
-                {
-                    return VisitParagraph(e);
-                }
-                case XElement e when e.Name == W + "r":
-                {
-                    return VisitRun(e);
-                }
-                case XElement e when e.Name == W + "tbl":
-                {
-                    return VisitTable(e);
-                }
-                case XElement e when e.Name == W + "tr":
-                {
-                    return VisitTableRow(e);
-                }
-                case XElement e when e.Name == W + "tc":
-                {
-                    return VisitTableCell(e);
-                }
-                case XText t:
-                {
-                    return VisitText(t);
-                }
-                default:
-                {
-                    Console.WriteLine($"Skipping unrecognized XObject:\r\n{xObject}");
-                    return null;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Visits the text as an <see cref="XText"/> node.
-        /// </summary>
-        /// <param name="text">
-        /// The text to visit.
-        /// </param>
-        /// <returns>
-        /// A visited <see cref="XObject"/>.
-        /// </returns>
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject Visit([CanBeNull] string text)
-        {
-            return Visit(new XText(text));
-        }
-
-        /// <summary>
-        /// Visits the <see cref="XName"/> for renaming and localization.
-        /// </summary>
-        /// <param name="name">
-        /// The name to visit.
-        /// </param>
-        /// <returns>
-        /// A visited <see cref="XName"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [NotNull]
-        protected virtual XName Visit([NotNull] XName name)
-        {
-            if (name is null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            return Renames.TryGetValue(name.LocalName, out XName result) ? result : name.LocalName;
-        }
-
-        /// <summary>
-        /// Reconstructs the attribute with only the local name.
-        /// </summary>
-        /// <param name="attribute">
-        /// The attribute to rename.
-        /// </param>
-        /// <returns>
-        /// The reconstructed attribute.
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitAttribute([NotNull] XAttribute attribute)
-        {
-            if (attribute is null)
-            {
-                throw new ArgumentNullException(nameof(attribute));
-            }
-
-            XName name = Visit(attribute.Name);
-
-            return SupportedAttributes.Contains(name) ? new XAttribute(name, attribute.Value) : null;
-        }
-
-        /// <summary>
-        /// Visits the body node.
+        /// Visits the body node and skips the attributes.
         /// </summary>
         /// <param name="body">
         /// The body to visit.
@@ -319,8 +193,7 @@ namespace AD.OpenXml.Html
         /// </returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitBody([NotNull] XElement body)
+        protected override XObject VisitBody(XElement body)
         {
             if (body is null)
             {
@@ -333,6 +206,7 @@ namespace AD.OpenXml.Html
                     body.Nodes().Select(Visit));
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///
         /// </summary>
@@ -344,8 +218,7 @@ namespace AD.OpenXml.Html
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitDrawing([NotNull] XElement drawing)
+        protected override XObject VisitDrawing(XElement drawing)
         {
             if (drawing is null)
             {
@@ -363,6 +236,7 @@ namespace AD.OpenXml.Html
                     drawing.Parent?.Elements()?.Where(x => x.Name != W + "drawing").Select(Visit));
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///
         /// </summary>
@@ -374,8 +248,7 @@ namespace AD.OpenXml.Html
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitParagraph([NotNull] XElement paragraph)
+        protected override XObject VisitParagraph(XElement paragraph)
         {
             if (paragraph is null)
             {
@@ -401,6 +274,7 @@ namespace AD.OpenXml.Html
                     paragraph.Nodes().Select(Visit));
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///
         /// </summary>
@@ -412,8 +286,7 @@ namespace AD.OpenXml.Html
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitRun([NotNull] XElement run)
+        protected override XObject VisitRun(XElement run)
         {
             if (run is null)
             {
@@ -472,6 +345,7 @@ namespace AD.OpenXml.Html
             return Visit(run.Value);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///
         /// </summary>
@@ -483,8 +357,7 @@ namespace AD.OpenXml.Html
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitTable([NotNull] XElement table)
+        protected override XObject VisitTable(XElement table)
         {
             if (table is null)
             {
@@ -501,6 +374,7 @@ namespace AD.OpenXml.Html
                     table.Nodes().Select(Visit));
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///
         /// </summary>
@@ -512,8 +386,7 @@ namespace AD.OpenXml.Html
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitTableCell([NotNull] XElement cell)
+        protected override XObject VisitTableCell(XElement cell)
         {
             if (cell is null)
             {
@@ -549,75 +422,6 @@ namespace AD.OpenXml.Html
                     Visit(alignmentStyle),
                     cell.Attributes().Select(Visit),
                     cell.Nodes().Select(Visit).Select(LiftSingleton));
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="row">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitTableRow([NotNull] XElement row)
-        {
-            if (row is null)
-            {
-                throw new ArgumentNullException(nameof(row));
-            }
-
-            return
-                new XElement(
-                    Visit(row.Name),
-                    row.Attributes().Select(Visit),
-                    row.Nodes().Select(Visit));
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="text">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitText([NotNull] XText text)
-        {
-            if (text is null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
-            return text;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="xObject">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject LiftSingleton([CanBeNull] XObject xObject)
-        {
-            if (xObject is XContainer container && container.Nodes().Count() <= 1)
-            {
-                return container.FirstNode;
-            }
-
-            return xObject;
         }
     }
 }
