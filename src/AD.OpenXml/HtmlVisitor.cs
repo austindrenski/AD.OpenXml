@@ -220,6 +220,66 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
+        /// <param name="element">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        protected override XObject VisitElement(XElement element)
+        {
+            if (element is null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            switch (element)
+            {
+                case XElement e when e.Name.LocalName == "body":
+                {
+                    return VisitBody(e);
+                }
+                case XElement e when e.Name.LocalName == "drawing":
+                {
+                    return VisitDrawing(e);
+                }
+                case XElement e when e.Name.LocalName == "footnote":
+                {
+                    return VisitFootnote(e);
+                }
+                case XElement e when e.Name.LocalName == "p":
+                {
+                    return VisitParagraph(e);
+                }
+                case XElement e when e.Name.LocalName == "r":
+                {
+                    return VisitRun(e);
+                }
+                case XElement e when e.Name.LocalName == "tbl":
+                {
+                    return VisitTable(e);
+                }
+                case XElement e when e.Name.LocalName == "tr":
+                {
+                    return VisitTableRow(e);
+                }
+                case XElement e when e.Name.LocalName == "tc":
+                {
+                    return VisitTableCell(e);
+                }
+                default:
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        ///
+        /// </summary>
         /// <param name="drawing">
         ///
         /// </param>
@@ -240,7 +300,7 @@ namespace AD.OpenXml
 
             return
                 new XElement(
-                    Visit(drawing.Name),
+                    VisitName(drawing.Name),
                     Visit(idAttribute),
                     new XElement("div",
                         Charts.TryGetValue((string) idAttribute, out XElement chart)
@@ -250,6 +310,16 @@ namespace AD.OpenXml
         }
 
         /// <inheritdoc />
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="footnote">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
         protected override XObject VisitFootnote(XElement footnote)
         {
@@ -301,7 +371,7 @@ namespace AD.OpenXml
 
             return
                 new XElement(
-                    Visit(paragraph.Name),
+                    VisitName(paragraph.Name),
                     Visit(classAttribute),
                     Visit(paragraph.Attributes()),
                     Visit(paragraph.Nodes()));
@@ -400,7 +470,7 @@ namespace AD.OpenXml
 
             return
                 new XElement(
-                    Visit(table.Name),
+                    VisitName(table.Name),
                     Visit(classAttribute),
                     Visit(table.Attributes()),
                     Visit(table.Nodes()));
@@ -431,7 +501,7 @@ namespace AD.OpenXml
             {
                 return
                     new XElement(
-                        Visit(cell.Name),
+                        VisitName(cell.Name),
                         Visit(alignment),
                         Visit(cell.Attributes()),
                         Visit(cell.Nodes()));
@@ -450,7 +520,7 @@ namespace AD.OpenXml
 
             return
                 new XElement(
-                    Visit(cell.Name),
+                    VisitName(cell.Name),
                     Visit(alignmentStyle),
                     Visit(cell.Attributes()),
                     Visit(cell.Nodes()).Select(LiftSingleton));

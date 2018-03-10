@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using AD.IO.Paths;
 using AD.OpenXml.Visits;
 using JetBrains.Annotations;
