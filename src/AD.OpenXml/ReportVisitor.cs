@@ -26,10 +26,11 @@ namespace AD.OpenXml
         /// </summary>
         protected override IDictionary<XName, XName> Renames { get; }
 
-        /// <summary>
-        /// The mapping of chart id to node.
-        /// </summary>
+        /// <inheritdoc />
         protected override IDictionary<string, XElement> Charts { get; set; }
+
+        /// <inheritdoc />
+        protected override IDictionary<string, (string mime, string description, string base64)> Images { get; set; }
 
         /// <inheritdoc />
         [Pure]

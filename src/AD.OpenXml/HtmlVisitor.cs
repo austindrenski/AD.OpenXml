@@ -32,6 +32,12 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull] private static readonly XNamespace D = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
 
+        // TODO: move into AD.Xml
+        /// <summary>
+        /// Represents the 'pic:' prefix seen in the markup for 'drawing' elements.
+        /// </summary>
+        [NotNull] private static readonly XNamespace P = "http://schemas.openxmlformats.org/drawingml/2006/picture";
+
         /// <summary>
         /// Represents the 'r:' prefix seen in the markup of document.xml.
         /// </summary>
@@ -107,6 +113,9 @@ namespace AD.OpenXml
         /// <inheritdoc />
         protected override IDictionary<string, XElement> Charts { get; set; }
 
+        /// <inheritdoc />
+        protected override IDictionary<string, (string mime, string description, string base64)> Images { get; set; }
+
         /// <summary>
         /// The 'charset' tage value.
         /// </summary>
@@ -142,29 +151,32 @@ namespace AD.OpenXml
             return new HtmlVisitor();
         }
 
-        /// <summary>
-        ///  Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
-        /// </summary>
-        /// <param name="document">
-        ///  The w:document node.
-        /// </param>
-        /// <param name="footnotes">
+        ///  <summary>
+        ///   Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
+        ///  </summary>
+        ///  <param name="document">
+        ///   The w:document node.
+        ///  </param>
+        ///  <param name="footnotes">
         ///
-        /// </param>
-        /// <param name="charts">
+        ///  </param>
+        ///  <param name="charts">
+        ///
+        ///  </param>
+        /// <param name="images">
         ///
         /// </param>
         /// <param name="title">
-        ///  The name of this HTML document.
-        /// </param>
-        /// <param name="stylesheet">
-        ///  The name, relative path, or absolute path to a CSS stylesheet.
-        /// </param>
-        /// <returns>
-        ///  An <see cref="XElement"/> "html
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        public XObject Visit(XElement document, XElement footnotes, IDictionary<string, XElement> charts, string title, string stylesheet = default)
+        ///   The name of this HTML document.
+        ///  </param>
+        ///  <param name="stylesheet">
+        ///   The name, relative path, or absolute path to a CSS stylesheet.
+        ///  </param>
+        ///  <returns>
+        ///   An <see cref="XElement"/> "html
+        ///  </returns>
+        ///  <exception cref="ArgumentNullException" />
+        public XObject Visit(XElement document, XElement footnotes, IDictionary<string, XElement> charts, IDictionary<string, (string mime, string description, string base64)> images, string title, string stylesheet = default)
         {
             if (document is null)
             {
@@ -177,6 +189,8 @@ namespace AD.OpenXml
             }
 
             Charts = new Dictionary<string, XElement>(charts);
+
+            Images = new Dictionary<string, (string mime, string description, string base64)>(images);
 
             return
                 new XDocument(
@@ -217,14 +231,146 @@ namespace AD.OpenXml
         }
 
         /// <inheritdoc />
+        protected override XObject VisitAreaChart(XElement areaChart)
+        {
+            if (areaChart is null)
+            {
+                throw new ArgumentNullException(nameof(areaChart));
+            }
+
+            return
+                new XElement("data",
+                    areaChart.Elements(C + "ser")
+                             .Select(
+                                 x =>
+                                     new XElement("series",
+                                         new XAttribute("name",
+                                             x.Element(C + "tx")
+                                              .Element(C + "strRef")
+                                              .Element(C + "strCache")
+                                              .Value),
+                                         (x.Element(C + "cat")?.Element(C + "strRef")?.Element(C + "strCache") ??
+                                          x.Element(C + "cat")?.Element(C + "numRef")?.Element(C + "numCache"))?
+                                         .Elements(C + "pt")
+                                         .Zip(
+                                             (x.Element(C + "val")?.Element(C + "strRef")?.Element(C + "strCache") ??
+                                              x.Element(C + "val")?.Element(C + "numRef")?.Element(C + "numCache"))?
+                                             .Elements(C + "pt"),
+                                             (a, b) =>
+                                                 new XElement("observation",
+                                                     new XAttribute("label", a.Value),
+                                                     new XAttribute("value", b.Value))))));
+        }
+
+        /// <inheritdoc />
+        protected override XObject VisitBarChart(XElement barChart)
+        {
+            if (barChart is null)
+            {
+                throw new ArgumentNullException(nameof(barChart));
+            }
+
+            return
+                new XElement("data",
+                    barChart.Elements(C + "ser")
+                            .Select(
+                                x =>
+                                    new XElement("series",
+                                        new XAttribute("name",
+                                            x.Element(C + "tx")?
+                                                .Element(C + "strRef")?
+                                                .Element(C + "strCache")?
+                                                .Value),
+                                        (x.Element(C + "cat")?.Element(C + "strRef")?.Element(C + "strCache") ??
+                                         x.Element(C + "cat")?.Element(C + "numRef")?.Element(C + "numCache"))?
+                                        .Elements(C + "pt")
+                                        .Zip(
+                                            (x.Element(C + "val")?.Element(C + "strRef")?.Element(C + "strCache") ??
+                                             x.Element(C + "val")?.Element(C + "numRef")?.Element(C + "numCache"))?
+                                            .Elements(C + "pt"),
+                                            (a, b) =>
+                                                new XElement("observation",
+                                                    new XAttribute("label", a.Value),
+                                                    new XAttribute("value", b.Value))))));
+        }
+
+        /// <inheritdoc />
+        protected override XObject VisitChart(XElement chart)
+        {
+            if (chart is null)
+            {
+                throw new ArgumentNullException(nameof(chart));
+            }
+
+            XElement content = Charts[(string) chart.Attribute(R + "id")].Element(C + "chart");
+
+            if (content.Element(C + "plotArea").Element(C + "areaChart") is XElement areaChart)
+            {
+                return
+                    new XElement("areaChart",
+                        Visit(areaChart));
+            }
+
+            if (content.Element(C + "plotArea").Element(C + "barChart") is XElement barChart)
+            {
+                return
+                    new XElement("barChart",
+                        Visit(barChart));
+            }
+
+            return content;
+        }
+
+        /// <inheritdoc />
         /// <summary>
         ///
         /// </summary>
-        /// <param name="element">
+        /// <param name="drawing">
         ///
         /// </param>
         /// <returns>
         ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        protected override XObject VisitDrawing(XElement drawing)
+        {
+            if (drawing is null)
+            {
+                throw new ArgumentNullException(nameof(drawing));
+            }
+
+            if (drawing.Element(D + "inline")?.Element(A + "graphic")?.Element(A + "graphicData")?.Element(P + "pic") is XElement picture)
+            {
+                return Visit(picture);
+            }
+
+            if (drawing.Element(D + "inline")?.Element(A + "graphic")?.Element(A + "graphicData")?.Element(C + "chart") is XElement chart)
+            {
+                return
+                    new XElement("figure",
+                        new XElement("figcaption",
+                            (string) drawing.Element(D + "inline")?.Element(D + "docPr")?.Attribute("title")),
+                        new XComment((string) drawing.Element(D + "inline")?.Element(D + "docPr")?.Attribute("descr") ?? string.Empty),
+                        Visit(chart));
+            }
+
+            return
+                new XElement(
+                    VisitName(drawing.Name),
+                    new XElement("div",
+                        new XText("[drawing: unknown]")));
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Dispatches an <see cref="XElement"/> to specific handlers.
+        /// </summary>
+        /// <param name="element">
+        /// The <see cref="XElement"/> to dispatch.
+        /// </param>
+        /// <returns>
+        /// The visited <see cref="XElement"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
@@ -241,6 +387,18 @@ namespace AD.OpenXml
                 {
                     return VisitBody(e);
                 }
+                case XElement e when e.Name.LocalName == "areaChart":
+                {
+                    return VisitAreaChart(e);
+                }
+                case XElement e when e.Name.LocalName == "barChart":
+                {
+                    return VisitBarChart(e);
+                }
+                case XElement e when e.Name.LocalName == "chart":
+                {
+                    return VisitChart(e);
+                }
                 case XElement e when e.Name.LocalName == "drawing":
                 {
                     return VisitDrawing(e);
@@ -252,6 +410,10 @@ namespace AD.OpenXml
                 case XElement e when e.Name.LocalName == "p":
                 {
                     return VisitParagraph(e);
+                }
+                case XElement e when e.Name.LocalName == "pic":
+                {
+                    return VisitPicture(e);
                 }
                 case XElement e when e.Name.LocalName == "r":
                 {
@@ -274,39 +436,6 @@ namespace AD.OpenXml
                     return null;
                 }
             }
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="drawing">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        protected override XObject VisitDrawing(XElement drawing)
-        {
-            if (drawing is null)
-            {
-                throw new ArgumentNullException(nameof(drawing));
-            }
-
-            XAttribute idAttribute =
-                drawing.Element(D + "inline")?.Element(A + "graphic")?.Element(A + "graphicData")?.Element(C + "chart")?.Attribute(R + "id");
-
-            return
-                new XElement(
-                    VisitName(drawing.Name),
-                    Visit(idAttribute),
-                    new XElement("div",
-                        Charts.TryGetValue((string) idAttribute, out XElement chart)
-                            ? (object) chart
-                            : new XText($"[figure: {(string) idAttribute}]")),
-                    Visit(drawing.Parent?.Elements()?.Where(x => x.Name != W + "drawing")));
         }
 
         /// <inheritdoc />
@@ -375,6 +504,35 @@ namespace AD.OpenXml
                     Visit(classAttribute),
                     Visit(paragraph.Attributes()),
                     Visit(paragraph.Nodes()));
+        }
+
+        /// <summary>
+        /// Visits the picture node.
+        /// </summary>
+        /// <param name="picture">
+        /// The picture to visit.
+        /// </param>
+        /// <returns>
+        /// The reconstructed picture.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        protected override XObject VisitPicture(XElement picture)
+        {
+            if (picture is null)
+            {
+                throw new ArgumentNullException(nameof(picture));
+            }
+
+            XAttribute imageId = picture.Element(P + "blipFill")?.Element(A + "blip")?.Attribute(R + "embed");
+
+            return
+                new XElement(
+                    new XElement("img",
+                        new XAttribute("src",
+                            Images.TryGetValue((string) imageId, out (string mime, string description, string base64) image)
+                                ? $"data:image/{image.mime};base64,{image.base64}"
+                                : $"[image: {(string) imageId}]"),
+                        new XAttribute("scale", "0")));
         }
 
         /// <inheritdoc />

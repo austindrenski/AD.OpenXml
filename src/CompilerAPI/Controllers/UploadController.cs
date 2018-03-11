@@ -121,6 +121,7 @@ namespace CompilerAPI.Controllers
                                                visitor.Document,
                                                visitor.Footnotes,
                                                visitor.ChartReferences,
+                                               visitor.ImageReferences,
                                                title ?? "")
                                            .ToString(),
                             ContentType = "text/html",

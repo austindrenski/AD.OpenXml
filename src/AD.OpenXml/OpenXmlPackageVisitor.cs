@@ -108,7 +108,7 @@ namespace AD.OpenXml
         [NotNull]
         public IDictionary<string, XElement> ChartReferences =>
             DocumentRelations.Elements()
-                             .Where(x => x.Attribute("Target").Value.Contains("chart"))
+                             .Where(x => x.Attribute("Target").Value.StartsWith("charts/"))
                              .ToDictionary(
                                  x => (string) x.Attribute("Id"),
                                  x => Charts.Single(y => y.Name == (string) x.Attribute("Target")).Chart);
@@ -117,12 +117,20 @@ namespace AD.OpenXml
         /// Maps image reference id to image node.
         /// </summary>
         [NotNull]
-        public IDictionary<string, byte[]> ImageReferences =>
+        public IDictionary<string, (string mime, string description, string base64)> ImageReferences =>
             DocumentRelations.Elements()
-                             .Where(x => x.Attribute("Target").Value.Contains("media"))
+                             .Where(x => x.Attribute("Target").Value.StartsWith("media/"))
+                             .Select(
+                                 x => new
+                                 {
+                                     id = (string) x.Attribute("Id"),
+                                     target = (string) x.Attribute("Target"),
+                                     description = string.Empty,
+                                     base64 = Convert.ToBase64String(Images.Single(y => y.Name == (string) x.Attribute("Target")).Image),
+                                 })
                              .ToDictionary(
-                                 x => (string) x.Attribute("Id"),
-                                 x => Images.Single(y => y.Name == (string) x.Attribute("Target")).Image);
+                                 x => x.id,
+                                 x => (mime: x.target.Substring(x.target.LastIndexOf('.') + 1), x.description, x.base64));
 
         /// <inheritdoc />
         /// <summary>

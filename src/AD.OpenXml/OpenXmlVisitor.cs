@@ -40,6 +40,33 @@ namespace AD.OpenXml
         [NotNull]
         protected abstract IDictionary<string, XElement> Charts { get; set; }
 
+        /// <summary>
+        /// The mapping of image id to data.
+        /// </summary>
+        protected abstract IDictionary<string, (string mime, string description, string base64)> Images { get; set; }
+
+        /// <summary>
+        /// Visits the area chart node.
+        /// </summary>
+        /// <param name="areaChart">
+        /// The area chart to visit.
+        /// </param>
+        /// <returns>
+        /// The reconstructed area chart.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitAreaChart([NotNull] XElement areaChart)
+        {
+            if (areaChart is null)
+            {
+                throw new ArgumentNullException(nameof(areaChart));
+            }
+
+            return base.VisitElement(areaChart);
+        }
+
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitAttribute(XAttribute attribute)
@@ -52,6 +79,28 @@ namespace AD.OpenXml
             XName name = VisitName(attribute.Name);
 
             return SupportedAttributes.Contains(name) ? new XAttribute(name, attribute.Value) : null;
+        }
+
+        /// <summary>
+        /// Visits the bar chart node.
+        /// </summary>
+        /// <param name="barChart">
+        /// The bar chart to visit.
+        /// </param>
+        /// <returns>
+        /// The reconstructed bar chart.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitBarChart([NotNull] XElement barChart)
+        {
+            if (barChart is null)
+            {
+                throw new ArgumentNullException(nameof(barChart));
+            }
+
+            return base.VisitElement(barChart);
         }
 
         /// <summary>
@@ -76,6 +125,50 @@ namespace AD.OpenXml
             return base.VisitElement(body);
         }
 
+        /// <summary>
+        /// Visits the chart node.
+        /// </summary>
+        /// <param name="chart">
+        /// The chart to visit.
+        /// </param>
+        /// <returns>
+        /// The reconstructed chart.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitChart([NotNull] XElement chart)
+        {
+            if (chart is null)
+            {
+                throw new ArgumentNullException(nameof(chart));
+            }
+
+            return base.VisitElement(chart);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="drawing">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitDrawing([NotNull] XElement drawing)
+        {
+            if (drawing is null)
+            {
+                throw new ArgumentNullException(nameof(drawing));
+            }
+
+            return base.VisitElement(drawing);
+        }
+
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitElement(XElement element)
@@ -91,6 +184,18 @@ namespace AD.OpenXml
                 {
                     return VisitBody(e);
                 }
+                case XElement e when e.Name.LocalName == "areaChart":
+                {
+                    return VisitAreaChart(e);
+                }
+                case XElement e when e.Name.LocalName == "barChart":
+                {
+                    return VisitBarChart(e);
+                }
+                case XElement e when e.Name.LocalName == "chart":
+                {
+                    return VisitChart(e);
+                }
                 case XElement e when e.Name.LocalName == "drawing":
                 {
                     return VisitDrawing(e);
@@ -102,6 +207,10 @@ namespace AD.OpenXml
                 case XElement e when e.Name.LocalName == "p":
                 {
                     return VisitParagraph(e);
+                }
+                case XElement e when e.Name.LocalName == "pic":
+                {
+                    return VisitPicture(e);
                 }
                 case XElement e when e.Name.LocalName == "r":
                 {
@@ -148,28 +257,6 @@ namespace AD.OpenXml
             return base.VisitElement(footnote);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="drawing">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitDrawing([NotNull] XElement drawing)
-        {
-            if (drawing is null)
-            {
-                throw new ArgumentNullException(nameof(drawing));
-            }
-
-            return base.VisitElement(drawing);
-        }
-
         /// <inheritdoc />
         [Pure]
         protected override XName VisitName(XName name)
@@ -202,6 +289,28 @@ namespace AD.OpenXml
             }
 
             return base.VisitElement(paragraph);
+        }
+
+        /// <summary>
+        /// Visits the picture node.
+        /// </summary>
+        /// <param name="picture">
+        /// The picture to visit.
+        /// </param>
+        /// <returns>
+        /// The reconstructed picture.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitPicture([NotNull] XElement picture)
+        {
+            if (picture is null)
+            {
+                throw new ArgumentNullException(nameof(picture));
+            }
+
+            return base.VisitElement(picture);
         }
 
         /// <summary>
