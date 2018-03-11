@@ -21,6 +21,12 @@ namespace AD.OpenXml
         IEnumerable<ChartInformation> Charts { get; }
 
         /// <summary>
+        /// word/media/image#.[jpeg|png|svg].
+        /// </summary>
+        [NotNull]
+        IEnumerable<ImageInformation> Images { get; }
+
+        /// <summary>
         /// [Content_Types].xml
         /// </summary>
         [NotNull]
@@ -91,14 +97,6 @@ namespace AD.OpenXml
         /// <summary>
         /// Writes the <see cref="IOpenXmlPackageVisitor"/> to the <see cref="DocxFilePath"/>.
         /// </summary>
-        /// <param name="result">
-        /// The file to which the <see cref="DocxFilePath"/> is written.
-        /// </param>
-        void Save([NotNull] DocxFilePath result);
-
-        /// <summary>
-        /// Writes the <see cref="IOpenXmlPackageVisitor"/> to the <see cref="DocxFilePath"/>.
-        /// </summary>
         /// <returns>
         /// The stream to which the <see cref="DocxFilePath"/> is written.
         /// </returns>
@@ -115,17 +113,6 @@ namespace AD.OpenXml
         [Pure]
         [NotNull]
         IOpenXmlPackageVisitor Visit([NotNull] MemoryStream stream);
-
-
-        /// <summary>
-        /// Visit and join the component document into this <see cref="IOpenXmlPackageVisitor"/>.
-        /// </summary>
-        /// <param name="file">
-        /// The files to visit.
-        /// </param>
-        [Pure]
-        [NotNull]
-        IOpenXmlPackageVisitor Visit([NotNull] DocxFilePath file);
 
         /// <summary>
         /// Folds <paramref name="subject"/> into this <see cref="IOpenXmlPackageVisitor"/>.
@@ -146,15 +133,5 @@ namespace AD.OpenXml
         [Pure]
         [NotNull]
         IOpenXmlPackageVisitor VisitAndFold([ItemNotNull] [NotNull] IEnumerable<MemoryStream> streams);
-
-        /// <summary>
-        /// Visit and fold the component documents into this <see cref="IOpenXmlPackageVisitor"/>.
-        /// </summary>
-        /// <param name="files">
-        /// The files to visit.
-        /// </param>
-        [Pure]
-        [NotNull]
-        IOpenXmlPackageVisitor VisitAndFold([ItemNotNull] [NotNull] IEnumerable<DocxFilePath> files);
     }
 }

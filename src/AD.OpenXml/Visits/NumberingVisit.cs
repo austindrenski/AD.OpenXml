@@ -52,7 +52,8 @@ namespace AD.OpenXml.Visits
                     subject.Styles,
                     numbering,
                     subject.Theme1,
-                    subject.Charts);
+                    subject.Charts,
+                    subject.Images);
         }
     }
 }

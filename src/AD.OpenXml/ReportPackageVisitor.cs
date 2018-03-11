@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using AD.IO.Paths;
 using AD.OpenXml.Visits;
 using JetBrains.Annotations;
 
@@ -29,17 +28,6 @@ namespace AD.OpenXml
         /// The base path used to initialize the new <see cref="T:AD.OpenXml.ReportPackageVisitor" />.
         /// </param>
         public ReportPackageVisitor([NotNull] MemoryStream result) : base(result)
-        {
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        /// Initialize a <see cref="ReportPackageVisitor"/> based on the supplied <see cref="DocxFilePath"/>.
-        /// </summary>
-        /// <param name="result">
-        /// The base path used to initialize the new <see cref="ReportPackageVisitor"/>.
-        /// </param>
-        public ReportPackageVisitor([NotNull] DocxFilePath result) : base(result)
         {
         }
 

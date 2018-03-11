@@ -286,7 +286,8 @@ namespace AD.OpenXml.Visits
                     styles,
                     subject.Numbering,
                     subject.Theme1,
-                    subject.Charts);
+                    subject.Charts,
+                    subject.Images);
         }
 
         [Pure]

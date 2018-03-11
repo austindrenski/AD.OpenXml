@@ -39,38 +39,6 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         ///
         /// </summary>
-        /// <param name="id">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        [Pure]
-        [NotNull]
-        public static string FormatPath(int id)
-        {
-            return $"word/charts/chart{id}.xml";
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="id">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        [Pure]
-        [NotNull]
-        public static string FormatPartName(int id)
-        {
-            return $"/{FormatPath(id)}";
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
         /// <returns></returns>
         public override string ToString()
         {
