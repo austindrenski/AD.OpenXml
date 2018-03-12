@@ -78,7 +78,7 @@ namespace AD.OpenXml
         /// <summary>
         /// The mapping of <see cref="XName"/> to visit method used by <see cref="VisitElement"/>.
         /// </summary>
-        protected IDictionary<XName, Func<XElement, XObject>> VisitLookup;
+        protected readonly IDictionary<XName, Func<XElement, XObject>> VisitLookup;
 
         /// <summary>
         ///
@@ -89,6 +89,7 @@ namespace AD.OpenXml
         protected OpenXmlVisitor(bool returnOnDefault)
         {
             _returnOnDefault = returnOnDefault;
+
             VisitLookup =
                 new Dictionary<XName, Func<XElement, XObject>>
                 {

@@ -31,7 +31,7 @@ namespace AD.OpenXml
         /// <summary>
         /// Represents the 'pic:' prefix seen in the markup for 'drawing' elements.
         /// </summary>
-        [NotNull] private static readonly XNamespace PIC = "http://schemas.openxmlformats.org/drawingml/2006/picture";
+        [NotNull] private static readonly XNamespace P = "http://schemas.openxmlformats.org/drawingml/2006/picture";
 
         /// <summary>
         /// Represents the 'r:' prefix seen in the markup of document.xml.
@@ -96,10 +96,14 @@ namespace AD.OpenXml
         protected virtual IDictionary<XName, XName> Renames { get; } =
             new Dictionary<XName, XName>
             {
-                { "drawing", "figure" },
-                { "tbl", "table" },
-                { "tc", "td" },
-                { "val", "class" }
+                // @formatter:off
+                [W + "body"]     = "article",
+                [W + "document"] = "body",
+                [W + "drawing"]  = "figure",
+                [W + "tbl"]      = "table",
+                [W + "tc"]       = "td",
+                [W + "val"]      = "class"
+                // @formatter:on
             };
 
         /// <inheritdoc />
@@ -281,7 +285,10 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(body));
             }
 
-            return LiftableHelper(body);
+            return
+                new XElement(
+                    VisitName(body.Name),
+                    Visit(body.Elements()));
         }
 
         /// <inheritdoc />
@@ -308,9 +315,9 @@ namespace AD.OpenXml
             }
 
             return
-                new XElement("body",
-                    new XElement("article",
-                        Visit(document.Elements())));
+                new XElement(
+                    VisitName(document.Name),
+                    Visit(document.Elements()));
         }
 
         /// <inheritdoc />
@@ -323,7 +330,8 @@ namespace AD.OpenXml
             }
 
             return
-                new XElement("figure",
+                new XElement(
+                    VisitName(drawing.Name),
                     // TODO: handle docPr in OpenXmlVisitor dispatch, then override in HtmlVisitor.
 //                    new XElement("figcaption", (string) anchor.Element(WP + "docPr")?.Attribute("title")),
 //                    new XComment((string) anchor.Element(WP + "docPr")?.Attribute("descr") ?? string.Empty),
@@ -426,7 +434,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(name));
             }
 
-            return Renames.TryGetValue(name.LocalName, out XName result) ? result : name.LocalName;
+            return Renames.TryGetValue(name, out XName result) ? result : name.LocalName;
         }
 
         /// <inheritdoc />
@@ -466,7 +474,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(picture));
             }
 
-            XAttribute imageId = picture.Element(PIC + "blipFill")?.Element(A + "blip")?.Attribute(R + "embed");
+            XAttribute imageId = picture.Element(P + "blipFill")?.Element(A + "blip")?.Attribute(R + "embed");
 
             return
                 new XElement("img",

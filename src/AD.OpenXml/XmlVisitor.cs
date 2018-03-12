@@ -17,7 +17,7 @@ namespace AD.OpenXml
         /// <summary>
         /// The "data-liftable" attribute.
         /// </summary>
-        public const string Liftable = "data-liftable";
+        [NotNull] protected const string Liftable = "data-liftable";
 
         /// <summary>
         /// Visits the <see cref="XObject"/>.
@@ -28,7 +28,6 @@ namespace AD.OpenXml
         /// <returns>
         /// The visited <see cref="XObject"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         public XObject Visit([CanBeNull] XObject xObject)
@@ -206,10 +205,9 @@ namespace AD.OpenXml
         /// <returns>
         /// The visited <see cref="XObject"/>.
         /// </returns>
-        /// <exception cref="NotSupportedException" />
         [Pure]
         [CanBeNull]
-        protected XObject VisitObject([NotNull] XObject xObject)
+        protected XObject VisitObject([CanBeNull] XObject xObject)
         {
             return xObject;
         }
@@ -247,7 +245,7 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject LiftSingleton([CanBeNull] XObject xObject)
+        protected static XObject LiftSingleton([CanBeNull] XObject xObject)
         {
             return
                 xObject is XContainer container && container.Nodes().Count() <= 1
@@ -264,7 +262,6 @@ namespace AD.OpenXml
         /// <returns>
         /// The <see cref="XObject"/> or the children of the <see cref="XObject"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
         [ItemCanBeNull]
