@@ -15,6 +15,11 @@ namespace AD.OpenXml
     public abstract class XmlVisitor
     {
         /// <summary>
+        /// The "data-liftable" attribute.
+        /// </summary>
+        public const string Liftable = "data-liftable";
+
+        /// <summary>
         /// Visits the <see cref="XObject"/>.
         /// </summary>
         /// <param name="xObject">
@@ -248,6 +253,41 @@ namespace AD.OpenXml
                 xObject is XContainer container && container.Nodes().Count() <= 1
                     ? container.FirstNode
                     : xObject;
+        }
+
+        /// <summary>
+        /// Yields the <see cref="XObject"/> or the children of the <see cref="XObject"/> if the "data-liftable" attribute is present.
+        /// </summary>
+        /// <param name="xObject">
+        /// The <see cref="XObject"/> to visit.
+        /// </param>
+        /// <returns>
+        /// The <see cref="XObject"/> or the children of the <see cref="XObject"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [NotNull]
+        [ItemCanBeNull]
+        protected static IEnumerable<XObject> Lift([CanBeNull] XObject xObject)
+        {
+            if (!(xObject is XElement e))
+            {
+                yield return xObject;
+
+                yield break;
+            }
+
+            if (e.Attribute(Liftable) is null)
+            {
+                yield return new XElement(e.Name, e.Attributes(), e.Nodes().Select(Lift));
+
+                yield break;
+            }
+
+            foreach (XObject item in e.Elements().SelectMany(Lift))
+            {
+                yield return item;
+            }
         }
     }
 }

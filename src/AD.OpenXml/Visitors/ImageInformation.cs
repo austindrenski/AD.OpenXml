@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visitors
 {
+    /// <inheritdoc cref="IEquatable{T}" />
     /// <summary>
     ///
     /// </summary>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
+using AD.Xml;
 using JetBrains.Annotations;
 
 // ReSharper disable VirtualMemberNeverOverridden.Global
@@ -15,24 +17,14 @@ namespace AD.OpenXml
     public abstract class OpenXmlVisitor : XmlVisitor
     {
         /// <summary>
-        /// The attributes that may be returned.
+        /// xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main".
         /// </summary>
-        [NotNull]
-        [ItemNotNull]
-        protected abstract ISet<XName> SupportedAttributes { get; }
+        [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
 
         /// <summary>
-        /// The elements that may be returned.
+        /// Return an element when handling the default dispatch case if true; otherwise, false.
         /// </summary>
-        [NotNull]
-        [ItemNotNull]
-        protected abstract ISet<XName> SupportedElements { get; }
-
-        /// <summary>
-        /// The mapping between OpenXML names and supported names.
-        /// </summary>
-        [NotNull]
-        protected abstract IDictionary<XName, XName> Renames { get; }
+        private readonly bool _returnOnDefault;
 
         /// <summary>
         /// The mapping of chart id to node.
@@ -44,6 +36,39 @@ namespace AD.OpenXml
         /// The mapping of image id to data.
         /// </summary>
         protected abstract IDictionary<string, (string mime, string description, string base64)> Images { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="returnOnDefault">
+        ///
+        /// </param>
+        protected OpenXmlVisitor(bool returnOnDefault)
+        {
+            _returnOnDefault = returnOnDefault;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="anchor">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitAnchor([NotNull] XElement anchor)
+        {
+            if (anchor is null)
+            {
+                throw new ArgumentNullException(nameof(anchor));
+            }
+
+            return base.VisitElement(anchor);
+        }
 
         /// <summary>
         /// Visits the area chart node.
@@ -65,20 +90,6 @@ namespace AD.OpenXml
             }
 
             return base.VisitElement(areaChart);
-        }
-
-        /// <inheritdoc />
-        [Pure]
-        protected override XObject VisitAttribute(XAttribute attribute)
-        {
-            if (attribute is null)
-            {
-                throw new ArgumentNullException(nameof(attribute));
-            }
-
-            XName name = VisitName(attribute.Name);
-
-            return SupportedAttributes.Contains(name) ? new XAttribute(name, attribute.Value) : null;
         }
 
         /// <summary>
@@ -148,13 +159,13 @@ namespace AD.OpenXml
         }
 
         /// <summary>
-        ///
+        /// Visits the drawing node.
         /// </summary>
         /// <param name="drawing">
-        ///
+        /// The drawing node to visit.
         /// </param>
         /// <returns>
-        ///
+        /// The reconstructed drawing.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
@@ -169,6 +180,28 @@ namespace AD.OpenXml
             return base.VisitElement(drawing);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="diagram">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitDiagram([NotNull] XElement diagram)
+        {
+            if (diagram is null)
+            {
+                throw new ArgumentNullException(nameof(diagram));
+            }
+
+            return base.VisitElement(diagram);
+        }
+
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitElement(XElement element)
@@ -180,9 +213,9 @@ namespace AD.OpenXml
 
             switch (element)
             {
-                case XElement e when e.Name.LocalName == "body":
+                case XElement e when e.Name.LocalName == "anchor":
                 {
-                    return VisitBody(e);
+                    return VisitAnchor(e);
                 }
                 case XElement e when e.Name.LocalName == "areaChart":
                 {
@@ -191,6 +224,10 @@ namespace AD.OpenXml
                 case XElement e when e.Name.LocalName == "barChart":
                 {
                     return VisitBarChart(e);
+                }
+                case XElement e when e.Name.LocalName == "body":
+                {
+                    return VisitBody(e);
                 }
                 case XElement e when e.Name.LocalName == "chart":
                 {
@@ -204,6 +241,22 @@ namespace AD.OpenXml
                 {
                     return VisitFootnote(e);
                 }
+                case XElement e when e.Name.LocalName == "graphic":
+                {
+                    return VisitGraphic(e);
+                }
+                case XElement e when e.Name.LocalName == "graphicData":
+                {
+                    return VisitGraphicData(e);
+                }
+                case XElement e when e.Name.LocalName == "inline":
+                {
+                    return VisitInline(e);
+                }
+                case XElement e when e.Name.LocalName == "lineChart":
+                {
+                    return VisitLineChart(e);
+                }
                 case XElement e when e.Name.LocalName == "p":
                 {
                     return VisitParagraph(e);
@@ -212,9 +265,17 @@ namespace AD.OpenXml
                 {
                     return VisitPicture(e);
                 }
+                case XElement e when e.Name.LocalName == "pieChart":
+                {
+                    return VisitPieChart(e);
+                }
                 case XElement e when e.Name.LocalName == "r":
                 {
                     return VisitRun(e);
+                }
+                case XElement e when e.Name.LocalName == "relIds":
+                {
+                    return VisitDiagram(e);
                 }
                 case XElement e when e.Name.LocalName == "tbl":
                 {
@@ -228,9 +289,13 @@ namespace AD.OpenXml
                 {
                     return VisitTableCell(e);
                 }
+                case XElement e when e.Name.LocalName == "wsp":
+                {
+                    return VisitShape(e);
+                }
                 default:
                 {
-                    return base.VisitElement(element);
+                    return _returnOnDefault ? base.VisitElement(element) : null;
                 }
             }
         }
@@ -257,16 +322,92 @@ namespace AD.OpenXml
             return base.VisitElement(footnote);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="graphic">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
         [Pure]
-        protected override XName VisitName(XName name)
+        [CanBeNull]
+        protected virtual XObject VisitGraphic([NotNull] XElement graphic)
         {
-            if (name is null)
+            if (graphic is null)
             {
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException(nameof(graphic));
             }
 
-            return Renames.TryGetValue(name.LocalName, out XName result) ? result : name.LocalName;
+            return base.VisitElement(graphic);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="graphicData">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitGraphicData([NotNull] XElement graphicData)
+        {
+            if (graphicData is null)
+            {
+                throw new ArgumentNullException(nameof(graphicData));
+            }
+
+            return base.VisitElement(graphicData);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="inline">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitInline([NotNull] XElement inline)
+        {
+            if (inline is null)
+            {
+                throw new ArgumentNullException(nameof(inline));
+            }
+
+            return base.VisitElement(inline);
+        }
+
+        /// <summary>
+        /// Visits the line chart node.
+        /// </summary>
+        /// <param name="lineChart">
+        /// The line chart to visit.
+        /// </param>
+        /// <returns>
+        /// The visited line chart.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitLineChart([NotNull] XElement lineChart)
+        {
+            if (lineChart is null)
+            {
+                throw new ArgumentNullException(nameof(lineChart));
+            }
+
+            return base.VisitElement(lineChart);
         }
 
         /// <summary>
@@ -314,6 +455,28 @@ namespace AD.OpenXml
         }
 
         /// <summary>
+        /// Visits the pie chart node.
+        /// </summary>
+        /// <param name="pieChart">
+        /// The pie chart to visit.
+        /// </param>
+        /// <returns>
+        /// The visited pie chart.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitPieChart([NotNull] XElement pieChart)
+        {
+            if (pieChart is null)
+            {
+                throw new ArgumentNullException(nameof(pieChart));
+            }
+
+            return base.VisitElement(pieChart);
+        }
+
+        /// <summary>
         ///
         /// </summary>
         /// <param name="run">
@@ -333,6 +496,28 @@ namespace AD.OpenXml
             }
 
             return base.VisitElement(run);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="shape">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [CanBeNull]
+        private XObject VisitShape([NotNull] XElement shape)
+        {
+            if (shape is null)
+            {
+                throw new ArgumentNullException(nameof(shape));
+            }
+
+            return base.VisitElement(shape);
         }
 
         /// <summary>

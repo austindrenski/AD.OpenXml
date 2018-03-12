@@ -204,6 +204,12 @@ namespace AD.OpenXml.Visits
             XElement modifiedContentTypes =
                 new XElement(
                     contentTypes.Name,
+                    new XElement(T + "Default",
+                        new XAttribute("Extension", "png"),
+                        new XAttribute("ContentType", "image/png")),
+                    new XElement(T + "Default",
+                        new XAttribute("Extension", "jpeg"),
+                        new XAttribute("ContentType", "image/jpeg")),
                     chartMapping.Select(
                         x =>
                             new XElement(T + "Override",
