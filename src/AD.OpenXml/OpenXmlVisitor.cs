@@ -19,45 +19,45 @@ namespace AD.OpenXml
         /// <summary>
         /// Represents the 'a:' prefix seen in the markup for chart[#].xml
         /// </summary>
-        [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
+        [NotNull] protected static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
 
         /// <summary>
         /// Represents the 'c:' prefix seen in the markup for chart[#].xml
         /// </summary>
-        [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
+        [NotNull] protected static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
         // TODO: move into AD.Xml
         /// <summary>
         /// Represents the 'dgm:' prefix seen in the markup for 'drawing' elements.
         /// </summary>
-        [NotNull] private static readonly XNamespace DGM = "http://schemas.openxmlformats.org/drawingml/2006/diagram";
+        [NotNull] protected static readonly XNamespace DGM = "http://schemas.openxmlformats.org/drawingml/2006/diagram";
 
         // TODO: move into AD.Xml
         /// <summary>
         /// Represents the 'pic:' prefix seen in the markup for 'drawing' elements.
         /// </summary>
-        [NotNull] private static readonly XNamespace PIC = "http://schemas.openxmlformats.org/drawingml/2006/picture";
+        [NotNull] protected static readonly XNamespace PIC = "http://schemas.openxmlformats.org/drawingml/2006/picture";
 
         /// <summary>
         /// Represents the 'r:' prefix seen in the markup of document.xml.
         /// </summary>
-        [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
+        [NotNull] protected static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
         /// <summary>
         /// Represents the 'w:' prefix seen in raw OpenXML documents.
         /// </summary>
-        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] protected static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// Represents the 'wp:' prefix seen in the markup for 'drawing' elements.
         /// </summary>
-        [NotNull] private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
+        [NotNull] protected static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
 
         // TODO: move into AD.Xml
         /// <summary>
         /// Represents the 'wps:' prefix seen in the markup for 'wsp' elements.
         /// </summary>
-        [NotNull] private static readonly XNamespace WPS = "http://schemas.microsoft.com/office/word/2010/wordprocessingShape";
+        [NotNull] protected static readonly XNamespace WPS = "http://schemas.microsoft.com/office/word/2010/wordprocessingShape";
 
         /// <summary>
         /// Return an element when handling the default dispatch case if true; otherwise, false.
@@ -65,26 +65,15 @@ namespace AD.OpenXml
         private readonly bool _returnOnDefault;
 
         /// <summary>
-        /// The mapping of chart id to node.
-        /// </summary>
-        [NotNull]
-        protected abstract IDictionary<string, XElement> Charts { get; set; }
-
-        /// <summary>
-        /// The mapping of image id to data.
-        /// </summary>
-        protected abstract IDictionary<string, (string mime, string description, string base64)> Images { get; set; }
-
-        /// <summary>
         /// The mapping of <see cref="XName"/> to visit method used by <see cref="VisitElement"/>.
         /// </summary>
         protected readonly IDictionary<XName, Func<XElement, XObject>> VisitLookup;
 
         /// <summary>
-        ///
+        /// Initializes an <see cref="OpenXmlVisitor"/>.
         /// </summary>
         /// <param name="returnOnDefault">
-        ///
+        /// True if an element should be returned when handling the default dispatch case.
         /// </param>
         protected OpenXmlVisitor(bool returnOnDefault)
         {
@@ -115,6 +104,7 @@ namespace AD.OpenXml
                     [W   + "tc"]          = VisitTableCell,
                     [W   + "tr"]          = VisitTableRow,
                     [WP  + "anchor"]      = VisitAnchor,
+                    [WP  + "docPr"]       = VisitDocumentProperty,
                     [WP  + "inline"]      = VisitInline,
                     [WPS + "wsp"]         = VisitShape
                     // @formatter:on
@@ -251,6 +241,28 @@ namespace AD.OpenXml
             }
 
             return base.VisitElement(document);
+        }
+
+        /// <summary>
+        /// Visits the document property node.
+        /// </summary>
+        /// <param name="docPr">
+        /// The document property node.
+        /// </param>
+        /// <returns>
+        /// The reconstructed document property.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitDocumentProperty([NotNull] XElement docPr)
+        {
+            if (docPr is null)
+            {
+                throw new ArgumentNullException(nameof(docPr));
+            }
+
+            return base.VisitElement(docPr);
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
@@ -17,9 +18,9 @@ namespace AD.OpenXml.Documents
     {
         private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
-        private static readonly XNamespace D = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
-
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
+        private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
 
         /// <summary>
         ///
@@ -63,15 +64,15 @@ namespace AD.OpenXml.Documents
 
             XElement element = result.ReadAsXml();
 
-            foreach (XElement item in element.Descendants(W + "drawing"))
+            foreach (XElement item in element.Descendants(W + "drawing").Where(x => x.Descendants(C + "chart").Any()))
             {
-                item.Element(D + "inline")?
-                    .Elements(D + "extent")
+                item.Element(WP + "inline")?
+                    .Element(WP + "extent")?
                     .Remove();
 
-                item.Element(D + "inline")?
+                item.Element(WP + "inline")?
                     .AddFirst(
-                        new XElement(D + "extent",
+                        new XElement(WP + "extent",
                             new XAttribute("cx", 914400 * 6.5),
                             new XAttribute("cy", 914400 * 3.5)));
             }

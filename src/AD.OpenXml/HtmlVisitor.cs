@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using AD.Xml;
 using JetBrains.Annotations;
 
 // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
@@ -17,32 +16,6 @@ namespace AD.OpenXml
     [PublicAPI]
     public class HtmlVisitor : OpenXmlVisitor
     {
-        /// <summary>
-        /// Represents the 'a:' prefix seen in the markup for chart[#].xml
-        /// </summary>
-        [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
-
-        /// <summary>
-        /// Represents the 'c:' prefix seen in the markup for chart[#].xml
-        /// </summary>
-        [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
-
-        // TODO: move into AD.Xml
-        /// <summary>
-        /// Represents the 'pic:' prefix seen in the markup for 'drawing' elements.
-        /// </summary>
-        [NotNull] private static readonly XNamespace P = "http://schemas.openxmlformats.org/drawingml/2006/picture";
-
-        /// <summary>
-        /// Represents the 'r:' prefix seen in the markup of document.xml.
-        /// </summary>
-        [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
-
-        /// <summary>
-        /// Represents the 'w:' prefix seen in raw OpenXML documents.
-        /// </summary>
-        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-
         /// <summary>
         /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
         /// </summary>
@@ -65,32 +38,6 @@ namespace AD.OpenXml
             };
 
         /// <summary>
-        /// The HTML elements that may be returned.
-        /// </summary>
-        protected virtual ISet<XName> SupportedElements { get; } =
-            new HashSet<XName>
-            {
-                "a",
-                "b",
-                "caption",
-                "em",
-                "h1",
-                "h2",
-                "h3",
-                "h4",
-                "h5",
-                "h6",
-                "i",
-                "p",
-                "sub",
-                "sup",
-                "table",
-                "td",
-                "th",
-                "tr"
-            };
-
-        /// <summary>
         /// The mapping between OpenXML names and HTML names.
         /// </summary>
         protected virtual IDictionary<XName, XName> Renames { get; } =
@@ -98,6 +45,7 @@ namespace AD.OpenXml
             {
                 // @formatter:off
                 [W + "body"]     = "article",
+                [W + "docPr"]    = "figcaption",
                 [W + "document"] = "body",
                 [W + "drawing"]  = "figure",
                 [W + "tbl"]      = "table",
@@ -106,11 +54,16 @@ namespace AD.OpenXml
                 // @formatter:on
             };
 
-        /// <inheritdoc />
-        protected override IDictionary<string, XElement> Charts { get; set; }
+        /// <summary>
+        /// The mapping of chart id to node.
+        /// </summary>
+        [NotNull]
+        protected IDictionary<string, XElement> Charts { get; }
 
-        /// <inheritdoc />
-        protected override IDictionary<string, (string mime, string description, string base64)> Images { get; set; }
+        /// <summary>
+        /// The mapping of image id to data.
+        /// </summary>
+        protected IDictionary<string, (string mime, string description, string base64)> Images { get; }
 
         /// <summary>
         /// The 'charset' tage value.
@@ -139,19 +92,60 @@ namespace AD.OpenXml
         /// <inheritdoc />
         protected HtmlVisitor(bool returnOnDefault) : base(returnOnDefault)
         {
+            Charts = new Dictionary<string, XElement>();
+            Images = new Dictionary<string, (string mime, string description, string base64)>();
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Initializes an <see cref="HtmlVisitor"/>.
+        /// </summary>
+        /// <param name="returnOnDefault">
+        /// True if an element should be returned when handling the default dispatch case.
+        /// </param>
+        /// <param name="charts">
+        /// Chart data referenced in the content to be visited.
+        /// </param>
+        /// <param name="images">
+        /// Image data referenced in the content to be visited.
+        /// </param>
+        protected HtmlVisitor(bool returnOnDefault, IDictionary<string, XElement> charts, IDictionary<string, (string mime, string description, string base64)> images) : base(returnOnDefault)
+        {
+            Charts = new Dictionary<string, XElement>(charts);
+            Images = new Dictionary<string, (string mime, string description, string base64)>(images);
         }
 
         /// <summary>
         /// Returns a new <see cref="HtmlVisitor"/>.
         /// </summary>
+        /// <param name="charts">
+        /// Chart data referenced in the content to be visited.
+        /// </param>
+        /// <param name="images">
+        /// Image data referenced in the content to be visited.
+        /// </param>
+        /// <param name="returnOnDefault">
+        /// True if an element should be returned when handling the default dispatch case.
+        /// </param>
         /// <returns>
         /// An <see cref="HtmlVisitor"/>.
         /// </returns>
+        /// <exception cref="ArgumentNullException"></exception>
         [Pure]
         [NotNull]
-        public static HtmlVisitor Create()
+        public static HtmlVisitor Create([NotNull] IDictionary<string, XElement> charts, [NotNull] IDictionary<string, (string mime, string description, string base64)> images, bool returnOnDefault = false)
         {
-            return new HtmlVisitor(false);
+            if (charts is null)
+            {
+                throw new ArgumentNullException(nameof(charts));
+            }
+
+            if (images is null)
+            {
+                throw new ArgumentNullException(nameof(images));
+            }
+
+            return new HtmlVisitor(false, charts, images);
         }
 
         ///  <summary>
@@ -163,12 +157,6 @@ namespace AD.OpenXml
         ///  <param name="footnotes">
         ///
         ///  </param>
-        ///  <param name="charts">
-        ///
-        ///  </param>
-        /// <param name="images">
-        ///
-        /// </param>
         /// <param name="title">
         ///   The name of this HTML document.
         ///  </param>
@@ -180,7 +168,7 @@ namespace AD.OpenXml
         ///  </returns>
         ///  <exception cref="ArgumentNullException" />
         [Pure]
-        public XObject Visit(XElement document, XElement footnotes, IDictionary<string, XElement> charts, IDictionary<string, (string mime, string description, string base64)> images, string title, string stylesheet = default)
+        public XObject Visit(XElement document, XElement footnotes, string title, string stylesheet)
         {
             if (document is null)
             {
@@ -192,9 +180,10 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(title));
             }
 
-            Charts = new Dictionary<string, XElement>(charts);
-
-            Images = new Dictionary<string, (string mime, string description, string base64)>(images);
+            if (stylesheet is null)
+            {
+                throw new ArgumentNullException(nameof(stylesheet));
+            }
 
             return
                 new XDocument(
@@ -209,9 +198,9 @@ namespace AD.OpenXml
                                 new XAttribute("content", MetaContent)),
                             new XElement("title", title),
                             new XElement("link",
-                                new XAttribute("href", stylesheet ?? ""),
                                 new XAttribute("type", "text/css"),
-                                new XAttribute("rel", "stylesheet")),
+                                new XAttribute("rel", "stylesheet"),
+                                new XAttribute("href", stylesheet)),
                             new XElement("style",
                                 new XText("article, section { counter-reset: footnote_counter; }"),
                                 new XText("footer :target { background: yellow; }"),
@@ -322,6 +311,21 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        protected override XObject VisitDocumentProperty(XElement docPr)
+        {
+            if (docPr is null)
+            {
+                throw new ArgumentNullException(nameof(docPr));
+            }
+
+            return
+                new XElement(
+                    VisitName(docPr.Name),
+                    Visit((string) docPr.Attribute("title") ?? string.Empty));
+        }
+
+        /// <inheritdoc />
+        [Pure]
         protected override XObject VisitDrawing(XElement drawing)
         {
             if (drawing is null)
@@ -332,9 +336,6 @@ namespace AD.OpenXml
             return
                 new XElement(
                     VisitName(drawing.Name),
-                    // TODO: handle docPr in OpenXmlVisitor dispatch, then override in HtmlVisitor.
-//                    new XElement("figcaption", (string) anchor.Element(WP + "docPr")?.Attribute("title")),
-//                    new XComment((string) anchor.Element(WP + "docPr")?.Attribute("descr") ?? string.Empty),
                     Visit(drawing.Elements()));
         }
 
@@ -474,15 +475,16 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(picture));
             }
 
-            XAttribute imageId = picture.Element(P + "blipFill")?.Element(A + "blip")?.Attribute(R + "embed");
+            XAttribute imageId = picture.Element(PIC + "blipFill")?.Element(A + "blip")?.Attribute(R + "embed");
 
             return
                 new XElement("img",
+                    new XAttribute("scale", "0"),
+                    new XAttribute("alt", (string) picture.Element(WP + "docPr")?.Attribute("descr") ?? string.Empty),
                     new XAttribute("src",
                         Images.TryGetValue((string) imageId, out (string mime, string description, string base64) image)
                             ? $"data:image/{image.mime};base64,{image.base64}"
-                            : $"[image: {(string) imageId}]"),
-                    new XAttribute("scale", "0"));
+                            : $"[image: {(string) imageId}]"));
         }
 
         /// <inheritdoc />
@@ -580,12 +582,34 @@ namespace AD.OpenXml
 
             XAttribute classAttribute = table.Element(W + "tblPr")?.Element(W + "tblStyle")?.Attribute(W + "val");
 
+            XObject[] tableNodes = Visit(table.Nodes()).ToArray();
+
+            XElement firstRow =
+                tableNodes.OfType<XElement>()
+                          .FirstOrDefault(x => x.Name == "tr");
+
+            XElement header =
+                new XElement("thead",
+                    firstRow.Nodes()
+                            .Select(x => !(x is XElement e) || e.Name != "td" ? x : new XElement("th", e.Attributes(), e.Nodes())));
+
+            XObject[] beforeHeader =
+                tableNodes.TakeWhile(x => !(x is XElement e) || e.Name != "tr")
+                          .ToArray();
+
+            XObject[] afterHeader =
+                tableNodes.SkipWhile(x => !(x is XElement e) || e.Name != "tr")
+                          .Skip(1)
+                          .ToArray();
+
             return
                 new XElement(
                     VisitName(table.Name),
                     Visit(classAttribute),
                     Visit(table.Attributes()),
-                    Visit(table.Nodes()));
+                    beforeHeader,
+                    header,
+                    afterHeader);
         }
 
         /// <inheritdoc />

@@ -54,6 +54,9 @@ namespace CompilerAPI.Controllers
         /// <param name="website">
         /// The website of the publisher.
         /// </param>
+        /// <param name="stylesheet">
+        /// A style sheet reference link to be included on the HTML document.
+        /// </param>
         /// <returns>
         /// The combined and formatted document.
         /// </returns>
@@ -61,7 +64,7 @@ namespace CompilerAPI.Controllers
         [NotNull]
         [HttpPost]
         [ItemNotNull]
-        public async Task<IActionResult> Index([NotNull] [ItemNotNull] IEnumerable<IFormFile> files, [CanBeNull] string format, [CanBeNull] string title, [CanBeNull] string publisher, [CanBeNull] string website)
+        public async Task<IActionResult> Index([NotNull] [ItemNotNull] IEnumerable<IFormFile> files, [CanBeNull] string format, [CanBeNull] string title, [CanBeNull] string publisher, [CanBeNull] string website, [CanBeNull] string stylesheet)
         {
             if (files is null)
             {
@@ -116,13 +119,8 @@ namespace CompilerAPI.Controllers
                         new ContentResult
                         {
                             Content =
-                                HtmlVisitor.Create()
-                                           .Visit(
-                                               visitor.Document,
-                                               visitor.Footnotes,
-                                               visitor.ChartReferences,
-                                               visitor.ImageReferences,
-                                               title ?? "")
+                                HtmlVisitor.Create(visitor.ChartReferences, visitor.ImageReferences)
+                                           .Visit(visitor.Document, visitor.Footnotes, title ?? "", stylesheet ?? "")
                                            .ToString(),
                             ContentType = "text/html",
                             StatusCode = 200

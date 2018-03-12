@@ -18,11 +18,9 @@ namespace AD.OpenXml.Documents
     [PublicAPI]
     public static class PositionChartsInlineExtensions
     {
-        private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
-
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        private static readonly XNamespace D = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
+        private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
 
         private static readonly XNamespace Wp2010 = "http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing";
 
@@ -65,25 +63,25 @@ namespace AD.OpenXml.Documents
 
             XElement document = result.ReadAsXml();
 
-            IEnumerable<XElement> charts =
+            IEnumerable<XElement> anchors =
                 document.Descendants(W + "drawing")
-                        .Where(x => x.Elements().FirstOrDefault()?.Name == D + "anchor")
+                        .Where(x => x.Elements().FirstOrDefault()?.Name == WP + "anchor")
                         .ToArray();
 
-            foreach (XElement item in charts)
+            foreach (XElement item in anchors)
             {
                 item.AddAfterSelf(
-                    new XElement(A + "inline",
+                    new XElement(WP + "inline",
                         new XAttribute("distT", "0"),
                         new XAttribute("distB", "0"),
                         new XAttribute("distL", "0"),
                         new XAttribute("distR", "0"),
-                        item.Element(D + "anchor")?
+                        item.Element(WP + "anchor")?
                             .Elements()
                             .RemoveAttributesBy(Wp2010 + "anchorId")
                             .RemoveAttributesBy(Wp2010 + "editId")));
 
-                item.RemoveBy(D + "anchor");
+                item.RemoveBy(WP + "anchor");
             }
 
             return await document.WriteInto(result, "word/document.xml");

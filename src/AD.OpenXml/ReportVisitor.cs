@@ -20,11 +20,15 @@ namespace AD.OpenXml
         /// </summary>
         protected ISet<XName> SupportedElements { get; }
 
-        /// <inheritdoc />
-        protected override IDictionary<string, XElement> Charts { get; set; }
+        /// <summary>
+        ///
+        /// </summary>
+        protected IDictionary<string, XElement> Charts { get; set; }
 
-        /// <inheritdoc />
-        protected override IDictionary<string, (string mime, string description, string base64)> Images { get; set; }
+        /// <summary>
+        ///
+        /// </summary>
+        protected IDictionary<string, (string mime, string description, string base64)> Images { get; set; }
 
         /// <inheritdoc />
         protected ReportVisitor(bool returnOnDefault) : base(returnOnDefault)
