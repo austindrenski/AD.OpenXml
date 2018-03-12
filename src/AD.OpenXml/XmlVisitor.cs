@@ -95,11 +95,11 @@ namespace AD.OpenXml
         [Pure]
         [NotNull]
         [ItemCanBeNull]
-        protected virtual IEnumerable<XObject> Visit([CanBeNull] [ItemCanBeNull] IEnumerable<XObject> source)
+        protected virtual IEnumerable<XObject> Visit([NotNull] [ItemCanBeNull] IEnumerable<XObject> source)
         {
             if (source is null)
             {
-                yield break;
+                throw new ArgumentNullException(nameof(source));
             }
 
             foreach (XObject item in source)
@@ -285,6 +285,32 @@ namespace AD.OpenXml
             }
 
             foreach (XObject item in e.Elements().SelectMany(Lift))
+            {
+                yield return item;
+            }
+        }
+
+        /// <summary>
+        /// Yields the <see cref="XObject"/> or the children of the <see cref="XObject"/> if the "data-liftable" attribute is present.
+        /// </summary>
+        /// <param name="source">
+        /// The collection of <see cref="XObject"/> to visit.
+        /// </param>
+        /// <returns>
+        /// The <see cref="XObject"/> or the children of the <see cref="XObject"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [NotNull]
+        [ItemCanBeNull]
+        protected static IEnumerable<XObject> Lift([NotNull] IEnumerable<XObject> source)
+        {
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            foreach (XObject item in source.SelectMany(Lift))
             {
                 yield return item;
             }

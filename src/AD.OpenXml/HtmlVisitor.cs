@@ -29,26 +29,9 @@ namespace AD.OpenXml
 
         // TODO: move into AD.Xml
         /// <summary>
-        /// Represents the 'dgm:' prefix seen in the markup for 'drawing' elements.
-        /// </summary>
-        [NotNull] private static readonly XNamespace DGM = "http://schemas.openxmlformats.org/drawingml/2006/diagram";
-
-        /// <summary>
-        /// Represents the 'wp:' prefix seen in the markup for 'drawing' elements.
-        /// </summary>
-        [NotNull] private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
-
-        // TODO: move into AD.Xml
-        /// <summary>
         /// Represents the 'pic:' prefix seen in the markup for 'drawing' elements.
         /// </summary>
-        [NotNull] private static readonly XNamespace P = "http://schemas.openxmlformats.org/drawingml/2006/picture";
-
-        // TODO: move into AD.Xml
-        /// <summary>
-        /// Represents the 'wps:' prefix seen in the markup for 'wsp' elements.
-        /// </summary>
-        [NotNull] private static readonly XNamespace WPS = "http://schemas.microsoft.com/office/word/2010/wordprocessingShape";
+        [NotNull] private static readonly XNamespace PIC = "http://schemas.openxmlformats.org/drawingml/2006/picture";
 
         /// <summary>
         /// Represents the 'r:' prefix seen in the markup of document.xml.
@@ -235,17 +218,8 @@ namespace AD.OpenXml
                                 new XText("a[aria-describedby=\"footnote-label\"] { margin-left: 1px; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { text-decoration: none; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { vertical-align: super; }"))),
-                        Lift(
-                            new XElement("body",
-                                new XElement("article",
-                                    Visit(document.Element(W + "body").Nodes())))),
-                        new XElement("footer",
-                            new XAttribute("class", "footnotes"),
-                            new XElement("h2",
-                                new XAttribute("id", "footnote-label"),
-                                new XText("Footnotes")),
-                            new XElement("ol",
-                                Visit(footnotes.Elements().Where(x => (int) x.Attribute(W + "id") > 0))))));
+                        Lift(Visit(document)),
+                        Visit(footnotes)));
         }
 
         /// <inheritdoc />
@@ -257,10 +231,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(anchor));
             }
 
-            return
-                new XElement("div",
-                    new XAttribute(Liftable, "from-anchor"),
-                    Visit(anchor.Elements()));
+            return LiftableHelper(anchor);
         }
 
         /// <inheritdoc />
@@ -303,6 +274,18 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        protected override XObject VisitBody(XElement body)
+        {
+            if (body is null)
+            {
+                throw new ArgumentNullException(nameof(body));
+            }
+
+            return LiftableHelper(body);
+        }
+
+        /// <inheritdoc />
+        [Pure]
         protected override XObject VisitChart(XElement chart)
         {
             if (chart is null)
@@ -310,19 +293,35 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(chart));
             }
 
-            XElement content = Charts[(string) chart.Attribute(R + "id")].Element(C + "chart");
+            XElement chartContent = Charts[(string) chart.Attribute(R + "id")].Element(C + "chart");
 
-            // TODO: pass through on plotArea and handle charts via dispatch.
+            return LiftableHelper(chartContent);
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitDocument(XElement document)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
             return
-                new XElement("div",
-                    new XAttribute(Liftable, "from-chart"),
-                    Visit(content.Element(C + "plotArea").Elements()));
+                new XElement("body",
+                    new XElement("article",
+                        Visit(document.Elements())));
         }
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitDrawing(XElement drawing)
         {
+            if (drawing is null)
+            {
+                throw new ArgumentNullException(nameof(drawing));
+            }
+
             return
                 new XElement("figure",
                     // TODO: handle docPr in OpenXmlVisitor dispatch, then override in HtmlVisitor.
@@ -353,6 +352,25 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        protected override XObject VisitFootnotes(XElement footnotes)
+        {
+            if (footnotes is null)
+            {
+                throw new ArgumentNullException(nameof(footnotes));
+            }
+
+            return
+                new XElement("footer",
+                    new XAttribute("class", "footnotes"),
+                    new XElement("h2",
+                        new XAttribute("id", "footnote-label"),
+                        new XText("Footnotes")),
+                    new XElement("ol",
+                        Visit(footnotes.Elements().Where(x => (int) x.Attribute(W + "id") > 0))));
+        }
+
+        /// <inheritdoc />
+        [Pure]
         protected override XObject VisitGraphic(XElement graphic)
         {
             if (graphic is null)
@@ -360,10 +378,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(graphic));
             }
 
-            return
-                new XElement("div",
-                    new XAttribute(Liftable, "from-graphic"),
-                    Visit(graphic.Elements()));
+            return LiftableHelper(graphic);
         }
 
         /// <inheritdoc />
@@ -375,10 +390,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(graphicData));
             }
 
-            return
-                new XElement("div",
-                    new XAttribute(Liftable, "from-graphicData"),
-                    Visit(graphicData.Elements()));
+            return LiftableHelper(graphicData);
         }
 
         /// <inheritdoc />
@@ -390,10 +402,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(inline));
             }
 
-            return
-                new XElement("div",
-                    new XAttribute(Liftable, "from-inline"),
-                    Visit(inline.Elements()));
+            return LiftableHelper(inline);
         }
 
         /// <inheritdoc />
@@ -457,7 +466,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(picture));
             }
 
-            XAttribute imageId = picture.Element(P + "blipFill")?.Element(A + "blip")?.Attribute(R + "embed");
+            XAttribute imageId = picture.Element(PIC + "blipFill")?.Element(A + "blip")?.Attribute(R + "embed");
 
             return
                 new XElement("img",
@@ -478,6 +487,18 @@ namespace AD.OpenXml
             }
 
             return ChartHelper(pieChart);
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitPlotArea(XElement plotArea)
+        {
+            if (plotArea is null)
+            {
+                throw new ArgumentNullException(nameof(plotArea));
+            }
+
+            return LiftableHelper(plotArea);
         }
 
         /// <inheritdoc />
@@ -597,6 +618,31 @@ namespace AD.OpenXml
                     Visit(alignmentStyle),
                     Visit(cell.Attributes()),
                     Visit(cell.Nodes()).Select(LiftSingleton));
+        }
+
+        /// <summary>
+        /// Constructs a liftable div element.
+        /// </summary>
+        /// <param name="element">
+        /// The <see cref="XElement"/> from which nodes can be lifted.
+        /// </param>
+        /// <returns>
+        /// An <see cref="XObject"/> representing the lift operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />>
+        [Pure]
+        [NotNull]
+        private XObject LiftableHelper([NotNull] XElement element)
+        {
+            if (element is null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            return
+                new XElement("div",
+                    new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
+                    Visit(element.Elements()));
         }
 
         /// <summary>
