@@ -53,6 +53,9 @@ namespace AD.OpenXml
         public IEnumerable<ChartInformation> Charts { get; }
 
         /// <inheritdoc />
+        public IEnumerable<ImageInformation> Images { get; }
+
+        /// <inheritdoc />
         public XElement ContentTypes { get; }
 
         /// <inheritdoc />
@@ -105,18 +108,35 @@ namespace AD.OpenXml
         [NotNull]
         public IDictionary<string, XElement> ChartReferences =>
             DocumentRelations.Elements()
-                             .Where(x => x.Attribute("Target").Value.Contains("chart"))
+                             .Where(x => x.Attribute("Target").Value.StartsWith("charts/"))
                              .ToDictionary(
                                  x => (string) x.Attribute("Id"),
                                  x => Charts.Single(y => y.Name == (string) x.Attribute("Target")).Chart);
+
+        /// <summary>
+        /// Maps image reference id to image node.
+        /// </summary>
+        [NotNull]
+        public IDictionary<string, (string mime, string description, string base64)> ImageReferences =>
+            DocumentRelations.Elements()
+                             .Where(x => x.Attribute("Target").Value.StartsWith("media/"))
+                             .Select(
+                                 x => new
+                                 {
+                                     id = (string) x.Attribute("Id"),
+                                     target = (string) x.Attribute("Target"),
+                                     description = string.Empty,
+                                     base64 = Convert.ToBase64String(Images.Single(y => y.Name == (string) x.Attribute("Target")).Image),
+                                 })
+                             .ToDictionary(
+                                 x => x.id,
+                                 x => (mime: x.target.Substring(x.target.LastIndexOf('.') + 1), x.description, x.base64));
 
         /// <inheritdoc />
         /// <summary>
         /// Initializes an <see cref="T:AD.OpenXml.OpenXmlPackageVisitor" /> by reading document parts into memory from a default <see cref="MemoryStream"/>.
         /// </summary>
-        public OpenXmlPackageVisitor() : this(DocxFilePath.Create())
-        {
-        }
+        public OpenXmlPackageVisitor() : this(DocxFilePath.Create()) { }
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
@@ -191,82 +211,16 @@ namespace AD.OpenXml
                       .Select(x => new ChartInformation(x, stream.ReadAsXml($"word/{x}")))
                       .ToImmutableList();
 
-            // TODO: remove when AD.IO starts resetting position by default.
-            stream.Seek(0, SeekOrigin.Begin);
-        }
-
-        /// <summary>
-        /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
-        /// </summary>
-        /// <param name="result">
-        /// The file to which changes can be saved.
-        /// </param>
-        /// <exception cref="ArgumentNullException"/>
-        public OpenXmlPackageVisitor([NotNull] DocxFilePath result)
-        {
-            if (result is null)
-            {
-                throw new ArgumentNullException(nameof(result));
-            }
-
-            ContentTypes =
-                result.ReadAsXml(ContentTypesInfo.Path) ?? throw new FileNotFoundException(ContentTypesInfo.Path);
-
-            Document =
-                result.ReadAsXml() ?? throw new FileNotFoundException("word/document.xml");
-
-            DocumentRelations =
-                result.ReadAsXml(DocumentRelsInfo.Path) ?? throw new FileNotFoundException(DocumentRelsInfo.Path);
-
-            Footnotes =
-                result.ReadAsXml("word/footnotes.xml") ?? new XElement(W + "footnotes");
-
-            FootnoteRelations =
-                result.ReadAsXml("word/_rels/footnotes.xml.rels") ?? new XElement(P + "Relationships");
-
-            Styles =
-                result.ReadAsXml("word/styles.xml") ?? throw new FileNotFoundException("word/styles.xml");
-
-            Numbering =
-                result.ReadAsXml("word/numbering.xml");
-
-            Theme1 =
-                result.ReadAsXml("word/theme/theme1.xml");
-
-            if (Numbering is null)
-            {
-                Numbering = new XElement(W + "numbering");
-
-                DocumentRelations =
-                    new XElement(
-                        DocumentRelations.Name,
-                        DocumentRelations.Attributes(),
-                        DocumentRelations.Elements()
-                                         .Where(x => !x.Attribute("Tartget")?.Value.Equals("numbering.xml", StringComparison.OrdinalIgnoreCase) ?? true),
-                        new XElement(
-                            P + "Relationship",
-                            new XAttribute("Id", $"rId{NextDocumentRelationId}"),
-                            new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
-                            new XAttribute("Target", "numbering.xml")));
-
-                ContentTypes =
-                    new XElement(
-                        ContentTypes.Name,
-                        ContentTypes.Attributes(),
-                        ContentTypes.Elements()
-                                    .Where(x => !x.Attribute("PartName")?.Value.Equals("/word/numbering.xml", StringComparison.OrdinalIgnoreCase) ?? true),
-                        new XElement(T + "Override",
-                            new XAttribute("PartName", "/word/numbering.xml"),
-                            new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml")));
-            }
-
-            Charts =
-                result.ReadAsXml(DocumentRelsInfo.Path)
+            Images =
+                stream.ReadAsXml(DocumentRelsInfo.Path)
                       .Elements()
                       .Select(x => x.Attribute("Target")?.Value)
-                      .Where(x => x?.StartsWith("charts/") ?? false)
-                      .Select(x => new ChartInformation(x, result.ReadAsXml($"word/{x}")))
+                      .Where(x => x?.StartsWith("media/") ?? false)
+                      .Select(x => new ImageInformation(x, stream.ReadAsByteArray($"word/{x}")))
                       .ToImmutableList();
+
+            // TODO: remove when AD.IO starts resetting position by default.
+            stream.Seek(0, SeekOrigin.Begin);
         }
 
         /// <summary>
@@ -292,39 +246,43 @@ namespace AD.OpenXml
             Numbering = subject.Numbering.Clone();
             Theme1 = subject.Theme1.Clone();
             Charts = subject.Charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
+            Images = subject.Images.Select(x => new ImageInformation(x.Name, x.Image.ToArray())).ToImmutableArray();
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="OpenXmlPackageVisitor"/> from the supplied components.
-        /// </summary>
-        /// <param name="contentTypes">
+        ///  <summary>
+        ///  Initializes a new <see cref="OpenXmlPackageVisitor"/> from the supplied components.
+        ///  </summary>
+        ///  <param name="contentTypes">
+        ///
+        ///  </param>
+        ///  <param name="document">
+        ///
+        ///  </param>
+        ///  <param name="documentRelations">
+        ///
+        ///  </param>
+        ///  <param name="footnotes">
+        ///
+        ///  </param>
+        ///  <param name="footnoteRelations">
+        ///
+        ///  </param>
+        ///  <param name="styles">
+        ///
+        ///  </param>
+        ///  <param name="numbering">
+        ///
+        ///  </param>
+        ///  <param name="theme1">
+        ///
+        ///  </param>
+        ///  <param name="charts">
+        ///
+        ///  </param>
+        /// <param name="images">
         ///
         /// </param>
-        /// <param name="document">
-        ///
-        /// </param>
-        /// <param name="documentRelations">
-        ///
-        /// </param>
-        /// <param name="footnotes">
-        ///
-        /// </param>
-        /// <param name="footnoteRelations">
-        ///
-        /// </param>
-        /// <param name="styles">
-        ///
-        /// </param>
-        /// <param name="numbering">
-        ///
-        /// </param>
-        /// <param name="theme1">
-        ///
-        /// </param>
-        /// <param name="charts">
-        ///
-        /// </param>
-        public OpenXmlPackageVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] XElement theme1, [NotNull] IEnumerable<ChartInformation> charts)
+        public OpenXmlPackageVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] XElement theme1, [NotNull] IEnumerable<ChartInformation> charts, [NotNull] IEnumerable<ImageInformation> images)
         {
             if (contentTypes is null)
             {
@@ -371,6 +329,11 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(charts));
             }
 
+            if (images is null)
+            {
+                throw new ArgumentNullException(nameof(images));
+            }
+
             ContentTypes = contentTypes.Clone();
             Document = document.Clone();
             DocumentRelations = documentRelations.Clone();
@@ -380,6 +343,7 @@ namespace AD.OpenXml
             Numbering = numbering.Clone();
             Theme1 = theme1.Clone();
             Charts = charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
+            Images = images.Select(x => new ImageInformation(x.Name, x.Image.ToArray())).ToImmutableArray();
         }
 
         /// <summary>
@@ -399,29 +363,6 @@ namespace AD.OpenXml
         }
 
         /// <inheritdoc />
-        public void Save(DocxFilePath result)
-        {
-            if (result is null)
-            {
-                throw new ArgumentNullException(nameof(result));
-            }
-
-            Document.WriteInto(result, "word/document.xml");
-            Footnotes.WriteInto(result, "word/footnotes.xml");
-            ContentTypes.WriteInto(result, ContentTypesInfo.Path);
-            DocumentRelations.WriteInto(result, DocumentRelsInfo.Path);
-            FootnoteRelations.WriteInto(result, "word/_rels/footnotes.xml.rels");
-            Styles.WriteInto(result, "word/styles.xml");
-            Numbering.WriteInto(result, "word/numbering.xml");
-            Theme1.WriteInto(result, "word/theme/theme1.xml");
-
-            foreach (ChartInformation item in Charts)
-            {
-                item.Chart.WriteInto(result, $"word/{item.Name}");
-            }
-        }
-
-        /// <inheritdoc />
         public async Task<MemoryStream> Save()
         {
             MemoryStream stream = DocxFilePath.Create();
@@ -438,6 +379,11 @@ namespace AD.OpenXml
             foreach (ChartInformation item in Charts)
             {
                 stream = await item.Chart.WriteInto(stream, $"word/{item.Name}");
+            }
+
+            foreach (ImageInformation item in Images)
+            {
+                stream = await item.Image.WriteInto(stream, $"word/{item.Name}");
             }
 
             return stream;
@@ -465,26 +411,6 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
-        public virtual IOpenXmlPackageVisitor Visit(DocxFilePath file)
-        {
-            if (file is null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
-
-            IOpenXmlPackageVisitor subject = new OpenXmlPackageVisitor(file);
-            IOpenXmlPackageVisitor documentVisitor = VisitDocument(subject, NextRevisionId);
-            IOpenXmlPackageVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId, NextRevisionId);
-            IOpenXmlPackageVisitor documentRelationVisitor = VisitDocumentRelations(footnoteVisitor, NextDocumentRelationId);
-            IOpenXmlPackageVisitor footnoteRelationVisitor = VisitFootnoteRelations(documentRelationVisitor, NextFootnoteRelationId);
-            IOpenXmlPackageVisitor styleVisitor = VisitStyles(footnoteRelationVisitor);
-            IOpenXmlPackageVisitor numberingVisitor = VisitNumbering(styleVisitor);
-
-            return numberingVisitor;
-        }
-
-        /// <inheritdoc />
-        [Pure]
         public virtual IOpenXmlPackageVisitor Fold(IOpenXmlPackageVisitor subject)
         {
             if (subject is null)
@@ -498,18 +424,6 @@ namespace AD.OpenXml
         /// <inheritdoc />
         [Pure]
         public virtual IOpenXmlPackageVisitor VisitAndFold(IEnumerable<MemoryStream> files)
-        {
-            if (files is null)
-            {
-                throw new ArgumentNullException(nameof(files));
-            }
-
-            return files.Aggregate(this as IOpenXmlPackageVisitor, (current, next) => current.Fold(current.Visit(next)));
-        }
-
-        /// <inheritdoc />
-        [Pure]
-        public virtual IOpenXmlPackageVisitor VisitAndFold(IEnumerable<DocxFilePath> files)
         {
             if (files is null)
             {
@@ -634,6 +548,12 @@ namespace AD.OpenXml
                           subject.Charts,
                           ChartInformation.Comparer);
 
+            IEnumerable<ImageInformation> images =
+                source.Images
+                      .Union(
+                          subject.Images,
+                          ImageInformation.Comparer);
+
             return
                 new OpenXmlPackageVisitor(
                     contentTypes,
@@ -644,7 +564,8 @@ namespace AD.OpenXml
                     styles,
                     numbering,
                     subject.Theme1,
-                    charts);
+                    charts,
+                    images);
         }
 
         /// <summary>

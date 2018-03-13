@@ -15,11 +15,9 @@ namespace AD.OpenXml.Visits
     [PublicAPI]
     public sealed class FootnoteRelationVisit : IOpenXmlPackageVisit
     {
-        [NotNull]
-        private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
+        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
-        [NotNull]
-        private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
+        [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
         /// <inheritdoc />
         public IOpenXmlPackageVisitor Result { get; }
@@ -44,7 +42,8 @@ namespace AD.OpenXml.Visits
                     subject.Styles,
                     subject.Numbering,
                     subject.Theme1,
-                    subject.Charts);
+                    subject.Charts,
+                    subject.Images);
         }
 
         [Pure]
@@ -85,7 +84,6 @@ namespace AD.OpenXml.Visits
                 modifiedFootnotes =
                     modifiedFootnotes.ChangeXAttributeValues(R + "id", (string) map.oldId, (string) map.newId);
             }
-
 
             XElement modifiedFootnoteRelations =
                 new XElement(

@@ -53,7 +53,8 @@ namespace AD.OpenXml.Visits
                     subject.Styles,
                     subject.Numbering,
                     subject.Theme1,
-                    subject.Charts);
+                    subject.Charts,
+                    subject.Images);
         }
 
         /// <summary>
@@ -236,6 +237,7 @@ namespace AD.OpenXml.Visits
                 {
                     previous.AddFirst(new XElement(W + "pPr", sectionProperties));
                 }
+
                 previous?.Element(W + "pPr")?.Add(sectionProperties);
             }
 
@@ -247,7 +249,7 @@ namespace AD.OpenXml.Visits
 
             foreach (XElement item in charts)
             {
-                item.RemoveBy(W + "pStyle");
+                item.RemoveByAll(W + "pStyle");
 
                 if (!item.Elements(W + "pPr").Any())
                 {
@@ -256,10 +258,8 @@ namespace AD.OpenXml.Visits
 
                 item.Element(W + "pPr")?
                     .AddFirst(
-                        new XElement(
-                            W + "pStyle",
-                            new XAttribute(
-                                W + "val",
+                        new XElement(W + "pStyle",
+                            new XAttribute(W + "val",
                                 "FiguresTablesSourceNote")));
             }
 
