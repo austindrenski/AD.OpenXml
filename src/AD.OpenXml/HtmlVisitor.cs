@@ -24,7 +24,12 @@ namespace AD.OpenXml
         /// <summary>
         /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
         /// </summary>
-        [NotNull] private static readonly Regex SequenceRegex = new Regex("SEQ (?<type>[A-z]+) ?(?<switch>..) ?(?<format>\"[()A-z0-9 -]+\")", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        [NotNull] private static readonly Regex SequenceRegex = new Regex("SEQ (?<type>[A-z]+)(?<switches>.*)(?<format>\".+\")", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
+        /// </summary>
+        [NotNull] private static readonly Regex StyleReferenceRegex = new Regex("STYLEREF (?<format>\".+\")", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The !DOCTYPE declaration.
@@ -479,6 +484,22 @@ namespace AD.OpenXml
                         Visit(paragraph.Value));
             }
 
+            // ReSharper disable once InvertIf
+            if (paragraph.NextNode is XElement next)
+            {
+                if (next.Name == W + "tbl" && (string) classAttribute == "CaptionTable")
+                {
+                    // Handled by VisitTable.
+                    return null;
+                }
+
+                if (next.Descendants(W + "drawing").Count() == 1 && (string) classAttribute == "CaptionFigure")
+                {
+                    // Not handled. <figcaption/> created from <w:docPr/>.
+                    return null;
+                }
+            }
+
             return
                 new XElement(
                     VisitName(paragraph.Name),
@@ -550,6 +571,7 @@ namespace AD.OpenXml
             {
                 if ((string) fieldChar.Attribute(W + "fldCharType") == "end")
                 {
+                    // Not handled. Placeholder text for field characters is not trusted.
                     return null;
                 }
             }
@@ -609,36 +631,44 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(table));
             }
 
+            XElement caption =
+                table.PreviousNode is XElement p &&
+                p.Name == W + "p" &&
+                (string) p.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "CaptionTable"
+                    ? p
+                    : null;
+
             XAttribute classAttribute = table.Element(W + "tblPr")?.Element(W + "tblStyle")?.Attribute(W + "val");
 
-            XObject[] tableNodes = Visit(table.Nodes()).ToArray();
+            XObject[] tableNodes = Visit(table.Elements()).ToArray();
 
-            XElement firstRow =
-                tableNodes.OfType<XElement>()
-                          .FirstOrDefault(x => x.Name == "tr");
+            XElement headerRow =
+                new XElement("tr",
+                    tableNodes.OfType<XElement>()
+                              .FirstOrDefault(x => x.Name == "tr")
+                              .Nodes()
+                              .Select(
+                                  x => !(x is XElement e) || e.Name != "td"
+                                           ? x
+                                           : new XElement("th",
+                                               e.Attributes(),
+                                               e.Nodes())));
 
-            XElement header =
-                new XElement("thead",
-                    firstRow.Nodes()
-                            .Select(x => !(x is XElement e) || e.Name != "td" ? x : new XElement("th", e.Attributes(), e.Nodes())));
-
-            XObject[] beforeHeader =
-                tableNodes.TakeWhile(x => !(x is XElement e) || e.Name != "tr")
-                          .ToArray();
-
-            XObject[] afterHeader =
+            IEnumerable<XObject> bodyRows =
                 tableNodes.SkipWhile(x => !(x is XElement e) || e.Name != "tr")
                           .Skip(1)
-                          .ToArray();
+                          .TakeWhile(x => x is XElement e && e.Name == "tr");
 
             return
                 new XElement(
                     VisitName(table.Name),
                     Visit(classAttribute),
                     Visit(table.Attributes()),
-                    beforeHeader,
-                    header,
-                    afterHeader);
+                    new XElement("caption", FindCaption(caption)),
+                    new XElement("thead", headerRow),
+                    new XElement("tbody", bodyRows),
+                    // TODO: incorporate source/note
+                    new XElement("tfoot", string.Empty));
         }
 
         /// <inheritdoc />
@@ -652,33 +682,21 @@ namespace AD.OpenXml
 
             XAttribute alignment = cell.Elements(W + "p").FirstOrDefault()?.Element(W + "pPr")?.Element(W + "jc")?.Attribute(W + "val");
 
-            if (cell.Elements(W + "p").Count() != 1)
-            {
-                return
-                    new XElement(
+            XAttribute style = cell.Element(W + "p")?.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
+
+            // Lift attributes and content to the cell when the parapgraph is a singleton.
+            return
+                cell.Elements(W + "p").Count() == 1
+                    ? new XElement(
+                        VisitName(cell.Name),
+                        Visit(MakeClassAttribute(alignment, style)),
+                        Visit(cell.Attributes()),
+                        Visit(cell.Nodes()).Select(LiftSingleton))
+                    : new XElement(
                         VisitName(cell.Name),
                         Visit(alignment),
                         Visit(cell.Attributes()),
                         Visit(cell.Nodes()));
-            }
-
-            XAttribute style = cell.Element(W + "p").Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
-
-            XAttribute alignmentStyle =
-                alignment is null && style is null
-                    ? null
-                    : alignment is null
-                        ? new XAttribute("class", (string) style)
-                        : style is null
-                            ? new XAttribute("class", (string) alignment)
-                            : new XAttribute("class", $"{style} {alignment}");
-
-            return
-                new XElement(
-                    VisitName(cell.Name),
-                    Visit(alignmentStyle),
-                    Visit(cell.Attributes()),
-                    Visit(cell.Nodes()).Select(LiftSingleton));
         }
 
         /// <inheritdoc />
@@ -690,7 +708,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(text));
             }
 
-            return SequenceRegex.IsMatch(text.Value) ? null : text;
+            return SequenceRegex.IsMatch(text.Value) || StyleReferenceRegex.IsMatch(text.Value) ? null : text;
         }
 
         /// <summary>
@@ -732,6 +750,44 @@ namespace AD.OpenXml
                                              new XElement("observation",
                                                  new XAttribute("label", a.Value),
                                                  new XAttribute("value", b.Value))))));
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="paragraph">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [CanBeNull]
+        private static XText FindCaption([CanBeNull] XElement paragraph)
+        {
+            return
+                paragraph is null
+                    ? new XText(string.Empty)
+                    : new XText(SequenceRegex.Replace(StyleReferenceRegex.Replace((string) paragraph, string.Empty), string.Empty));
+        }
+
+        /// <summary>
+        /// Space delimits the attribute values into a 'class' attribute.
+        /// </summary>
+        /// <param name="attributes">
+        /// The <see cref="XAttribute"/> collection to combine.
+        /// </param>
+        /// <returns>
+        /// An <see cref="XAttribute"/> with the name 'class' and the values from <paramref name="attributes"/>.
+        /// </returns>
+        [Pure]
+        [NotNull]
+        private static XAttribute MakeClassAttribute([NotNull] [ItemCanBeNull] params XAttribute[] attributes)
+        {
+            return
+                new XAttribute("class",
+                    string.Join(" ", attributes.Where(x => x != null).Select(x => (string) x)));
         }
     }
 }
