@@ -24,12 +24,12 @@ namespace AD.OpenXml
         /// <summary>
         /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
         /// </summary>
-        [NotNull] private static readonly Regex SequenceRegex = new Regex("SEQ (?<type>[A-z]+)(?<switches>.*)(?<format>\".+\")", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        [NotNull] private static readonly Regex SequenceRegex = new Regex("SEQ (?<type>[A-z]+) (?<switches>.*) (?<format>\".+\"|[A-z]+ \\\\s [0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
         /// </summary>
-        [NotNull] private static readonly Regex StyleReferenceRegex = new Regex("STYLEREF (?<format>\".+\")", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        [NotNull] private static readonly Regex StyleReferenceRegex = new Regex("STYLEREF (?<format>\".+\"|[0-9] \\\\s)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The !DOCTYPE declaration.
@@ -569,11 +569,17 @@ namespace AD.OpenXml
 
             if (run.NextNode is XElement next && next.Element(W + "fldChar") is XElement fieldChar)
             {
-                if ((string) fieldChar.Attribute(W + "fldCharType") == "end")
+                if (fieldChar.Attribute(W + "fldCharType") != null)
                 {
-                    // Not handled. Placeholder text for field characters is not trusted.
+                    // Not handled. Field characters are not supported.
                     return null;
                 }
+            }
+
+            if (run.Element(W + "instrText") != null)
+            {
+                // Not handled. Field character formatting codes are not supported.
+                return null;
             }
 
             if ((string) run.Element(W + "footnoteReference")?.Attribute(W + "id") is string footnoteReference)
@@ -631,12 +637,10 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(table));
             }
 
-            XElement caption =
-                table.PreviousNode is XElement p &&
-                p.Name == W + "p" &&
-                (string) p.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "CaptionTable"
-                    ? p
-                    : null;
+            IEnumerable<XObject> caption =
+                table.PreviousNode is XElement p && p.Name == W + "p" && (string) p.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "CaptionTable"
+                    ? p.Nodes()
+                    : Enumerable.Empty<XObject>();
 
             XAttribute classAttribute = table.Element(W + "tblPr")?.Element(W + "tblStyle")?.Attribute(W + "val");
 
@@ -664,7 +668,7 @@ namespace AD.OpenXml
                     VisitName(table.Name),
                     Visit(classAttribute),
                     Visit(table.Attributes()),
-                    new XElement("caption", FindCaption(caption)),
+                    new XElement("caption", Visit(caption)),
                     new XElement("thead", headerRow),
                     new XElement("tbody", bodyRows),
                     // TODO: incorporate source/note
@@ -753,26 +757,6 @@ namespace AD.OpenXml
         }
 
         /// <summary>
-        ///
-        /// </summary>
-        /// <param name="paragraph">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [CanBeNull]
-        private static XText FindCaption([CanBeNull] XElement paragraph)
-        {
-            return
-                paragraph is null
-                    ? new XText(string.Empty)
-                    : new XText(SequenceRegex.Replace(StyleReferenceRegex.Replace((string) paragraph, string.Empty), string.Empty));
-        }
-
-        /// <summary>
         /// Space delimits the attribute values into a 'class' attribute.
         /// </summary>
         /// <param name="attributes">
@@ -782,12 +766,17 @@ namespace AD.OpenXml
         /// An <see cref="XAttribute"/> with the name 'class' and the values from <paramref name="attributes"/>.
         /// </returns>
         [Pure]
-        [NotNull]
+        [CanBeNull]
         private static XAttribute MakeClassAttribute([NotNull] [ItemCanBeNull] params XAttribute[] attributes)
         {
+            XAttribute[] notNull =
+                attributes.Where(x => x != null)
+                          .ToArray();
+
             return
-                new XAttribute("class",
-                    string.Join(" ", attributes.Where(x => x != null).Select(x => (string) x)));
+                notNull.Any()
+                    ? new XAttribute("class", string.Join(" ", attributes.Where(x => x != null).Select(x => (string) x)))
+                    : null;
         }
     }
 }

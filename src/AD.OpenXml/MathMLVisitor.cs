@@ -61,6 +61,8 @@ namespace AD.OpenXml
         /// </param>
         protected MathMLVisitor(bool returnOnDefault)
         {
+            _returnOnDefault = returnOnDefault;
+            
             VisitLookup =
                 new Dictionary<XName, Func<XElement, XObject>>
                 {
