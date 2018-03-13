@@ -484,6 +484,12 @@ namespace AD.OpenXml
                         Visit(paragraph.Value));
             }
 
+            if ((string) classAttribute == "FiguresTablesSourceNote")
+            {
+                // Not handled. Greedily subsumed by table nodes.
+                return null;
+            }
+
             // ReSharper disable once InvertIf
             if (paragraph.NextNode is XElement next)
             {
@@ -663,6 +669,12 @@ namespace AD.OpenXml
                           .Skip(1)
                           .TakeWhile(x => x is XElement e && e.Name == "tr");
 
+            IEnumerable<XElement> footerItems =
+                NextWhile(
+                    table,
+                    x => x as XElement,
+                    x => (string) x.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "FiguresTablesSourceNote");
+
             return
                 new XElement(
                     VisitName(table.Name),
@@ -671,8 +683,14 @@ namespace AD.OpenXml
                     new XElement("caption", Visit(caption)),
                     new XElement("thead", headerRow),
                     new XElement("tbody", bodyRows),
-                    // TODO: incorporate source/note
-                    new XElement("tfoot", string.Empty));
+                    new XElement("tfoot",
+                        new XAttribute("aria-label", "table sources and notes"),
+                        footerItems.Select(
+                            x =>
+                                new XElement("tr",
+                                    new XElement("td",
+                                        new XAttribute("colspan", headerRow.Elements("th").Count()),
+                                        Visit(x.Nodes()))))));
         }
 
         /// <inheritdoc />

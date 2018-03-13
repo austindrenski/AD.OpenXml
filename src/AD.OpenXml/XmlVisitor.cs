@@ -337,5 +337,56 @@ namespace AD.OpenXml
                     new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
                     Visit(element.Elements()));
         }
+
+        ///  <summary>
+        ///
+        ///  </summary>
+        ///  <param name="current">
+        ///
+        ///  </param>
+        /// <param name="cast">
+        ///
+        /// </param>
+        /// <param name="predicates">
+        ///
+        ///  </param>
+        ///  <returns>
+        ///
+        ///  </returns>
+        [Pure]
+        [NotNull]
+        [ItemNotNull]
+        protected IEnumerable<T> NextWhile<T>([NotNull] XNode current, Func<XNode, T> cast, [NotNull] [ItemNotNull] params Func<T, bool>[] predicates) where T : class
+        {
+            if (current is null)
+            {
+                throw new ArgumentNullException(nameof(current));
+            }
+
+            if (predicates.Any(x => x is null))
+            {
+                throw new ArgumentNullException(nameof(predicates));
+            }
+
+            for (XNode next = current.NextNode; next != null; next = next.NextNode)
+            {
+                T item = cast(next);
+
+                if (item is null)
+                {
+                    yield break;
+                }
+
+                for (int i = 0; i < predicates.Length; i++)
+                {
+                    if (!predicates[i](item))
+                    {
+                        yield break;
+                    }
+                }
+
+                yield return item;
+            }
+        }
     }
 }
