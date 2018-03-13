@@ -62,17 +62,18 @@ namespace AD.OpenXml
         protected MathMLVisitor(bool returnOnDefault)
         {
             _returnOnDefault = returnOnDefault;
-            
+
             VisitLookup =
                 new Dictionary<XName, Func<XElement, XObject>>
                 {
                     // @formatter:off
-                    [M + "d"]     = VisitDelimiter,
-                    [M + "e"]     = VisitBase,
-                    [M + "oMath"] = VisitMath,
-                    [M + "r"]     = VisitRun,
-                    [M + "sSub"]  = VisitSubscript,
-                    [M + "sSup"]  = VisitSuperscript,
+                    [M + "d"]         = VisitDelimiter,
+                    [M + "e"]         = VisitBase,
+                    [M + "oMath"]     = VisitMath,
+                    [M + "oMathPara"] = VisitMathParagraph,
+                    [M + "r"]         = VisitRun,
+                    [M + "sSub"]      = VisitSubscript,
+                    [M + "sSup"]      = VisitSuperscript,
                     // @formatter:on
                 };
         }
@@ -185,6 +186,28 @@ namespace AD.OpenXml
             return
                 new XElement("math",
                     Visit(math.Nodes()));
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="mathParagraph">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitMathParagraph([NotNull] XElement mathParagraph)
+        {
+            if (mathParagraph is null)
+            {
+                throw new ArgumentNullException(nameof(mathParagraph));
+            }
+
+            return LiftableHelper(mathParagraph);
         }
 
         /// <summary>
