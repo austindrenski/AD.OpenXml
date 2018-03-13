@@ -34,6 +34,12 @@ namespace AD.OpenXml
 
         // TODO: move into AD.Xml
         /// <summary>
+        /// Represents the 'm:' prefix seen in the markup for math elements.
+        /// </summary>
+        [NotNull] protected static readonly XNamespace M = "http://schemas.openxmlformats.org/officeDocument/2006/math";
+
+        // TODO: move into AD.Xml
+        /// <summary>
         /// Represents the 'pic:' prefix seen in the markup for 'drawing' elements.
         /// </summary>
         [NotNull] protected static readonly XNamespace PIC = "http://schemas.openxmlformats.org/drawingml/2006/picture";
@@ -92,6 +98,7 @@ namespace AD.OpenXml
                     [C   + "pieChart"]    = VisitPieChart,
                     [C   + "plotArea"]    = VisitPlotArea,
                     [DGM + "relIds"]      = VisitDiagram,
+                    [M   + "oMath"]       = VisitMath,
                     [PIC + "pic"]         = VisitPicture,
                     [W   + "body"]        = VisitBody,
                     [W   + "document"]    = VisitDocument,
@@ -478,6 +485,28 @@ namespace AD.OpenXml
             }
 
             return base.VisitElement(paragraph);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="math">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitMath([NotNull] XElement math)
+        {
+            if (math is null)
+            {
+                throw new ArgumentNullException(nameof(math));
+            }
+
+            return base.VisitElement(math);
         }
 
         /// <summary>

@@ -22,6 +22,11 @@ namespace AD.OpenXml
         [NotNull] private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
+        /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
+        /// </summary>
+        [NotNull] private static readonly Regex SequenceRegex = new Regex("SEQ (?<type>[A-z]+) ?(?<switch>..) ?(?<format>\"[()A-z0-9 -]+\")", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        /// <summary>
         /// The !DOCTYPE declaration.
         /// </summary>
         [NotNull] private static readonly XDocumentType DocumentTypeDeclaration = new XDocumentType("html", null, null, null);
@@ -130,7 +135,7 @@ namespace AD.OpenXml
         /// <returns>
         /// An <see cref="HtmlVisitor"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
         public static HtmlVisitor Create([NotNull] IDictionary<string, XElement> charts, [NotNull] IDictionary<string, (string mime, string description, string base64)> images, bool returnOnDefault = false)
@@ -201,6 +206,10 @@ namespace AD.OpenXml
                                 new XAttribute("type", "text/css"),
                                 new XAttribute("rel", "stylesheet"),
                                 new XAttribute("href", stylesheet)),
+                            new XElement("script",
+                                new XAttribute("type", "text/javascript"),
+                                new XAttribute("src", "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=MML_CHTML"),
+                                new XText(string.Empty)),
                             new XElement("style",
                                 new XText("article, section { counter-reset: footnote_counter; }"),
                                 new XText("footer :target { background: yellow; }"),
@@ -428,6 +437,18 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        protected override XObject VisitMath(XElement math)
+        {
+            if (math is null)
+            {
+                throw new ArgumentNullException(nameof(math));
+            }
+
+            return MathMLVisitor.Create(true).Visit(math);
+        }
+
+        /// <inheritdoc />
+        [Pure]
         protected override XName VisitName(XName name)
         {
             if (name is null)
@@ -523,6 +544,14 @@ namespace AD.OpenXml
             if (run.Element(W + "drawing") is XElement drawing)
             {
                 return Visit(drawing);
+            }
+
+            if (run.NextNode is XElement next && next.Element(W + "fldChar") is XElement fieldChar)
+            {
+                if ((string) fieldChar.Attribute(W + "fldCharType") == "end")
+                {
+                    return null;
+                }
             }
 
             if ((string) run.Element(W + "footnoteReference")?.Attribute(W + "id") is string footnoteReference)
@@ -652,29 +681,16 @@ namespace AD.OpenXml
                     Visit(cell.Nodes()).Select(LiftSingleton));
         }
 
-        /// <summary>
-        /// Constructs a liftable div element.
-        /// </summary>
-        /// <param name="element">
-        /// The <see cref="XElement"/> from which nodes can be lifted.
-        /// </param>
-        /// <returns>
-        /// An <see cref="XObject"/> representing the lift operation.
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />>
+        /// <inheritdoc />
         [Pure]
-        [NotNull]
-        private XObject LiftableHelper([NotNull] XElement element)
+        protected override XObject VisitText(XText text)
         {
-            if (element is null)
+            if (text is null)
             {
-                throw new ArgumentNullException(nameof(element));
+                throw new ArgumentNullException(nameof(text));
             }
 
-            return
-                new XElement("div",
-                    new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
-                    Visit(element.Elements()));
+            return SequenceRegex.IsMatch(text.Value) ? null : text;
         }
 
         /// <summary>

@@ -312,5 +312,30 @@ namespace AD.OpenXml
                 yield return item;
             }
         }
+
+        /// <summary>
+        /// Constructs a liftable div element.
+        /// </summary>
+        /// <param name="element">
+        /// The <see cref="XElement"/> from which nodes can be lifted.
+        /// </param>
+        /// <returns>
+        /// An <see cref="XObject"/> representing the lift operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />>
+        [Pure]
+        [NotNull]
+        protected XObject LiftableHelper([NotNull] XElement element)
+        {
+            if (element is null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            return
+                new XElement("div",
+                    new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
+                    Visit(element.Elements()));
+        }
     }
 }
