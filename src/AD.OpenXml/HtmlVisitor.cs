@@ -216,28 +216,21 @@ namespace AD.OpenXml
                                 new XAttribute("src", "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=MML_CHTML"),
                                 new XText(string.Empty)),
                             new XElement("style",
-                                // language=css
                                 new XText("article { counter-reset: chapter_counter; }"),
-                                // language=css
-                                new XText("h1::before { counter-increment: chapter_counter; }"),
-                                // language=css
-                                new XText("h1::before { counter-reset: footnote_counter; }"),
-                                // language=css
-                                new XText("h1::before { content: 'Chapter ' counter(chapter_counter) '<br/>'; }"),
-                                // language=css
+                                new XText("h1 { counter-increment: chapter_counter; }"),
+                                new XText("h1 { counter-reset: footnote_counter figure_counter table_counter; }"),
+                                new XText("h1::before { content:'Chapter ' counter(chapter_counter) '\\A'; white-space: pre; }"),
                                 new XText("footer::target { background: yellow; }"),
-                                // language=css
+                                new XText("table { counter-increment: table_counter; }"),
+                                new XText("figure { counter-increment: figure_counter; }"),
+                                new XText("caption::before { content: 'Table ' counter(chapter_counter) '.' counter(table_counter) ' '; font-weight: bold; }"),
+                                new XText("figcaption::before { content: 'Figure ' counter(chapter_counter) '.' counter(figure_counter) ' '; font-weight: bold; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"]::after { content: '[' counter(footnote_counter) ']'; }"),
-                                // language=css
-                                new XText("a[aria-describedby=\"footnote-label\"]::after { counter-increment: footnote_counter; }"),
-                                // language=css
-                                new XText("a[aria-describedby=\"footnote-label\"]::after { font-size: 0.5em; }"),
-                                // language=css
-                                new XText("a[aria-describedby=\"footnote-label\"]::after { margin-left: 1px; }"),
-                                // language=css
-                                new XText("a[aria-describedby=\"footnote-label\"]::after { text-decoration: none; }"),
-                                // language=css
-                                new XText("a[aria-describedby=\"footnote-label\"]::after { vertical-align: super; }"))),
+                                new XText("a[aria-describedby=\"footnote-label\"] { counter-increment: footnote_counter; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"] { font-size: 0.5em; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"] { margin-left: 1px; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"] { text-decoration: none; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"] { vertical-align: super; }"))),
                         // TODO: dispatch sequences of nodes optionally (e.g. virtual) instead of each node to support section-encapsulation.
                         Lift(Visit(document)),
                         // TODO: handle this as a call at the end of an encapsulated section so that each section can be served as stand alone content.
