@@ -224,7 +224,9 @@ namespace AD.OpenXml
                                 new XText("a[aria-describedby=\"footnote-label\"] { margin-left: 1px; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { text-decoration: none; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { vertical-align: super; }"))),
+                        // TODO: dispatch sequences of nodes optionally (e.g. virtual) instead of each node to support section-encapsulation.
                         Lift(Visit(document)),
+                        // TODO: handle this as a call at the end of an encapsulated section so that each section can be served as stand alone content.
                         Visit(footnotes)));
         }
 
