@@ -217,6 +217,7 @@ namespace AD.OpenXml
                                 new XText(string.Empty)),
                             new XElement("style",
                                 new XText("article { counter-reset: chapter_counter; }"),
+                                new XText("h1 { page-break-before: always; }"),
                                 new XText("h1 { counter-increment: chapter_counter; }"),
                                 new XText("h1 { counter-reset: footnote_counter figure_counter table_counter; }"),
                                 new XText("h1::before { content:'Chapter ' counter(chapter_counter) '\\A'; white-space: pre; }"),
