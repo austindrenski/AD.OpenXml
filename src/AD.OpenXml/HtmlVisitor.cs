@@ -216,10 +216,9 @@ namespace AD.OpenXml
                                 new XAttribute("src", "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=MML_CHTML"),
                                 new XText(string.Empty)),
                             new XElement("style",
-                                new XText("article, section { counter-reset: footnote_counter; }"),
+                                new XText("h1 { counter-reset: footnote_counter; }"),
                                 new XText("footer :target { background: yellow; }"),
-                                new XText("a[aria-describedby=\"footnote-label\"]::before { content: '['; }"),
-                                new XText("a[aria-describedby=\"footnote-label\"]::after { content: ']'; }"),
+                                new XText("a[aria-describedby=\"footnote-label\"]::after { content: '[' counter(footnote_counter) ']'; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { counter-increment: footnote_counter; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { font-size: 0.5em; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { margin-left: 1px; }"),
@@ -388,7 +387,8 @@ namespace AD.OpenXml
                     new XElement("h2",
                         new XAttribute("id", "footnote-label"),
                         new XText("Footnotes")),
-                    new XElement("ol",
+                    // TODO: use <ol> once footnotes are encapsulated by the chapter section.
+                    new XElement("ul",
                         Visit(footnotes.Elements().Where(x => (int) x.Attribute(W + "id") > 0))));
         }
 
@@ -595,7 +595,7 @@ namespace AD.OpenXml
                         new XAttribute("id", $"footnote_ref_{footnoteReference}"),
                         new XAttribute("href", $"#footnote_{footnoteReference}"),
                         new XAttribute("aria-describedby", "footnote-label"),
-                        Visit(footnoteReference));
+                        new XText(string.Empty));
             }
 
             if ((string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") == "superscript" ||
