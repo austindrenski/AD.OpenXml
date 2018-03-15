@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RuntimeIdentifiers>win81-x64;win10-x64;rhel-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win81-x64;win10-x64;rhel.7-x64</RuntimeIdentifiers>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <Authors>Austin Drenski</Authors>
     <Company>Austin Drenski</Company>
