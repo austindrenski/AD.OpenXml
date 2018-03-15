@@ -18,11 +18,6 @@ dotnet_csproj:
   package_version: '{version}'
   assembly_version: '{version}'
 
-artifacts:
-  - path: /app/win81-x64.zip
-  - path: /app/win10-x64.zip
-  - path: /app/rhel-x64.zip
-
 build_script:
   - pwsh: dotnet build -c Release -f netcoreapp2.0
   - pwsh: dotnet publish src/CompilerAPI -c Release -f netcoreapp2.0 -r win81-x64
@@ -30,14 +25,19 @@ build_script:
   - pwsh: dotnet publish src/CompilerAPI -c Release -f netcoreapp2.0 -r rhel-x64
 
 after_build:
-  - pwsh: Compress-Archive src/CompilerAPI/bin/Release/netcoreapp2.0/win81-x64 /app/win81-x64.zip
-  - pwsh: Compress-Archive src/CompilerAPI/bin/Release/netcoreapp2.0/win10-x64 /app/win10-x64.zip
-  - pwsh: Compress-Archive src/CompilerAPI/bin/Release/netcoreapp2.0/rhel-x64  /app/rhel-x64.zip
+  - pwsh: Compress-Archive src/CompilerAPI/bin/Release/netcoreapp2.0/win81-x64 app/win81-x64.zip
+  - pwsh: Compress-Archive src/CompilerAPI/bin/Release/netcoreapp2.0/win10-x64 app/win10-x64.zip
+  - pwsh: Compress-Archive src/CompilerAPI/bin/Release/netcoreapp2.0/rhel-x64  app/rhel-x64.zip
 
 test_script:
   - pwsh: dotnet test test/AD.OpenXML.Tests -c Release -f netcoreapp2.0 -r win81-x64
   - pwsh: dotnet test test/AD.OpenXML.Tests -c Release -f netcoreapp2.0 -r win10-x64
   - pwsh: dotnet test test/AD.OpenXML.Tests -c Release -f netcoreapp2.0 -r rhel-x64
+
+artifacts:
+  - path: app/win81-x64.zip
+  - path: app/win10-x64.zip
+  - path: app/rhel-x64.zip
 
 deploy_script:
     - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s ${env:push} -k ${env:nuget}
