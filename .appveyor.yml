@@ -18,7 +18,7 @@ dotnet_csproj:
   assembly_version: '{version}'
 
 cache:
-  - %USERPROFILE%\.nuget\packages -> *.csproj
+  - '%USERPROFILE%\.nuget\packages -> *.csproj'
 
 artifacts:
   - path: app.zip
