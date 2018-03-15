@@ -17,25 +17,19 @@ dotnet_csproj:
   package_version: '{version}'
   assembly_version: '{version}'
 
-cache:
-  - packages -> **\*.csproj
-  - c:\users\appveyor\.nuget\packages -> **\*.csproj
-
 artifacts:
-  - path: /app/docker.zip
-    name: docker
-
-#before_build:
-#  - pwsh: mkdir src/CompilerAPI/wwwroot/min
+  - path: docker.zip
 
 build_script:
   - pwsh: dotnet build -c Release
   - pwsh: dotnet test test/AD.OpenXML.Tests -c Release
   - pwsh: dotnet publish src/CompilerAPI -c Release -o /app
-  - pwsh: docker build .
 
 on_success:
   - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s https://www.nuget.org/api/v2/package -k ${env:nuget}
+  - pwsh: docker build . -t compilerapi:${env:appveyor_build_version}
+  - pwsh: docker image ls
+  - pwsh: docker image save compilerapi:${env:appveyor_build_version} -o docker.zip
 
 #deploy:
 #  release: CompilerAPI-v$(appveyor_build_version)
