@@ -18,10 +18,10 @@ dotnet_csproj:
   assembly_version: '{version}'
 
 cache:
-  - packages -> **\packages.config
+  - %USERPROFILE%\.nuget\packages -> *.csproj
 
 artifacts:
-  - path: CompilerAPI.zip
+  - path: app.zip
     name: docker
 
 before_build:
@@ -30,7 +30,6 @@ before_build:
 build_script:
   - pwsh: dotnet build -c Release
   - pwsh: dotnet test test/AD.OpenXML.Tests -c Release
-
   - pwsh: dotnet publish src/CompilerAPI -c Release -o /app
   - pwsh: docker build .
 
