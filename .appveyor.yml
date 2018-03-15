@@ -18,14 +18,14 @@ dotnet_csproj:
   assembly_version: '{version}'
 
 cache:
-  - '%USERPROFILE%\.nuget\packages -> *.csproj'
+  - /users/appveyor/.nuget/packages -> *.csproj
 
 artifacts:
   - path: app.zip
     name: docker
 
-before_build:
-  - pwsh: mkdir src/CompilerAPI/wwwroot/min
+#before_build:
+#  - pwsh: mkdir src/CompilerAPI/wwwroot/min
 
 build_script:
   - pwsh: dotnet build -c Release
