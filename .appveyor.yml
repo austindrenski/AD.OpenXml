@@ -1,6 +1,8 @@
 image: Visual Studio 2017
 
-platform: Any CPU
+platform: x64
+
+configuration: release
 
 version: 1.4.{build}
 
@@ -21,7 +23,8 @@ dotnet_csproj:
   assembly_version: '{version}'
 
 artifacts:
-  - path: compilerapi
+  - path: compilerapi.zip
+    name: docker
 
 before_build:
   - pwsh: mkdir src/CompilerAPI/wwwroot/min
@@ -31,7 +34,7 @@ build_script:
   - pwsh: dotnet test test/AD.OpenXML.Tests -c Release
 
   - pwsh: dotnet publish src/CompilerAPI -c Release -o /app
-  - pwsh: docker build -t compilerapi .
+  - pwsh: docker build .
 
 on_success:
   - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s https://www.nuget.org/api/v2/package -k ${env:nuget}
