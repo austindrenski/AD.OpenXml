@@ -13,7 +13,8 @@ environment:
   nuget:
     secure: lAOgXBlidUDKDMFlDJInIUO7K9vZc4FHLP715QyBp1gP9KFNQjntN70Jo6gi4+bA
 
-version: 1.4.{build}
+version:
+ - 1.4.{build}
 
 dotnet_csproj:
   patch: true
@@ -23,11 +24,16 @@ dotnet_csproj:
   assembly_version: '{version}'
 
 install:
+ - docker version
+
+before_build:
   - pwsh: mkdir src/CompilerAPI/wwwroot/min
 
 build_script:
   - pwsh: dotnet build --configuration Release
   - pwsh: dotnet test test/AD.OpenXML.Tests --configuration Release
+  - docker build
+  - docker run
 
 on_success:
   - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg --source https://www.nuget.org/api/v2/package --api-key ${env:nuget}
