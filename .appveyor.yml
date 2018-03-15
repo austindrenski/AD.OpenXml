@@ -42,20 +42,4 @@ artifacts:
   - path: CompilerAPI-${env:appveyor_build_version}-rhel.7-x64.zip
 
 deploy_script:
-    - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s ${env:push} -k ${env:nuget}
-
-deploy:
-  release: v$(appveyor_build_version)
-  description: "CompilerAPI-v$(appveyor_build_version)"
-  provider: GitHub
-  auth_token:
-    secure: lUfPIpUpOgUKNIp62jlMKWpPk7as9PrO4jecoGCEAt4qmFQJZ+r58FfQK1zkfyG0QMFci4l+WR8RU6I445zM7M0INwxBE2KG18mR6gojpIe18yw3LbRgHZAd6pxdElhXRnPDOAZfb9Ac/G2x8EqIBO6emwRIPWWwxgxtQiwXrvOYwGL38Tk/H6ZlONDtCRfMplC+EOn+iUjnGSIMHBHVm4aShkcffTRfii6pifp9MAOCfGAxrcxWEAD4mNahcqV0DIoIg61PNbmzgSLpq0c1CsMojHpekPDUd6ioklHxuL7PKw076dL3ZWt5WiTDLQ+2xJTqaQbw3SfdlJB3T4nCSMAgL1hDj61aN2UT6AFqyKd9HychhWBvoGa0R/bcDhWd5Rlb+mbuAPV4BUtsFb4LyiB5heL1I62FmnwcUFOuzzxjR03AWUS/ZiR9b+J73BP6Q+YvvyqO0swRtmN8JoaBm+eiXhefzVBfSWsrSYxPIUVIXeJfUr8UGhP0t5/KH++3
-  artifact:
-    CompilerAPI-v$(appveyor_build_version)-win81-x64.zip
-    CompilerAPI-v$(appveyor_build_version)-win10-x64.zip
-    CompilerAPI-v$(appveyor_build_version)-rhel.7-x64.zip
-  name: release
-  on:
-    branch: master
-  draft: false
-  prerelease: false
+  - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s ${env:push} -k ${env:nuget}
