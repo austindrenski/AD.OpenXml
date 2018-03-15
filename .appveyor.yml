@@ -1,8 +1,8 @@
-image:
-  - Visual Studio 2017
+image: Visual Studio 2017
 
-platform:
-  - Any CPU
+platform: Any CPU
+
+version: 1.4.{build}
 
 branches:
   only:
@@ -12,9 +12,6 @@ branches:
 environment:
   nuget:
     secure: lAOgXBlidUDKDMFlDJInIUO7K9vZc4FHLP715QyBp1gP9KFNQjntN70Jo6gi4+bA
-
-version:
- - 1.4.{build}
 
 dotnet_csproj:
   patch: true
