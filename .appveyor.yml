@@ -19,7 +19,7 @@ dotnet_csproj:
   assembly_version: '{version}'
 
 build_script:
-  - pwsh: dotnet build -c Release -f netcoreapp2.0
+  - pwsh: dotnet build -c Release
   - pwsh: dotnet publish src/CompilerAPI -c Release -f netcoreapp2.0 -r win81-x64
   - pwsh: dotnet publish src/CompilerAPI -c Release -f netcoreapp2.0 -r win10-x64
   - pwsh: dotnet publish src/CompilerAPI -c Release -f netcoreapp2.0 -r rhel-x64
