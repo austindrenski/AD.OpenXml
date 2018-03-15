@@ -17,8 +17,11 @@ dotnet_csproj:
   package_version: '{version}'
   assembly_version: '{version}'
 
+cache:
+  - packages -> **\packages.config
+
 artifacts:
-  - path: compilerapi.zip
+  - path: CompilerAPI.zip
     name: docker
 
 before_build:
