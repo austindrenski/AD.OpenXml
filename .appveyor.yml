@@ -7,6 +7,7 @@ branches:
     - master
 
 environment:
+  push: https://www.nuget.org/api/v2/package
   nuget:
     secure: lAOgXBlidUDKDMFlDJInIUO7K9vZc4FHLP715QyBp1gP9KFNQjntN70Jo6gi4+bA
 
@@ -18,18 +19,28 @@ dotnet_csproj:
   assembly_version: '{version}'
 
 artifacts:
-  - path: docker.zip
+  - path: /app/win81-x64.zip
+  - path: /app/win10-x64.zip
+  - path: /app/rhel-x64.zip
 
 build_script:
-  - pwsh: dotnet build -c Release
-  - pwsh: dotnet test test/AD.OpenXML.Tests -c Release
-  - pwsh: dotnet publish src/CompilerAPI -c Release -o /app
+  - pwsh: dotnet build -c Release -f netcoreapp2.0
+  - pwsh: dotnet publish src/CompilerAPI -c Release -f netcoreapp2.0 -r win81-x64
+  - pwsh: dotnet publish src/CompilerAPI -c Release -f netcoreapp2.0 -r win10-x64
+  - pwsh: dotnet publish src/CompilerAPI -c Release -f netcoreapp2.0 -r rhel-x64
 
-on_success:
-  - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s https://www.nuget.org/api/v2/package -k ${env:nuget}
-  - pwsh: docker build . -t compilerapi:${env:appveyor_build_version}
-  - pwsh: docker image ls
-  - pwsh: docker image save compilerapi:${env:appveyor_build_version} -o docker.zip
+after_build:
+  - pwsh: Compress-Archive src/CompilerAPI/bin/Release/netcoreapp2.0/win81-x64 /app/win81-x64.zip
+  - pwsh: Compress-Archive src/CompilerAPI/bin/Release/netcoreapp2.0/win10-x64 /app/win10-x64.zip
+  - pwsh: Compress-Archive src/CompilerAPI/bin/Release/netcoreapp2.0/rhel-x64  /app/rhel-x64.zip
+
+test_script:
+  - pwsh: dotnet test test/AD.OpenXML.Tests -c Release -f netcoreapp2.0 -r win81-x64
+  - pwsh: dotnet test test/AD.OpenXML.Tests -c Release -f netcoreapp2.0 -r win10-x64
+  - pwsh: dotnet test test/AD.OpenXML.Tests -c Release -f netcoreapp2.0 -r rhel-x64
+
+deploy_script:
+    - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s ${env:push} -k ${env:nuget}
 
 #deploy:
 #  release: CompilerAPI-v$(appveyor_build_version)
