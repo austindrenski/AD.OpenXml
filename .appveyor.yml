@@ -22,25 +22,7 @@ build_script:
   - pwsh: dotnet build -c Release
 
 test_script:
-  - pwsh: dotnet test test/AD.OpenXML.Tests -c Release -f netcoreapp2.0 -r win10-x64
-
-after_test:
-  - pwsh: dotnet publish src/CompilerAPI -c Release -f netcoreapp2.0 -r win10-x64 -o /app
-  - pwsh: docker build -t compilerapi-v${env:appveyor_build_version} .
-  - pwsh: docker image save compilerapi-v${env:appveyor_build_version}
-
-artifacts:
-  - path: compilerapi-v$(appveyor_build_version)
+  - pwsh: dotnet test test/AD.OpenXML.Tests -c Release -f netcoreapp2.0
 
 deploy_script:
   - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s ${env:push} -k ${env:nuget}
-
-deploy:
-  provider: GitHub
-  description: "CompilerAPI-v$(appveyor_build_version)"
-  artifact: compilerapi-v$(appveyor_build_version)
-  auth_token:
-    secure: lUfPIpUpOgUKNIp62jlMKWpPk7as9PrO4jecoGCEAt6fSYikAaFyimbplKtWxVhIR/cvtqo7472EBMpkN6/vJzcI38xYIeLVzc0eC7UC/SXcpHGBQsOtQtDnquwI8AmS+cvX0EXXNvKJ+fynqQ015txYeYko2DMq2meSOi7Dn25+fgXvieijjSfv4Q2mXJkUgh8mSleX3ydj+iX9NWSxlD9OWtRSx8MHQHPyJ7SFT/ZqG0EK8IuUWqCSe7PJTS6NgoL9kTa1T8bupP7ziL5N8TL/GdfzBA+P4HvuRQBeh+9rFMJOU/+yXYtXbqnGsxRoSgFq50QMKiXn3GgsddSx26GgO99SzFo4iViJgZ6F9uaNPCnBtvtsrgmJGOt3Nf3GyvtrAXrywoFBo/zG+ytIuAGszcnD38fJ0MW2s8C2Kb+8RixV3hQ4HEKDpSrjUuv5Mw8PbxCBZfoBpXYGW7A9yRheUsKvHNTpntE4QnCW4w8cnnmUcaoFMfAkAaLx5Yuc
-  on:
-    branch: master
-#    appveyor_repo_tag: true
