@@ -44,16 +44,16 @@ artifacts:
 deploy_script:
   - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s ${env:push} -k ${env:nuget}
 
- deploy:
-   release: v$(appveyor_build_version)
-   description: "CompilerAPI-v$(appveyor_build_version)"
-   provider: GitHub
-   auth_token:
-     secure: lUfPIpUpOgUKNIp62jlMKWpPk7as9PrO4jecoGCEAt6fSYikAaFyimbplKtWxVhIR/cvtqo7472EBMpkN6/vJzcI38xYIeLVzc0eC7UC/SXcpHGBQsOtQtDnquwI8AmS+cvX0EXXNvKJ+fynqQ015txYeYko2DMq2meSOi7Dn25+fgXvieijjSfv4Q2mXJkUgh8mSleX3ydj+iX9NWSxlD9OWtRSx8MHQHPyJ7SFT/ZqG0EK8IuUWqCSe7PJTS6NgoL9kTa1T8bupP7ziL5N8TL/GdfzBA+P4HvuRQBeh+9rFMJOU/+yXYtXbqnGsxRoSgFq50QMKiXn3GgsddSx26GgO99SzFo4iViJgZ6F9uaNPCnBtvtsrgmJGOt3Nf3GyvtrAXrywoFBo/zG+ytIuAGszcnD38fJ0MW2s8C2Kb+8RixV3hQ4HEKDpSrjUuv5Mw8PbxCBZfoBpXYGW7A9yRheUsKvHNTpntE4QnCW4w8cnnmUcaoFMfAkAaLx5Yuc
-   artifact:
-     CompilerAPI-v$(appveyor_build_version)-win81-x64.zip
-     CompilerAPI-v$(appveyor_build_version)-win10-x64.zip
-     CompilerAPI-v$(appveyor_build_version)-rhel.7-x64.zip
-   on:
-     branch: master
-     appveyor_repo_tag: true
+deploy:
+  release: v$(appveyor_build_version)
+  description: "CompilerAPI-v$(appveyor_build_version)"
+  provider: GitHub
+  auth_token:
+    secure: lUfPIpUpOgUKNIp62jlMKWpPk7as9PrO4jecoGCEAt6fSYikAaFyimbplKtWxVhIR/cvtqo7472EBMpkN6/vJzcI38xYIeLVzc0eC7UC/SXcpHGBQsOtQtDnquwI8AmS+cvX0EXXNvKJ+fynqQ015txYeYko2DMq2meSOi7Dn25+fgXvieijjSfv4Q2mXJkUgh8mSleX3ydj+iX9NWSxlD9OWtRSx8MHQHPyJ7SFT/ZqG0EK8IuUWqCSe7PJTS6NgoL9kTa1T8bupP7ziL5N8TL/GdfzBA+P4HvuRQBeh+9rFMJOU/+yXYtXbqnGsxRoSgFq50QMKiXn3GgsddSx26GgO99SzFo4iViJgZ6F9uaNPCnBtvtsrgmJGOt3Nf3GyvtrAXrywoFBo/zG+ytIuAGszcnD38fJ0MW2s8C2Kb+8RixV3hQ4HEKDpSrjUuv5Mw8PbxCBZfoBpXYGW7A9yRheUsKvHNTpntE4QnCW4w8cnnmUcaoFMfAkAaLx5Yuc
+  artifact:
+    CompilerAPI-v$(appveyor_build_version)-win81-x64.zip
+    CompilerAPI-v$(appveyor_build_version)-win10-x64.zip
+    CompilerAPI-v$(appveyor_build_version)-rhel.7-x64.zip
+  on:
+    branch: master
+    appveyor_repo_tag: true
