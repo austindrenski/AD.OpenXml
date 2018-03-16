@@ -12,7 +12,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{86495F50-AC36-49FA-BDF9-055D00F9FDEF}"
 ProjectSection(SolutionItems) = preProject
 	.appveyor.yml = .appveyor.yml
-	.gitattributes = .gitattributes
 	.gitignore = .gitignore
 	LICENSE = LICENSE
 	README.md = README.md
