@@ -45,7 +45,6 @@ deploy_script:
   - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s ${env:push} -k ${env:nuget}
 
 deploy:
-  release: v$(appveyor_build_version)
   description: "CompilerAPI-v$(appveyor_build_version)"
   provider: GitHub
   auth_token:
