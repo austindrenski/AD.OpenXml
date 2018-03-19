@@ -19,10 +19,10 @@ dotnet_csproj:
   assembly_version: '{version}'
 
 build_script:
-  - dotnet build -c Release
+  - pwsh: dotnet build -c Release
 
 test_script:
-  - dotnet test test/AD.OpenXML.Tests -c Release
+  - pwsh: dotnet test test/AD.OpenXML.Tests -c Release
 
 deploy_script:
   - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s ${env:push} -k ${env:nuget}
