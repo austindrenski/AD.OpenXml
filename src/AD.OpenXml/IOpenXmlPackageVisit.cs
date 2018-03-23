@@ -3,7 +3,7 @@
 namespace AD.OpenXml
 {
     /// <summary>
-    /// Represents a visit to an <see cref="IOpenXmlPackageVisitor"/>.
+    /// Represents a visit to an <see cref="OpenXmlPackageVisitor"/>.
     /// </summary>
     [PublicAPI]
     public interface IOpenXmlPackageVisit
@@ -11,6 +11,6 @@ namespace AD.OpenXml
         /// <summary>
         /// The result of the visit.
         /// </summary>
-        IOpenXmlPackageVisitor Result { get; }
+        OpenXmlPackageVisitor Result { get; }
     }
 }

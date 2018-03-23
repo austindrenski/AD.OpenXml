@@ -65,7 +65,7 @@ namespace AD.OpenXml.Documents
             using (MemoryStream result = await stream.CopyPure())
             {
                 return
-                    result.ReadAsXml(ContentTypesInfo.Path)
+                    result.ReadXml(ContentTypesInfo.Path)
                           .Elements(ContentTypesInfo.Elements.Override)
                           .Where(x => (string) x.Attribute(ContentTypesInfo.Attributes.ContentType) == ChartContentType)
                           .Select(x => (string) x.Attribute(ContentTypesInfo.Attributes.PartName))

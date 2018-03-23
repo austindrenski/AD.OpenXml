@@ -58,7 +58,7 @@ namespace AD.OpenXml.Visits
         [NotNull] private static readonly XElement TOCHeading;
 
         /// <inheritdoc />
-        public IOpenXmlPackageVisitor Result { get; }
+        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         ///
@@ -272,7 +272,7 @@ namespace AD.OpenXml.Visits
         ///
         /// </summary>
         /// <param name="subject"></param>
-        public StyleVisit(IOpenXmlPackageVisitor subject)
+        public StyleVisit(OpenXmlPackageVisitor subject)
         {
             XElement styles = Execute(subject.Styles.Clone());
 

@@ -20,7 +20,7 @@ namespace AD.OpenXml.Visits
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
         /// <inheritdoc />
-        public IOpenXmlPackageVisitor Result { get; }
+        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
@@ -28,7 +28,7 @@ namespace AD.OpenXml.Visits
         /// <param name="subject">The file from which content is copied.</param>
         /// <param name="footnoteRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
-        public FootnoteRelationVisit(IOpenXmlPackageVisitor subject, int footnoteRelationId)
+        public FootnoteRelationVisit(OpenXmlPackageVisitor subject, int footnoteRelationId)
         {
             (var footnotes, var footnoteRelations) = Execute(subject.Footnotes, subject.FootnoteRelations, footnoteRelationId);
 

@@ -62,7 +62,7 @@ namespace AD.OpenXml.Documents
 
             MemoryStream result = await stream.CopyPure();
 
-            XElement element = result.ReadAsXml();
+            XElement element = result.ReadXml();
 
             foreach (XElement item in element.Descendants(W + "drawing").Where(x => x.Descendants(C + "chart").Any()))
             {
@@ -77,7 +77,7 @@ namespace AD.OpenXml.Documents
                             new XAttribute("cy", 914400 * 3.5)));
             }
 
-            return await element.WriteInto(result, "word/document.xml");
+            return await element.WriteIntoAsync(result, "word/document.xml");
         }
     }
 }

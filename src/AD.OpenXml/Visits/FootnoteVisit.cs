@@ -29,7 +29,7 @@ namespace AD.OpenXml.Visits
             };
 
         /// <inheritdoc />
-        public IOpenXmlPackageVisitor Result { get; }
+        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
@@ -46,7 +46,7 @@ namespace AD.OpenXml.Visits
         /// <returns>
         /// The updated document node of the source file.
         /// </returns>
-        public FootnoteVisit(IOpenXmlPackageVisitor subject, int footnoteId, int revisionId)
+        public FootnoteVisit(OpenXmlPackageVisitor subject, int footnoteId, int revisionId)
         {
             (XElement document, XElement footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId, revisionId);
 

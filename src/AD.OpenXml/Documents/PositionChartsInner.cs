@@ -54,7 +54,7 @@ namespace AD.OpenXml.Documents
 
             foreach (string item in await result.EnumerateChartPartNames())
             {
-                XElement element = result.ReadAsXml(item);
+                XElement element = result.ReadXml(item);
 
                 XElement plotArea = element.Descendants(C + "plotArea").First();
 
@@ -78,7 +78,7 @@ namespace AD.OpenXml.Documents
                             new XElement(C + "h",
                                 new XAttribute("val", "-0.9")))));
 
-                result = await element.WriteInto(result, item);
+                result = await element.WriteIntoAsync(result, item);
             }
 
             return result;

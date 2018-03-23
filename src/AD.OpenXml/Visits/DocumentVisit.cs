@@ -29,7 +29,7 @@ namespace AD.OpenXml.Visits
             };
 
         /// <inheritdoc />
-        public IOpenXmlPackageVisitor Result { get; }
+        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         /// Marshals content from the source document to be added into the container.
@@ -39,7 +39,7 @@ namespace AD.OpenXml.Visits
         /// The current revision number incremented by one.
         /// </param>
         /// <returns>The updated document node of the source file.</returns>
-        public DocumentVisit(IOpenXmlPackageVisitor subject, int revisionId)
+        public DocumentVisit(OpenXmlPackageVisitor subject, int revisionId)
         {
             XElement document = Execute(subject.Document, revisionId);
 

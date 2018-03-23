@@ -61,7 +61,7 @@ namespace AD.OpenXml.Documents
 
             MemoryStream result = await stream.CopyPure();
 
-            XElement document = result.ReadAsXml();
+            XElement document = result.ReadXml();
 
             IEnumerable<XElement> anchors =
                 document.Descendants(W + "drawing")
@@ -84,7 +84,7 @@ namespace AD.OpenXml.Documents
                 item.RemoveBy(WP + "anchor");
             }
 
-            return await document.WriteInto(result, "word/document.xml");
+            return await document.WriteIntoAsync(result, "word/document.xml");
         }
     }
 }

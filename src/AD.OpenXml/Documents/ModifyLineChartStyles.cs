@@ -63,9 +63,9 @@ namespace AD.OpenXml.Documents
             foreach (string item in await result.EnumerateChartPartNames())
             {
                 result =
-                    await result.ReadAsXml(item)
+                    await result.ReadXml(item)
                                 .ModifyLineChartStyles()
-                                .WriteInto(result, item);
+                                .WriteIntoAsync(result, item);
             }
 
             return result;

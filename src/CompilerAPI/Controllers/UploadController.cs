@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using AD.OpenXml;
@@ -88,13 +89,13 @@ namespace CompilerAPI.Controllers
                 return BadRequest("Invalid file format.");
             }
 
-            Queue<MemoryStream> documentQueue = new Queue<MemoryStream>(uploadedFiles.Length);
+            Queue<ZipArchive> documentQueue = new Queue<ZipArchive>(uploadedFiles.Length);
 
             foreach (IFormFile file in uploadedFiles)
             {
-                MemoryStream memoryStream = new MemoryStream();
-                await file.CopyToAsync(memoryStream);
-                documentQueue.Enqueue(memoryStream);
+//                MemoryStream memoryStream = new MemoryStream();
+//                await file.CopyToAsync(memoryStream);
+                documentQueue.Enqueue(new ZipArchive(file.OpenReadStream()));
             }
 
             MemoryStream output =
@@ -103,6 +104,11 @@ namespace CompilerAPI.Controllers
                     title ?? "[REPORT TITLE]",
                     publisher ?? "[PUBLISHER]",
                     website ?? "[PUBLISHER WEBSITE]");
+
+            foreach (ZipArchive archive in documentQueue)
+            {
+                archive.Dispose();
+            }
 
             output.Seek(0, SeekOrigin.Begin);
 
@@ -114,7 +120,7 @@ namespace CompilerAPI.Controllers
                 }
                 case "html":
                 {
-                    ReportPackageVisitor visitor = new ReportPackageVisitor(output);
+                    OpenXmlPackageVisitor visitor = new OpenXmlPackageVisitor(new ZipArchive(output));
                     return
                         new ContentResult
                         {
@@ -128,7 +134,7 @@ namespace CompilerAPI.Controllers
                 }
                 case "xml":
                 {
-                    ReportPackageVisitor visitor = new ReportPackageVisitor(output);
+                    OpenXmlPackageVisitor visitor = new OpenXmlPackageVisitor(new ZipArchive(output));
                     return
                         new ContentResult
                         {
@@ -147,7 +153,7 @@ namespace CompilerAPI.Controllers
         [Pure]
         [NotNull]
         [ItemNotNull]
-        private static async Task<MemoryStream> Process([NotNull] [ItemNotNull] IEnumerable<MemoryStream> files, [NotNull] string title, [NotNull] string publisher, [NotNull] string website)
+        private static async Task<MemoryStream> Process([NotNull] [ItemNotNull] IEnumerable<ZipArchive> files, [NotNull] string title, [NotNull] string publisher, [NotNull] string website)
         {
             if (files is null)
             {
@@ -170,7 +176,7 @@ namespace CompilerAPI.Controllers
             }
 
             return
-                await new ReportPackageVisitor()
+                await OpenXmlPackageVisitor
                       .VisitAndFold(files)
                       .Save()
                       .AddHeaders(title)

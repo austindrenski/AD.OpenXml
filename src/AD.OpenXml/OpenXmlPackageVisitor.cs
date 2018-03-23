@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -10,12 +11,12 @@ using AD.IO.Paths;
 using AD.OpenXml.Elements;
 using AD.OpenXml.Structures;
 using AD.OpenXml.Visitors;
+using AD.OpenXml.Visits;
 using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml
 {
-    /// <inheritdoc />
     ///  <summary>
     ///  Represents a visitor or rewriter for OpenXML documents.
     ///  </summary>
@@ -25,13 +26,15 @@ namespace AD.OpenXml
     ///  Access to <see cref="T:System.Xml.Linq.XElement" /> objects should be done with care, ensuring that objects are cloned prior to any in-place mainpulations.
     ///  The derived visitor class should provide:
     ///    1) A public constructor that delegates to <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.#ctor(AD.IO.Paths.DocxFilePath)" />.
-    ///    2) A private constructor that delegates to <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.#ctor(AD.OpenXml.IOpenXmlPackageVisitor)" />.
-    ///    3) Override <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.Create(AD.OpenXml.IOpenXmlPackageVisitor)" />.
+    ///    2) A private constructor that delegates to <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.#ctor(AD.OpenXml.OpenXmlPackageVisitor)" />.
+    ///    3) Override <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.Create(AD.OpenXml.OpenXmlPackageVisitor)" />.
     ///    4) An optional override for each desired visitor method.
     ///  </remarks>
     [PublicAPI]
-    public class OpenXmlPackageVisitor : IOpenXmlPackageVisitor
+    public sealed class OpenXmlPackageVisitor
     {
+        [NotNull] private static readonly ZipArchive DefaultOpenXml = new ZipArchive(DocxFilePath.Create());
+
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
         [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
@@ -49,46 +52,74 @@ namespace AD.OpenXml
                 W + "moveTo"
             };
 
-        /// <inheritdoc />
+        /// <summary>
+        /// word/charts/chart#.xml.
+        /// </summary>
         public IEnumerable<ChartInformation> Charts { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// word/media/image#.[jpeg|png|svg].
+        /// </summary>
         public IEnumerable<ImageInformation> Images { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// [Content_Types].xml
+        /// </summary>
         public XElement ContentTypes { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// word/document.xml
+        /// </summary>
         public XElement Document { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// word/_rels/document.xml.rels
+        /// </summary>
         public XElement DocumentRelations { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// word/_rels/footnotes.xml.rels
+        /// </summary>
         public XElement FootnoteRelations { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// word/footnotes.xml
+        /// </summary>
         public XElement Footnotes { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// word/styles.xml
+        /// </summary>
         public XElement Styles { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// word/numbering.xml
+        /// </summary>
         public XElement Numbering { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// word/theme/theme1.xml
+        /// </summary>
         public XElement Theme1 { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The current document relation number incremented by one.
+        /// </summary>
         public int NextDocumentRelationId => DocumentRelations.Elements().Count() + 1;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The current footnote number incremented by one.
+        /// </summary>
         public int NextFootnoteId => Footnotes.Elements(W + "footnote").Count(x => (int) x.Attribute(W + "id") > 0) + 1;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The current footnote relation number incremented by one.
+        /// </summary>
         public int NextFootnoteRelationId => FootnoteRelations.Elements().Count() + 1;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The current revision number incremented by one.
+        /// </summary>
         public int NextRevisionId =>
             Math.Max(
                 Document.Descendants()
@@ -132,54 +163,31 @@ namespace AD.OpenXml
                                  x => x.id,
                                  x => (mime: x.target.Substring(x.target.LastIndexOf('.') + 1), x.description, x.base64));
 
-        /// <inheritdoc />
-        /// <summary>
-        /// Initializes an <see cref="T:AD.OpenXml.OpenXmlPackageVisitor" /> by reading document parts into memory from a default <see cref="MemoryStream"/>.
-        /// </summary>
-        public OpenXmlPackageVisitor() : this(DocxFilePath.Create()) { }
-
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
         /// </summary>
-        /// <param name="stream">
-        /// The stream to which changes can be saved.
+        /// <param name="archive">
+        /// The archive to which changes can be saved.
         /// </param>
         /// <exception cref="ArgumentNullException"/>
-        public OpenXmlPackageVisitor([NotNull] MemoryStream stream)
+        public OpenXmlPackageVisitor([NotNull] ZipArchive archive)
         {
-            if (stream is null)
+            if (archive is null)
             {
-                throw new ArgumentNullException(nameof(stream));
+                throw new ArgumentNullException(nameof(archive));
             }
 
-            ContentTypes =
-                stream.ReadAsXml(ContentTypesInfo.Path) ?? throw new FileNotFoundException(ContentTypesInfo.Path);
+            ContentTypes = archive.ReadXml(ContentTypesInfo.Path);
+            Document = archive.ReadXml();
+            DocumentRelations = archive.ReadXml(DocumentRelsInfo.Path);
+            Footnotes = archive.ReadXml("word/footnotes.xml", new XElement(W + "footnotes"));
+            FootnoteRelations = archive.ReadXml("word/_rels/footnotes.xml.rels", new XElement(P + "Relationships"));
+            Styles = archive.ReadXml("word/styles.xml");
+            Numbering = archive.ReadXml("word/numbering.xml", new XElement(W + "numbering"));
+            Theme1 = archive.ReadXml("word/theme/theme1.xml");
 
-            Document =
-                stream.ReadAsXml() ?? throw new FileNotFoundException("word/document.xml");
-
-            DocumentRelations =
-                stream.ReadAsXml(DocumentRelsInfo.Path) ?? throw new FileNotFoundException(DocumentRelsInfo.Path);
-
-            Footnotes =
-                stream.ReadAsXml("word/footnotes.xml") ?? new XElement(W + "footnotes");
-
-            FootnoteRelations =
-                stream.ReadAsXml("word/_rels/footnotes.xml.rels") ?? new XElement(P + "Relationships");
-
-            Styles =
-                stream.ReadAsXml("word/styles.xml") ?? throw new FileNotFoundException("word/styles.xml");
-
-            Numbering =
-                stream.ReadAsXml("word/numbering.xml");
-
-            Theme1 =
-                stream.ReadAsXml("word/theme/theme1.xml");
-
-            if (Numbering is null)
+            if (!Numbering.HasElements)
             {
-                Numbering = new XElement(W + "numbering");
-
                 DocumentRelations =
                     new XElement(
                         DocumentRelations.Name,
@@ -204,33 +212,30 @@ namespace AD.OpenXml
             }
 
             Charts =
-                stream.ReadAsXml(DocumentRelsInfo.Path)
-                      .Elements()
-                      .Select(x => x.Attribute("Target")?.Value)
-                      .Where(x => x?.StartsWith("charts/") ?? false)
-                      .Select(x => new ChartInformation(x, stream.ReadAsXml($"word/{x}")))
-                      .ToImmutableList();
+                archive.ReadXml(DocumentRelsInfo.Path)
+                       .Elements()
+                       .Select(x => x.Attribute("Target")?.Value)
+                       .Where(x => x?.StartsWith("charts/") ?? false)
+                       .Select(x => new ChartInformation(x, archive.ReadXml($"word/{x}")))
+                       .ToImmutableList();
 
             Images =
-                stream.ReadAsXml(DocumentRelsInfo.Path)
-                      .Elements()
-                      .Select(x => x.Attribute("Target")?.Value)
-                      .Where(x => x?.StartsWith("media/") ?? false)
-                      .Select(x => new ImageInformation(x, stream.ReadAsByteArray($"word/{x}")))
-                      .ToImmutableList();
-
-            // TODO: remove when AD.IO starts resetting position by default.
-            stream.Seek(0, SeekOrigin.Begin);
+                archive.ReadXml(DocumentRelsInfo.Path)
+                       .Elements()
+                       .Select(x => x.Attribute("Target")?.Value)
+                       .Where(x => x?.StartsWith("media/") ?? false)
+                       .Select(x => new ImageInformation(x, archive.ReadByteArray($"word/{x}")))
+                       .ToImmutableList();
         }
 
         /// <summary>
-        /// Initializes a new <see cref="OpenXmlPackageVisitor"/> from an existing <see cref="IOpenXmlPackageVisitor"/>.
+        /// Initializes a new <see cref="OpenXmlPackageVisitor"/> from an existing <see cref="OpenXmlPackageVisitor"/>.
         /// </summary>
         /// <param name="subject">
-        /// The <see cref="IOpenXmlPackageVisitor"/> to visit.
+        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
         /// </param>
         /// <exception cref="ArgumentNullException"/>
-        public OpenXmlPackageVisitor([NotNull] IOpenXmlPackageVisitor subject)
+        public OpenXmlPackageVisitor([NotNull] OpenXmlPackageVisitor subject)
         {
             if (subject is null)
             {
@@ -282,7 +287,7 @@ namespace AD.OpenXml
         /// <param name="images">
         ///
         /// </param>
-        public OpenXmlPackageVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] XElement theme1, [NotNull] IEnumerable<ChartInformation> charts, [NotNull] IEnumerable<ImageInformation> images)
+        internal OpenXmlPackageVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] XElement theme1, [NotNull] IEnumerable<ChartInformation> charts, [NotNull] IEnumerable<ImageInformation> images)
         {
             if (contentTypes is null)
             {
@@ -347,111 +352,89 @@ namespace AD.OpenXml
         }
 
         /// <summary>
-        ///
+        /// Writes the <see cref="OpenXmlPackageVisitor"/> to the <see cref="DocxFilePath"/>.
         /// </summary>
-        /// <param name="subject"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"/>
-        protected virtual IOpenXmlPackageVisitor Create([NotNull] IOpenXmlPackageVisitor subject)
-        {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            return new OpenXmlPackageVisitor(subject);
-        }
-
-        /// <inheritdoc />
+        /// <returns>
+        /// The stream to which the <see cref="DocxFilePath"/> is written.
+        /// </returns>
         public async Task<MemoryStream> Save()
         {
             MemoryStream stream = DocxFilePath.Create();
 
-            stream = await Document.WriteInto(stream, "word/document.xml");
-            stream = await Footnotes.WriteInto(stream, "word/footnotes.xml");
-            stream = await ContentTypes.WriteInto(stream, ContentTypesInfo.Path);
-            stream = await DocumentRelations.WriteInto(stream, DocumentRelsInfo.Path);
-            stream = await FootnoteRelations.WriteInto(stream, "word/_rels/footnotes.xml.rels");
-            stream = await Styles.WriteInto(stream, "word/styles.xml");
-            stream = await Numbering.WriteInto(stream, "word/numbering.xml");
-            stream = await Theme1.WriteInto(stream, "word/theme/theme1.xml");
+            stream = await Document.WriteIntoAsync(stream, "word/document.xml");
+            stream = await Footnotes.WriteIntoAsync(stream, "word/footnotes.xml");
+            stream = await ContentTypes.WriteIntoAsync(stream, ContentTypesInfo.Path);
+            stream = await DocumentRelations.WriteIntoAsync(stream, DocumentRelsInfo.Path);
+            stream = await FootnoteRelations.WriteIntoAsync(stream, "word/_rels/footnotes.xml.rels");
+            stream = await Styles.WriteIntoAsync(stream, "word/styles.xml");
+            stream = await Numbering.WriteIntoAsync(stream, "word/numbering.xml");
+            stream = await Theme1.WriteIntoAsync(stream, "word/theme/theme1.xml");
 
             foreach (ChartInformation item in Charts)
             {
-                stream = await item.Chart.WriteInto(stream, $"word/{item.Name}");
+                stream = await item.Chart.WriteIntoAsync(stream, $"word/{item.Name}");
             }
 
             foreach (ImageInformation item in Images)
             {
-                stream = await item.Image.WriteInto(stream, $"word/{item.Name}");
+                stream = await item.Image.WriteIntoAsync(stream, $"word/{item.Name}");
             }
 
             return stream;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Visit and join the component document into this <see cref="OpenXmlPackageVisitor"/>.
+        /// </summary>
+        /// <param name="archive">
+        /// The archive to visit.
+        /// </param>
         [Pure]
-        public virtual IOpenXmlPackageVisitor Visit(MemoryStream stream)
+        public OpenXmlPackageVisitor Visit(ZipArchive archive)
         {
-            if (stream is null)
+            if (archive is null)
             {
-                throw new ArgumentNullException(nameof(stream));
+                throw new ArgumentNullException(nameof(archive));
             }
 
-            IOpenXmlPackageVisitor subject = new OpenXmlPackageVisitor(stream);
-            IOpenXmlPackageVisitor documentVisitor = VisitDocument(subject, NextRevisionId);
-            IOpenXmlPackageVisitor footnoteVisitor = VisitFootnotes(documentVisitor, NextFootnoteId, NextRevisionId);
-            IOpenXmlPackageVisitor documentRelationVisitor = VisitDocumentRelations(footnoteVisitor, NextDocumentRelationId);
-            IOpenXmlPackageVisitor footnoteRelationVisitor = VisitFootnoteRelations(documentRelationVisitor, NextFootnoteRelationId);
-            IOpenXmlPackageVisitor styleVisitor = VisitStyles(footnoteRelationVisitor);
-            IOpenXmlPackageVisitor numberingVisitor = VisitNumbering(styleVisitor);
+            OpenXmlPackageVisitor subject = new OpenXmlPackageVisitor(archive);
+            OpenXmlPackageVisitor documentVisitor = new DocumentVisit(subject, NextRevisionId).Result;
+            OpenXmlPackageVisitor footnoteVisitor = new FootnoteVisit(documentVisitor, NextFootnoteId, NextRevisionId).Result;
+            OpenXmlPackageVisitor documentRelationVisitor = new DocumentRelationVisit(footnoteVisitor, NextDocumentRelationId).Result;
+            OpenXmlPackageVisitor footnoteRelationVisitor = new FootnoteRelationVisit(documentRelationVisitor, NextFootnoteRelationId).Result;
+            OpenXmlPackageVisitor styleVisitor = new StyleVisit(footnoteRelationVisitor).Result;
+            OpenXmlPackageVisitor numberingVisitor = new NumberingVisit(styleVisitor).Result;
 
             return numberingVisitor;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Visit and fold the component documents into this <see cref="OpenXmlPackageVisitor"/>.
+        /// </summary>
+        /// <param name="archives">
+        /// The archives to visit.
+        /// </param>
         [Pure]
-        public virtual IOpenXmlPackageVisitor Fold(IOpenXmlPackageVisitor subject)
+        public static OpenXmlPackageVisitor VisitAndFold(IEnumerable<ZipArchive> archives)
         {
-            if (subject is null)
+            if (archives is null)
             {
-                throw new ArgumentNullException(nameof(subject));
+                throw new ArgumentNullException(nameof(archives));
             }
 
-            return Create(StaticFold(this, subject));
-        }
-
-        /// <inheritdoc />
-        [Pure]
-        public virtual IOpenXmlPackageVisitor VisitAndFold(IEnumerable<MemoryStream> files)
-        {
-            if (files is null)
-            {
-                throw new ArgumentNullException(nameof(files));
-            }
-
-            return files.Aggregate(this as IOpenXmlPackageVisitor, (current, next) => current.Fold(current.Visit(next)));
+            return archives.Aggregate(new OpenXmlPackageVisitor(DefaultOpenXml), (current, next) => current.Fold(current.Visit(next)));
         }
 
         /// <summary>
-        /// Folds <paramref name="subject"/> into this <paramref name="source"/>.
+        /// Folds <paramref name="subject"/> into this <see cref="OpenXmlPackageVisitor"/>.
         /// </summary>
-        /// <param name="source">
-        /// The <see cref="IOpenXmlPackageVisitor"/> into which the <paramref name="subject"/> is folded.
-        /// </param>
         /// <param name="subject">
-        /// The <see cref="IOpenXmlPackageVisitor"/> that is folded into the <paramref name="source"/>.
+        /// The <see cref="OpenXmlPackageVisitor"/> that is folded into this <see cref="OpenXmlPackageVisitor"/>.
         /// </param>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        private static OpenXmlPackageVisitor StaticFold([NotNull] IOpenXmlPackageVisitor source, [NotNull] IOpenXmlPackageVisitor subject)
+        public OpenXmlPackageVisitor Fold(OpenXmlPackageVisitor subject)
         {
-            if (source is null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
             if (subject is null)
             {
                 throw new ArgumentNullException(nameof(subject));
@@ -459,61 +442,56 @@ namespace AD.OpenXml
 
             XElement document =
                 new XElement(
-                    source.Document.Name,
-                    source.Document.Attributes(),
+                    Document.Name,
+                    Document.Attributes(),
                     new XElement(
-                        source.Document.Elements().First().Name,
-                        source.Document.Elements().First().Elements(),
+                        Document.Elements().First().Name,
+                        Document.Elements().First().Elements(),
                         subject.Document.Elements().First().Elements()));
 
             document = document.RemoveDuplicateSectionProperties();
 
             XElement footnotes =
                 new XElement(
-                    source.Footnotes.Name,
-                    source.Footnotes.Attributes(),
-                    source.Footnotes
-                          .Elements()
-                          .Union(
-                              subject.Footnotes.Elements(),
-                              XNode.EqualityComparer));
+                    Footnotes.Name,
+                    Footnotes.Attributes(),
+                    Footnotes.Elements()
+                             .Union(
+                                 subject.Footnotes.Elements(),
+                                 XNode.EqualityComparer));
 
             XElement footnoteRelations =
                 new XElement(
-                    source.FootnoteRelations.Name,
-                    source.FootnoteRelations.Attributes(),
-                    source.FootnoteRelations
-                          .Elements()
-                          .Union(
-                              subject.FootnoteRelations.Elements(),
-                              XNode.EqualityComparer));
+                    FootnoteRelations.Name,
+                    FootnoteRelations.Attributes(),
+                    FootnoteRelations.Elements()
+                                     .Union(
+                                         subject.FootnoteRelations.Elements(),
+                                         XNode.EqualityComparer));
 
             XElement documentRelations =
                 new XElement(
-                    source.DocumentRelations.Name,
-                    source.DocumentRelations.Attributes(),
-                    source.DocumentRelations
-                          .Elements()
-                          .Union(
-                              subject.DocumentRelations.Elements(),
-                              XNode.EqualityComparer));
+                    DocumentRelations.Name,
+                    DocumentRelations.Attributes(),
+                    DocumentRelations.Elements()
+                                     .Union(
+                                         subject.DocumentRelations.Elements(),
+                                         XNode.EqualityComparer));
 
             XElement contentTypes =
                 new XElement(
-                    source.ContentTypes.Name,
-                    source.ContentTypes.Attributes(),
-                    source.ContentTypes
-                          .Elements()
-                          .Union(
-                              subject.ContentTypes.Elements(),
-                              XNode.EqualityComparer));
+                    ContentTypes.Name,
+                    ContentTypes.Attributes(),
+                    ContentTypes.Elements()
+                                .Union(
+                                    subject.ContentTypes.Elements(),
+                                    XNode.EqualityComparer));
 
             XElement styles =
                 new XElement(
-                    source.Styles.Name,
-                    source.Styles.Attributes(),
-                    source.Styles
-                          .Elements()
+                    Styles.Name,
+                    Styles.Attributes(),
+                    Styles.Elements()
                           .Union(
                               subject.Styles
                                      .Elements()
@@ -523,36 +501,32 @@ namespace AD.OpenXml
 
             XElement numbering =
                 new XElement(
-                    source.Numbering.Name,
-                    source.Numbering.Attributes(),
-                    source.Numbering
-                          .Elements()
-                          .Union(
-                              subject.Numbering.Elements(),
-                              XNode.EqualityComparer));
+                    Numbering.Name,
+                    Numbering.Attributes(),
+                    Numbering.Elements()
+                             .Union(
+                                 subject.Numbering.Elements(),
+                                 XNode.EqualityComparer));
 
             // TODO: write a ThemeVisit
 //            XElement theme1 =
 //                new XElement(
-//                    source.Theme1.Name,
-//                    source.Theme1.Attributes(),
-//                    source.Theme1
-//                          .Elements()
+//                    Theme1.Name,
+//                    Theme1.Attributes(),
+//                    Theme1.Elements()
 //                          .Union(
 //                              subject.Theme1.Elements(),
 //                              XNode.EqualityComparer));
 
             IEnumerable<ChartInformation> charts =
-                source.Charts
-                      .Union(
-                          subject.Charts,
-                          ChartInformation.Comparer);
+                Charts.Union(
+                    subject.Charts,
+                    ChartInformation.Comparer);
 
             IEnumerable<ImageInformation> images =
-                source.Images
-                      .Union(
-                          subject.Images,
-                          ImageInformation.Comparer);
+                Images.Union(
+                    subject.Images,
+                    ImageInformation.Comparer);
 
             return
                 new OpenXmlPackageVisitor(
@@ -566,153 +540,6 @@ namespace AD.OpenXml
                     subject.Theme1,
                     charts,
                     images);
-        }
-
-        /// <summary>
-        /// Visit the <see cref="Document"/> of the subject.
-        /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
-        /// </param>
-        /// <param name="revisionId">
-        /// The current revision number incremented by one.
-        /// </param>
-        /// <returns>
-        /// A new <see cref="OpenXmlPackageVisitor"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [NotNull]
-        protected virtual IOpenXmlPackageVisitor VisitDocument([NotNull] IOpenXmlPackageVisitor subject, int revisionId)
-        {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            return Create(subject);
-        }
-
-        /// <summary>
-        /// Visit the <see cref="Footnotes"/> of the subject.
-        /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
-        /// </param>
-        /// <param name="footnoteId">
-        /// The current footnote identifier.
-        /// </param>
-        /// <param name="revisionId">
-        /// The current revision number incremented by one.
-        /// </param>
-        /// <returns>
-        /// A new <see cref="OpenXmlPackageVisitor"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [NotNull]
-        protected virtual IOpenXmlPackageVisitor VisitFootnotes([NotNull] IOpenXmlPackageVisitor subject, int footnoteId, int revisionId)
-        {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            return Create(subject);
-        }
-
-        /// <summary>
-        /// Visit the <see cref="Document"/> and <see cref="DocumentRelations"/> of the subject to modify hyperlinks in the main document.
-        /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
-        /// </param>
-        /// <param name="documentRelationId">
-        /// The current document relationship identifier.
-        /// </param>
-        /// <returns>
-        /// A new <see cref="OpenXmlPackageVisitor"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [NotNull]
-        protected virtual IOpenXmlPackageVisitor VisitDocumentRelations([NotNull] IOpenXmlPackageVisitor subject, int documentRelationId)
-        {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            return Create(subject);
-        }
-
-        /// <summary>
-        /// Visit the <see cref="Footnotes"/> and <see cref="FootnoteRelations"/> of the subject to modify hyperlinks in the main document.
-        /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
-        /// </param>
-        /// <param name="footnoteRelationId">
-        /// The current footnote relationship identifier.
-        /// </param>
-        /// <returns>
-        /// A new <see cref="OpenXmlPackageVisitor"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [NotNull]
-        protected virtual IOpenXmlPackageVisitor VisitFootnoteRelations([NotNull] IOpenXmlPackageVisitor subject, int footnoteRelationId)
-        {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            return Create(subject);
-        }
-
-        /// <summary>
-        /// Visit the <see cref="Styles"/> of the subject.
-        /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
-        /// </param>
-        /// <returns>
-        /// A new <see cref="OpenXmlPackageVisitor"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [NotNull]
-        protected virtual IOpenXmlPackageVisitor VisitStyles([NotNull] IOpenXmlPackageVisitor subject)
-        {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            return Create(subject);
-        }
-
-        /// <summary>
-        /// Visit the <see cref="Numbering"/> of the subject.
-        /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
-        /// </param>
-        /// <returns>
-        /// A new <see cref="OpenXmlPackageVisitor"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [NotNull]
-        protected virtual IOpenXmlPackageVisitor VisitNumbering([NotNull] IOpenXmlPackageVisitor subject)
-        {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            return Create(subject);
         }
     }
 }

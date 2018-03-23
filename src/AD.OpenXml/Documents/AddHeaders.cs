@@ -99,25 +99,25 @@ namespace AD.OpenXml.Documents
 
             // Remove headers from [Content_Types].xml
             result =
-                await result.ReadAsXml(ContentTypesInfo.Path)
+                await result.ReadXml(ContentTypesInfo.Path)
                             .Recurse(x => (string) x.Attribute(ContentTypesInfo.Attributes.ContentType) != HeaderContentType)
-                            .WriteInto(result, ContentTypesInfo.Path);
+                            .WriteIntoAsync(result, ContentTypesInfo.Path);
 
             // Remove headers from document.xml.rels
             result =
-                await result.ReadAsXml(DocumentRelsInfo.Path)
+                await result.ReadXml(DocumentRelsInfo.Path)
                             .Recurse(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) != HeaderRelationshipType)
-                            .WriteInto(result, DocumentRelsInfo.Path);
+                            .WriteIntoAsync(result, DocumentRelsInfo.Path);
 
             // Remove headers from document.xml
             result =
-                await result.ReadAsXml()
+                await result.ReadXml()
                             .Recurse(x => x.Name != W + "headerReference")
-                            .WriteInto(result, "word/document.xml");
+                            .WriteIntoAsync(result, "word/document.xml");
 
             // Store the current relationship id number
             int currentRelationshipId =
-                result.ReadAsXml(DocumentRelsInfo.Path)
+                result.ReadXml(DocumentRelsInfo.Path)
                       .Elements()
                       .Attributes("Id")
                       .Select(x => int.Parse(x.Value.Substring(3)))
@@ -152,9 +152,9 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(headerId));
             }
 
-            MemoryStream result = await Header2.WriteInto(stream, "word/header2.xml");
+            MemoryStream result = await Header2.WriteIntoAsync(stream, "word/header2.xml");
 
-            XElement documentRelation = result.ReadAsXml(DocumentRelsInfo.Path);
+            XElement documentRelation = result.ReadXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(
@@ -169,9 +169,9 @@ namespace AD.OpenXml.Documents
                         DocumentRelsInfo.Attributes.Target,
                         "header2.xml")));
 
-            result = await documentRelation.WriteInto(result, DocumentRelsInfo.Path);
+            result = await documentRelation.WriteIntoAsync(result, DocumentRelsInfo.Path);
 
-            XElement document = result.ReadAsXml();
+            XElement document = result.ReadXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.AddFirst(
@@ -181,9 +181,9 @@ namespace AD.OpenXml.Documents
                         new XAttribute(R + "id", headerId)));
             }
 
-            result = await document.WriteInto(result, "word/document.xml");
+            result = await document.WriteIntoAsync(result, "word/document.xml");
 
-            XElement packageRelation = result.ReadAsXml(ContentTypesInfo.Path);
+            XElement packageRelation = result.ReadXml(ContentTypesInfo.Path);
 
             packageRelation.Add(
                 new XElement(
@@ -195,7 +195,7 @@ namespace AD.OpenXml.Documents
                         ContentTypesInfo.Attributes.ContentType,
                         "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
 
-            return await packageRelation.WriteInto(result, ContentTypesInfo.Path);
+            return await packageRelation.WriteIntoAsync(result, ContentTypesInfo.Path);
         }
 
         /// <summary>
@@ -229,9 +229,9 @@ namespace AD.OpenXml.Documents
 
             XElement header1 = Header1.Clone();
             header1.Element(W + "p").Element(W + "r").Element(W + "t").Value = title;
-            result = await header1.WriteInto(result, "word/header1.xml");
+            result = await header1.WriteIntoAsync(result, "word/header1.xml");
 
-            XElement documentRelation = result.ReadAsXml(DocumentRelsInfo.Path);
+            XElement documentRelation = result.ReadXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(
@@ -246,9 +246,9 @@ namespace AD.OpenXml.Documents
                         DocumentRelsInfo.Attributes.Target,
                         "header1.xml")));
 
-            result = await documentRelation.WriteInto(result, DocumentRelsInfo.Path);
+            result = await documentRelation.WriteIntoAsync(result, DocumentRelsInfo.Path);
 
-            XElement document = result.ReadAsXml();
+            XElement document = result.ReadXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.AddFirst(
@@ -258,9 +258,9 @@ namespace AD.OpenXml.Documents
                         new XAttribute(R + "id", headerId)));
             }
 
-            result = await document.WriteInto(result, "word/document.xml");
+            result = await document.WriteIntoAsync(result, "word/document.xml");
 
-            XElement packageRelation = result.ReadAsXml(ContentTypesInfo.Path);
+            XElement packageRelation = result.ReadXml(ContentTypesInfo.Path);
 
             packageRelation.Add(
                 new XElement(
@@ -272,7 +272,7 @@ namespace AD.OpenXml.Documents
                         ContentTypesInfo.Attributes.ContentType,
                         "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
 
-            return await packageRelation.WriteInto(result, ContentTypesInfo.Path);
+            return await packageRelation.WriteIntoAsync(result, ContentTypesInfo.Path);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace AD.OpenXml.Visits
         [NotNull] private static readonly XElement Numbering;
 
         /// <inheritdoc />
-        public IOpenXmlPackageVisitor Result { get; }
+        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         ///
@@ -38,7 +38,7 @@ namespace AD.OpenXml.Visits
         ///
         /// </summary>
         /// <param name="subject"></param>
-        public NumberingVisit(IOpenXmlPackageVisitor subject)
+        public NumberingVisit(OpenXmlPackageVisitor subject)
         {
             XElement numbering = Numbering.Clone();
 

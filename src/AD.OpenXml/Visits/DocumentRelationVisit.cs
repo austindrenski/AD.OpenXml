@@ -31,7 +31,7 @@ namespace AD.OpenXml.Visits
         /// <inheritdoc />
         ///  <summary>
         ///  </summary>
-        public IOpenXmlPackageVisitor Result { get; }
+        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
@@ -39,7 +39,7 @@ namespace AD.OpenXml.Visits
         /// <param name="subject">The file from which content is copied.</param>
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
-        public DocumentRelationVisit(IOpenXmlPackageVisitor subject, int documentRelationId)
+        public DocumentRelationVisit(OpenXmlPackageVisitor subject, int documentRelationId)
         {
             (var document, var documentRelations, var contentTypes, var charts, var images) =
                 Execute(
