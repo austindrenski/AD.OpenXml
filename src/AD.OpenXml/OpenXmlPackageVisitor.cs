@@ -360,9 +360,9 @@ namespace AD.OpenXml
         /// <returns>
         /// The stream to which the <see cref="DocxFilePath"/> is written.
         /// </returns>
-        public MemoryStream Save()
+        public ZipArchive Save()
         {
-            ZipArchive archive = new ZipArchive(DocxFilePath.Create(), ZipArchiveMode.Update);
+            ZipArchive archive = new ZipArchive(new MemoryStream(), ZipArchiveMode.Update);
 
             using (Stream stream = archive.CreateEntry("word/document.xml").Open())
             {
@@ -420,25 +420,7 @@ namespace AD.OpenXml
                 }
             }
 
-            MemoryStream ms = DocxFilePath.Create();
-
-            using (ZipArchive writer = new ZipArchive(ms, ZipArchiveMode.Update, true))
-            {
-                foreach (ZipArchiveEntry entry in archive.Entries)
-                {
-                    using (Stream readStream = entry.Open())
-                    {
-                        using (Stream writeStream = (writer.GetEntry(entry.FullName) ?? writer.CreateEntry(entry.FullName)).Open())
-                        {
-                            readStream.CopyTo(writeStream);
-                        }
-                    }
-                }
-            }
-
-            ms.Seek(default, SeekOrigin.Begin);
-
-            return ms;
+            return archive;
         }
 
         /// <summary>

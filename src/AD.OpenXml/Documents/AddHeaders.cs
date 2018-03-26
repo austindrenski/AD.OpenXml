@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -66,6 +67,88 @@ namespace AD.OpenXml.Documents
             {
                 Header2 = XElement.Parse(reader.ReadToEnd());
             }
+        }
+
+        private static ZipArchive Clone(ZipArchive archive)
+        {
+            ZipArchive writer = new ZipArchive(new MemoryStream(), ZipArchiveMode.Update);
+
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                using (Stream readStream = entry.Open())
+                {
+                    using (Stream writeStream = writer.CreateEntry(entry.FullName).Open())
+                    {
+                        readStream.CopyTo(writeStream);
+                    }
+                }
+            }
+
+            return writer;
+        }
+
+        /// <summary>
+        /// Add headers to a Word document.
+        /// </summary>
+        [Pure]
+        [NotNull]
+        public static MemoryStream AddHeaders([NotNull] this ZipArchive archive, [NotNull] string title)
+        {
+            if (archive is null)
+            {
+                throw new ArgumentNullException(nameof(archive));
+            }
+
+            if (title is null)
+            {
+                throw new ArgumentNullException(nameof(title));
+            }
+
+            (MemoryStream ms, ZipArchive result) = Clone(archive);
+
+            // Remove headers from [Content_Types].xml
+            result.GetEntry(ContentTypesInfo.Path).Delete();
+            using (Stream stream = result.CreateEntry(ContentTypesInfo.Path).Open())
+            {
+                archive.ReadXml(ContentTypesInfo.Path)
+                       .Recurse(x => (string) x.Attribute(ContentTypesInfo.Attributes.ContentType) != HeaderContentType)
+                       .Save(stream);
+            }
+
+            // Remove headers from document.xml.rels
+            result.GetEntry(DocumentRelsInfo.Path).Delete();
+            using (Stream stream = result.CreateEntry(DocumentRelsInfo.Path).Open())
+            {
+                archive.ReadXml(DocumentRelsInfo.Path)
+                       .Recurse(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) != HeaderRelationshipType)
+                       .Save(stream);
+            }
+
+            // Remove headers from document.xml
+            result.GetEntry("word/document.xml").Delete();
+            using (Stream stream = result.CreateEntry("word/document.xml").Open())
+            {
+                archive.ReadXml(DocumentRelsInfo.Path)
+                       .Recurse(x => x.Name != W + "headerReference")
+                       .Save(stream);
+            }
+
+            // Store the current relationship id number
+            int currentRelationshipId =
+                result.ReadXml(DocumentRelsInfo.Path)
+                      .Elements()
+                      .Attributes("Id")
+                      .Select(x => int.Parse(x.Value.Substring(3)))
+                      .DefaultIfEmpty(0)
+                      .Max();
+
+            ms.Seek(default, SeekOrigin.Begin);
+
+            // Add headers
+            ms = AddOddPageHeader(ms, $"rId{++currentRelationshipId}").Result;
+            ms = AddEvenPageHeader(ms, $"rId{++currentRelationshipId}", title).Result;
+
+            return ms;
         }
 
         /// <summary>
