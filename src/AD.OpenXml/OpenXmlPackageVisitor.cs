@@ -360,9 +360,9 @@ namespace AD.OpenXml
         /// <returns>
         /// The stream to which the <see cref="DocxFilePath"/> is written.
         /// </returns>
-        public Stream Save()
+        public MemoryStream Save()
         {
-            ZipArchive archive = new ZipArchive(DocxFilePath.Create());
+            ZipArchive archive = new ZipArchive(DocxFilePath.Create(), ZipArchiveMode.Update);
 
             using (Stream stream = archive.CreateEntry("word/document.xml").Open())
             {
@@ -414,21 +414,29 @@ namespace AD.OpenXml
 
             foreach (ImageInformation item in Images)
             {
-                using (BinaryWriter writer = new BinaryWriter(archive.CreateEntry($"word/{item.Name}").Open()))
+                using (Stream stream = archive.CreateEntry($"word/{item.Name}").Open())
                 {
-                    writer.Write(item.Image);
+                    stream.Write(item.Image, default, item.Image.Length);
                 }
             }
 
-            MemoryStream ms = new MemoryStream();
+            MemoryStream ms = DocxFilePath.Create();
 
-            foreach (ZipArchiveEntry entry in archive.Entries)
+            using (ZipArchive writer = new ZipArchive(ms, ZipArchiveMode.Update, true))
             {
-                using (Stream stream = entry.Open())
+                foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    stream.CopyTo(ms);
+                    using (Stream readStream = entry.Open())
+                    {
+                        using (Stream writeStream = (writer.GetEntry(entry.FullName) ?? writer.CreateEntry(entry.FullName)).Open())
+                        {
+                            readStream.CopyTo(writeStream);
+                        }
+                    }
                 }
             }
+
+            ms.Seek(default, SeekOrigin.Begin);
 
             return ms;
         }
