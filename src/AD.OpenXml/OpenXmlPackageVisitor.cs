@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
@@ -51,6 +49,19 @@ namespace AD.OpenXml
                 W + "moveToRangeEnd",
                 W + "moveTo"
             };
+
+        [NotNull] private static readonly XElement NumberingOverrideEntry =
+            new XElement(T + "Override",
+                new XAttribute("PartName", "/word/numbering.xml"),
+                new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"));
+
+        [NotNull]
+        private XElement NumberingTargetEntry =>
+            new XElement(
+                P + "Relationship",
+                new XAttribute("Id", $"rId{NextDocumentRelationId}"),
+                new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
+                new XAttribute("Target", "numbering.xml"));
 
         /// <summary>
         /// word/charts/chart#.xml.
@@ -192,40 +203,32 @@ namespace AD.OpenXml
                     new XElement(
                         DocumentRelations.Name,
                         DocumentRelations.Attributes(),
-                        DocumentRelations.Elements()
-                                         .Where(x => !x.Attribute("Tartget")?.Value.Equals("numbering.xml", StringComparison.OrdinalIgnoreCase) ?? true),
-                        new XElement(
-                            P + "Relationship",
-                            new XAttribute("Id", $"rId{NextDocumentRelationId}"),
-                            new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
-                            new XAttribute("Target", "numbering.xml")));
+                        DocumentRelations.Elements().Where(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Target) != "numbering.xml"),
+                        NumberingTargetEntry);
 
                 ContentTypes =
                     new XElement(
                         ContentTypes.Name,
                         ContentTypes.Attributes(),
-                        ContentTypes.Elements()
-                                    .Where(x => !x.Attribute("PartName")?.Value.Equals("/word/numbering.xml", StringComparison.OrdinalIgnoreCase) ?? true),
-                        new XElement(T + "Override",
-                            new XAttribute("PartName", "/word/numbering.xml"),
-                            new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml")));
+                        ContentTypes.Elements().Where(x => (string) x.Attribute(ContentTypesInfo.Attributes.PartName) != "/word/numbering.xml"),
+                        NumberingOverrideEntry);
             }
 
             Charts =
                 archive.ReadXml(DocumentRelsInfo.Path)
                        .Elements()
-                       .Select(x => x.Attribute("Target")?.Value)
+                       .Select(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Target))
                        .Where(x => x?.StartsWith("charts/") ?? false)
                        .Select(x => new ChartInformation(x, archive.ReadXml($"word/{x}")))
-                       .ToImmutableList();
+                       .ToArray();
 
             Images =
                 archive.ReadXml(DocumentRelsInfo.Path)
                        .Elements()
-                       .Select(x => x.Attribute("Target")?.Value)
+                       .Select(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Target))
                        .Where(x => x?.StartsWith("media/") ?? false)
                        .Select(x => new ImageInformation(x, archive.ReadByteArray($"word/{x}")))
-                       .ToImmutableList();
+                       .ToArray();
         }
 
         /// <summary>
@@ -250,8 +253,8 @@ namespace AD.OpenXml
             Styles = subject.Styles.Clone();
             Numbering = subject.Numbering.Clone();
             Theme1 = subject.Theme1.Clone();
-            Charts = subject.Charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
-            Images = subject.Images.Select(x => new ImageInformation(x.Name, x.Image.ToArray())).ToImmutableArray();
+            Charts = subject.Charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToArray();
+            Images = subject.Images.Select(x => new ImageInformation(x.Name, x.Image.ToArray())).ToArray();
         }
 
         ///  <summary>
@@ -347,8 +350,8 @@ namespace AD.OpenXml
             Styles = styles.Clone();
             Numbering = numbering.Clone();
             Theme1 = theme1.Clone();
-            Charts = charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToImmutableArray();
-            Images = images.Select(x => new ImageInformation(x.Name, x.Image.ToArray())).ToImmutableArray();
+            Charts = charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToArray();
+            Images = images.Select(x => new ImageInformation(x.Name, x.Image.ToArray())).ToArray();
         }
 
         /// <summary>
@@ -357,30 +360,77 @@ namespace AD.OpenXml
         /// <returns>
         /// The stream to which the <see cref="DocxFilePath"/> is written.
         /// </returns>
-        public async Task<MemoryStream> Save()
+        public Stream Save()
         {
-            MemoryStream stream = DocxFilePath.Create();
+            ZipArchive archive = new ZipArchive(DocxFilePath.Create());
 
-            stream = await Document.WriteIntoAsync(stream, "word/document.xml");
-            stream = await Footnotes.WriteIntoAsync(stream, "word/footnotes.xml");
-            stream = await ContentTypes.WriteIntoAsync(stream, ContentTypesInfo.Path);
-            stream = await DocumentRelations.WriteIntoAsync(stream, DocumentRelsInfo.Path);
-            stream = await FootnoteRelations.WriteIntoAsync(stream, "word/_rels/footnotes.xml.rels");
-            stream = await Styles.WriteIntoAsync(stream, "word/styles.xml");
-            stream = await Numbering.WriteIntoAsync(stream, "word/numbering.xml");
-            stream = await Theme1.WriteIntoAsync(stream, "word/theme/theme1.xml");
+            using (Stream stream = archive.CreateEntry("word/document.xml").Open())
+            {
+                Document.Save(stream);
+            }
+
+            using (Stream stream = archive.CreateEntry("word/footnotes.xml").Open())
+            {
+                Footnotes.Save(stream);
+            }
+
+            using (Stream stream = archive.CreateEntry(ContentTypesInfo.Path).Open())
+            {
+                ContentTypes.Save(stream);
+            }
+
+            using (Stream stream = archive.CreateEntry(DocumentRelsInfo.Path).Open())
+            {
+                DocumentRelations.Save(stream);
+            }
+
+            using (Stream stream = archive.CreateEntry("word/_rels/footnotes.xml.rels").Open())
+            {
+                FootnoteRelations.Save(stream);
+            }
+
+            using (Stream stream = archive.CreateEntry("word/styles.xml").Open())
+            {
+                Styles.Save(stream);
+            }
+
+            using (Stream stream = archive.CreateEntry("word/numbering.xml").Open())
+            {
+                Numbering.Save(stream);
+            }
+
+            using (Stream stream = archive.CreateEntry("word/theme/theme1.xml").Open())
+            {
+                Theme1.Save(stream);
+            }
 
             foreach (ChartInformation item in Charts)
             {
-                stream = await item.Chart.WriteIntoAsync(stream, $"word/{item.Name}");
+                using (Stream stream = archive.CreateEntry($"word/{item.Name}").Open())
+                {
+                    item.Chart.Save(stream);
+                }
             }
 
             foreach (ImageInformation item in Images)
             {
-                stream = await item.Image.WriteIntoAsync(stream, $"word/{item.Name}");
+                using (BinaryWriter writer = new BinaryWriter(archive.CreateEntry($"word/{item.Name}").Open()))
+                {
+                    writer.Write(item.Image);
+                }
             }
 
-            return stream;
+            MemoryStream ms = new MemoryStream();
+
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                using (Stream stream = entry.Open())
+                {
+                    stream.CopyTo(ms);
+                }
+            }
+
+            return ms;
         }
 
         /// <summary>

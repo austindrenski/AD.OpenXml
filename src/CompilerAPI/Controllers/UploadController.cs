@@ -175,19 +175,19 @@ namespace CompilerAPI.Controllers
                 throw new ArgumentNullException(nameof(website));
             }
 
-            return
-                await OpenXmlPackageVisitor
-                      .VisitAndFold(files)
-                      .Save()
-                      .AddHeaders(title)
-                      .AddFooters(publisher, website)
-                      .PositionChartsInline()
-                      .PositionChartsInner()
-                      .PositionChartsOuter()
-                      .ModifyBarChartStyles()
-                      .ModifyPieChartStyles()
-                      .ModifyLineChartStyles()
-                      .ModifyAreaChartStyles();
+            return await
+                OpenXmlPackageVisitor
+                    .VisitAndFold(files)
+                    .Save()
+                    .AddHeaders(title)
+                    .AddFooters(publisher, website)
+                    .PositionChartsInline()
+                    .PositionChartsInner()
+                    .PositionChartsOuter()
+                    .ModifyBarChartStyles()
+                    .ModifyPieChartStyles()
+                    .ModifyLineChartStyles()
+                    .ModifyAreaChartStyles();
         }
     }
 }

@@ -73,17 +73,7 @@ namespace AD.OpenXml.Documents
         /// </summary>
         [Pure]
         [NotNull]
-        public static async Task<MemoryStream> AddHeaders([NotNull] this Task<MemoryStream> stream, [NotNull] string title)
-        {
-            return await AddHeaders(await stream, title);
-        }
-
-        /// <summary>
-        /// Add headers to a Word document.
-        /// </summary>
-        [Pure]
-        [NotNull]
-        public static async Task<MemoryStream> AddHeaders([NotNull] this MemoryStream stream, [NotNull] string title)
+        public static async Task<MemoryStream> AddHeaders([NotNull] this Stream stream, [NotNull] string title)
         {
             if (stream is null)
             {
