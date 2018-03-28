@@ -159,9 +159,9 @@ namespace AD.OpenXml.Documents
 
             documentRelation.Add(
                 new XElement(P + "Relationship",
-                             new XAttribute("Id", footerId),
-                             new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
-                             new XAttribute("Target", "footer1.xml")));
+                    new XAttribute("Id", footerId),
+                    new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
+                    new XAttribute("Target", "footer1.xml")));
 
             result = await documentRelation.WriteIntoAsync(result, DocumentRelsInfo.Path);
 
@@ -195,8 +195,8 @@ namespace AD.OpenXml.Documents
 
             packageRelation.Add(
                 new XElement(T + "Override",
-                             new XAttribute("PartName", "/word/footer1.xml"),
-                             new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
+                    new XAttribute("PartName", "/word/footer1.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
 
             result = await packageRelation.WriteIntoAsync(result, ContentTypesInfo.Path);
 
@@ -233,9 +233,9 @@ namespace AD.OpenXml.Documents
 
             documentRelation.Add(
                 new XElement(P + "Relationship",
-                             new XAttribute("Id", footerId),
-                             new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
-                             new XAttribute("Target", "footer2.xml")));
+                    new XAttribute("Id", footerId),
+                    new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
+                    new XAttribute("Target", "footer2.xml")));
 
             result = await documentRelation.WriteIntoAsync(result, DocumentRelsInfo.Path);
 
@@ -269,8 +269,8 @@ namespace AD.OpenXml.Documents
 
             packageRelation.Add(
                 new XElement(T + "Override",
-                             new XAttribute("PartName", "/word/footer2.xml"),
-                             new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
+                    new XAttribute("PartName", "/word/footer2.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
 
             result = await packageRelation.WriteIntoAsync(result, ContentTypesInfo.Path);
 

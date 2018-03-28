@@ -362,44 +362,46 @@ namespace AD.OpenXml
         /// </returns>
         public ZipArchive Save()
         {
-            ZipArchive archive = new ZipArchive(new MemoryStream(), ZipArchiveMode.Update);
+            ZipArchive archive = new ZipArchive(DocxFilePath.Create(), ZipArchiveMode.Update);
 
-            using (Stream stream = archive.CreateEntry("word/document.xml").Open())
+            using (Stream stream = archive.GetEntry("word/document.xml").Open())
             {
                 Document.Save(stream);
             }
 
-            using (Stream stream = archive.CreateEntry("word/footnotes.xml").Open())
+            using (Stream stream = archive.GetEntry("word/footnotes.xml").Open())
             {
                 Footnotes.Save(stream);
             }
 
-            using (Stream stream = archive.CreateEntry(ContentTypesInfo.Path).Open())
+            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
             {
                 ContentTypes.Save(stream);
             }
 
-            using (Stream stream = archive.CreateEntry(DocumentRelsInfo.Path).Open())
+            using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path).Open())
             {
                 DocumentRelations.Save(stream);
             }
 
-            using (Stream stream = archive.CreateEntry("word/_rels/footnotes.xml.rels").Open())
+            using (Stream stream = archive.GetEntry("word/_rels/footnotes.xml.rels").Open())
             {
                 FootnoteRelations.Save(stream);
             }
 
-            using (Stream stream = archive.CreateEntry("word/styles.xml").Open())
+            using (Stream stream = archive.GetEntry("word/styles.xml").Open())
             {
                 Styles.Save(stream);
             }
 
-            using (Stream stream = archive.CreateEntry("word/numbering.xml").Open())
+            using (Stream stream = archive.GetEntry("word/numbering.xml")?.Open() ??
+                                   archive.CreateEntry("word/numbering.xml").Open())
             {
                 Numbering.Save(stream);
             }
 
-            using (Stream stream = archive.CreateEntry("word/theme/theme1.xml").Open())
+            using (Stream stream = archive.GetEntry("word/theme/theme1.xml")?.Open() ??
+                                   archive.CreateEntry("word/theme/theme1.xml").Open())
             {
                 Theme1.Save(stream);
             }

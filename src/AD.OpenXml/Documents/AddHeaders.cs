@@ -4,10 +4,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
-using AD.IO.Streams;
 using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -69,8 +67,15 @@ namespace AD.OpenXml.Documents
             }
         }
 
-        private static ZipArchive Clone(ZipArchive archive)
+        [Pure]
+        [NotNull]
+        private static ZipArchive Clone([NotNull] ZipArchive archive)
         {
+            if (archive is null)
+            {
+                throw new ArgumentNullException(nameof(archive));
+            }
+
             ZipArchive writer = new ZipArchive(new MemoryStream(), ZipArchiveMode.Update);
 
             foreach (ZipArchiveEntry entry in archive.Entries)
@@ -87,11 +92,42 @@ namespace AD.OpenXml.Documents
             return writer;
         }
 
+        [Pure]
+        [NotNull]
+        private static MemoryStream CloneToStream([NotNull] ZipArchive archive)
+        {
+            if (archive is null)
+            {
+                throw new ArgumentNullException(nameof(archive));
+            }
+
+            MemoryStream ms = new MemoryStream();
+
+            using (ZipArchive writer = new ZipArchive(ms, ZipArchiveMode.Update, true))
+            {
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    using (Stream readStream = entry.Open())
+                    {
+                        using (Stream writeStream = writer.CreateEntry(entry.FullName).Open())
+                        {
+                            readStream.CopyTo(writeStream);
+                        }
+                    }
+                }
+            }
+
+            ms.Seek(0, SeekOrigin.Begin);
+
+            return ms;
+        }
+
         /// <summary>
         /// Add headers to a Word document.
         /// </summary>
         [Pure]
         [NotNull]
+        // TODO: return ZipArchive
         public static MemoryStream AddHeaders([NotNull] this ZipArchive archive, [NotNull] string title)
         {
             if (archive is null)
@@ -104,7 +140,7 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(title));
             }
 
-            (MemoryStream ms, ZipArchive result) = Clone(archive);
+            ZipArchive result = Clone(archive);
 
             // Remove headers from [Content_Types].xml
             result.GetEntry(ContentTypesInfo.Path).Delete();
@@ -128,7 +164,7 @@ namespace AD.OpenXml.Documents
             result.GetEntry("word/document.xml").Delete();
             using (Stream stream = result.CreateEntry("word/document.xml").Open())
             {
-                archive.ReadXml(DocumentRelsInfo.Path)
+                archive.ReadXml()
                        .Recurse(x => x.Name != W + "headerReference")
                        .Save(stream);
             }
@@ -142,82 +178,26 @@ namespace AD.OpenXml.Documents
                       .DefaultIfEmpty(0)
                       .Max();
 
-            ms.Seek(default, SeekOrigin.Begin);
 
             // Add headers
-            ms = AddOddPageHeader(ms, $"rId{++currentRelationshipId}").Result;
-            ms = AddEvenPageHeader(ms, $"rId{++currentRelationshipId}", title).Result;
+            AddOddPageHeader(result, $"rId{++currentRelationshipId}");
+            AddEvenPageHeader(result, $"rId{++currentRelationshipId}", title);
 
-            return ms;
-        }
-
-        /// <summary>
-        /// Add headers to a Word document.
-        /// </summary>
-        [Pure]
-        [NotNull]
-        public static async Task<MemoryStream> AddHeaders([NotNull] this Stream stream, [NotNull] string title)
-        {
-            if (stream is null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
-
-            if (title is null)
-            {
-                throw new ArgumentNullException(nameof(title));
-            }
-
-            MemoryStream result = await stream.CopyPure();
-
-            // Remove headers from [Content_Types].xml
-            result =
-                await result.ReadXml(ContentTypesInfo.Path)
-                            .Recurse(x => (string) x.Attribute(ContentTypesInfo.Attributes.ContentType) != HeaderContentType)
-                            .WriteIntoAsync(result, ContentTypesInfo.Path);
-
-            // Remove headers from document.xml.rels
-            result =
-                await result.ReadXml(DocumentRelsInfo.Path)
-                            .Recurse(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) != HeaderRelationshipType)
-                            .WriteIntoAsync(result, DocumentRelsInfo.Path);
-
-            // Remove headers from document.xml
-            result =
-                await result.ReadXml()
-                            .Recurse(x => x.Name != W + "headerReference")
-                            .WriteIntoAsync(result, "word/document.xml");
-
-            // Store the current relationship id number
-            int currentRelationshipId =
-                result.ReadXml(DocumentRelsInfo.Path)
-                      .Elements()
-                      .Attributes("Id")
-                      .Select(x => int.Parse(x.Value.Substring(3)))
-                      .DefaultIfEmpty(0)
-                      .Max();
-
-            // Add headers
-            result = await AddOddPageHeader(result, $"rId{++currentRelationshipId}");
-            result = await AddEvenPageHeader(result, $"rId{++currentRelationshipId}", title);
-
-            return result;
+            return CloneToStream(result);
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="stream"></param>
+        /// <param name="archive"></param>
         /// <param name="headerId"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        [Pure]
-        [NotNull]
-        private static async Task<MemoryStream> AddOddPageHeader([NotNull] MemoryStream stream, [NotNull] string headerId)
+        private static void AddOddPageHeader([NotNull] ZipArchive archive, [NotNull] string headerId)
         {
-            if (stream is null)
+            if (archive is null)
             {
-                throw new ArgumentNullException(nameof(stream));
+                throw new ArgumentNullException(nameof(archive));
             }
 
             if (headerId is null)
@@ -225,9 +205,15 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(headerId));
             }
 
-            MemoryStream result = await Header2.WriteIntoAsync(stream, "word/header2.xml");
+            // Remove headers from document.xml
+            archive.GetEntry("word/header2.xml")?.Delete();
+            using (Stream stream = archive.CreateEntry("word/header2.xml").Open())
+            {
+                stream.SetLength(0);
+                Header2.Save(stream);
+            }
 
-            XElement documentRelation = result.ReadXml(DocumentRelsInfo.Path);
+            XElement documentRelation = archive.ReadXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(
@@ -242,9 +228,13 @@ namespace AD.OpenXml.Documents
                         DocumentRelsInfo.Attributes.Target,
                         "header2.xml")));
 
-            result = await documentRelation.WriteIntoAsync(result, DocumentRelsInfo.Path);
+            using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path).Open())
+            {
+                stream.SetLength(0);
+                documentRelation.Save(stream);
+            }
 
-            XElement document = result.ReadXml();
+            XElement document = archive.ReadXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.AddFirst(
@@ -254,9 +244,13 @@ namespace AD.OpenXml.Documents
                         new XAttribute(R + "id", headerId)));
             }
 
-            result = await document.WriteIntoAsync(result, "word/document.xml");
+            using (Stream stream = archive.GetEntry("word/document.xml").Open())
+            {
+                stream.SetLength(0);
+                document.Save(stream);
+            }
 
-            XElement packageRelation = result.ReadXml(ContentTypesInfo.Path);
+            XElement packageRelation = archive.ReadXml(ContentTypesInfo.Path);
 
             packageRelation.Add(
                 new XElement(
@@ -268,24 +262,26 @@ namespace AD.OpenXml.Documents
                         ContentTypesInfo.Attributes.ContentType,
                         "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
 
-            return await packageRelation.WriteIntoAsync(result, ContentTypesInfo.Path);
+            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
+            {
+                stream.SetLength(0);
+                packageRelation.Save(stream);
+            }
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="stream"></param>
+        /// <param name="archive"></param>
         /// <param name="headerId"></param>
         /// <param name="title"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        [Pure]
-        [NotNull]
-        private static async Task<MemoryStream> AddEvenPageHeader([NotNull] MemoryStream stream, [NotNull] string headerId, [NotNull] string title)
+        private static void AddEvenPageHeader([NotNull] ZipArchive archive, [NotNull] string headerId, [NotNull] string title)
         {
-            if (stream is null)
+            if (archive is null)
             {
-                throw new ArgumentNullException(nameof(stream));
+                throw new ArgumentNullException(nameof(archive));
             }
 
             if (headerId is null)
@@ -298,13 +294,17 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(title));
             }
 
-            MemoryStream result = await stream.CopyPure();
-
             XElement header1 = Header1.Clone();
             header1.Element(W + "p").Element(W + "r").Element(W + "t").Value = title;
-            result = await header1.WriteIntoAsync(result, "word/header1.xml");
 
-            XElement documentRelation = result.ReadXml(DocumentRelsInfo.Path);
+            archive.GetEntry("word/header1.xml")?.Delete();
+            using (Stream stream = archive.CreateEntry("word/header1.xml").Open())
+            {
+                stream.SetLength(0);
+                header1.Save(stream);
+            }
+
+            XElement documentRelation = archive.ReadXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(
@@ -319,9 +319,13 @@ namespace AD.OpenXml.Documents
                         DocumentRelsInfo.Attributes.Target,
                         "header1.xml")));
 
-            result = await documentRelation.WriteIntoAsync(result, DocumentRelsInfo.Path);
+            using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path).Open())
+            {
+                stream.SetLength(0);
+                documentRelation.Save(stream);
+            }
 
-            XElement document = result.ReadXml();
+            XElement document = archive.ReadXml();
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
                 sectionProperties.AddFirst(
@@ -331,9 +335,13 @@ namespace AD.OpenXml.Documents
                         new XAttribute(R + "id", headerId)));
             }
 
-            result = await document.WriteIntoAsync(result, "word/document.xml");
+            using (Stream stream = archive.GetEntry("word/document.xml").Open())
+            {
+                stream.SetLength(0);
+                document.Save(stream);
+            }
 
-            XElement packageRelation = result.ReadXml(ContentTypesInfo.Path);
+            XElement packageRelation = archive.ReadXml(ContentTypesInfo.Path);
 
             packageRelation.Add(
                 new XElement(
@@ -345,7 +353,11 @@ namespace AD.OpenXml.Documents
                         ContentTypesInfo.Attributes.ContentType,
                         "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
 
-            return await packageRelation.WriteIntoAsync(result, ContentTypesInfo.Path);
+            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
+            {
+                stream.SetLength(0);
+                packageRelation.Save(stream);
+            }
         }
     }
 }
