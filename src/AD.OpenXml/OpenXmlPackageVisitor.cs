@@ -179,7 +179,9 @@ namespace AD.OpenXml
                                      id = (string) x.Attribute("Id"),
                                      target = (string) x.Attribute("Target"),
                                      description = string.Empty,
-                                     base64 = Convert.ToBase64String(Images.Single(y => y.Name == (string) x.Attribute("Target")).Image),
+                                     base64 =
+                                         Convert.ToBase64String(
+                                             Images.Single(y => y.Name == (string) x.Attribute("Target")).Image.Span.ToArray()),
                                  })
                              .ToDictionary(
                                  x => x.id,
@@ -432,7 +434,10 @@ namespace AD.OpenXml
             {
                 using (Stream stream = archive.CreateEntry($"word/{item.Name}").Open())
                 {
-                    stream.Write(item.Image, default, item.Image.Length);
+                    for (int i = 0; i < item.Image.Span.Length; i++)
+                    {
+                        stream.WriteByte(item.Image.Span[i]);
+                    }
                 }
             }
 
@@ -586,15 +591,9 @@ namespace AD.OpenXml
 //                              subject.Theme1.Elements(),
 //                              XNode.EqualityComparer));
 
-            IEnumerable<ChartInformation> charts =
-                Charts.Union(
-                    subject.Charts,
-                    ChartInformation.Comparer);
+            IEnumerable<ChartInformation> charts = Charts.Union(subject.Charts);
 
-            IEnumerable<ImageInformation> images =
-                Images.Union(
-                    subject.Images,
-                    ImageInformation.Comparer);
+            IEnumerable<ImageInformation> images = Images.Union(subject.Images);
 
             return
                 new OpenXmlPackageVisitor(

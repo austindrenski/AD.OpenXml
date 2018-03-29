@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visitors
@@ -14,20 +13,12 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public static IEqualityComparer<ImageInformation> Comparer = new ImageInformationComparer();
+        [NotNull] public readonly string Name;
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public string Name { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull]
-        public byte[] Image { get; }
+        public readonly ReadOnlyMemory<byte> Image;
 
         /// <summary>
         ///
@@ -70,15 +61,9 @@ namespace AD.OpenXml.Visitors
         {
             unchecked
             {
+                // ReSharper disable once ImpureMethodCallOnReadonlyValueField
                 return (397 * Name.GetHashCode()) ^ Image.GetHashCode();
             }
-        }
-
-        /// <inheritdoc />
-        [Pure]
-        public bool Equals(ImageInformation other)
-        {
-            return string.Equals(Name, other.Name) && Equals(Image, other.Image);
         }
 
         /// <inheritdoc />
@@ -86,6 +71,14 @@ namespace AD.OpenXml.Visitors
         public override bool Equals([CanBeNull] object obj)
         {
             return obj is ImageInformation information && Equals(information);
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        public bool Equals(ImageInformation other)
+        {
+            // ReSharper disable once ImpureMethodCallOnReadonlyValueField
+            return string.Equals(Name, other.Name) && Image.Equals(other.Image);
         }
 
         /// <summary>
@@ -122,22 +115,6 @@ namespace AD.OpenXml.Visitors
         public static bool operator !=(ImageInformation left, ImageInformation right)
         {
             return !left.Equals(right);
-        }
-
-        /// <inheritdoc />
-        private class ImageInformationComparer : IEqualityComparer<ImageInformation>
-        {
-            [Pure]
-            public bool Equals(ImageInformation x, ImageInformation y)
-            {
-                return x.Equals(y);
-            }
-
-            [Pure]
-            public int GetHashCode(ImageInformation obj)
-            {
-                return obj.GetHashCode();
-            }
         }
     }
 }

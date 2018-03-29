@@ -8,6 +8,7 @@ namespace AD.OpenXml
     /// <summary>
     /// Defines a visitor to create human-readable OpenXML content.
     /// </summary>
+    [PublicAPI]
     public class ReportVisitor : OpenXmlVisitor
     {
         /// <summary>

@@ -143,7 +143,7 @@ namespace AD.OpenXml.Visits
                     .OrderBy(x => x.newId.Value.ParseInt())
                     .Select(
                         // TODO: fix this...should be single
-                        x => new ImageInformation(x.newTarget.Value, images.First(y => y.Name == x.oldTarget.Value).Image))
+                        x => new ImageInformation(x.newTarget.Value, images.First(y => y.Name == x.oldTarget.Value).Image.Span.ToArray()))
                     .ToArray();
 
             XElement modifiedDocument =
