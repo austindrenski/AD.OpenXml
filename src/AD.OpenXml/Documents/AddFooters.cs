@@ -1,12 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.IO;
-using AD.IO.Streams;
 using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -76,42 +75,33 @@ namespace AD.OpenXml.Documents
         /// </summary>
         [Pure]
         [NotNull]
-        public static async Task<MemoryStream> AddFooters([NotNull] this Task<MemoryStream> stream, [NotNull] string publisher, [NotNull] string website)
+        public static ZipArchive AddFooters([NotNull] this ZipArchive archive, [NotNull] string publisher, [NotNull] string website)
         {
-            return await AddFooters(await stream, publisher, website);
-        }
-
-        /// <summary>
-        /// Add footers to a Word document.
-        /// </summary>
-        [Pure]
-        [NotNull]
-        public static async Task<MemoryStream> AddFooters([NotNull] this MemoryStream stream, [NotNull] string publisher, [NotNull] string website)
-        {
-            if (stream is null)
+            if (archive is null)
             {
-                throw new ArgumentNullException(nameof(stream));
+                throw new ArgumentNullException(nameof(archive));
             }
 
-            MemoryStream result = await stream.CopyPure();
-
-            // Remove footers from [Content_Types].xml
-            result =
-                await result.ReadXml(ContentTypesInfo.Path)
-                            .Recurse(x => (string) x.Attribute(ContentTypesInfo.Attributes.ContentType) != FooterContentType)
-                            .WriteIntoAsync(result, ContentTypesInfo.Path);
-
-            // Remove footers from document.xml.rels
-            result =
-                await result.ReadXml(DocumentRelsInfo.Path)
-                            .Recurse(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) != FooterRelationshipType)
-                            .WriteIntoAsync(result, DocumentRelsInfo.Path);
-
-            // Remove footers from document.xml
-            result =
-                await result.ReadXml()
-                            .Recurse(x => x.Name != W + "footerReference")
-                            .WriteIntoAsync(result, "word/document.xml");
+            ZipArchive result =
+                archive.With(
+                    // Remove footers from [Content_Types].xml
+                    (
+                        ContentTypesInfo.Path,
+                        z => z.ReadXml(ContentTypesInfo.Path)
+                              .Recurse(x => (string) x.Attribute(ContentTypesInfo.Attributes.ContentType) != FooterContentType)
+                    ),
+                    // Remove footers from document.xml.rels
+                    (
+                        DocumentRelsInfo.Path,
+                        z => z.ReadXml(DocumentRelsInfo.Path)
+                              .Recurse(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) != FooterRelationshipType)
+                    ),
+                    // Remove footers from document.xml
+                    (
+                        "word/document.xml",
+                        z => z.ReadXml()
+                              .Recurse(x => x.Name != W + "footerReference")
+                    ));
 
             // Store the current relationship id number
             int currentRelationshipId =
@@ -123,19 +113,17 @@ namespace AD.OpenXml.Documents
                       .Max();
 
             // Add footers
-            result = await AddEvenPageFooter(result, $"rId{++currentRelationshipId}", website);
-            result = await AddOddPageFooter(result, $"rId{++currentRelationshipId}", publisher);
+            AddEvenPageFooter(result, $"rId{++currentRelationshipId}", website);
+            AddOddPageFooter(result, $"rId{++currentRelationshipId}", publisher);
 
             return result;
         }
 
-        [Pure]
-        [NotNull]
-        private static async Task<MemoryStream> AddOddPageFooter([NotNull] MemoryStream stream, [NotNull] string footerId, [NotNull] string publisher)
+        private static void AddOddPageFooter([NotNull] ZipArchive archive, [NotNull] string footerId, [NotNull] string publisher)
         {
-            if (stream is null)
+            if (archive is null)
             {
-                throw new ArgumentNullException(nameof(stream));
+                throw new ArgumentNullException(nameof(archive));
             }
 
             if (footerId is null)
@@ -148,14 +136,17 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(publisher));
             }
 
-            MemoryStream result = await stream.CopyPure();
-
             XElement footer1 = Footer1.Clone();
             footer1.Element(W + "p").Elements(W + "r").First().Element(W + "t").Value = publisher;
 
-            result = await footer1.WriteIntoAsync(result, "word/footer1.xml");
+            archive.GetEntry("word/footer1.xml")?.Delete();
+            using (Stream stream = archive.CreateEntry("word/footer1.xml").Open())
+            {
+                stream.SetLength(0);
+                footer1.Save(stream);
+            }
 
-            XElement documentRelation = result.ReadXml(DocumentRelsInfo.Path);
+            XElement documentRelation = archive.ReadXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(P + "Relationship",
@@ -163,9 +154,14 @@ namespace AD.OpenXml.Documents
                     new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
                     new XAttribute("Target", "footer1.xml")));
 
-            result = await documentRelation.WriteIntoAsync(result, DocumentRelsInfo.Path);
+            archive.GetEntry(DocumentRelsInfo.Path)?.Delete();
+            using (Stream stream = archive.CreateEntry(DocumentRelsInfo.Path).Open())
+            {
+                stream.SetLength(0);
+                documentRelation.Save(stream);
+            }
 
-            XElement document = result.ReadXml();
+            XElement document = archive.ReadXml();
 
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
@@ -189,27 +185,33 @@ namespace AD.OpenXml.Documents
                 }
             }
 
-            result = await document.WriteIntoAsync(result, "word/document.xml");
+            archive.GetEntry("word/document.xml")?.Delete();
+            using (Stream stream = archive.CreateEntry("word/document.xml").Open())
+            {
+                stream.SetLength(0);
+                document.Save(stream);
+            }
 
-            XElement packageRelation = result.ReadXml(ContentTypesInfo.Path);
+            XElement packageRelation = archive.ReadXml(ContentTypesInfo.Path);
 
             packageRelation.Add(
                 new XElement(T + "Override",
                     new XAttribute("PartName", "/word/footer1.xml"),
                     new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
 
-            result = await packageRelation.WriteIntoAsync(result, ContentTypesInfo.Path);
-
-            return result;
+            archive.GetEntry(ContentTypesInfo.Path)?.Delete();
+            using (Stream stream = archive.CreateEntry(ContentTypesInfo.Path).Open())
+            {
+                stream.SetLength(0);
+                packageRelation.Save(stream);
+            }
         }
 
-        [Pure]
-        [NotNull]
-        private static async Task<MemoryStream> AddEvenPageFooter([NotNull] MemoryStream stream, [NotNull] string footerId, [NotNull] string website)
+        private static void AddEvenPageFooter([NotNull] ZipArchive archive, [NotNull] string footerId, [NotNull] string website)
         {
-            if (stream is null)
+            if (archive is null)
             {
-                throw new ArgumentNullException(nameof(stream));
+                throw new ArgumentNullException(nameof(archive));
             }
 
             if (footerId is null)
@@ -222,14 +224,17 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(website));
             }
 
-            MemoryStream result = await stream.CopyPure();
-
             XElement footer2 = Footer2.Clone();
             footer2.Element(W + "p").Elements(W + "r").Last().Element(W + "t").Value = website;
 
-            result = await footer2.WriteIntoAsync(result, "word/footer2.xml");
+            archive.GetEntry("word/footer2.xml")?.Delete();
+            using (Stream stream = archive.CreateEntry("word/footer2.xml").Open())
+            {
+                stream.SetLength(0);
+                footer2.Save(stream);
+            }
 
-            XElement documentRelation = result.ReadXml(DocumentRelsInfo.Path);
+            XElement documentRelation = archive.ReadXml(DocumentRelsInfo.Path);
 
             documentRelation.Add(
                 new XElement(P + "Relationship",
@@ -237,9 +242,14 @@ namespace AD.OpenXml.Documents
                     new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"),
                     new XAttribute("Target", "footer2.xml")));
 
-            result = await documentRelation.WriteIntoAsync(result, DocumentRelsInfo.Path);
+            archive.GetEntry(DocumentRelsInfo.Path)?.Delete();
+            using (Stream stream = archive.CreateEntry(DocumentRelsInfo.Path).Open())
+            {
+                stream.SetLength(0);
+                documentRelation.Save(stream);
+            }
 
-            XElement document = result.ReadXml();
+            XElement document = archive.ReadXml();
 
             foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
             {
@@ -263,18 +273,26 @@ namespace AD.OpenXml.Documents
                 }
             }
 
-            result = await document.WriteIntoAsync(result, "word/document.xml");
+            archive.GetEntry("word/document.xml")?.Delete();
+            using (Stream stream = archive.CreateEntry("word/document.xml").Open())
+            {
+                stream.SetLength(0);
+                document.Save(stream);
+            }
 
-            XElement packageRelation = result.ReadXml(ContentTypesInfo.Path);
+            XElement packageRelation = archive.ReadXml(ContentTypesInfo.Path);
 
             packageRelation.Add(
                 new XElement(T + "Override",
                     new XAttribute("PartName", "/word/footer2.xml"),
                     new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml")));
 
-            result = await packageRelation.WriteIntoAsync(result, ContentTypesInfo.Path);
-
-            return result;
+            archive.GetEntry(ContentTypesInfo.Path)?.Delete();
+            using (Stream stream = archive.CreateEntry(ContentTypesInfo.Path).Open())
+            {
+                stream.SetLength(0);
+                packageRelation.Save(stream);
+            }
         }
     }
 }

@@ -15,21 +15,22 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml
 {
-    ///  <summary>
-    ///  Represents a visitor or rewriter for OpenXML documents.
-    ///  </summary>
-    ///  <remarks>
-    ///  This class is modeled after the <see cref="T:System.Linq.Expressions.ExpressionVisitor" />.
-    ///  The goal is to encapsulate OpenXML manipulations within immutable objects. Every visit operation should be a pure function.
-    ///  Access to <see cref="T:System.Xml.Linq.XElement" /> objects should be done with care, ensuring that objects are cloned prior to any in-place mainpulations.
-    ///  The derived visitor class should provide:
-    ///    1) A public constructor that delegates to <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.#ctor(AD.IO.Paths.DocxFilePath)" />.
-    ///    2) A private constructor that delegates to <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.#ctor(AD.OpenXml.OpenXmlPackageVisitor)" />.
-    ///    3) Override <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.Create(AD.OpenXml.OpenXmlPackageVisitor)" />.
-    ///    4) An optional override for each desired visitor method.
-    ///  </remarks>
+    /// <inheritdoc />
+    /// <summary>
+    /// Represents a visitor or rewriter for OpenXML documents.
+    /// </summary>
+    /// <remarks>
+    /// This class is modeled after the <see cref="T:System.Linq.Expressions.ExpressionVisitor" />.
+    /// The goal is to encapsulate OpenXML manipulations within immutable objects. Every visit operation should be a pure function.
+    /// Access to <see cref="T:System.Xml.Linq.XElement" /> objects should be done with care, ensuring that objects are cloned prior to any in-place mainpulations.
+    /// The derived visitor class should provide:
+    ///   1) A public constructor that delegates to <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.#ctor(AD.IO.Paths.DocxFilePath)" />.
+    ///   2) A private constructor that delegates to <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.#ctor(AD.OpenXml.OpenXmlPackageVisitor)" />.
+    ///   3) Override <see cref="M:AD.OpenXml.OpenXmlPackageVisitor.Create(AD.OpenXml.OpenXmlPackageVisitor)" />.
+    ///   4) An optional override for each desired visitor method.
+    /// </remarks>
     [PublicAPI]
-    public sealed class OpenXmlPackageVisitor
+    public sealed class OpenXmlPackageVisitor : IDisposable
     {
         [NotNull] private static readonly ZipArchive DefaultOpenXml = new ZipArchive(DocxFilePath.Create());
 
@@ -66,51 +67,61 @@ namespace AD.OpenXml
         /// <summary>
         /// word/charts/chart#.xml.
         /// </summary>
+        [NotNull]
         public IEnumerable<ChartInformation> Charts { get; }
 
         /// <summary>
         /// word/media/image#.[jpeg|png|svg].
         /// </summary>
+        [NotNull]
         public IEnumerable<ImageInformation> Images { get; }
 
         /// <summary>
         /// [Content_Types].xml
         /// </summary>
+        [NotNull]
         public XElement ContentTypes { get; }
 
         /// <summary>
         /// word/document.xml
         /// </summary>
+        [NotNull]
         public XElement Document { get; }
 
         /// <summary>
         /// word/_rels/document.xml.rels
         /// </summary>
+        [NotNull]
         public XElement DocumentRelations { get; }
 
         /// <summary>
         /// word/_rels/footnotes.xml.rels
         /// </summary>
+        [NotNull]
         public XElement FootnoteRelations { get; }
 
         /// <summary>
         /// word/footnotes.xml
         /// </summary>
+        [NotNull]
         public XElement Footnotes { get; }
 
         /// <summary>
         /// word/styles.xml
         /// </summary>
+        [NotNull]
         public XElement Styles { get; }
 
         /// <summary>
         /// word/numbering.xml
         /// </summary>
+        [NotNull]
         public XElement Numbering { get; }
 
         /// <summary>
         /// word/theme/theme1.xml
         /// </summary>
+        [NotNull]
         public XElement Theme1 { get; }
 
         /// <summary>
@@ -180,8 +191,11 @@ namespace AD.OpenXml
         /// <param name="archive">
         /// The archive to which changes can be saved.
         /// </param>
+        /// <param name="dispose">
+        /// True if the archive should be disposed; otherwise false.
+        /// </param>
         /// <exception cref="ArgumentNullException"/>
-        public OpenXmlPackageVisitor([NotNull] ZipArchive archive)
+        public OpenXmlPackageVisitor([NotNull] ZipArchive archive, bool dispose = true)
         {
             if (archive is null)
             {
@@ -245,16 +259,16 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            Document = subject.Document.Clone();
-            DocumentRelations = subject.DocumentRelations.Clone();
-            ContentTypes = subject.ContentTypes.Clone();
-            Footnotes = subject.Footnotes.Clone();
-            FootnoteRelations = subject.FootnoteRelations.Clone();
-            Styles = subject.Styles.Clone();
-            Numbering = subject.Numbering.Clone();
-            Theme1 = subject.Theme1.Clone();
-            Charts = subject.Charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToArray();
-            Images = subject.Images.Select(x => new ImageInformation(x.Name, x.Image.ToArray())).ToArray();
+            Document = subject.Document;
+            DocumentRelations = subject.DocumentRelations;
+            ContentTypes = subject.ContentTypes;
+            Footnotes = subject.Footnotes;
+            FootnoteRelations = subject.FootnoteRelations;
+            Styles = subject.Styles;
+            Numbering = subject.Numbering;
+            Theme1 = subject.Theme1;
+            Charts = subject.Charts;
+            Images = subject.Images;
         }
 
         ///  <summary>
@@ -342,16 +356,16 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(images));
             }
 
-            ContentTypes = contentTypes.Clone();
-            Document = document.Clone();
-            DocumentRelations = documentRelations.Clone();
-            Footnotes = footnotes.Clone();
-            FootnoteRelations = footnoteRelations.Clone();
-            Styles = styles.Clone();
-            Numbering = numbering.Clone();
-            Theme1 = theme1.Clone();
-            Charts = charts.Select(x => new ChartInformation(x.Name, x.Chart.Clone())).ToArray();
-            Images = images.Select(x => new ImageInformation(x.Name, x.Image.ToArray())).ToArray();
+            ContentTypes = contentTypes;
+            Document = document;
+            DocumentRelations = documentRelations;
+            Footnotes = footnotes;
+            FootnoteRelations = footnoteRelations;
+            Styles = styles;
+            Numbering = numbering;
+            Theme1 = theme1;
+            Charts = charts.ToArray();
+            Images = images.ToArray();
         }
 
         /// <summary>
@@ -464,7 +478,19 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(archives));
             }
 
-            return archives.Aggregate(new OpenXmlPackageVisitor(DefaultOpenXml), (current, next) => current.Fold(current.Visit(next)));
+            return
+                archives.Aggregate(
+                    new OpenXmlPackageVisitor(DefaultOpenXml, false),
+                    (current, next) =>
+                    {
+                        using (current)
+                        {
+                            using (OpenXmlPackageVisitor visited = current.Visit(next))
+                            {
+                                return current.Fold(visited);
+                            }
+                        }
+                    });
         }
 
         /// <summary>
@@ -487,11 +513,11 @@ namespace AD.OpenXml
                     Document.Name,
                     Document.Attributes(),
                     new XElement(
-                        Document.Elements().First().Name,
-                        Document.Elements().First().Elements(),
-                        subject.Document.Elements().First().Elements()));
+                        W + "body",
+                        Document.Element(W + "body").Elements(),
+                        subject.Document.Element(W + "body").Elements()));
 
-            document = document.RemoveDuplicateSectionProperties();
+            document.RemoveDuplicateSectionProperties();
 
             XElement footnotes =
                 new XElement(
@@ -582,6 +608,19 @@ namespace AD.OpenXml
                     subject.Theme1,
                     charts,
                     images);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            ContentTypes.RemoveAll();
+            Document.RemoveAll();
+            DocumentRelations.RemoveAll();
+            FootnoteRelations.RemoveAll();
+            Footnotes.RemoveAll();
+            Numbering.RemoveAll();
+            Styles.RemoveAll();
+            Theme1.RemoveAll();
         }
     }
 }

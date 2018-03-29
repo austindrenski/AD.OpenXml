@@ -15,27 +15,25 @@ namespace AD.OpenXml.Elements
         /// <summary>
         /// Represents the 'w:' prefix seen in raw OpenXML documents.
         /// </summary>
-        [NotNull]
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
+        // TODO: this may cause excessive allocations as its only called in methods already recursively cloning.
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="document"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static XElement RemoveDuplicateSectionProperties([NotNull] this XElement document)
+        internal static void RemoveDuplicateSectionProperties([NotNull] this XElement document)
         {
             if (document is null)
             {
                 throw new ArgumentNullException(nameof(document));
             }
 
-            XElement resultDocument = document.Clone();
-
             XElement[] sections =
-                resultDocument.Descendants(W + "sectPr")
-                              .ToArray();
+                document.Descendants(W + "sectPr")
+                        .ToArray();
 
             for (int i = 1; i < sections.Length; i++)
             {
@@ -47,8 +45,6 @@ namespace AD.OpenXml.Elements
                     sections[i - 1].Remove();
                 }
             }
-
-            return resultDocument;
         }
     }
 }

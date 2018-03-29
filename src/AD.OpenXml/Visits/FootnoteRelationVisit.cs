@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.OpenXml.Elements;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -30,7 +30,8 @@ namespace AD.OpenXml.Visits
         /// <returns>The updated document node of the source file.</returns>
         public FootnoteRelationVisit(OpenXmlPackageVisitor subject, int footnoteRelationId)
         {
-            (var footnotes, var footnoteRelations) = Execute(subject.Footnotes, subject.FootnoteRelations, footnoteRelationId);
+            (var footnoteRelations, var footnotes) =
+                Execute(subject.Footnotes.RemoveRsidAttributes(), subject.FootnoteRelations.RemoveRsidAttributes(), footnoteRelationId);
 
             Result =
                 new OpenXmlPackageVisitor(
@@ -47,57 +48,102 @@ namespace AD.OpenXml.Visits
         }
 
         [Pure]
-        private static (XElement Footnotes, XElement FootnoteRelations) Execute([NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, int footnoteRelationId)
+        private static (XElement FootnoteRelations, XElement Footnotes) Execute([NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, int footnoteRelationId)
         {
             if (footnotes is null)
             {
                 throw new ArgumentNullException(nameof(footnotes));
             }
 
-            var footnoteRelationMapping =
-                footnoteRelations.RemoveRsidAttributes()
-                                 .Descendants(P + "Relationship")
-                                 .Select(
-                                     x => new
-                                     {
-                                         Id = x.Attribute("Id"),
-                                         Type = x.Attribute("Type"),
-                                         Target = x.Attribute("Target"),
-                                         TargetMode = x.Attribute("TargetMode")
-                                     })
-                                 .OrderBy(x => x.Id.Value.ParseInt())
-                                 .Select(
-                                     (x, i) => new
-                                     {
-                                         oldId = x.Id,
-                                         newId = new XAttribute("Id", $"rId{footnoteRelationId + i}"),
-                                         x.Type,
-                                         x.Target,
-                                         x.TargetMode
-                                     })
-                                 .ToArray();
-
-            XElement modifiedFootnotes = footnotes.Clone();
-
-            foreach (var map in footnoteRelationMapping)
+            if (footnoteRelations is null)
             {
-                modifiedFootnotes =
-                    modifiedFootnotes.ChangeXAttributeValues(R + "id", (string) map.oldId, (string) map.newId);
+                throw new ArgumentNullException(nameof(footnoteRelations));
             }
+
+//            var footnoteRelationMapping =
+//                footnoteRelations.RemoveRsidAttributes()
+//                                 .Descendants(P + "Relationship")
+//                                 .Select(
+//                                     x => new
+//                                     {
+//                                         Id = x.Attribute("Id"),
+//                                         Type = x.Attribute("Type"),
+//                                         Target = x.Attribute("Target"),
+//                                         TargetMode = x.Attribute("TargetMode")
+//                                     })
+//                                 .OrderBy(x => x.Id.Value.ParseInt())
+//                                 .Select(
+//                                     (x, i) => new
+//                                     {
+//                                         oldId = x.Id,
+//                                         newId = new XAttribute("Id", $"rId{footnoteRelationId + i}"),
+//                                         x.Type,
+//                                         x.Target,
+//                                         x.TargetMode
+//                                     })
+//                                 .ToArray();
+//
+//            XElement modifiedFootnotes = footnotes.Clone();
+//
+//            foreach (var map in footnoteRelationMapping)
+//            {
+//                modifiedFootnotes =
+//                    modifiedFootnotes.ChangeXAttributeValues(R + "id", (string) map.oldId, (string) map.newId);
+//            }
+//
+//            XElement modifiedFootnoteRelations =
+//                new XElement(
+//                    footnoteRelations.Name,
+//                    footnoteRelationMapping.Select(
+//                        x =>
+//                            new XElement(
+//                                P + "Relationship",
+//                                x.newId,
+//                                x.Type,
+//                                x.Target,
+//                                x.TargetMode)));
+
+            string[] lookup =
+                footnoteRelations.Elements(P + "Relationship")
+                                 .Select(x => int.Parse(x.Attribute("Id").Value.Substring(3)))
+                                 .OrderBy(x => x)
+                                 .Select((x, i) => $"rId{i + footnoteRelationId}")
+                                 .ToArray();
 
             XElement modifiedFootnoteRelations =
                 new XElement(
                     footnoteRelations.Name,
-                    footnoteRelationMapping.Select(
-                        x =>
-                            new XElement(
-                                P + "Relationship",
-                                x.newId,
-                                x.Type,
-                                x.Target,
-                                x.TargetMode)));
+                    footnoteRelations.Attributes(),
+                    lookup.Select(x =>)
 
-            return (modifiedFootnotes, modifiedFootnoteRelations);
+                    footnoteRelations.Elements()
+                                     .Select(UpdateElements));
+
+            XElement modifiedFootnotes =
+                new XElement(
+                    footnotes.Name,
+                    footnotes.Attributes(),
+                    footnotes.Elements().Select(UpdateElements));
+
+            return (modifiedFootnoteRelations, modifiedFootnotes);
+
+            XElement UpdateElements(XElement e)
+            {
+                return
+                    new XElement(
+                        e.Name,
+                        e.Attributes().Select(UpdateAttributes),
+                        e.Elements().Select(UpdateElements),
+                        e.HasElements ? null : e.Value);
+            }
+
+            XAttribute UpdateAttributes(XAttribute a)
+            {
+                return
+                    a.Name == "Id" || a.Name == R + "id"
+                        ? new XAttribute(a.Name, lookup[a.Value])
+                        : a;
+            }
         }
     }
 }

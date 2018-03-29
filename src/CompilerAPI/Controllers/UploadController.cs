@@ -93,8 +93,6 @@ namespace CompilerAPI.Controllers
 
             foreach (IFormFile file in uploadedFiles)
             {
-//                MemoryStream memoryStream = new MemoryStream();
-//                await file.CopyToAsync(memoryStream);
                 documentQueue.Enqueue(new ZipArchive(file.OpenReadStream()));
             }
 
@@ -176,18 +174,19 @@ namespace CompilerAPI.Controllers
             }
 
             return await
-                OpenXmlPackageVisitor
-                    .VisitAndFold(files)
-                    .Save()
-                    .AddHeaders(title)
-                    .AddFooters(publisher, website)
-                    .PositionChartsInline()
-                    .PositionChartsInner()
-                    .PositionChartsOuter()
-                    .ModifyBarChartStyles()
-                    .ModifyPieChartStyles()
-                    .ModifyLineChartStyles()
-                    .ModifyAreaChartStyles();
+                       OpenXmlPackageVisitor
+                           .VisitAndFold(files)
+                           .Save()
+                           .AddHeaders(title)
+                           .AddFooters(publisher, website)
+                           .ToStream()
+                           .PositionChartsInline()
+                           .PositionChartsInner()
+                           .PositionChartsOuter()
+                           .ModifyBarChartStyles()
+                           .ModifyPieChartStyles()
+                           .ModifyLineChartStyles()
+                           .ModifyAreaChartStyles();
         }
     }
 }

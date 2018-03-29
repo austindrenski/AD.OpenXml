@@ -9,21 +9,24 @@ namespace AD.OpenXml.Visitors
     ///
     /// </summary>
     [PublicAPI]
-    public struct ImageInformation : IEquatable<ImageInformation>
+    public readonly struct ImageInformation : IEquatable<ImageInformation>
     {
         /// <summary>
         ///
         /// </summary>
+        [NotNull]
         public static IEqualityComparer<ImageInformation> Comparer = new ImageInformationComparer();
 
         /// <summary>
         ///
         /// </summary>
+        [NotNull]
         public string Name { get; }
 
         /// <summary>
         ///
         /// </summary>
+        [NotNull]
         public byte[] Image { get; }
 
         /// <summary>
@@ -31,8 +34,18 @@ namespace AD.OpenXml.Visitors
         /// </summary>
         /// <param name="name"></param>
         /// <param name="image"></param>
-        public ImageInformation(string name, byte[] image)
+        public ImageInformation([NotNull] string name, [NotNull] byte[] image)
         {
+            if (name is null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            if (image is null)
+            {
+                throw new ArgumentNullException(nameof(image));
+            }
+
             Name = name;
             Image = image;
         }
@@ -41,38 +54,38 @@ namespace AD.OpenXml.Visitors
         ///
         /// </summary>
         /// <returns></returns>
+        [Pure]
+        [NotNull]
         public override string ToString()
         {
-            return $"Name: {Name}.";
+            return $"Name: {Name}";
         }
 
         /// <summary>
         ///
         /// </summary>
         /// <returns></returns>
+        [Pure]
         public override int GetHashCode()
         {
             unchecked
             {
-                return (397 * (Name?.GetHashCode() ?? 0)) ^ (Image?.GetHashCode() ?? 0);
+                return (397 * Name.GetHashCode()) ^ Image.GetHashCode();
             }
         }
 
         /// <inheritdoc />
+        [Pure]
         public bool Equals(ImageInformation other)
         {
-            return
-                string.Equals(Name, other.Name) &&
-                Equals(Image, other.Image);
+            return string.Equals(Name, other.Name) && Equals(Image, other.Image);
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj)
+        [Pure]
+        public override bool Equals([CanBeNull] object obj)
         {
-            return
-                !ReferenceEquals(null, obj) &&
-                obj is ImageInformation information &&
-                Equals(information);
+            return obj is ImageInformation information && Equals(information);
         }
 
         /// <summary>
@@ -87,6 +100,7 @@ namespace AD.OpenXml.Visitors
         /// <returns>
         /// true if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.
         /// </returns>
+        [Pure]
         public static bool operator ==(ImageInformation left, ImageInformation right)
         {
             return left.Equals(right);
@@ -104,6 +118,7 @@ namespace AD.OpenXml.Visitors
         /// <returns>
         /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
+        [Pure]
         public static bool operator !=(ImageInformation left, ImageInformation right)
         {
             return !left.Equals(right);
@@ -112,11 +127,13 @@ namespace AD.OpenXml.Visitors
         /// <inheritdoc />
         private class ImageInformationComparer : IEqualityComparer<ImageInformation>
         {
+            [Pure]
             public bool Equals(ImageInformation x, ImageInformation y)
             {
                 return x.Equals(y);
             }
 
+            [Pure]
             public int GetHashCode(ImageInformation obj)
             {
                 return obj.GetHashCode();

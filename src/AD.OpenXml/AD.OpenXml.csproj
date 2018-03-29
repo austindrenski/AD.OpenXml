@@ -4,6 +4,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>AD.OpenXml</AssemblyName>
     <RootNamespace>AD.OpenXml</RootNamespace>
+    <DefineConstants>JETBRAINS_ANNOTATIONS</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>

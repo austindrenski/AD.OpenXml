@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using JetBrains.Annotations;
@@ -8,21 +9,24 @@ namespace AD.OpenXml.Visitors
     ///
     /// </summary>
     [PublicAPI]
-    public struct ChartInformation
+    public readonly struct ChartInformation
     {
         /// <summary>
         ///
         /// </summary>
+        [NotNull]
         public static IEqualityComparer<ChartInformation> Comparer = new ChartInformationComparer();
 
         /// <summary>
         ///
         /// </summary>
+        [NotNull]
         public string Name { get; }
 
         /// <summary>
         ///
         /// </summary>
+        [NotNull]
         public XElement Chart { get; }
 
         /// <summary>
@@ -30,8 +34,18 @@ namespace AD.OpenXml.Visitors
         /// </summary>
         /// <param name="name"></param>
         /// <param name="chart"></param>
-        public ChartInformation(string name, XElement chart)
+        public ChartInformation([NotNull] string name, [NotNull] XElement chart)
         {
+            if (name is null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            if (chart is null)
+            {
+                throw new ArgumentNullException(nameof(chart));
+            }
+
             Name = name;
             Chart = chart;
         }
@@ -40,9 +54,11 @@ namespace AD.OpenXml.Visitors
         ///
         /// </summary>
         /// <returns></returns>
+        [Pure]
+        [NotNull]
         public override string ToString()
         {
-            return $"Name: {Name}. {Chart.Attribute("fileName")}.";
+            return $"(Name: {Name}, FileName: {Chart.Attribute("fileName")})";
         }
 
         /// <summary>
@@ -50,7 +66,8 @@ namespace AD.OpenXml.Visitors
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        [Pure]
+        public override bool Equals([CanBeNull] object obj)
         {
             return obj is ChartInformation chart && Name.Equals(chart.Name) && XNode.DeepEquals(Chart, chart.Chart);
         }
@@ -59,6 +76,7 @@ namespace AD.OpenXml.Visitors
         ///
         /// </summary>
         /// <returns></returns>
+        [Pure]
         public override int GetHashCode()
         {
             unchecked
@@ -70,11 +88,13 @@ namespace AD.OpenXml.Visitors
         /// <inheritdoc />
         private class ChartInformationComparer : IEqualityComparer<ChartInformation>
         {
+            [Pure]
             public bool Equals(ChartInformation x, ChartInformation y)
             {
                 return x.Equals(y);
             }
 
+            [Pure]
             public int GetHashCode(ChartInformation obj)
             {
                 return obj.GetHashCode();
