@@ -103,21 +103,18 @@ namespace AD.OpenXml.Visits
 //                                x.Target,
 //                                x.TargetMode)));
 
-            string[] lookup =
+            IDictionary<string, string> lookup =
                 footnoteRelations.Elements(P + "Relationship")
                                  .Select(x => int.Parse(x.Attribute("Id").Value.Substring(3)))
                                  .OrderBy(x => x)
-                                 .Select((x, i) => $"rId{i + footnoteRelationId}")
-                                 .ToArray();
+                                 .Select((x, i) => (a: x, b: i + footnoteRelationId))
+                                 .ToDictionary(x => $"rId{x.a}", x => $"rId{x.b}");
 
             XElement modifiedFootnoteRelations =
                 new XElement(
                     footnoteRelations.Name,
                     footnoteRelations.Attributes(),
-                    lookup.Select(x =>)
-
-                    footnoteRelations.Elements()
-                                     .Select(UpdateElements));
+                    footnoteRelations.Elements().Select(UpdateElements));
 
             XElement modifiedFootnotes =
                 new XElement(
