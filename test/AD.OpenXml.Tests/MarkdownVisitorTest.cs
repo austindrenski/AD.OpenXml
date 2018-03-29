@@ -9,8 +9,10 @@ namespace AD.OpenXml.Tests
     public class MarkdownVisitorTest
     {
         [Theory]
-        [InlineData(" #  ", "Heading 1")]
-        [InlineData("#  ", "Heading 1")]
+        [InlineData(" # ", "Heading 1")]
+        [InlineData("  #  ", "Heading 1")]
+        [InlineData("   #   ", "Heading 1")]
+        [InlineData("# ", "Heading 1 ###### ")]
         [InlineData("# ", "Heading 1")]
         [InlineData("## ", "Heading 2")]
         [InlineData("### ", "Heading 3")]
@@ -21,19 +23,21 @@ namespace AD.OpenXml.Tests
         {
             MarkdownVisitor visitor = new MarkdownVisitor();
             StringSegment raw = prefix + value;
-            string markdown = $"{prefix.Trim()} {value.Trim()}";
+            string result = value.Trim().TrimEnd('#').TrimEnd();
+            string markdown = $"{prefix.Trim()} {result}";
 
             MNode node = visitor.Visit(in raw);
 
+            Assert.Equal(markdown, (string) node);
+            Assert.Equal(markdown, node.ToString());
             Assert.IsType<MHeading>(node);
-
-            MHeading heading = (MHeading) node;
-
-            Assert.Equal(markdown, heading.ToString());
-            Assert.Equal(value, heading.Heading.ToString());
+            Assert.Equal(result, (string) ((MHeading) node).Heading);
+            Assert.Equal(result, ((MHeading) node).Heading.ToString());
         }
 
         [Theory]
+        [InlineData("# ")]
+        [InlineData("    # Heading 1")]
         [InlineData("Heading 1")]
         [InlineData("#Heading 1")]
         [InlineData("##Heading 2")]
@@ -41,10 +45,13 @@ namespace AD.OpenXml.Tests
         {
             MarkdownVisitor visitor = new MarkdownVisitor();
             StringSegment segment = text;
+            string markdown = text.Trim();
 
             MNode node = visitor.Visit(in segment);
 
             Assert.IsNotType<MHeading>(node);
+            Assert.Equal(markdown, node.ToString());
+            Assert.Equal(markdown, (string) node);
         }
     }
 }

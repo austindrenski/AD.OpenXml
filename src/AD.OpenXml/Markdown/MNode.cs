@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Xml.Linq;
+using AD.Xml;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
+
+// TODO: temporary until StringSegment is a readonly struct in 2.1
+// ReSharper disable ImpureMethodCallOnReadonlyValueField
 
 namespace AD.OpenXml.Markdown
 {
@@ -14,12 +18,12 @@ namespace AD.OpenXml.Markdown
     [PublicAPI]
     public class MNode : IEquatable<MNode>
     {
-        private StringSegment _text;
+        protected static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// The raw text of the node.
         /// </summary>
-        public ref readonly StringSegment Text => ref _text;
+        public readonly StringSegment Text;
 
         /// <summary>
         /// Constructs an <see cref="MNode"/>.
@@ -29,17 +33,38 @@ namespace AD.OpenXml.Markdown
         /// </param>
         public MNode(in StringSegment text)
         {
-            _text = text.HasValue ? FixWhitespace(in text) : StringSegment.Empty;
+            Text = text.HasValue ? Normalize(in text) : StringSegment.Empty;
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        public static implicit operator MNode(in StringSegment text)
+        /// <param name="segment">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        public static implicit operator MNode(in StringSegment segment)
         {
-            return new MNode(in text);
+            return new MNode(in segment);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="node">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        public static explicit operator string([CanBeNull] MNode node)
+        {
+            return node?.Text.Value;
         }
 
         /// <inheritdoc />
@@ -73,21 +98,37 @@ namespace AD.OpenXml.Markdown
         [NotNull]
         public virtual XNode ToOpenXml()
         {
-            return new XText(Text.Value);
+            return
+                new XElement(W + "t",
+                    new XText(Text.Value));
         }
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals([CanBeNull] MNode other)
+        public bool Equals(MNode other)
         {
-            return Text.Equals(other?.Text);
+            return Text.Equals(other.Text);
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">
+        /// An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other">other</paramref> parameter; otherwise, false.
+        /// </returns>
+        [Pure]
+        public bool Equals([CanBeNull] in MNode other)
+        {
+            return !(other is null) && Text.Equals(other.Text);
         }
 
         /// <inheritdoc />
         [Pure]
         public override bool Equals([CanBeNull] object obj)
         {
-            return obj is MNode node && Equals(node);
+            return obj is MNode node && Equals(in node);
         }
 
         /// <inheritdoc />
@@ -110,9 +151,9 @@ namespace AD.OpenXml.Markdown
         /// true if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator ==(in MNode left, in MNode right)
+        public static bool operator ==([CanBeNull] in MNode left, [CanBeNull] in MNode right)
         {
-            return Equals(left, right);
+            return !(left is null) && !(right is null) && left.Equals(in right);
         }
 
         /// <summary>
@@ -128,50 +169,24 @@ namespace AD.OpenXml.Markdown
         /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator !=(MNode left, MNode right)
+        public static bool operator !=([CanBeNull] in MNode left, [CanBeNull] in MNode right)
         {
-            return !Equals(left, right);
+            return left is null || right is null || !left.Equals(in right);
         }
 
         /// <summary>
-        /// Trims leading and trailing whitespace then reduces multiple whitespaces to one.
+        /// Normalizes the segment by trimming outer whitespace and reducing inner whitespace.
         /// </summary>
         /// <param name="segment">
-        /// The segment to fix.
+        /// The segment to normalize.
         /// </param>
         /// <returns>
-        /// A <see cref="StringSegment"/> representing the corrected string.
+        /// The normalized segment.
         /// </returns>
-        [Pure]
-        private static StringSegment FixWhitespace(in StringSegment segment)
+        private static StringSegment Normalize(in StringSegment segment)
         {
-            StringSegment trimmed = segment.Trim();
+            return segment.Trim().NormalizeInner(' ');
 
-            int capacity = trimmed.Length;
-
-            for (int i = 0; i < trimmed.Length; i++)
-            {
-                // safe because trimmed can't end with whitespace.
-                if (trimmed[i] == ' ' && trimmed[i + 1] == ' ')
-                {
-                    capacity--;
-                }
-            }
-
-            InplaceStringBuilder sb = new InplaceStringBuilder(capacity);
-
-            for (int i = 0; i < trimmed.Length; i++)
-            {
-                // safe because trimmed can't end with whitespace.
-                if (trimmed[i] == ' ' && trimmed[i + 1] == ' ')
-                {
-                    continue;
-                }
-
-                sb.Append(trimmed[i]);
-            }
-
-            return sb.ToString();
         }
     }
 }
