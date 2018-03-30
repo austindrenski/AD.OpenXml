@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
@@ -9,7 +8,8 @@ using Microsoft.Extensions.Primitives;
 
 namespace AD.OpenXml.Markdown
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="MNode"/>
+    /// <inheritdoc cref="IEquatable{T}"/>
     /// <summary>
     /// Represents a Markdown header node.
     /// </summary>
@@ -18,13 +18,13 @@ namespace AD.OpenXml.Markdown
     /// See: http://spec.commonmark.org/0.28/#atx-headings
     /// </remarks>
     [PublicAPI]
-    public class MHeading : MNode
+    public class MHeading : MNode, IEquatable<MHeading>
     {
         /// <summary>
         /// The text of the heading.
         /// </summary>
         [NotNull]
-        public MNode Heading { get; }
+        public MText Heading { get; }
 
         /// <summary>
         /// The level of the header.
@@ -37,17 +37,16 @@ namespace AD.OpenXml.Markdown
         /// <param name="text">
         /// The raw text of the heading.
         /// </param>
-        public MHeading(in StringSegment text) : base(in text)
+        public MHeading(in StringSegment text)
         {
             if (!Accept(in text))
             {
-                throw new ArgumentException($"Heading must begin with 1-6 '#' characters followed by a ' ' character: '{Text}'");
+                throw new ArgumentException($"Heading must begin with 1-6 '#' characters followed by a ' ' character: '{text}'");
             }
 
-            StringSegment t = Normalize(in text);
-
-            Level = t.IndexOf(' ');
-            Heading = t.Subsegment(Level + 1);
+            StringSegment normalized = Normalize(in text);
+            Level = normalized.IndexOf(' ');
+            Heading = normalized.Subsegment(Level + 1);
         }
 
         /// <summary>
@@ -87,6 +86,7 @@ namespace AD.OpenXml.Markdown
         /// <returns>
         /// The normalized segment.
         /// </returns>
+        [Pure]
         private static StringSegment Normalize(in StringSegment segment)
         {
             return segment.TrimStart(' ', 3).TrimEnd().TrimEnd('#').TrimEnd(' ', 1).NormalizeInner(' ');
@@ -94,6 +94,7 @@ namespace AD.OpenXml.Markdown
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         public override string ToString()
         {
             return $"{new string('#', Level)} {Heading}";
@@ -103,7 +104,7 @@ namespace AD.OpenXml.Markdown
         [Pure]
         public override XNode ToHtml()
         {
-            return new XElement($"h{Level}", Heading);
+            return new XElement($"h{Level}", Heading.ToHtml());
         }
 
         /// <inheritdoc />
@@ -115,8 +116,67 @@ namespace AD.OpenXml.Markdown
                     new XElement(W + "pPr",
                         new XElement(W + "pStyle",
                             new XAttribute(W + "val", $"Heading{Level}"))),
-                    new XElement(W + "r",
-                        new XElement(W + "t", Heading)));
+                    new XElement(W + "r", Heading.ToOpenXml()));
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        public bool Equals([CanBeNull] MHeading other)
+        {
+            return !(other is null) && Heading.Equals(other.Heading) && Level == other.Level;
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        public override bool Equals([CanBeNull] object obj)
+        {
+            return obj is MHeading heading && Equals(heading);
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (397 * Heading.GetHashCode()) ^ Level.GetHashCode();
+            }
+        }
+
+        /// <summary>
+        /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Markdown.MHeading" /> objects are equal.
+        /// </summary>
+        /// <param name="left">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="right">
+        /// The second value to compare.
+        /// </param>
+        /// <returns>
+        /// true if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.
+        /// </returns>
+        [Pure]
+        public static bool operator ==([CanBeNull] MHeading left, [CanBeNull] MHeading right)
+        {
+            return !(left is null) && !(right is null) && left.Equals(right);
+        }
+
+        /// <summary>
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Markdown.MHeading" /> objects have different values.
+        /// </summary>
+        /// <param name="left">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="right">
+        /// The second value to compare.
+        /// </param>
+        /// <returns>
+        /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
+        /// </returns>
+        [Pure]
+        public static bool operator !=([CanBeNull] MHeading left, [CanBeNull] MHeading right)
+        {
+            return left is null || right is null || !left.Equals(right);
         }
     }
 }

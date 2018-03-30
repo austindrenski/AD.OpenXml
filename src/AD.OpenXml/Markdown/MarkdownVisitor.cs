@@ -25,7 +25,7 @@ namespace AD.OpenXml.Markdown
                 return new MHeading(in segment);
             }
 
-            return segment;
+            return new MParagraph(in segment);
         }
     }
 }

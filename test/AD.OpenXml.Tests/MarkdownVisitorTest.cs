@@ -28,10 +28,8 @@ namespace AD.OpenXml.Tests
 
             MNode node = visitor.Visit(in raw);
 
-            Assert.Equal(markdown, (string) node);
             Assert.Equal(markdown, node.ToString());
             Assert.IsType<MHeading>(node);
-            Assert.Equal(result, (string) ((MHeading) node).Heading);
             Assert.Equal(result, ((MHeading) node).Heading.ToString());
         }
 
@@ -51,7 +49,6 @@ namespace AD.OpenXml.Tests
 
             Assert.IsNotType<MHeading>(node);
             Assert.Equal(markdown, node.ToString());
-            Assert.Equal(markdown, (string) node);
         }
     }
 }
