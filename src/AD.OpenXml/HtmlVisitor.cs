@@ -494,7 +494,7 @@ namespace AD.OpenXml
                         Visit(paragraph.Value));
             }
 
-            if ((string) classAttribute == "FiguresTablesSourceNote")
+            if ((string) classAttribute == "FiguresTablesSourceNote" && !paragraph.Descendants(W + "drawing").Any())
             {
                 // Not handled. Greedily subsumed by table nodes.
                 return null;
@@ -503,16 +503,22 @@ namespace AD.OpenXml
             // ReSharper disable once InvertIf
             if (paragraph.NextNode is XElement next)
             {
-                if (next.Name == W + "tbl" && (string) classAttribute == "CaptionTable")
+                switch ((string) classAttribute)
                 {
-                    // Handled by VisitTable.
-                    return null;
-                }
-
-                if (next.Descendants(W + "drawing").Count() == 1 && (string) classAttribute == "CaptionFigure")
-                {
-                    // Not handled. <figcaption/> created from <w:docPr/>.
-                    return null;
+                    case "CaptionTable" when next.Name == W + "tbl":
+                    {
+                        // Handled by VisitTable.
+                        return null;
+                    }
+                    case "CaptionFigure" when next.Descendants(W + "drawing").Any():
+                    {
+                        // Not handled. <figcaption/> created from <w:docPr/>.
+                        return null;
+                    }
+                    default:
+                    {
+                        break;
+                    }
                 }
             }
 

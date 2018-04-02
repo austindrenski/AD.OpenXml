@@ -23,6 +23,11 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         ///
         /// </summary>
+        public string Base64 => Convert.ToBase64String(Image.Span.ToArray());
+
+        /// <summary>
+        ///
+        /// </summary>
         /// <param name="name"></param>
         /// <param name="image"></param>
         public ImageInformation([NotNull] string name, [NotNull] byte[] image)

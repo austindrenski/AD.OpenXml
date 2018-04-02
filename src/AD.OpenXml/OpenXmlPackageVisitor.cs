@@ -177,15 +177,13 @@ namespace AD.OpenXml
                                  x => new
                                  {
                                      id = (string) x.Attribute("Id"),
-                                     target = (string) x.Attribute("Target"),
+                                     mime = Path.GetExtension((string) x.Attribute("Target")),
                                      description = string.Empty,
-                                     base64 =
-                                         Convert.ToBase64String(
-                                             Images.Single(y => y.Name == (string) x.Attribute("Target")).Image.Span.ToArray()),
+                                     base64 = Images.Single(y => y.Name == (string) x.Attribute("Target")).Base64,
                                  })
                              .ToDictionary(
                                  x => x.id,
-                                 x => (mime: x.target.Substring(x.target.LastIndexOf('.') + 1), x.description, x.base64));
+                                 x => (x.mime, x.description, x.base64));
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
