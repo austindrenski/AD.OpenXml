@@ -8,6 +8,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace AD.OpenXml.Markdown
 {
+    /// <inheritdoc cref="MNode"/>
     /// <summary>
     /// Represents a Markdown node.
     /// </summary>
@@ -70,6 +71,7 @@ namespace AD.OpenXml.Markdown
             return Text.ToString();
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///
         /// </summary>
@@ -82,6 +84,7 @@ namespace AD.OpenXml.Markdown
             return Text.ToHtml();
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///
         /// </summary>

@@ -528,19 +528,15 @@ namespace AD.OpenXml
                 new XElement(
                     Footnotes.Name,
                     Footnotes.Attributes(),
-                    Footnotes.Elements()
-                             .Union(
-                                 subject.Footnotes.Elements(),
-                                 XNode.EqualityComparer));
+                    Footnotes.Elements(),
+                    subject.Footnotes.Elements());
 
             XElement footnoteRelations =
                 new XElement(
                     FootnoteRelations.Name,
                     FootnoteRelations.Attributes(),
-                    FootnoteRelations.Elements()
-                                     .Union(
-                                         subject.FootnoteRelations.Elements(),
-                                         XNode.EqualityComparer));
+                    FootnoteRelations.Elements(),
+                    subject.FootnoteRelations.Elements());
 
             XElement documentRelations =
                 new XElement(
@@ -591,9 +587,9 @@ namespace AD.OpenXml
 //                              subject.Theme1.Elements(),
 //                              XNode.EqualityComparer));
 
-            IEnumerable<ChartInformation> charts = Charts.Union(subject.Charts);
+            IEnumerable<ChartInformation> charts = Charts.Concat(subject.Charts);
 
-            IEnumerable<ImageInformation> images = Images.Union(subject.Images);
+            IEnumerable<ImageInformation> images = Images.Concat(subject.Images);
 
             return
                 new OpenXmlPackageVisitor(

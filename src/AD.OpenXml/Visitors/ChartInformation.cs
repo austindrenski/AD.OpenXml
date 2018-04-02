@@ -4,8 +4,8 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visitors
 {
+    /// <inheritdoc cref="IEquatable{T}" />
     /// <summary>
-    ///
     /// </summary>
     [PublicAPI]
     public readonly struct ChartInformation : IEquatable<ChartInformation>
