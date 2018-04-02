@@ -60,7 +60,7 @@ namespace AD.OpenXml
         private XElement NumberingTargetEntry =>
             new XElement(
                 P + "Relationship",
-                new XAttribute("Id", $"rId{NextDocumentRelationId}"),
+                new XAttribute("Id", $"rId{DocumentRelationId + 1}"),
                 new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
                 new XAttribute("Target", "numbering.xml"));
 
@@ -127,22 +127,22 @@ namespace AD.OpenXml
         /// <summary>
         /// The current document relation number incremented by one.
         /// </summary>
-        public int NextDocumentRelationId => DocumentRelations.Elements().Count() + 1;
+        public int DocumentRelationId => DocumentRelations.Elements().Count();
 
         /// <summary>
         /// The current footnote number incremented by one.
         /// </summary>
-        public int NextFootnoteId => Footnotes.Elements(W + "footnote").Count(x => (int) x.Attribute(W + "id") > 0) + 1;
+        public int FootnoteId => Footnotes.Elements(W + "footnote").Count(x => (int) x.Attribute(W + "id") > 0);
 
         /// <summary>
         /// The current footnote relation number incremented by one.
         /// </summary>
-        public int NextFootnoteRelationId => FootnoteRelations.Elements().Count() + 1;
+        public int FootnoteRelationId => FootnoteRelations.Elements().Count();
 
         /// <summary>
         /// The current revision number incremented by one.
         /// </summary>
-        public int NextRevisionId =>
+        public int RevisionId =>
             Math.Max(
                 Document.Descendants()
                         .Where(x => Revisions.Contains(x.Name))
@@ -153,7 +153,7 @@ namespace AD.OpenXml
                          .Where(x => Revisions.Contains(x.Name))
                          .Select(x => (int) x.Attribute(W + "id"))
                          .DefaultIfEmpty(0)
-                         .Max()) + 1;
+                         .Max());
 
         /// <summary>
         /// Maps chart reference id to chart node.
@@ -459,10 +459,10 @@ namespace AD.OpenXml
             }
 
             OpenXmlPackageVisitor subject = new OpenXmlPackageVisitor(archive);
-            OpenXmlPackageVisitor documentVisitor = new DocumentVisit(subject, NextRevisionId).Result;
-            OpenXmlPackageVisitor footnoteVisitor = new FootnoteVisit(documentVisitor, NextFootnoteId, NextRevisionId).Result;
-            OpenXmlPackageVisitor documentRelationVisitor = new DocumentRelationVisit(footnoteVisitor, NextDocumentRelationId).Result;
-            OpenXmlPackageVisitor footnoteRelationVisitor = new FootnoteRelationVisit(documentRelationVisitor, NextFootnoteRelationId).Result;
+            OpenXmlPackageVisitor documentVisitor = new DocumentVisit(subject, RevisionId).Result;
+            OpenXmlPackageVisitor footnoteVisitor = new FootnoteVisit(documentVisitor, FootnoteId, RevisionId).Result;
+            OpenXmlPackageVisitor documentRelationVisitor = new DocumentRelationVisit(footnoteVisitor, DocumentRelationId).Result;
+            OpenXmlPackageVisitor footnoteRelationVisitor = new FootnoteRelationVisit(documentRelationVisitor, FootnoteRelationId).Result;
             OpenXmlPackageVisitor styleVisitor = new StyleVisit(footnoteRelationVisitor).Result;
             OpenXmlPackageVisitor numberingVisitor = new NumberingVisit(styleVisitor).Result;
 
@@ -483,19 +483,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(archives));
             }
 
-            return
-                archives.Aggregate(
-                    new OpenXmlPackageVisitor(DefaultOpenXml, false),
-                    (current, next) =>
-                    {
-                        using (current)
-                        {
-                            using (OpenXmlPackageVisitor visited = current.Visit(next))
-                            {
-                                return current.Fold(visited);
-                            }
-                        }
-                    });
+            return archives.Aggregate(new OpenXmlPackageVisitor(DefaultOpenXml), (current, next) => current.Fold(current.Visit(next)));
         }
 
         /// <summary>

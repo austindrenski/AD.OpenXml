@@ -48,7 +48,12 @@ namespace AD.OpenXml.Visits
         /// </returns>
         public FootnoteVisit(OpenXmlPackageVisitor subject, int footnoteId, int revisionId)
         {
-            (XElement document, XElement footnotes) = Execute(subject.Footnotes, subject.Document, footnoteId, revisionId);
+            (XElement document, XElement footnotes) =
+                Execute(
+                    subject.Footnotes,
+                    subject.Document,
+                    footnoteId + 1,
+                    revisionId + 1);
 
             Result =
                 new OpenXmlPackageVisitor(

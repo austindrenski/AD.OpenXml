@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using AD.OpenXml.Elements;
@@ -31,7 +30,10 @@ namespace AD.OpenXml.Visits
         public FootnoteRelationVisit(OpenXmlPackageVisitor subject, int footnoteRelationId)
         {
             (var footnoteRelations, var footnotes) =
-                Execute(subject.Footnotes.RemoveRsidAttributes(), subject.FootnoteRelations.RemoveRsidAttributes(), footnoteRelationId);
+                Execute(
+                    subject.Footnotes.RemoveRsidAttributes(),
+                    subject.FootnoteRelations.RemoveRsidAttributes(),
+                    footnoteRelationId);
 
             Result =
                 new OpenXmlPackageVisitor(
@@ -59,56 +61,6 @@ namespace AD.OpenXml.Visits
             {
                 throw new ArgumentNullException(nameof(footnoteRelations));
             }
-
-//            var footnoteRelationMapping =
-//                footnoteRelations.RemoveRsidAttributes()
-//                                 .Descendants(P + "Relationship")
-//                                 .Select(
-//                                     x => new
-//                                     {
-//                                         Id = x.Attribute("Id"),
-//                                         Type = x.Attribute("Type"),
-//                                         Target = x.Attribute("Target"),
-//                                         TargetMode = x.Attribute("TargetMode")
-//                                     })
-//                                 .OrderBy(x => x.Id.Value.ParseInt())
-//                                 .Select(
-//                                     (x, i) => new
-//                                     {
-//                                         oldId = x.Id,
-//                                         newId = new XAttribute("Id", $"rId{footnoteRelationId + i}"),
-//                                         x.Type,
-//                                         x.Target,
-//                                         x.TargetMode
-//                                     })
-//                                 .ToArray();
-//
-//            XElement modifiedFootnotes = footnotes.Clone();
-//
-//            foreach (var map in footnoteRelationMapping)
-//            {
-//                modifiedFootnotes =
-//                    modifiedFootnotes.ChangeXAttributeValues(R + "id", (string) map.oldId, (string) map.newId);
-//            }
-//
-//            XElement modifiedFootnoteRelations =
-//                new XElement(
-//                    footnoteRelations.Name,
-//                    footnoteRelationMapping.Select(
-//                        x =>
-//                            new XElement(
-//                                P + "Relationship",
-//                                x.newId,
-//                                x.Type,
-//                                x.Target,
-//                                x.TargetMode)));
-
-            IDictionary<string, string> lookup =
-                footnoteRelations.Elements(P + "Relationship")
-                                 .Select(x => int.Parse(x.Attribute("Id").Value.Substring(3)))
-                                 .OrderBy(x => x)
-                                 .Select((x, i) => (a: x, b: i + footnoteRelationId))
-                                 .ToDictionary(x => $"rId{x.a}", x => $"rId{x.b}");
 
             XElement modifiedFootnoteRelations =
                 new XElement(
@@ -138,7 +90,7 @@ namespace AD.OpenXml.Visits
             {
                 return
                     a.Name == "Id" || a.Name == R + "id"
-                        ? new XAttribute(a.Name, lookup[a.Value])
+                        ? new XAttribute(a.Name, $"rId{footnoteRelationId + int.Parse(a.Value.Substring(3))}")
                         : a;
             }
         }

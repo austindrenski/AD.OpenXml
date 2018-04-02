@@ -48,7 +48,7 @@ namespace AD.OpenXml.Visits
                     subject.ContentTypes,
                     subject.Charts,
                     subject.Images,
-                    documentRelationId);
+                    documentRelationId + 1);
 
             Result =
                 new OpenXmlPackageVisitor(

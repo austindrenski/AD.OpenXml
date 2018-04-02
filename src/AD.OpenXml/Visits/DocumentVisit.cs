@@ -41,7 +41,7 @@ namespace AD.OpenXml.Visits
         /// <returns>The updated document node of the source file.</returns>
         public DocumentVisit(OpenXmlPackageVisitor subject, int revisionId)
         {
-            XElement document = Execute(subject.Document, revisionId);
+            XElement document = Execute(subject.Document, revisionId + 1);
 
             Result =
                 new OpenXmlPackageVisitor(
