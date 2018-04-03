@@ -215,8 +215,8 @@
       <w:szCs w:val="20"/>
     </w:rPr>
   </w:style>
-  <w:style w:type="paragraph" w:customStyle="1" w:styleId="332ReportCoverAgencyName">
-    <w:name w:val="332 Report Cover AgencyName"/>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="332ReportCoverAgencyTarget">
+    <w:name w:val="332 Report Cover AgencyTarget"/>
     <w:basedOn w:val="332ReportCoverTitle"/>
     <w:qFormat/>
     <w:rsid w:val="00B95F75"/>

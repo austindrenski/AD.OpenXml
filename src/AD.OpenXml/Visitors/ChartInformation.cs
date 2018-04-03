@@ -1,5 +1,6 @@
 using System;
 using System.Xml.Linq;
+using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visitors
@@ -10,11 +11,26 @@ namespace AD.OpenXml.Visitors
     [PublicAPI]
     public readonly struct ChartInformation : IEquatable<ChartInformation>
     {
+        [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
+
+        [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
+
+        /// <summary>
+        ///
+        /// </summary>
+        private readonly uint _id;
+
         /// <summary>
         ///
         /// </summary>
         [NotNull]
-        public string Name { get; }
+        public string RelationId => $"rId{_id}";
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull]
+        public string Target => $"charts/chart{_id}.xml";
 
         /// <summary>
         ///
@@ -25,13 +41,42 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         ///
         /// </summary>
-        /// <param name="name"></param>
+        [NotNull]
+        public XElement ContentTypeEntry =>
+            new XElement(T + "Override",
+                new XAttribute("PartName", $"/word/{Target}"),
+                new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml"));
+
+        ///  <summary>
+        ///
+        ///  </summary>
+        ///  <param name="id"></param>
         /// <param name="chart"></param>
-        public ChartInformation([NotNull] string name, [NotNull] XElement chart)
+        private ChartInformation(uint id, [NotNull] XElement chart)
         {
-            if (name is null)
+            if (chart is null)
             {
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException(nameof(chart));
+            }
+
+            _id = id;
+            XElement clone = chart.Clone();
+            clone.Descendants(C + "externalData").Remove();
+            Chart = clone;
+        }
+
+        ///  <summary>
+        ///
+        ///  </summary>
+        ///  <param name="rId"></param>
+        /// <param name="chart"></param>
+        ///  <returns></returns>
+        ///  <exception cref="ArgumentNullException"></exception>
+        public static ChartInformation Create([NotNull] string rId, [NotNull] XElement chart)
+        {
+            if (rId is null)
+            {
+                throw new ArgumentNullException(nameof(rId));
             }
 
             if (chart is null)
@@ -39,8 +84,38 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(chart));
             }
 
-            Name = name;
-            Chart = chart;
+            uint id = uint.Parse(rId.Substring(3));
+
+            return new ChartInformation(id, chart);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        public ChartInformation WithOffset(uint offset)
+        {
+            return new ChartInformation(_id + offset, Chart);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="rId"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        public ChartInformation WithRelationId([NotNull] string rId)
+        {
+            if (rId is null)
+            {
+                throw new ArgumentNullException(nameof(rId));
+            }
+
+            return Create(rId, Chart);
         }
 
         /// <summary>
@@ -51,7 +126,7 @@ namespace AD.OpenXml.Visitors
         [NotNull]
         public override string ToString()
         {
-            return $"(Name: {Name}, FileName: {Chart.Attribute("fileName")})";
+            return $"(Target: {Target}, FileName: {Chart.Attribute("fileName")})";
         }
 
         /// <inheritdoc />
@@ -60,7 +135,7 @@ namespace AD.OpenXml.Visitors
         {
             unchecked
             {
-                return (397 * Name.GetHashCode()) ^ Chart.GetHashCode();
+                return (397 * Target.GetHashCode()) ^ Chart.GetHashCode();
             }
         }
 
@@ -75,7 +150,7 @@ namespace AD.OpenXml.Visitors
         [Pure]
         public bool Equals(ChartInformation other)
         {
-            return string.Equals(Name, other.Name) && XNode.DeepEquals(Chart, other.Chart);
+            return string.Equals(Target, other.Target) && XNode.DeepEquals(Chart, other.Chart);
         }
 
         /// <summary>

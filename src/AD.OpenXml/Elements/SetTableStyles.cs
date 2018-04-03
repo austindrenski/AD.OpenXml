@@ -119,7 +119,7 @@ namespace AD.OpenXml.Elements
                 }
             }
 
-            //source.Descendants(W + "tcPr").Descendants().Where(x => x.Name != W + "vAlign").Remove();
+            //source.Descendants(W + "tcPr").Descendants().Where(x => x.Target != W + "vAlign").Remove();
             source.Descendants(W + "trPr").Remove();
             //source.Descendants(W + "gridCol").Attributes(W + "w").Remove();
 

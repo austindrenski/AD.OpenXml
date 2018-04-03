@@ -39,9 +39,9 @@ namespace AD.OpenXml.Visits
         /// The current revision number incremented by one.
         /// </param>
         /// <returns>The updated document node of the source file.</returns>
-        public DocumentVisit(OpenXmlPackageVisitor subject, int revisionId)
+        public DocumentVisit(OpenXmlPackageVisitor subject, uint revisionId)
         {
-            XElement document = Execute(subject.Document, revisionId + 1);
+            XElement document = Execute(subject.Document, (int) (revisionId + 1));
 
             Result =
                 new OpenXmlPackageVisitor(

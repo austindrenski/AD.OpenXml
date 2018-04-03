@@ -51,6 +51,14 @@ namespace AD.OpenXml
                 W + "moveTo"
             };
 
+        [NotNull] private static readonly IEnumerable<string> UpdatableRelationTypes =
+            new string[]
+            {
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
+            };
+
         [NotNull] private static readonly XElement NumberingOverrideEntry =
             new XElement(T + "Override",
                 new XAttribute("PartName", "/word/numbering.xml"),
@@ -60,7 +68,7 @@ namespace AD.OpenXml
         private XElement NumberingTargetEntry =>
             new XElement(
                 P + "Relationship",
-                new XAttribute("Id", $"rId{DocumentRelationId + 1}"),
+                new XAttribute("Id", $"rId{DocumentRelationCount + 1}"),
                 new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
                 new XAttribute("Target", "numbering.xml"));
 
@@ -125,25 +133,25 @@ namespace AD.OpenXml
         public XElement Theme1 { get; }
 
         /// <summary>
-        /// The current document relation number incremented by one.
+        /// The current document relation count.
         /// </summary>
-        public int DocumentRelationId => DocumentRelations.Elements().Count();
+        public uint DocumentRelationCount => (uint) DocumentRelations.Elements().Count();
 
         /// <summary>
-        /// The current footnote number incremented by one.
+        /// The current footnote count.
         /// </summary>
-        public int FootnoteId => Footnotes.Elements(W + "footnote").Count(x => (int) x.Attribute(W + "id") > 0);
+        public uint FootnoteCount => (uint) Footnotes.Elements().Count();
 
         /// <summary>
-        /// The current footnote relation number incremented by one.
+        /// The current footnote relation count.
         /// </summary>
-        public int FootnoteRelationId => FootnoteRelations.Elements().Count();
+        public uint FootnoteRelationCount => (uint) FootnoteRelations.Elements().Count();
 
         /// <summary>
-        /// The current revision number incremented by one.
+        /// The current revision number.
         /// </summary>
-        public int RevisionId =>
-            Math.Max(
+        public uint RevisionId =>
+            (uint) Math.Max(
                 Document.Descendants()
                         .Where(x => Revisions.Contains(x.Name))
                         .Select(x => (int) x.Attribute(W + "id"))
@@ -164,7 +172,7 @@ namespace AD.OpenXml
                              .Where(x => x.Attribute("Target").Value.StartsWith("charts/"))
                              .ToDictionary(
                                  x => (string) x.Attribute("Id"),
-                                 x => Charts.Single(y => y.Name == (string) x.Attribute("Target")).Chart);
+                                 x => Charts.Single(y => y.Target == (string) x.Attribute("Target")).Chart);
 
         /// <summary>
         /// Maps image reference id to image node.
@@ -179,7 +187,7 @@ namespace AD.OpenXml
                                      id = (string) x.Attribute("Id"),
                                      mime = Path.GetExtension((string) x.Attribute("Target")),
                                      description = string.Empty,
-                                     base64 = Images.Single(y => y.Name == (string) x.Attribute("Target")).Base64,
+                                     base64 = Images.Single(y => y.Target == (string) x.Attribute("Target")).Base64String,
                                  })
                              .ToDictionary(
                                  x => x.id,
@@ -229,20 +237,30 @@ namespace AD.OpenXml
             }
 
             Charts =
-                archive.ReadXml(DocumentRelsInfo.Path)
-                       .Elements()
-                       .Select(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Target))
-                       .Where(x => x?.StartsWith("charts/") ?? false)
-                       .Select(x => new ChartInformation(x, archive.ReadXml($"word/{x}")))
-                       .ToArray();
+                DocumentRelations.Elements()
+                                 .Select(
+                                     x =>
+                                         new
+                                         {
+                                             Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
+                                             Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
+                                         })
+                                 .Where(x => x.Target.StartsWith("charts/"))
+                                 .Select(x => ChartInformation.Create(x.Id, archive.ReadXml($"word/{x.Target}")))
+                                 .ToArray();
 
             Images =
-                archive.ReadXml(DocumentRelsInfo.Path)
-                       .Elements()
-                       .Select(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Target))
-                       .Where(x => x?.StartsWith("media/") ?? false)
-                       .Select(x => new ImageInformation(x, archive.ReadByteArray($"word/{x}")))
-                       .ToArray();
+                DocumentRelations.Elements()
+                                 .Select(
+                                     x =>
+                                         new
+                                         {
+                                             Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
+                                             Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
+                                         })
+                                 .Where(x => x.Target.StartsWith("media/"))
+                                 .Select(x => ImageInformation.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
+                                 .ToArray();
         }
 
         /// <summary>
@@ -422,7 +440,7 @@ namespace AD.OpenXml
 
             foreach (ChartInformation item in Charts)
             {
-                using (Stream stream = archive.CreateEntry($"word/{item.Name}").Open())
+                using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
                 {
                     item.Chart.Save(stream);
                 }
@@ -430,7 +448,7 @@ namespace AD.OpenXml
 
             foreach (ImageInformation item in Images)
             {
-                using (Stream stream = archive.CreateEntry($"word/{item.Name}").Open())
+                using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
                 {
                     for (int i = 0; i < item.Image.Span.Length; i++)
                     {
@@ -458,9 +476,9 @@ namespace AD.OpenXml
 
             OpenXmlPackageVisitor subject = new OpenXmlPackageVisitor(archive);
             OpenXmlPackageVisitor documentVisitor = new DocumentVisit(subject, RevisionId).Result;
-            OpenXmlPackageVisitor footnoteVisitor = new FootnoteVisit(documentVisitor, FootnoteId, RevisionId).Result;
-            OpenXmlPackageVisitor documentRelationVisitor = new DocumentRelationVisit(footnoteVisitor, DocumentRelationId).Result;
-            OpenXmlPackageVisitor footnoteRelationVisitor = new FootnoteRelationVisit(documentRelationVisitor, FootnoteRelationId).Result;
+            OpenXmlPackageVisitor footnoteVisitor = new FootnoteVisit(documentVisitor, FootnoteCount, RevisionId).Result;
+            OpenXmlPackageVisitor documentRelationVisitor = new DocumentRelationVisit(footnoteVisitor, DocumentRelationCount).Result;
+            OpenXmlPackageVisitor footnoteRelationVisitor = new FootnoteRelationVisit(documentRelationVisitor, FootnoteRelationCount).Result;
             OpenXmlPackageVisitor styleVisitor = new StyleVisit(footnoteRelationVisitor).Result;
             OpenXmlPackageVisitor numberingVisitor = new NumberingVisit(styleVisitor).Result;
 
@@ -522,24 +540,30 @@ namespace AD.OpenXml
                     FootnoteRelations.Name,
                     FootnoteRelations.Attributes(),
                     FootnoteRelations.Elements(),
-                    subject.FootnoteRelations.Elements());
+                    subject.FootnoteRelations
+                           .Elements()
+                           .Where(x => UpdatableRelationTypes.Contains((string) x.Attribute("Type"))));
 
             XElement documentRelations =
                 new XElement(
                     DocumentRelations.Name,
                     DocumentRelations.Attributes(),
-                    DocumentRelations.Elements()
-                                     .Union(
-                                         subject.DocumentRelations.Elements(),
-                                         XNode.EqualityComparer));
+                    DocumentRelations.Elements(),
+                    subject.DocumentRelations
+                           .Elements()
+                           .Where(x => UpdatableRelationTypes.Contains((string) x.Attribute("Type"))));
 
             XElement contentTypes =
                 new XElement(
                     ContentTypes.Name,
                     ContentTypes.Attributes(),
-                    ContentTypes.Elements()
+                    ContentTypes.Elements("Default")
                                 .Union(
-                                    subject.ContentTypes.Elements(),
+                                    subject.ContentTypes.Elements("Default"),
+                                    XNode.EqualityComparer),
+                    ContentTypes.Elements("Override")
+                                .Union(
+                                    subject.ContentTypes.Elements("Pverrride"),
                                     XNode.EqualityComparer));
 
             XElement styles =
@@ -566,7 +590,7 @@ namespace AD.OpenXml
             // TODO: write a ThemeVisit
 //            XElement theme1 =
 //                new XElement(
-//                    Theme1.Name,
+//                    Theme1.Target,
 //                    Theme1.Attributes(),
 //                    Theme1.Elements()
 //                          .Union(

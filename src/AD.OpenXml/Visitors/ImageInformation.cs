@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
+using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visitors
@@ -10,10 +14,25 @@ namespace AD.OpenXml.Visitors
     [PublicAPI]
     public readonly struct ImageInformation : IEquatable<ImageInformation>
     {
+        [NotNull] private static readonly Regex RegexTarget = new Regex("media/image(?<id>[0-9]+)\\.(?<extension>png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
+
+        private readonly uint _id;
+
+        private readonly string _extension;
+
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public readonly string Name;
+        [NotNull]
+        public string RelationId => $"rId{_id}";
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull]
+        public string Target => $"media/image{_id}.{_extension}";
 
         /// <summary>
         ///
@@ -23,18 +42,19 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         ///
         /// </summary>
-        public string Base64 => Convert.ToBase64String(Image.Span.ToArray());
+        public string Base64String => Convert.ToBase64String(Image.Span.ToArray());
 
-        /// <summary>
+        ///  <summary>
         ///
-        /// </summary>
-        /// <param name="name"></param>
+        ///  </summary>
+        ///  <param name="id"></param>
+        /// <param name="extension"></param>
         /// <param name="image"></param>
-        public ImageInformation([NotNull] string name, [NotNull] byte[] image)
+        public ImageInformation(uint id, [NotNull] string extension, [NotNull] byte[] image)
         {
-            if (name is null)
+            if (extension is null)
             {
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException(nameof(extension));
             }
 
             if (image is null)
@@ -42,8 +62,78 @@ namespace AD.OpenXml.Visitors
                 throw new ArgumentNullException(nameof(image));
             }
 
-            Name = name;
+
+            _id = id;
+            _extension = extension;
+            Image = image.ToArray();
+        }
+
+        ///  <summary>
+        ///
+        ///  </summary>
+        ///  <param name="id"></param>
+        /// <param name="extension"></param>
+        /// <param name="image"></param>
+        public ImageInformation(uint id, [NotNull] string extension, ReadOnlyMemory<byte> image)
+        {
+            if (extension is null)
+            {
+                throw new ArgumentNullException(nameof(extension));
+            }
+
+            _id = id;
+            _extension = extension;
             Image = image;
+        }
+
+        ///  <summary>
+        ///
+        ///  </summary>
+        /// <param name="rId"></param>
+        /// <param name="target"></param>
+        ///  <param name="image"></param>
+        ///  <returns></returns>
+        ///  <exception cref="ArgumentNullException"></exception>
+        public static ImageInformation Create([NotNull] string rId, [NotNull] string target, [NotNull] byte[] image)
+        {
+            if (rId is null)
+            {
+                throw new ArgumentNullException(nameof(rId));
+            }
+
+            if (target is null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            if (!RegexTarget.IsMatch(target))
+            {
+                throw new ArgumentException(nameof(target));
+            }
+
+            if (image is null)
+            {
+                throw new ArgumentNullException(nameof(image));
+            }
+
+            Match m = RegexTarget.Match(target);
+
+            uint id = uint.Parse(rId.Substring(3));
+            string extension = m.Groups["extension"].Value;
+
+            return new ImageInformation(id, extension, image);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        public ImageInformation WithOffset(uint offset)
+        {
+            return new ImageInformation(_id + offset, _extension, Image);
         }
 
         /// <summary>
@@ -54,7 +144,7 @@ namespace AD.OpenXml.Visitors
         [NotNull]
         public override string ToString()
         {
-            return $"Name: {Name}";
+            return $"Target: {Target}";
         }
 
         /// <summary>
@@ -67,7 +157,7 @@ namespace AD.OpenXml.Visitors
             unchecked
             {
                 // ReSharper disable once ImpureMethodCallOnReadonlyValueField
-                return (397 * Name.GetHashCode()) ^ Image.GetHashCode();
+                return (397 * Target.GetHashCode()) ^ Image.GetHashCode();
             }
         }
 
@@ -83,7 +173,7 @@ namespace AD.OpenXml.Visitors
         public bool Equals(ImageInformation other)
         {
             // ReSharper disable once ImpureMethodCallOnReadonlyValueField
-            return string.Equals(Name, other.Name) && Image.Equals(other.Image);
+            return string.Equals(Target, other.Target) && Image.Equals(other.Image);
         }
 
         /// <summary>

@@ -46,14 +46,14 @@ namespace AD.OpenXml.Visits
         /// <returns>
         /// The updated document node of the source file.
         /// </returns>
-        public FootnoteVisit(OpenXmlPackageVisitor subject, int footnoteId, int revisionId)
+        public FootnoteVisit(OpenXmlPackageVisitor subject, uint footnoteId, uint revisionId)
         {
             (XElement document, XElement footnotes) =
                 Execute(
                     subject.Footnotes,
                     subject.Document,
-                    footnoteId + 1,
-                    revisionId + 1);
+                    (int) footnoteId + 1,
+                    (int) revisionId + 1);
 
             Result =
                 new OpenXmlPackageVisitor(

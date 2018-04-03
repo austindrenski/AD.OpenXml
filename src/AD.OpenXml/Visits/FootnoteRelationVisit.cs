@@ -27,7 +27,7 @@ namespace AD.OpenXml.Visits
         /// <param name="subject">The file from which content is copied.</param>
         /// <param name="footnoteRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
-        public FootnoteRelationVisit(OpenXmlPackageVisitor subject, int footnoteRelationId)
+        public FootnoteRelationVisit(OpenXmlPackageVisitor subject, uint footnoteRelationId)
         {
             (var footnoteRelations, var footnotes) =
                 Execute(
@@ -50,7 +50,7 @@ namespace AD.OpenXml.Visits
         }
 
         [Pure]
-        private static (XElement FootnoteRelations, XElement Footnotes) Execute([NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, int footnoteRelationId)
+        private static (XElement FootnoteRelations, XElement Footnotes) Execute([NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, uint footnoteRelationId)
         {
             if (footnotes is null)
             {
