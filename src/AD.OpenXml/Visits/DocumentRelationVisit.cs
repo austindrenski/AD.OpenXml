@@ -79,7 +79,7 @@ namespace AD.OpenXml.Visits
                 new XElement(
                     documentRelations.Name,
                     documentRelations.Attributes(),
-                    documentRelations.Elements().Select(UpdateElement));
+                    documentRelations.Elements().Select(x => UpdateElement(x, documentRelationId)));
 
             (string oldId, string newId)[] documentRelationMapping =
                 modifiedDocumentRelations.Elements()
@@ -142,39 +142,39 @@ namespace AD.OpenXml.Visits
                     chartMapping.Select(x => x.ContentTypeEntry));
 
             return (document, modifiedDocumentRelations, modifiedContentTypes, chartMapping, imageMapping);
+        }
 
-            XElement UpdateElement(XElement e)
+        private static XElement UpdateElement(XElement e, uint offset)
+        {
+            uint candidate = offset + uint.Parse(e.Attribute("Id").Value.Substring(3));
+
+            return
+                new XElement(
+                    e.Name,
+                    e.Attributes().Select(x => UpdateAttribute(x, candidate)),
+                    e.Elements().Select(x => UpdateElement(x, offset)));
+        }
+
+        private static XAttribute UpdateAttribute(XAttribute a, uint candidate)
+        {
+            switch (a.Name.LocalName)
             {
-                uint candidate = documentRelationId + uint.Parse(e.Attribute("Id").Value.Substring(3));
-
-                return
-                    new XElement(
-                        e.Name,
-                        e.Attributes().Select(x => UpdateAttribute(x, candidate)),
-                        e.Elements().Select(UpdateElement));
-            }
-
-            XAttribute UpdateAttribute(XAttribute a, uint candidate)
-            {
-                switch (a.Name.LocalName)
+                case "Id":
                 {
-                    case "Id":
-                    {
-                        return new XAttribute(a.Name, $"rId{candidate}");
-                    }
-                    case "Target" when TargetChart.IsMatch(a.Value):
-                    {
-                        return new XAttribute(a.Name, $"charts/chart{candidate}.xml");
-                    }
-                    case "Target" when TargetImage.IsMatch(a.Value):
-                    {
-                        Match m = TargetImage.Match(a.Value);
-                        return new XAttribute(a.Name, $"media/image{candidate}.{m.Groups["extension"].Value}");
-                    }
-                    default:
-                    {
-                        return a;
-                    }
+                    return new XAttribute(a.Name, $"rId{candidate}");
+                }
+                case "Target" when TargetChart.IsMatch(a.Value):
+                {
+                    return new XAttribute(a.Name, $"charts/chart{candidate}.xml");
+                }
+                case "Target" when TargetImage.IsMatch(a.Value):
+                {
+                    Match m = TargetImage.Match(a.Value);
+                    return new XAttribute(a.Name, $"media/image{candidate}.{m.Groups["extension"].Value}");
+                }
+                default:
+                {
+                    return a;
                 }
             }
         }
