@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
@@ -58,11 +59,6 @@ namespace AD.OpenXml
                 "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
             };
 
-        [NotNull] private static readonly XElement NumberingOverrideEntry =
-            new XElement(T + "Override",
-                new XAttribute("PartName", "/word/numbering.xml"),
-                new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"));
-
         /// <summary>
         /// word/charts/chart#.xml.
         /// </summary>
@@ -85,53 +81,19 @@ namespace AD.OpenXml
         /// [Content_Types].xml
         /// </summary>
         [NotNull]
-        public XElement ContentTypes =>
-            new XElement(T + "Types",
-                new XElement(T + "Default",
-                    new XAttribute("Extension", "docx"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml")),
-                new XElement(T + "Default",
-                    new XAttribute("Extension", "xlsx"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")),
-                new XElement(T + "Default",
-                    new XAttribute("Extension", "rels"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-package.relationships+xml")),
-                new XElement(T + "Default",
-                    new XAttribute("Extension", "xml"),
-                    new XAttribute("ContentType", "application/xml")),
-                new XElement(T + "Default",
-                    new XAttribute("Extension", "jpeg"),
-                    new XAttribute("ContentType", "image/jpeg")),
-                new XElement(T + "Default",
-                    new XAttribute("Extension", "png"),
-                    new XAttribute("ContentType", "image/png")),
-                new XElement(T + "Default",
-                    new XAttribute("Extension", "svg"),
-                    new XAttribute("ContentType", "image/svg")),
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/docProps/app.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.extended-properties+xml")),
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/docProps/core.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-package.core-properties+xml")),
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/document.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml")),
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/settings.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml")),
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/styles.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml")),
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/theme/theme1.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.theme+xml")),
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/footnotes.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml")),
-                new XElement(T + "Override",
-                    new XAttribute("PartName", "/word/numbering.xml"),
-                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml")),
+        public ContentTypes ContentTypes =>
+            ContentTypes.Create(
+                new ContentTypes.Override[]
+                {
+                    new ContentTypes.Override("/docProps/app.xml", "application/vnd.openxmlformats-officedocument.extended-properties+xml"),
+                    new ContentTypes.Override("/docProps/core.xml", "application/vnd.openxmlformats-package.core-properties+xml"),
+                    new ContentTypes.Override("/word/document.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"),
+                    new ContentTypes.Override("/word/settings.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"),
+                    new ContentTypes.Override("/word/styles.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"),
+                    new ContentTypes.Override("/word/theme/theme1.xml", "application/vnd.openxmlformats-officedocument.theme+xml"),
+                    new ContentTypes.Override("/word/footnotes.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"),
+                    new ContentTypes.Override("/word/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"),
+                },
                 Charts.Select(x => x.ContentTypeEntry));
 
         /// <summary>
@@ -467,7 +429,10 @@ namespace AD.OpenXml
 
             using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
             {
-                ContentTypes.Save(stream);
+                using (StreamWriter writer = new StreamWriter(stream, Encoding.UTF8))
+                {
+                    writer.Write(ContentTypes.ToString());
+                }
             }
 
             using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path).Open())

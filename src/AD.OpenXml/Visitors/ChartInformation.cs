@@ -1,7 +1,9 @@
 using System;
 using System.Xml.Linq;
+using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
+
 // ReSharper disable ImpureMethodCallOnReadonlyValueField
 
 namespace AD.OpenXml.Visitors
@@ -21,7 +23,18 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         ///
         /// </summary>
+        public static readonly string MimeType = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
+
+        /// <summary>
+        ///
+        /// </summary>
         private readonly uint _id;
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull]
+        public XElement Chart { get; }
 
         /// <summary>
         ///
@@ -38,17 +51,7 @@ namespace AD.OpenXml.Visitors
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public XElement Chart { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull]
-        public XElement ContentTypeEntry =>
-            new XElement(T + "Override",
-                new XAttribute("PartName", $"/word/{Target}"),
-                new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml"));
+        public ContentTypes.Override ContentTypeEntry => new ContentTypes.Override($"/word/{Target}", MimeType);
 
         /// <summary>
         ///
