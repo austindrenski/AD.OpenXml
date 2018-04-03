@@ -56,17 +56,9 @@ namespace AD.OpenXml.Visits
                     (int) revisionId + 1);
 
             Result =
-                new OpenXmlPackageVisitor(
-                    subject.ContentTypes,
-                    document,
-                    subject.DocumentRelations,
-                    footnotes,
-                    subject.FootnoteRelations,
-                    subject.Styles,
-                    subject.Numbering,
-                    subject.Theme1,
-                    subject.Charts,
-                    subject.Images);
+                subject.With(
+                    document: document,
+                    footnotes: footnotes);
         }
 
         [Pure]

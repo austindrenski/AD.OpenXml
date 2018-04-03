@@ -16,11 +16,16 @@ namespace AD.OpenXml.Visitors
     {
         [NotNull] private static readonly Regex RegexTarget = new Regex("media/image(?<id>[0-9]+)\\.(?<extension>png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
+
         [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
 
         private readonly uint _id;
 
-        private readonly string _extension;
+        /// <summary>
+        ///
+        /// </summary>
+        public string Extension { get; }
 
         /// <summary>
         ///
@@ -32,7 +37,7 @@ namespace AD.OpenXml.Visitors
         ///
         /// </summary>
         [NotNull]
-        public string Target => $"media/image{_id}.{_extension}";
+        public string Target => $"media/image{_id}.{Extension}";
 
         /// <summary>
         ///
@@ -43,6 +48,16 @@ namespace AD.OpenXml.Visitors
         ///
         /// </summary>
         public string Base64String => Convert.ToBase64String(Image.Span.ToArray());
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull]
+        public XElement RelationshipEntry =>
+            new XElement(P + "Relationship",
+                new XAttribute("Id", RelationId),
+                new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"),
+                new XAttribute("Target", Target));
 
         ///  <summary>
         ///
@@ -64,7 +79,7 @@ namespace AD.OpenXml.Visitors
 
 
             _id = id;
-            _extension = extension;
+            Extension = extension;
             Image = image.ToArray();
         }
 
@@ -82,7 +97,7 @@ namespace AD.OpenXml.Visitors
             }
 
             _id = id;
-            _extension = extension;
+            Extension = extension;
             Image = image;
         }
 
@@ -133,7 +148,7 @@ namespace AD.OpenXml.Visitors
         [Pure]
         public ImageInformation WithOffset(uint offset)
         {
-            return new ImageInformation(_id + offset, _extension, Image);
+            return new ImageInformation(_id + offset, Extension, Image);
         }
 
         /// <summary>
@@ -144,7 +159,7 @@ namespace AD.OpenXml.Visitors
         [NotNull]
         public override string ToString()
         {
-            return $"Target: {Target}";
+            return $"(Id: {RelationId}, Target: {Target})";
         }
 
         /// <summary>

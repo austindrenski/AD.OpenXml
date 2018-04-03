@@ -42,18 +42,7 @@ namespace AD.OpenXml.Visits
         {
             XElement numbering = Numbering.Clone();
 
-            Result =
-                new OpenXmlPackageVisitor(
-                    subject.ContentTypes,
-                    subject.Document,
-                    subject.DocumentRelations,
-                    subject.Footnotes,
-                    subject.FootnoteRelations,
-                    subject.Styles,
-                    numbering,
-                    subject.Theme1,
-                    subject.Charts,
-                    subject.Images);
+            Result = subject.With(numbering: numbering);
         }
     }
 }

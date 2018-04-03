@@ -164,6 +164,7 @@ namespace AD.OpenXml
             return new Relationships(node.Elements().Select(Entry.Create));
         }
 
+        /// <inheritdoc cref="IEquatable{T}"/>
         /// <summary>
         ///
         /// </summary>

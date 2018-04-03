@@ -15,7 +15,6 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml
 {
-    /// <inheritdoc />
     /// <summary>
     /// Represents a visitor or rewriter for OpenXML documents.
     /// </summary>
@@ -30,7 +29,7 @@ namespace AD.OpenXml
     ///   4) An optional override for each desired visitor method.
     /// </remarks>
     [PublicAPI]
-    public sealed class OpenXmlPackageVisitor : IDisposable
+    public sealed class OpenXmlPackageVisitor
     {
         [NotNull] private static readonly ZipArchive DefaultOpenXml = new ZipArchive(DocxFilePath.Create());
 
@@ -64,14 +63,6 @@ namespace AD.OpenXml
                 new XAttribute("PartName", "/word/numbering.xml"),
                 new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"));
 
-        [NotNull]
-        private XElement NumberingTargetEntry =>
-            new XElement(
-                P + "Relationship",
-                new XAttribute("Id", $"rId{DocumentRelationCount + 1}"),
-                new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
-                new XAttribute("Target", "numbering.xml"));
-
         /// <summary>
         /// word/charts/chart#.xml.
         /// </summary>
@@ -85,10 +76,63 @@ namespace AD.OpenXml
         public IEnumerable<ImageInformation> Images { get; }
 
         /// <summary>
+        /// Hyperlinks
+        /// </summary>
+        [NotNull]
+        public IEnumerable<HyperlinkInformation> HyperLinks { get; }
+
+        /// <summary>
         /// [Content_Types].xml
         /// </summary>
         [NotNull]
-        public XElement ContentTypes { get; }
+        public XElement ContentTypes =>
+            new XElement(T + "Types",
+                new XElement(T + "Default",
+                    new XAttribute("Extension", "docx"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml")),
+                new XElement(T + "Default",
+                    new XAttribute("Extension", "xlsx"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")),
+                new XElement(T + "Default",
+                    new XAttribute("Extension", "rels"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-package.relationships+xml")),
+                new XElement(T + "Default",
+                    new XAttribute("Extension", "xml"),
+                    new XAttribute("ContentType", "application/xml")),
+                new XElement(T + "Default",
+                    new XAttribute("Extension", "jpeg"),
+                    new XAttribute("ContentType", "image/jpeg")),
+                new XElement(T + "Default",
+                    new XAttribute("Extension", "png"),
+                    new XAttribute("ContentType", "image/png")),
+                new XElement(T + "Default",
+                    new XAttribute("Extension", "svg"),
+                    new XAttribute("ContentType", "image/svg")),
+                new XElement(T + "Override",
+                    new XAttribute("PartName", "/docProps/app.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.extended-properties+xml")),
+                new XElement(T + "Override",
+                    new XAttribute("PartName", "/docProps/core.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-package.core-properties+xml")),
+                new XElement(T + "Override",
+                    new XAttribute("PartName", "/word/document.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml")),
+                new XElement(T + "Override",
+                    new XAttribute("PartName", "/word/settings.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml")),
+                new XElement(T + "Override",
+                    new XAttribute("PartName", "/word/styles.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml")),
+                new XElement(T + "Override",
+                    new XAttribute("PartName", "/word/theme/theme1.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.theme+xml")),
+                new XElement(T + "Override",
+                    new XAttribute("PartName", "/word/footnotes.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml")),
+                new XElement(T + "Override",
+                    new XAttribute("PartName", "/word/numbering.xml"),
+                    new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml")),
+                Charts.Select(x => x.ContentTypeEntry));
 
         /// <summary>
         /// word/document.xml
@@ -135,12 +179,12 @@ namespace AD.OpenXml
         /// <summary>
         /// The current document relation count.
         /// </summary>
-        public uint DocumentRelationCount => (uint) DocumentRelations.Elements().Count();
+        public uint DocumentRelationCount => DocumentRelations.Elements().Max(x => uint.Parse(x.Attribute("Id").Value.Substring(3)));
 
         /// <summary>
         /// The current footnote count.
         /// </summary>
-        public uint FootnoteCount => (uint) Footnotes.Elements().Count();
+        public uint FootnoteCount => (uint) Footnotes.Elements().Skip(2).Count();
 
         /// <summary>
         /// The current footnote relation count.
@@ -168,30 +212,18 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull]
         public IDictionary<string, XElement> ChartReferences =>
-            DocumentRelations.Elements()
-                             .Where(x => x.Attribute("Target").Value.StartsWith("charts/"))
-                             .ToDictionary(
-                                 x => (string) x.Attribute("Id"),
-                                 x => Charts.Single(y => y.Target == (string) x.Attribute("Target")).Chart);
+            Charts.ToDictionary(
+                x => x.RelationId,
+                x => x.Chart);
 
         /// <summary>
         /// Maps image reference id to image node.
         /// </summary>
         [NotNull]
         public IDictionary<string, (string mime, string description, string base64)> ImageReferences =>
-            DocumentRelations.Elements()
-                             .Where(x => x.Attribute("Target").Value.StartsWith("media/"))
-                             .Select(
-                                 x => new
-                                 {
-                                     id = (string) x.Attribute("Id"),
-                                     mime = Path.GetExtension((string) x.Attribute("Target")),
-                                     description = string.Empty,
-                                     base64 = Images.Single(y => y.Target == (string) x.Attribute("Target")).Base64String,
-                                 })
-                             .ToDictionary(
-                                 x => x.id,
-                                 x => (x.mime, x.description, x.base64));
+            Images.ToDictionary(
+                x => x.RelationId,
+                x => (x.Extension, string.Empty, x.Base64String));
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
@@ -210,34 +242,17 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(archive));
             }
 
-            ContentTypes = archive.ReadXml(ContentTypesInfo.Path);
             Document = archive.ReadXml();
-            DocumentRelations = archive.ReadXml(DocumentRelsInfo.Path);
             Footnotes = archive.ReadXml("word/footnotes.xml", new XElement(W + "footnotes"));
             FootnoteRelations = archive.ReadXml("word/_rels/footnotes.xml.rels", new XElement(P + "Relationships"));
             Styles = archive.ReadXml("word/styles.xml");
             Numbering = archive.ReadXml("word/numbering.xml", new XElement(W + "numbering"));
             Theme1 = archive.ReadXml("word/theme/theme1.xml");
 
-            if (!Numbering.HasElements)
-            {
-                DocumentRelations =
-                    new XElement(
-                        DocumentRelations.Name,
-                        DocumentRelations.Attributes(),
-                        DocumentRelations.Elements().Where(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Target) != "numbering.xml"),
-                        NumberingTargetEntry);
-
-                ContentTypes =
-                    new XElement(
-                        ContentTypes.Name,
-                        ContentTypes.Attributes(),
-                        ContentTypes.Elements().Where(x => (string) x.Attribute(ContentTypesInfo.Attributes.PartName) != "/word/numbering.xml"),
-                        NumberingOverrideEntry);
-            }
+            XElement documentRelations = archive.ReadXml(DocumentRelsInfo.Path);
 
             Charts =
-                DocumentRelations.Elements()
+                documentRelations.Elements()
                                  .Select(
                                      x =>
                                          new
@@ -250,7 +265,7 @@ namespace AD.OpenXml
                                  .ToArray();
 
             Images =
-                DocumentRelations.Elements()
+                documentRelations.Elements()
                                  .Select(
                                      x =>
                                          new
@@ -261,74 +276,70 @@ namespace AD.OpenXml
                                  .Where(x => x.Target.StartsWith("media/"))
                                  .Select(x => ImageInformation.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
                                  .ToArray();
+
+            HyperLinks =
+                documentRelations.Elements()
+                                 .Select(
+                                     x =>
+                                         new
+                                         {
+                                             Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
+                                             Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target),
+                                             TargetMode = (string) x.Attribute("TargetMode")
+                                         })
+                                 .Where(x => x.TargetMode != null)
+                                 .Select(x => HyperlinkInformation.Create(x.Id, x.Target, x.TargetMode))
+                                 .ToArray();
+
+            DocumentRelations =
+                new XElement(P + "Relationships",
+                    documentRelations.Elements().Where(x => !UpdatableRelationTypes.Contains(x.Attribute("Type").Value)),
+                    Charts.Select(x => x.RelationshipEntry),
+                    Images.Select(x => x.RelationshipEntry),
+                    HyperLinks.Select(x => x.RelationshipEntry));
+
+            // ReSharper disable once InvertIf
+            if (!Numbering.HasElements)
+            {
+                DocumentRelations =
+                    new XElement(
+                        DocumentRelations.Name,
+                        DocumentRelations.Attributes(),
+                        DocumentRelations.Elements().Where(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Target) != "numbering.xml"),
+                        new XElement(
+                            P + "Relationship",
+                            new XAttribute("Id", $"rId{DocumentRelationCount + 1}"),
+                            new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
+                            new XAttribute("Target", "numbering.xml")));
+            }
         }
 
         /// <summary>
-        /// Initializes a new <see cref="OpenXmlPackageVisitor"/> from an existing <see cref="OpenXmlPackageVisitor"/>.
+        /// Initializes a new <see cref="OpenXmlPackageVisitor"/> from the supplied components.
         /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlPackageVisitor"/> to visit.
-        /// </param>
-        /// <exception cref="ArgumentNullException"/>
-        public OpenXmlPackageVisitor([NotNull] OpenXmlPackageVisitor subject)
+        /// <param name="document"></param>
+        /// <param name="documentRelations"></param>
+        /// <param name="footnotes"></param>
+        /// <param name="footnoteRelations"></param>
+        /// <param name="styles"></param>
+        /// <param name="numbering"></param>
+        /// <param name="theme1"></param>
+        /// <param name="charts"></param>
+        /// <param name="images"></param>
+        /// <param name="hyperlinks"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        private OpenXmlPackageVisitor(
+            [NotNull] XElement document,
+            [NotNull] XElement documentRelations,
+            [NotNull] XElement footnotes,
+            [NotNull] XElement footnoteRelations,
+            [NotNull] XElement styles,
+            [NotNull] XElement numbering,
+            [NotNull] XElement theme1,
+            [NotNull] IEnumerable<ChartInformation> charts,
+            [NotNull] IEnumerable<ImageInformation> images,
+            [NotNull] IEnumerable<HyperlinkInformation> hyperlinks)
         {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            Document = subject.Document;
-            DocumentRelations = subject.DocumentRelations;
-            ContentTypes = subject.ContentTypes;
-            Footnotes = subject.Footnotes;
-            FootnoteRelations = subject.FootnoteRelations;
-            Styles = subject.Styles;
-            Numbering = subject.Numbering;
-            Theme1 = subject.Theme1;
-            Charts = subject.Charts;
-            Images = subject.Images;
-        }
-
-        ///  <summary>
-        ///  Initializes a new <see cref="OpenXmlPackageVisitor"/> from the supplied components.
-        ///  </summary>
-        ///  <param name="contentTypes">
-        ///
-        ///  </param>
-        ///  <param name="document">
-        ///
-        ///  </param>
-        ///  <param name="documentRelations">
-        ///
-        ///  </param>
-        ///  <param name="footnotes">
-        ///
-        ///  </param>
-        ///  <param name="footnoteRelations">
-        ///
-        ///  </param>
-        ///  <param name="styles">
-        ///
-        ///  </param>
-        ///  <param name="numbering">
-        ///
-        ///  </param>
-        ///  <param name="theme1">
-        ///
-        ///  </param>
-        ///  <param name="charts">
-        ///
-        ///  </param>
-        /// <param name="images">
-        ///
-        /// </param>
-        internal OpenXmlPackageVisitor([NotNull] XElement contentTypes, [NotNull] XElement document, [NotNull] XElement documentRelations, [NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, [NotNull] XElement styles, [NotNull] XElement numbering, [NotNull] XElement theme1, [NotNull] IEnumerable<ChartInformation> charts, [NotNull] IEnumerable<ImageInformation> images)
-        {
-            if (contentTypes is null)
-            {
-                throw new ArgumentNullException(nameof(contentTypes));
-            }
-
             if (document is null)
             {
                 throw new ArgumentNullException(nameof(document));
@@ -374,9 +385,12 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(images));
             }
 
-            ContentTypes = contentTypes;
+            if (hyperlinks is null)
+            {
+                throw new ArgumentNullException(nameof(hyperlinks));
+            }
+
             Document = document;
-            DocumentRelations = documentRelations;
             Footnotes = footnotes;
             FootnoteRelations = footnoteRelations;
             Styles = styles;
@@ -384,6 +398,51 @@ namespace AD.OpenXml
             Theme1 = theme1;
             Charts = charts.ToArray();
             Images = images.ToArray();
+            HyperLinks = hyperlinks.ToArray();
+
+            DocumentRelations =
+                new XElement(P + "Relationships",
+                    documentRelations.Elements().Where(x => !UpdatableRelationTypes.Contains(x.Attribute("Type").Value)),
+                    Charts.Select(x => x.RelationshipEntry),
+                    Images.Select(x => x.RelationshipEntry),
+                    HyperLinks.Select(x => x.RelationshipEntry));
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="footnotes"></param>
+        /// <param name="footnoteRelations"></param>
+        /// <param name="styles"></param>
+        /// <param name="numbering"></param>
+        /// <param name="theme1"></param>
+        /// <param name="charts"></param>
+        /// <param name="images"></param>
+        /// <param name="hyperlinks"></param>
+        /// <returns></returns>
+        public OpenXmlPackageVisitor With(
+            [CanBeNull] XElement document = default,
+            [CanBeNull] XElement footnotes = default,
+            [CanBeNull] XElement footnoteRelations = default,
+            [CanBeNull] XElement styles = default,
+            [CanBeNull] XElement numbering = default,
+            [CanBeNull] XElement theme1 = default,
+            [CanBeNull] IEnumerable<ChartInformation> charts = default,
+            [CanBeNull] IEnumerable<ImageInformation> images = default,
+            [CanBeNull] IEnumerable<HyperlinkInformation> hyperlinks = default)
+        {
+            return new OpenXmlPackageVisitor(
+                document ?? Document,
+                DocumentRelations,
+                footnotes ?? Footnotes,
+                footnoteRelations ?? FootnoteRelations,
+                styles ?? Styles,
+                numbering ?? Numbering,
+                theme1 ?? Theme1,
+                charts ?? Charts,
+                images ?? Images,
+                hyperlinks ?? HyperLinks);
         }
 
         /// <summary>
@@ -544,28 +603,6 @@ namespace AD.OpenXml
                            .Elements()
                            .Where(x => UpdatableRelationTypes.Contains((string) x.Attribute("Type"))));
 
-            XElement documentRelations =
-                new XElement(
-                    DocumentRelations.Name,
-                    DocumentRelations.Attributes(),
-                    DocumentRelations.Elements(),
-                    subject.DocumentRelations
-                           .Elements()
-                           .Where(x => UpdatableRelationTypes.Contains((string) x.Attribute("Type"))));
-
-            XElement contentTypes =
-                new XElement(
-                    ContentTypes.Name,
-                    ContentTypes.Attributes(),
-                    ContentTypes.Elements(T + "Default")
-                                .Union(
-                                    subject.ContentTypes.Elements(T + "Default"),
-                                    XNode.EqualityComparer),
-                    ContentTypes.Elements(T + "Override")
-                                .Union(
-                                    subject.ContentTypes.Elements(T + "Override"),
-                                    XNode.EqualityComparer));
-
             XElement styles =
                 new XElement(
                     Styles.Name,
@@ -601,31 +638,19 @@ namespace AD.OpenXml
 
             IEnumerable<ImageInformation> images = Images.Concat(subject.Images);
 
-            return
-                new OpenXmlPackageVisitor(
-                    contentTypes,
-                    document,
-                    documentRelations,
-                    footnotes,
-                    footnoteRelations,
-                    styles,
-                    numbering,
-                    subject.Theme1,
-                    charts,
-                    images);
-        }
+            IEnumerable<HyperlinkInformation> hyperlinks = HyperLinks.Concat(subject.HyperLinks);
 
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            ContentTypes.RemoveAll();
-            Document.RemoveAll();
-            DocumentRelations.RemoveAll();
-            FootnoteRelations.RemoveAll();
-            Footnotes.RemoveAll();
-            Numbering.RemoveAll();
-            Styles.RemoveAll();
-            Theme1.RemoveAll();
+            return
+                With(
+                    document: document,
+                    footnotes: footnotes,
+                    footnoteRelations: footnoteRelations,
+                    styles: styles,
+                    numbering: numbering,
+                    theme1: subject.Theme1,
+                    charts: charts,
+                    images: images,
+                    hyperlinks: hyperlinks);
         }
     }
 }

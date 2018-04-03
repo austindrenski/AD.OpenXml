@@ -44,17 +44,7 @@ namespace AD.OpenXml.Visits
             XElement document = Execute(subject.Document, (int) (revisionId + 1));
 
             Result =
-                new OpenXmlPackageVisitor(
-                    subject.ContentTypes,
-                    document,
-                    subject.DocumentRelations,
-                    subject.Footnotes,
-                    subject.FootnoteRelations,
-                    subject.Styles,
-                    subject.Numbering,
-                    subject.Theme1,
-                    subject.Charts,
-                    subject.Images);
+                subject.With(document: document);
         }
 
         /// <summary>

@@ -276,18 +276,7 @@ namespace AD.OpenXml.Visits
         {
             XElement styles = Execute(subject.Styles.Clone());
 
-            Result =
-                new OpenXmlPackageVisitor(
-                    subject.ContentTypes,
-                    subject.Document,
-                    subject.DocumentRelations,
-                    subject.Footnotes,
-                    subject.FootnoteRelations,
-                    styles,
-                    subject.Numbering,
-                    subject.Theme1,
-                    subject.Charts,
-                    subject.Images);
+            Result = subject.With(styles: styles);
         }
 
         [Pure]

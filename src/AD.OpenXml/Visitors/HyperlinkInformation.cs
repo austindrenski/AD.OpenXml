@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
+
 // ReSharper disable ImpureMethodCallOnReadonlyValueField
 
 namespace AD.OpenXml.Visitors
@@ -10,10 +11,8 @@ namespace AD.OpenXml.Visitors
     /// <summary>
     /// </summary>
     [PublicAPI]
-    public readonly struct ChartInformation : IEquatable<ChartInformation>
+    public readonly struct HyperlinkInformation : IEquatable<HyperlinkInformation>
     {
-        [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
-
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
         [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
@@ -33,22 +32,13 @@ namespace AD.OpenXml.Visitors
         ///
         /// </summary>
         [NotNull]
-        public string Target => $"charts/chart{_id}.xml";
+        public string Target { get; }
 
         /// <summary>
         ///
         /// </summary>
         [NotNull]
-        public XElement Chart { get; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull]
-        public XElement ContentTypeEntry =>
-            new XElement(T + "Override",
-                new XAttribute("PartName", $"/word/{Target}"),
-                new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.drawingml.chart+xml"));
+        public string TargetMode { get; }
 
         /// <summary>
         ///
@@ -57,49 +47,62 @@ namespace AD.OpenXml.Visitors
         public XElement RelationshipEntry =>
             new XElement(P + "Relationship",
                 new XAttribute("Id", RelationId),
-                new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart"),
-                new XAttribute("Target", Target));
+                new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"),
+                new XAttribute("Target", Target),
+                new XAttribute("TargetMode", TargetMode));
 
-        ///  <summary>
+        /// <summary>
         ///
-        ///  </summary>
-        ///  <param name="id"></param>
-        /// <param name="chart"></param>
-        private ChartInformation(uint id, [NotNull] XElement chart)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="target"></param>
+        /// <param name="targetMode"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        private HyperlinkInformation(uint id, [NotNull] string target, [NotNull] string targetMode)
         {
-            if (chart is null)
+            if (target is null)
             {
-                throw new ArgumentNullException(nameof(chart));
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            if (targetMode is null)
+            {
+                throw new ArgumentNullException(nameof(targetMode));
             }
 
             _id = id;
-            XElement clone = chart.Clone();
-            clone.Descendants(C + "externalData").Remove();
-            Chart = clone;
+            Target = target;
+            TargetMode = targetMode;
         }
 
-        ///  <summary>
+        /// <summary>
         ///
-        ///  </summary>
-        ///  <param name="rId"></param>
-        /// <param name="chart"></param>
-        ///  <returns></returns>
-        ///  <exception cref="ArgumentNullException"></exception>
-        public static ChartInformation Create([NotNull] string rId, [NotNull] XElement chart)
+        /// </summary>
+        /// <param name="rId"></param>
+        /// <param name="target"></param>
+        /// <param name="targetMode"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException" />
+        public static HyperlinkInformation Create([NotNull] string rId, [NotNull] string target, [NotNull] string targetMode)
         {
             if (rId is null)
             {
                 throw new ArgumentNullException(nameof(rId));
             }
 
-            if (chart is null)
+            if (target is null)
             {
-                throw new ArgumentNullException(nameof(chart));
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            if (targetMode is null)
+            {
+                throw new ArgumentNullException(nameof(targetMode));
             }
 
             uint id = uint.Parse(rId.Substring(3));
 
-            return new ChartInformation(id, chart);
+            return new HyperlinkInformation(id, target, targetMode);
         }
 
         /// <summary>
@@ -109,9 +112,9 @@ namespace AD.OpenXml.Visitors
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public ChartInformation WithOffset(uint offset)
+        public HyperlinkInformation WithOffset(uint offset)
         {
-            return new ChartInformation(_id + offset, Chart);
+            return new HyperlinkInformation(_id + offset, Target, TargetMode);
         }
 
         /// <summary>
@@ -121,14 +124,14 @@ namespace AD.OpenXml.Visitors
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public ChartInformation WithRelationId([NotNull] string rId)
+        public HyperlinkInformation WithRelationId([NotNull] string rId)
         {
             if (rId is null)
             {
                 throw new ArgumentNullException(nameof(rId));
             }
 
-            return Create(rId, Chart);
+            return Create(rId, Target, TargetMode);
         }
 
         /// <summary>
@@ -139,7 +142,7 @@ namespace AD.OpenXml.Visitors
         [NotNull]
         public override string ToString()
         {
-            return $"(Id: {RelationId}, Target: {Target})";
+            return $"(Id: {RelationId}, Target: {Target}, TargetMode: {TargetMode})";
         }
 
         /// <inheritdoc />
@@ -148,7 +151,7 @@ namespace AD.OpenXml.Visitors
         {
             unchecked
             {
-                return (397 * _id.GetHashCode()) ^ Chart.GetHashCode();
+                return (397 * _id.GetHashCode()) ^ (397 * Target.GetHashCode()) ^ (397 * TargetMode.GetHashCode());
             }
         }
 
@@ -156,18 +159,18 @@ namespace AD.OpenXml.Visitors
         [Pure]
         public override bool Equals([CanBeNull] object obj)
         {
-            return obj is ChartInformation chart && Equals(chart);
+            return obj is HyperlinkInformation hyperlink && Equals(hyperlink);
         }
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(ChartInformation other)
+        public bool Equals(HyperlinkInformation other)
         {
-            return _id == other._id && XNode.DeepEquals(Chart, other.Chart);
+            return _id == other._id && string.Equals(Target, other.Target) && string.Equals(TargetMode, other.TargetMode);
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Visitors.ChartInformation" /> objects have the same values.
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Visitors.HyperlinkInformation" /> objects have the same values.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.
@@ -179,13 +182,13 @@ namespace AD.OpenXml.Visitors
         /// true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator ==(ChartInformation left, ChartInformation right)
+        public static bool operator ==(HyperlinkInformation left, HyperlinkInformation right)
         {
             return left.Equals(right);
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Visitors.ChartInformation" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Visitors.HyperlinkInformation" /> objects have different values.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.
@@ -197,7 +200,7 @@ namespace AD.OpenXml.Visitors
         /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator !=(ChartInformation left, ChartInformation right)
+        public static bool operator !=(HyperlinkInformation left, HyperlinkInformation right)
         {
             return !left.Equals(right);
         }

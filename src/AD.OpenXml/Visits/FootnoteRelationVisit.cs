@@ -34,19 +34,10 @@ namespace AD.OpenXml.Visits
                     subject.Footnotes.RemoveRsidAttributes(),
                     subject.FootnoteRelations.RemoveRsidAttributes(),
                     footnoteRelationId);
-
             Result =
-                new OpenXmlPackageVisitor(
-                    subject.ContentTypes,
-                    subject.Document,
-                    subject.DocumentRelations,
-                    footnotes,
-                    footnoteRelations,
-                    subject.Styles,
-                    subject.Numbering,
-                    subject.Theme1,
-                    subject.Charts,
-                    subject.Images);
+                subject.With(
+                    footnotes: footnotes,
+                    footnoteRelations: footnoteRelations);
         }
 
         [Pure]

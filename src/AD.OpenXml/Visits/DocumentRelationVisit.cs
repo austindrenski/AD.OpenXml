@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using AD.OpenXml.Elements;
 using AD.OpenXml.Visitors;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -39,81 +38,45 @@ namespace AD.OpenXml.Visits
         /// <returns>The updated document node of the source file.</returns>
         public DocumentRelationVisit(OpenXmlPackageVisitor subject, uint documentRelationId)
         {
-            (var document, var documentRelations, var contentTypes, var charts, var images) =
+            (var document, var charts, var images, var hyperlinks) =
                 Execute(
-                    subject.Document.RemoveRsidAttributes(),
-                    subject.DocumentRelations,
-                    subject.ContentTypes,
+                    subject.Document,
                     subject.Charts,
                     subject.Images,
+                    subject.HyperLinks,
                     documentRelationId);
 
             Result =
-                new OpenXmlPackageVisitor(
-                    contentTypes,
-                    document,
-                    documentRelations,
-                    subject.Footnotes,
-                    subject.FootnoteRelations,
-                    subject.Styles,
-                    subject.Numbering,
-                    subject.Theme1,
-                    charts,
-                    images);
+                subject.With(
+                    document: document,
+                    charts: charts,
+                    images: images,
+                    hyperlinks: hyperlinks);
         }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
         /// <param name="document"></param>
-        /// <param name="documentRelations"></param>
-        /// <param name="contentTypes"></param>
         /// <param name="charts"></param>
         /// <param name="images"></param>
+        /// <param name="hyperlinks"></param>
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
-        private static (XElement Document, XElement DocumentRelations, XElement ContentTypes, ChartInformation[] Charts, ImageInformation[] Images) Execute(XElement document, XElement documentRelations, XElement contentTypes, IEnumerable<ChartInformation> charts, IEnumerable<ImageInformation> images, uint documentRelationId)
+        private static (XElement Document, ChartInformation[] Charts, ImageInformation[] Images, HyperlinkInformation[] Hyperlinks)
+            Execute(
+                XElement document,
+                IEnumerable<ChartInformation> charts,
+                IEnumerable<ImageInformation> images,
+                IEnumerable<HyperlinkInformation> hyperlinks,
+                uint documentRelationId)
         {
-            XElement modifiedDocumentRelations =
+            XElement modifiedDocument =
                 new XElement(
-                    documentRelations.Name,
-                    documentRelations.Attributes(),
-                    documentRelations.Elements().Select(x => UpdateElement(x, documentRelationId)));
-
-            (string oldId, string newId)[] documentRelationMapping =
-                modifiedDocumentRelations.Elements()
-                                         .Attributes("Id")
-                                         .Select(x => (oldId: $"rId{int.Parse(x.Value.Substring(3)) - documentRelationId}", newId: x.Value))
-                                         .ToArray();
-
-            foreach (XAttribute item in document.Descendants().Attributes(R + "id"))
-            {
-                (string _, string newId) = documentRelationMapping.Single(x => x.oldId == (string) item);
-
-                item.SetValue(newId);
-
-                item.Parent?
-                    .Ancestors(W + "drawing")
-                    .Descendants()
-                    .Attributes("id")
-                    .SingleOrDefault()?
-                    .SetValue(newId);
-            }
-
-            foreach (XAttribute item in document.Descendants().Attributes(R + "embed"))
-            {
-                (string _, string newId) = documentRelationMapping.Single(x => x.oldId == (string) item);
-
-                item.SetValue(newId);
-
-                item.Parent?
-                    .Ancestors(W + "drawing")
-                    .Descendants()
-                    .Attributes("embed")
-                    .SingleOrDefault()?
-                    .SetValue(newId);
-            }
+                    document.Name,
+                    document.Attributes().Select(x => Update(x, documentRelationId)),
+                    document.Elements().Select(x => Update(x, documentRelationId)));
 
             ChartInformation[] chartMapping =
                 charts.Select(x => x.WithOffset(documentRelationId))
@@ -123,58 +86,33 @@ namespace AD.OpenXml.Visits
                 images.Select(x => x.WithOffset(documentRelationId))
                       .ToArray();
 
-            XElement modifiedContentTypes =
-                new XElement(
-                    contentTypes.Name,
-                    contentTypes.Attributes(),
-                    new XElement(
-                        T + "Default",
-                        new XAttribute("Extension", "jpeg"),
-                        new XAttribute("ContentType", "image/jpeg")),
-                    new XElement(
-                        T + "Default",
-                        new XAttribute("Extension", "png"),
-                        new XAttribute("ContentType", "image/png")),
-                    new XElement(
-                        T + "Default",
-                        new XAttribute("Extension", "svg"),
-                        new XAttribute("ContentType", "image/svg")),
-                    chartMapping.Select(x => x.ContentTypeEntry));
+            HyperlinkInformation[] hyperlinkMapping =
+                hyperlinks.Select(x => x.WithOffset(documentRelationId))
+                          .ToArray();
 
-            return (document, modifiedDocumentRelations, modifiedContentTypes, chartMapping, imageMapping);
+            return (modifiedDocument, chartMapping, imageMapping, hyperlinkMapping);
         }
 
-        private static XElement UpdateElement(XElement e, uint offset)
+        private static XObject Update(XObject node, uint offset)
         {
-            uint candidate = offset + uint.Parse(e.Attribute("Id").Value.Substring(3));
-
-            return
-                new XElement(
-                    e.Name,
-                    e.Attributes().Select(x => UpdateAttribute(x, candidate)),
-                    e.Elements().Select(x => UpdateElement(x, offset)));
-        }
-
-        private static XAttribute UpdateAttribute(XAttribute a, uint candidate)
-        {
-            switch (a.Name.LocalName)
+            switch (node)
             {
-                case "Id":
+                case XElement e:
                 {
-                    return new XAttribute(a.Name, $"rId{candidate}");
+                    return
+                        new XElement(
+                            e.Name,
+                            e.Attributes().Select(x => Update(x, offset)),
+                            e.Elements().Select(x => Update(x, offset)),
+                            e.HasElements ? null : e.Value);
                 }
-                case "Target" when TargetChart.IsMatch(a.Value):
+                case XAttribute a when a.Name == R + "id" || a.Name == R + "embed":
                 {
-                    return new XAttribute(a.Name, $"charts/chart{candidate}.xml");
-                }
-                case "Target" when TargetImage.IsMatch(a.Value):
-                {
-                    Match m = TargetImage.Match(a.Value);
-                    return new XAttribute(a.Name, $"media/image{candidate}.{m.Groups["extension"].Value}");
+                    return new XAttribute(a.Name, $"rId{offset + uint.Parse(a.Value.Substring(3))}");
                 }
                 default:
                 {
-                    return a;
+                    return node;
                 }
             }
         }
