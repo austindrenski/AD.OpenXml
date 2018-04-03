@@ -557,13 +557,13 @@ namespace AD.OpenXml
                 new XElement(
                     ContentTypes.Name,
                     ContentTypes.Attributes(),
-                    ContentTypes.Elements("Default")
+                    ContentTypes.Elements(T + "Default")
                                 .Union(
-                                    subject.ContentTypes.Elements("Default"),
+                                    subject.ContentTypes.Elements(T + "Default"),
                                     XNode.EqualityComparer),
-                    ContentTypes.Elements("Override")
+                    ContentTypes.Elements(T + "Override")
                                 .Union(
-                                    subject.ContentTypes.Elements("Pverrride"),
+                                    subject.ContentTypes.Elements(T + "Override"),
                                     XNode.EqualityComparer));
 
             XElement styles =
