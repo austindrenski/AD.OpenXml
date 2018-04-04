@@ -7,7 +7,6 @@ using System.Text;
 using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
-using AD.OpenXml.Elements;
 using AD.OpenXml.Structures;
 using AD.OpenXml.Visits;
 using AD.Xml;
@@ -34,8 +33,6 @@ namespace AD.OpenXml
         [NotNull] private static readonly ZipArchive DefaultOpenXml = new ZipArchive(DocxFilePath.Create());
 
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
-        [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
 
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -149,24 +146,6 @@ namespace AD.OpenXml
                          .Select(x => (int) x.Attribute(W + "id"))
                          .DefaultIfEmpty(0)
                          .Max());
-
-        /// <summary>
-        /// Maps chart reference id to chart node.
-        /// </summary>
-        [NotNull]
-        public IDictionary<string, XElement> ChartReferences =>
-            Document.Charts.ToDictionary(
-                x => x.RelationId.Value,
-                x => x.Chart);
-
-        /// <summary>
-        /// Maps image reference id to image node.
-        /// </summary>
-        [NotNull]
-        public IDictionary<string, (string mime, string description, string base64)> ImageReferences =>
-            Document.Images.ToDictionary(
-                x => x.RelationId.Value,
-                x => (x.Extension.Value, string.Empty, x.Base64String));
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
@@ -426,23 +405,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            XElement document =
-                new XElement(
-                    Document.Content.Name,
-                    Document.Content.Attributes(),
-                    new XElement(
-                        W + "body",
-                        Document.Content.Element(W + "body").Elements(),
-                        subject.Document.Content.Element(W + "body").Elements()));
-
-            document.RemoveDuplicateSectionProperties();
-
-            Document resultDoc =
-                new Document(
-                    document,
-                    Document.Charts.Concat(subject.Document.Charts),
-                    Document.Images.Concat(subject.Document.Images),
-                    Document.Hyperlinks.Concat(subject.Document.Hyperlinks));
+            Document document = Document.Concat(subject.Document);
 
             XElement footnotes =
                 new XElement(
@@ -493,7 +456,7 @@ namespace AD.OpenXml
 
             return
                 With(
-                    document: resultDoc,
+                    document: document,
                     footnotes: footnotes,
                     footnoteRelations: footnoteRelations,
                     styles: styles,

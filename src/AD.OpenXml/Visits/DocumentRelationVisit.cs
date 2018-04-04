@@ -38,7 +38,7 @@ namespace AD.OpenXml.Visits
         /// <returns>The updated document node of the source file.</returns>
         public DocumentRelationVisit(OpenXmlPackageVisitor subject, uint documentRelationId)
         {
-            (var document, var charts, var images, var hyperlinks) =
+            Document document =
                 Execute(
                     subject.Document.Content,
                     subject.Document.Charts,
@@ -46,9 +46,7 @@ namespace AD.OpenXml.Visits
                     subject.Document.Hyperlinks,
                     documentRelationId);
 
-            Document resultDoc = new Document(document, charts, images, hyperlinks);
-
-            Result = subject.With(document: resultDoc);
+            Result = subject.With(document: document);
         }
 
         /// <summary>
@@ -61,13 +59,12 @@ namespace AD.OpenXml.Visits
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
-        private static (XElement Document, ChartInfo[] Charts, ImageInfo[] Images, HyperlinkInfo[] Hyperlinks)
-            Execute(
-                XElement document,
-                IEnumerable<ChartInfo> charts,
-                IEnumerable<ImageInfo> images,
-                IEnumerable<HyperlinkInfo> hyperlinks,
-                uint documentRelationId)
+        private static Document Execute(
+            [NotNull] XElement document,
+            [NotNull] IEnumerable<ChartInfo> charts,
+            [NotNull] IEnumerable<ImageInfo> images,
+            [NotNull] IEnumerable<HyperlinkInfo> hyperlinks,
+            uint documentRelationId)
         {
             XElement modifiedDocument =
                 new XElement(
@@ -87,7 +84,7 @@ namespace AD.OpenXml.Visits
                 hyperlinks.Select(x => x.WithOffset(documentRelationId))
                           .ToArray();
 
-            return (modifiedDocument, chartMapping, imageMapping, hyperlinkMapping);
+            return new Document(modifiedDocument, chartMapping, imageMapping, hyperlinkMapping);
         }
 
         private static XObject Update(XObject node, uint offset)

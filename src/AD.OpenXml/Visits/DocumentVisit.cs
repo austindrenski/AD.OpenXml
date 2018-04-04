@@ -44,7 +44,7 @@ namespace AD.OpenXml.Visits
         {
             XElement document = Execute(subject.Document.Content, (int) (revisionId + 1));
 
-            Document resultDoc = new Document(document, subject.Document.Charts, subject.Document.Images, subject.Document.Hyperlinks);
+            Document resultDoc = subject.Document.With(document);
 
             Result = subject.With(document: resultDoc);
         }

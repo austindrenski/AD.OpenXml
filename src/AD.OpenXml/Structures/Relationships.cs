@@ -39,26 +39,9 @@ namespace AD.OpenXml.Structures
         ///
         /// </param>
         /// <exception cref="ArgumentNullException"/>
-        public Relationships([NotNull] IEnumerable<Entry> entries)
+        public Relationships(params IEnumerable<Entry>[] entries)
         {
-            if (entries is null)
-            {
-                throw new ArgumentNullException(nameof(entries));
-            }
-
-            Entries = entries.ToImmutableHashSet();
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="entries">
-        ///
-        /// </param>
-        /// <exception cref="ArgumentNullException"/>
-        public Relationships([ItemNotNull] params IEnumerable<Entry>[] entries)
-        {
-            Entries = entries.SelectMany(x => x).ToImmutableHashSet();
+            Entries = entries.Where(x => x != null).SelectMany(x => x).ToImmutableHashSet();
         }
 
         /// <summary>

@@ -56,7 +56,7 @@ namespace AD.OpenXml.Visits
                     (int) footnoteId + 1,
                     (int) revisionId + 1);
 
-            Document resultDoc = new Document(document, subject.Document.Charts, subject.Document.Images, subject.Document.Hyperlinks);
+            Document resultDoc = subject.Document.With(document);
 
             Result = subject.With(document: resultDoc, footnotes: footnotes);
         }
