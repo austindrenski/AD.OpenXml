@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Xml.Linq;
-using AD.Xml;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Primitives;
 
 // ReSharper disable ImpureMethodCallOnReadonlyValueField
 
@@ -14,8 +13,6 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public readonly struct HyperlinkInformation : IEquatable<HyperlinkInformation>
     {
-        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
         /// <summary>
         ///
         /// </summary>
@@ -24,32 +21,27 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public string RelationId => $"rId{_id}";
+        public static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public string Target { get; }
+        public StringSegment RelationId => $"rId{_id}";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public string TargetMode { get; }
+        public StringSegment Target { get; }
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public XElement RelationshipEntry =>
-            new XElement(
-                P + "Relationship",
-                new XAttribute("Id", RelationId),
-                new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"),
-                new XAttribute("Target", Target),
-                new XAttribute("TargetMode", TargetMode));
+        public StringSegment TargetMode { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, SchemaType, TargetMode);
 
         /// <summary>
         ///
@@ -58,18 +50,8 @@ namespace AD.OpenXml.Structures
         /// <param name="target"></param>
         /// <param name="targetMode"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        private HyperlinkInformation(uint id, [NotNull] string target, [NotNull] string targetMode)
+        private HyperlinkInformation(uint id, StringSegment target, StringSegment targetMode)
         {
-            if (target is null)
-            {
-                throw new ArgumentNullException(nameof(target));
-            }
-
-            if (targetMode is null)
-            {
-                throw new ArgumentNullException(nameof(targetMode));
-            }
-
             _id = id;
             Target = target;
             TargetMode = targetMode;
@@ -83,23 +65,8 @@ namespace AD.OpenXml.Structures
         /// <param name="targetMode"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
-        public static HyperlinkInformation Create([NotNull] string rId, [NotNull] string target, [NotNull] string targetMode)
+        public static HyperlinkInformation Create(StringSegment rId, StringSegment target, StringSegment targetMode)
         {
-            if (rId is null)
-            {
-                throw new ArgumentNullException(nameof(rId));
-            }
-
-            if (target is null)
-            {
-                throw new ArgumentNullException(nameof(target));
-            }
-
-            if (targetMode is null)
-            {
-                throw new ArgumentNullException(nameof(targetMode));
-            }
-
             uint id = uint.Parse(rId.Substring(3));
 
             return new HyperlinkInformation(id, target, targetMode);
@@ -166,7 +133,7 @@ namespace AD.OpenXml.Structures
         [Pure]
         public bool Equals(HyperlinkInformation other)
         {
-            return _id == other._id && string.Equals(Target, other.Target) && string.Equals(TargetMode, other.TargetMode);
+            return _id == other._id && Equals(Target, other.Target) && Equals(TargetMode, other.TargetMode);
         }
 
         /// <summary>

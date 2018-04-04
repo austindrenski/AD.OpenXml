@@ -3,6 +3,7 @@ using System.Linq;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Primitives;
 
 // ReSharper disable ImpureMethodCallOnReadonlyValueField
 
@@ -16,17 +17,15 @@ namespace AD.OpenXml.Structures
     {
         [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
-        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
+        /// <summary>
+        ///
+        /// </summary>
+        public static readonly StringSegment MimeType = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
 
         /// <summary>
         ///
         /// </summary>
-        public static readonly string MimeType = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
-
-        /// <summary>
-        ///
-        /// </summary>
-        private readonly uint _id;
+        public static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart";
 
         /// <summary>
         ///
@@ -37,61 +36,38 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public string RelationId => $"rId{_id}";
+        public StringSegment RelationId { get; }
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public string Target => $"charts/chart{_id}.xml";
+        public StringSegment Target => $"charts/chart{RelationId.Subsegment(3)}.xml";
 
         /// <summary>
         ///
         /// </summary>
-        public ContentTypes.Override ContentTypeEntry => new ContentTypes.Override($"/word/{Target}", MimeType);
+        public StringSegment PartName => $"/word/{Target}";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public XElement RelationshipEntry =>
-            new XElement(
-                P + "Relationship",
-                new XAttribute("Id", RelationId),
-                new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart"),
-                new XAttribute("Target", Target));
+        public ContentTypes.Override ContentTypeEntry => new ContentTypes.Override(PartName, MimeType);
 
-        ///  <summary>
+        /// <summary>
         ///
-        ///  </summary>
-        ///  <param name="id"></param>
-        /// <param name="chart"></param>
-        private ChartInformation(uint id, [NotNull] XElement chart)
-        {
-            if (chart is null)
-            {
-                throw new ArgumentNullException(nameof(chart));
-            }
-
-            _id = id;
-            XElement clone = chart.Clone();
-            clone.Descendants(C + "externalData").Remove();
-            Chart = clone;
-        }
+        /// </summary>
+        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, SchemaType);
 
         ///  <summary>
         ///
         ///  </summary>
         ///  <param name="rId"></param>
         /// <param name="chart"></param>
-        ///  <returns></returns>
-        ///  <exception cref="ArgumentNullException"></exception>
-        public static ChartInformation Create([NotNull] string rId, [NotNull] XElement chart)
+        public ChartInformation(StringSegment rId, [NotNull] XElement chart)
         {
-            if (rId is null)
+            if (!rId.StartsWith("rId", StringComparison.Ordinal))
             {
-                throw new ArgumentNullException(nameof(rId));
+                throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
             }
 
             if (chart is null)
@@ -99,9 +75,10 @@ namespace AD.OpenXml.Structures
                 throw new ArgumentNullException(nameof(chart));
             }
 
-            uint id = uint.Parse(rId.Substring(3));
-
-            return new ChartInformation(id, chart);
+            RelationId = rId;
+            XElement clone = chart.Clone();
+            clone.Descendants(C + "externalData").Remove();
+            Chart = clone;
         }
 
         /// <summary>
@@ -113,7 +90,7 @@ namespace AD.OpenXml.Structures
         [Pure]
         public ChartInformation WithOffset(uint offset)
         {
-            return new ChartInformation(_id + offset, Chart);
+            return new ChartInformation($"rId{uint.Parse(RelationId.Substring(3)) + offset}", Chart);
         }
 
         /// <summary>
@@ -123,14 +100,9 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public ChartInformation WithRelationId([NotNull] string rId)
+        public ChartInformation WithRelationId(StringSegment rId)
         {
-            if (rId is null)
-            {
-                throw new ArgumentNullException(nameof(rId));
-            }
-
-            return Create(rId, Chart);
+            return new ChartInformation(rId, Chart);
         }
 
         /// <summary>
@@ -150,8 +122,15 @@ namespace AD.OpenXml.Structures
         {
             unchecked
             {
-                return (397 * _id.GetHashCode()) ^ Chart.GetHashCode();
+                return (397 * RelationId.GetHashCode()) ^ Chart.GetHashCode();
             }
+        }
+
+        /// <inheritdoc />
+        [Pure]
+        public bool Equals(ChartInformation other)
+        {
+            return Equals(RelationId, other.RelationId) && XNode.DeepEquals(Chart, other.Chart);
         }
 
         /// <inheritdoc />
@@ -159,13 +138,6 @@ namespace AD.OpenXml.Structures
         public override bool Equals([CanBeNull] object obj)
         {
             return obj is ChartInformation chart && Equals(chart);
-        }
-
-        /// <inheritdoc />
-        [Pure]
-        public bool Equals(ChartInformation other)
-        {
-            return _id == other._id && XNode.DeepEquals(Chart, other.Chart);
         }
 
         /// <summary>

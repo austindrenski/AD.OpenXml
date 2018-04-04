@@ -56,7 +56,7 @@ namespace AD.OpenXml.Structures
         [NotNull]
         public static ContentTypes Create([ItemNotNull] params IEnumerable<Override>[] overrides)
         {
-            return new ContentTypes(Default.Standard, overrides.SelectMany(x => x));
+            return new ContentTypes(Default.StandardEntries, overrides.SelectMany(x => x));
         }
 
         /// <summary>
@@ -87,12 +87,13 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [PublicAPI]
-        public readonly struct Default : IComparable<Default>
+        public readonly struct Default : IComparable<Default>, IEquatable<Default>
         {
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public static readonly Default[] Standard =
+            [NotNull]
+            public static Default[] StandardEntries =>
                 new Default[]
                 {
                     new Default("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"),
@@ -165,6 +166,48 @@ namespace AD.OpenXml.Structures
             {
                 return StringComparer.Ordinal.Compare(Extension.Value, other.Extension.Value);
             }
+
+            /// <inheritdoc />
+            [Pure]
+            public bool Equals(Default other)
+            {
+                return Extension.Equals(other.Extension) && ContentType.Equals(other.ContentType);
+            }
+
+            /// <inheritdoc />
+            [Pure]
+            public override bool Equals([CanBeNull] object obj)
+            {
+                return obj is Default d && Equals(d);
+            }
+
+            /// <inheritdoc />
+            [Pure]
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return (Extension.GetHashCode() * 397) ^ ContentType.GetHashCode();
+                }
+            }
+
+            /// <summary>Returns a value that indicates whether two <see cref="Default" /> objects have equal values.</summary>
+            /// <param name="left">The first value to compare.</param>
+            /// <param name="right">The second value to compare.</param>
+            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.</returns>            [Pure]
+            public static bool operator ==(Default left, Default right)
+            {
+                return left.Equals(right);
+            }
+
+            /// <summary>Returns a value that indicates whether two <see cref="Default" /> objects have different values.</summary>
+            /// <param name="left">The first value to compare.</param>
+            /// <param name="right">The second value to compare.</param>
+            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.</returns>            [Pure]
+            public static bool operator !=(Default left, Default right)
+            {
+                return !left.Equals(right);
+            }
         }
 
         /// <inheritdoc cref="IComparable{T}"/>
@@ -172,7 +215,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [PublicAPI]
-        public readonly struct Override : IComparable<Override>
+        public readonly struct Override : IComparable<Override>, IEquatable<Override>
         {
             /// <summary>
             ///
@@ -234,6 +277,50 @@ namespace AD.OpenXml.Structures
             public int CompareTo(Override other)
             {
                 return StringComparer.Ordinal.Compare(PartName.Value, other.PartName.Value);
+            }
+
+            /// <inheritdoc />
+            [Pure]
+            public bool Equals(Override other)
+            {
+                return PartName.Equals(other.PartName) && ContentType.Equals(other.ContentType);
+            }
+
+            /// <inheritdoc />
+            [Pure]
+            public override bool Equals([CanBeNull] object obj)
+            {
+                return obj is Override over && Equals(over);
+            }
+
+            /// <inheritdoc />
+            [Pure]
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return (PartName.GetHashCode() * 397) ^ ContentType.GetHashCode();
+                }
+            }
+
+            /// <summary>Returns a value that indicates whether two <see cref="Override" /> objects have equal values.</summary>
+            /// <param name="left">The first value to compare.</param>
+            /// <param name="right">The second value to compare.</param>
+            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.</returns>
+            [Pure]
+            public static bool operator ==(Override left, Override right)
+            {
+                return left.Equals(right);
+            }
+
+            /// <summary>Returns a value that indicates whether two <see cref="Override" /> objects have different values.</summary>
+            /// <param name="left">The first value to compare.</param>
+            /// <param name="right">The second value to compare.</param>
+            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.</returns>
+            [Pure]
+            public static bool operator !=(Override left, Override right)
+            {
+                return !left.Equals(right);
             }
         }
     }

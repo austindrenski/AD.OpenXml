@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Primitives;
 
 namespace AD.OpenXml.Structures
 {
@@ -16,8 +17,6 @@ namespace AD.OpenXml.Structures
     public class Relationships
     {
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
-        [NotNull] private static readonly XName RootName = P + "Relationships";
 
         [NotNull] private readonly Dictionary<int, Entry> _dictionary;
 
@@ -129,7 +128,7 @@ namespace AD.OpenXml.Structures
         [NotNull]
         public XElement ToXElement()
         {
-            return new XElement(RootName, _dictionary.Select(x => x.ToXElement()));
+            return new XElement(P + "Relationships", _dictionary.Select(x => x.ToXElement()));
         }
 
         /// <inheritdoc />
@@ -140,50 +139,32 @@ namespace AD.OpenXml.Structures
             return ToXElement().ToString();
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ArgumentException"></exception>
-        [Pure]
-        [NotNull]
-        public static implicit operator Relationships([NotNull] XElement node)
-        {
-            if (node is null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
-
-            if (node.Name != RootName)
-            {
-                throw new ArgumentException($"Root node is not {RootName}.");
-            }
-
-            return new Relationships(node.Elements().Select(Entry.Create));
-        }
-
         /// <inheritdoc cref="IEquatable{T}"/>
         /// <summary>
         ///
         /// </summary>
         [PublicAPI]
-        public readonly struct Entry : IEquatable<Entry>
+        public readonly struct Entry : IComparable<Entry>, IEquatable<Entry>
         {
-            private static readonly XName EntryName = P + "Relationship";
+            /// <summary>
+            ///
+            /// </summary>
+            public StringSegment Id { get; }
 
             /// <summary>
             ///
             /// </summary>
-            [NotNull]
-            public string Type { get; }
+            public StringSegment Target { get; }
 
             /// <summary>
             ///
             /// </summary>
-            [NotNull]
-            public string Target { get; }
+            public StringSegment Type { get; }
+
+            /// <summary>
+            ///
+            /// </summary>
+            public StringSegment TargetMode { get; }
 
             /// <summary>
             ///
@@ -191,24 +172,34 @@ namespace AD.OpenXml.Structures
             /// <param name="type">
             ///
             /// </param>
+            /// <param name="id">
+            ///
+            /// </param>
             /// <param name="target">
             ///
             /// </param>
+            /// <param name="targetMode">
+            ///
+            /// </param>
             /// <exception cref="ArgumentNullException" />
-            public Entry([NotNull] string type, [NotNull] string target)
+            public Entry(StringSegment id, StringSegment target, StringSegment type, StringSegment targetMode = default)
             {
-                if (type is null)
-                {
-                    throw new ArgumentNullException(nameof(type));
-                }
-
-                if (target is null)
-                {
-                    throw new ArgumentNullException(nameof(target));
-                }
-
-                Type = type;
+                Id = id;
                 Target = target;
+                Type = type;
+                TargetMode = targetMode;
+            }
+
+            /// <summary>
+            ///
+            /// </summary>
+            /// <param name="entry"></param>
+            /// <returns></returns>
+            [Pure]
+            [NotNull]
+            public static explicit operator XElement(Entry entry)
+            {
+                return entry.ToXElement();
             }
 
             /// <summary>
@@ -223,9 +214,11 @@ namespace AD.OpenXml.Structures
             {
                 return
                     new XElement(
-                        EntryName,
+                        P + "Relationship",
+                        new XAttribute("Id", Id),
                         new XAttribute("Type", Type),
-                        new XAttribute("Target", Target));
+                        new XAttribute("Target", Target),
+                        TargetMode.HasValue ? new XAttribute("TargetMode", TargetMode) : null);
             }
 
             /// <inheritdoc />
@@ -236,63 +229,56 @@ namespace AD.OpenXml.Structures
                 return ToXElement().ToString();
             }
 
-            /// <summary>
-            ///
-            /// </summary>
-            /// <param name="node"></param>
-            /// <returns></returns>
-            /// <exception cref="ArgumentNullException"></exception>
-            /// <exception cref="ArgumentException"></exception>
+            /// <inheritdoc />
             [Pure]
-            public static (int Key, Entry Value) Create([NotNull] XElement node)
+            public int CompareTo(Entry other)
             {
-                if (node is null)
-                {
-                    throw new ArgumentNullException(nameof(node));
-                }
-
-                if (node.Name != EntryName)
-                {
-                    throw new ArgumentException($"Child node is not {EntryName}.");
-                }
-
-                return ((int) node.Attribute("Id"), new Entry((string) node.Attribute("PartName"), (string) node.Attribute("ContentType")));
+                return StringComparer.Ordinal.Compare(Target.Value, other.Target.Value);
             }
 
             /// <inheritdoc />
+            [Pure]
             public bool Equals(Entry other)
             {
-                return string.Equals(Type, other.Type) && string.Equals(Target, other.Target);
+                return Id.Equals(other.Id) && Type.Equals(other.Type) && Target.Equals(other.Target) && TargetMode.Equals(other.TargetMode);
             }
 
             /// <inheritdoc />
+            [Pure]
             public override bool Equals([CanBeNull] object obj)
             {
                 return obj is Entry entry && Equals(entry);
             }
 
             /// <inheritdoc />
+            [Pure]
             public override int GetHashCode()
             {
                 unchecked
                 {
-                    return (Type.GetHashCode() * 397) ^ Target.GetHashCode();
+                    int hashCode = Id.GetHashCode();
+                    hashCode = (hashCode * 397) ^ Target.GetHashCode();
+                    hashCode = (hashCode * 397) ^ Type.GetHashCode();
+                    hashCode = (hashCode * 397) ^ TargetMode.GetHashCode();
+                    return hashCode;
                 }
             }
 
-            /// <summary>Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.ContentTypes.Entry" /> objects are equal.</summary>
+            /// <summary>Returns a value that indicates whether the values of two <see cref="Entry" /> objects are equal.</summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
             /// <returns>true if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.</returns>
+            [Pure]
             public static bool operator ==(Entry left, Entry right)
             {
                 return left.Equals(right);
             }
 
-            /// <summary>Returns a value that indicates whether two <see cref="T:AD.OpenXml.ContentTypes.Entry" /> objects have different values.</summary>
+            /// <summary>Returns a value that indicates whether two <see cref="Entry" /> objects have different values.</summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
             /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.</returns>
+            [Pure]
             public static bool operator !=(Entry left, Entry right)
             {
                 return !left.Equals(right);

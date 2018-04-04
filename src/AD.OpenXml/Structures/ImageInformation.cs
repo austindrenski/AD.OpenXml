@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
-using AD.Xml;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Primitives;
 
 namespace AD.OpenXml.Structures
 {
@@ -16,26 +15,27 @@ namespace AD.OpenXml.Structures
     {
         [NotNull] private static readonly Regex RegexTarget = new Regex("media/image(?<id>[0-9]+)\\.(?<extension>png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
         private readonly uint _id;
 
         /// <summary>
         ///
         /// </summary>
-        public string Extension { get; }
+        public static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public string RelationId => $"rId{_id}";
+        public StringSegment Extension { get; }
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public string Target => $"media/image{_id}.{Extension}";
+        public StringSegment RelationId => $"rId{_id}";
+
+        /// <summary>
+        ///
+        /// </summary>
+        public StringSegment Target => $"media/image{_id}.{Extension}";
 
         /// <summary>
         ///
@@ -50,12 +50,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public XElement RelationshipEntry =>
-            new XElement(P + "Relationship",
-                new XAttribute("Id", RelationId),
-                new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"),
-                new XAttribute("Target", Target));
+        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, SchemaType);
 
         ///  <summary>
         ///
@@ -63,13 +58,8 @@ namespace AD.OpenXml.Structures
         ///  <param name="id"></param>
         /// <param name="extension"></param>
         /// <param name="image"></param>
-        public ImageInformation(uint id, [NotNull] string extension, [NotNull] byte[] image)
+        public ImageInformation(uint id, StringSegment extension, [NotNull] byte[] image)
         {
-            if (extension is null)
-            {
-                throw new ArgumentNullException(nameof(extension));
-            }
-
             if (image is null)
             {
                 throw new ArgumentNullException(nameof(image));
@@ -87,13 +77,8 @@ namespace AD.OpenXml.Structures
         ///  <param name="id"></param>
         /// <param name="extension"></param>
         /// <param name="image"></param>
-        public ImageInformation(uint id, [NotNull] string extension, ReadOnlyMemory<byte> image)
+        public ImageInformation(uint id, StringSegment extension, ReadOnlyMemory<byte> image)
         {
-            if (extension is null)
-            {
-                throw new ArgumentNullException(nameof(extension));
-            }
-
             _id = id;
             Extension = extension;
             Image = image;
@@ -107,19 +92,9 @@ namespace AD.OpenXml.Structures
         ///  <param name="image"></param>
         ///  <returns></returns>
         ///  <exception cref="ArgumentNullException"></exception>
-        public static ImageInformation Create([NotNull] string rId, [NotNull] string target, [NotNull] byte[] image)
+        public static ImageInformation Create(StringSegment rId, StringSegment target, [NotNull] byte[] image)
         {
-            if (rId is null)
-            {
-                throw new ArgumentNullException(nameof(rId));
-            }
-
-            if (target is null)
-            {
-                throw new ArgumentNullException(nameof(target));
-            }
-
-            if (!RegexTarget.IsMatch(target))
+            if (!RegexTarget.IsMatch(target.Value))
             {
                 throw new ArgumentException(nameof(target));
             }
@@ -129,7 +104,7 @@ namespace AD.OpenXml.Structures
                 throw new ArgumentNullException(nameof(image));
             }
 
-            Match m = RegexTarget.Match(target);
+            Match m = RegexTarget.Match(target.Value);
 
             uint id = uint.Parse(rId.Substring(3));
             string extension = m.Groups["extension"].Value;
@@ -186,7 +161,7 @@ namespace AD.OpenXml.Structures
         public bool Equals(ImageInformation other)
         {
             // ReSharper disable once ImpureMethodCallOnReadonlyValueField
-            return string.Equals(Target, other.Target) && Image.Equals(other.Image);
+            return Equals(Target, other.Target) && Image.Equals(other.Image);
         }
 
         /// <summary>

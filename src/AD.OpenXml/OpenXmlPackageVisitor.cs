@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -62,19 +63,19 @@ namespace AD.OpenXml
         /// word/charts/chart#.xml.
         /// </summary>
         [NotNull]
-        public IEnumerable<ChartInformation> Charts { get; }
+        public IImmutableSet<ChartInformation> Charts { get; }
 
         /// <summary>
         /// word/media/image#.[jpeg|png|svg].
         /// </summary>
         [NotNull]
-        public IEnumerable<ImageInformation> Images { get; }
+        public IImmutableSet<ImageInformation> Images { get; }
 
         /// <summary>
         /// Hyperlinks
         /// </summary>
         [NotNull]
-        public IEnumerable<HyperlinkInformation> HyperLinks { get; }
+        public IImmutableSet<HyperlinkInformation> HyperLinks { get; }
 
         /// <summary>
         /// [Content_Types].xml
@@ -174,7 +175,7 @@ namespace AD.OpenXml
         [NotNull]
         public IDictionary<string, XElement> ChartReferences =>
             Charts.ToDictionary(
-                x => x.RelationId,
+                x => x.RelationId.Value,
                 x => x.Chart);
 
         /// <summary>
@@ -183,8 +184,8 @@ namespace AD.OpenXml
         [NotNull]
         public IDictionary<string, (string mime, string description, string base64)> ImageReferences =>
             Images.ToDictionary(
-                x => x.RelationId,
-                x => (x.Extension, string.Empty, x.Base64String));
+                x => x.RelationId.Value,
+                x => (x.Extension.Value, string.Empty, x.Base64String));
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
@@ -222,8 +223,8 @@ namespace AD.OpenXml
                                              Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
                                          })
                                  .Where(x => x.Target.StartsWith("charts/"))
-                                 .Select(x => ChartInformation.Create(x.Id, archive.ReadXml($"word/{x.Target}")))
-                                 .ToArray();
+                                 .Select(x => new ChartInformation(x.Id, archive.ReadXml($"word/{x.Target}")))
+                                 .ToImmutableHashSet();
 
             Images =
                 documentRelations.Elements()
@@ -236,7 +237,7 @@ namespace AD.OpenXml
                                          })
                                  .Where(x => x.Target.StartsWith("media/"))
                                  .Select(x => ImageInformation.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
-                                 .ToArray();
+                                 .ToImmutableHashSet();
 
             HyperLinks =
                 documentRelations.Elements()
@@ -250,14 +251,15 @@ namespace AD.OpenXml
                                          })
                                  .Where(x => x.TargetMode != null)
                                  .Select(x => HyperlinkInformation.Create(x.Id, x.Target, x.TargetMode))
-                                 .ToArray();
+                                 .ToImmutableHashSet();
 
             DocumentRelations =
-                new XElement(P + "Relationships",
+                new XElement(
+                    P + "Relationships",
                     documentRelations.Elements().Where(x => !UpdatableRelationTypes.Contains(x.Attribute("Type").Value)),
-                    Charts.Select(x => x.RelationshipEntry),
-                    Images.Select(x => x.RelationshipEntry),
-                    HyperLinks.Select(x => x.RelationshipEntry));
+                    Charts.Select(x => (XElement) x.RelationshipEntry),
+                    Images.Select(x => (XElement) x.RelationshipEntry),
+                    HyperLinks.Select(x => (XElement) x.RelationshipEntry));
 
             // ReSharper disable once InvertIf
             if (!Numbering.HasElements)
@@ -357,16 +359,17 @@ namespace AD.OpenXml
             Styles = styles;
             Numbering = numbering;
             Theme1 = theme1;
-            Charts = charts.ToArray();
-            Images = images.ToArray();
-            HyperLinks = hyperlinks.ToArray();
+            Charts = charts.ToImmutableHashSet();
+            Images = images.ToImmutableHashSet();
+            HyperLinks = hyperlinks.ToImmutableHashSet();
 
             DocumentRelations =
-                new XElement(P + "Relationships",
+                new XElement(
+                    P + "Relationships",
                     documentRelations.Elements().Where(x => !UpdatableRelationTypes.Contains(x.Attribute("Type").Value)),
-                    Charts.Select(x => x.RelationshipEntry),
-                    Images.Select(x => x.RelationshipEntry),
-                    HyperLinks.Select(x => x.RelationshipEntry));
+                    Charts.Select(x => (XElement) x.RelationshipEntry),
+                    Images.Select(x => (XElement) x.RelationshipEntry),
+                    HyperLinks.Select(x => (XElement) x.RelationshipEntry));
         }
 
         /// <summary>
