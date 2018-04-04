@@ -5,7 +5,7 @@ using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml.Structures
 {
     /// <inheritdoc cref="IEquatable{T}" />
     /// <summary>
@@ -17,8 +17,6 @@ namespace AD.OpenXml.Visitors
         [NotNull] private static readonly Regex RegexTarget = new Regex("media/image(?<id>[0-9]+)\\.(?<extension>png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
-        [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
 
         private readonly uint _id;
 
@@ -192,7 +190,7 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Visitors.ImageInformation" /> objects are equal.
+        /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Structures.ImageInformation" /> objects are equal.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.
@@ -210,7 +208,7 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Visitors.ImageInformation" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ImageInformation" /> objects have different values.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.

@@ -9,7 +9,6 @@ using AD.IO;
 using AD.IO.Paths;
 using AD.OpenXml.Elements;
 using AD.OpenXml.Structures;
-using AD.OpenXml.Visitors;
 using AD.OpenXml.Visits;
 using AD.Xml;
 using JetBrains.Annotations;

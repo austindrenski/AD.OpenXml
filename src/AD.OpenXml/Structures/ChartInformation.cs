@@ -1,12 +1,12 @@
 using System;
+using System.Linq;
 using System.Xml.Linq;
-using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
 
 // ReSharper disable ImpureMethodCallOnReadonlyValueField
 
-namespace AD.OpenXml.Visitors
+namespace AD.OpenXml.Structures
 {
     /// <inheritdoc cref="IEquatable{T}" />
     /// <summary>
@@ -17,8 +17,6 @@ namespace AD.OpenXml.Visitors
         [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
-        [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
 
         /// <summary>
         ///
@@ -58,7 +56,8 @@ namespace AD.OpenXml.Visitors
         /// </summary>
         [NotNull]
         public XElement RelationshipEntry =>
-            new XElement(P + "Relationship",
+            new XElement(
+                P + "Relationship",
                 new XAttribute("Id", RelationId),
                 new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart"),
                 new XAttribute("Target", Target));
@@ -170,7 +169,7 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Visitors.ChartInformation" /> objects have the same values.
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ChartInformation" /> objects have the same values.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.
@@ -188,7 +187,7 @@ namespace AD.OpenXml.Visitors
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Visitors.ChartInformation" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ChartInformation" /> objects have different values.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.

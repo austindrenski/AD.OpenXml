@@ -145,7 +145,8 @@ namespace AD.OpenXml.Structures
             public XElement ToXElement()
             {
                 return
-                    new XElement(T + "Default",
+                    new XElement(
+                        T + "Default",
                         new XAttribute("Extension", Extension),
                         new XAttribute("ContentType", ContentType));
             }
@@ -214,7 +215,8 @@ namespace AD.OpenXml.Structures
             public XElement ToXElement()
             {
                 return
-                    new XElement(T + "Override",
+                    new XElement(
+                        T + "Override",
                         new XAttribute("PartName", PartName),
                         new XAttribute("ContentType", ContentType));
             }

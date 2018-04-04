@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using AD.OpenXml.Visitors;
+using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
 
