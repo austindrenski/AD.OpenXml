@@ -13,7 +13,7 @@ namespace AD.OpenXml.Structures
     /// <summary>
     /// </summary>
     [PublicAPI]
-    public readonly struct ChartInformation : IEquatable<ChartInformation>
+    public readonly struct ChartInfo : IEquatable<ChartInfo>
     {
         [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
@@ -63,7 +63,7 @@ namespace AD.OpenXml.Structures
         ///  </summary>
         ///  <param name="rId"></param>
         /// <param name="chart"></param>
-        public ChartInformation(StringSegment rId, [NotNull] XElement chart)
+        public ChartInfo(StringSegment rId, [NotNull] XElement chart)
         {
             if (!rId.StartsWith("rId", StringComparison.Ordinal))
             {
@@ -88,9 +88,9 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public ChartInformation WithOffset(uint offset)
+        public ChartInfo WithOffset(uint offset)
         {
-            return new ChartInformation($"rId{uint.Parse(RelationId.Substring(3)) + offset}", Chart);
+            return new ChartInfo($"rId{uint.Parse(RelationId.Substring(3)) + offset}", Chart);
         }
 
         /// <summary>
@@ -100,9 +100,9 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public ChartInformation WithRelationId(StringSegment rId)
+        public ChartInfo WithRelationId(StringSegment rId)
         {
-            return new ChartInformation(rId, Chart);
+            return new ChartInfo(rId, Chart);
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(ChartInformation other)
+        public bool Equals(ChartInfo other)
         {
             return Equals(RelationId, other.RelationId) && XNode.DeepEquals(Chart, other.Chart);
         }
@@ -137,11 +137,11 @@ namespace AD.OpenXml.Structures
         [Pure]
         public override bool Equals([CanBeNull] object obj)
         {
-            return obj is ChartInformation chart && Equals(chart);
+            return obj is ChartInfo chart && Equals(chart);
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ChartInformation" /> objects have the same values.
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ChartInfo" /> objects have the same values.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.
@@ -153,13 +153,13 @@ namespace AD.OpenXml.Structures
         /// true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator ==(ChartInformation left, ChartInformation right)
+        public static bool operator ==(ChartInfo left, ChartInfo right)
         {
             return left.Equals(right);
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ChartInformation" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ChartInfo" /> objects have different values.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.
@@ -171,7 +171,7 @@ namespace AD.OpenXml.Structures
         /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator !=(ChartInformation left, ChartInformation right)
+        public static bool operator !=(ChartInfo left, ChartInfo right)
         {
             return !left.Equals(right);
         }

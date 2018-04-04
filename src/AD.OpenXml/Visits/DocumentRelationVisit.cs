@@ -64,12 +64,12 @@ namespace AD.OpenXml.Visits
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
         [Pure]
-        private static (XElement Document, ChartInformation[] Charts, ImageInformation[] Images, HyperlinkInformation[] Hyperlinks)
+        private static (XElement Document, ChartInfo[] Charts, ImageInfo[] Images, HyperlinkInfo[] Hyperlinks)
             Execute(
                 XElement document,
-                IEnumerable<ChartInformation> charts,
-                IEnumerable<ImageInformation> images,
-                IEnumerable<HyperlinkInformation> hyperlinks,
+                IEnumerable<ChartInfo> charts,
+                IEnumerable<ImageInfo> images,
+                IEnumerable<HyperlinkInfo> hyperlinks,
                 uint documentRelationId)
         {
             XElement modifiedDocument =
@@ -78,15 +78,15 @@ namespace AD.OpenXml.Visits
                     document.Attributes().Select(x => Update(x, documentRelationId)),
                     document.Elements().Select(x => Update(x, documentRelationId)));
 
-            ChartInformation[] chartMapping =
+            ChartInfo[] chartMapping =
                 charts.Select(x => x.WithOffset(documentRelationId))
                       .ToArray();
 
-            ImageInformation[] imageMapping =
+            ImageInfo[] imageMapping =
                 images.Select(x => x.WithOffset(documentRelationId))
                       .ToArray();
 
-            HyperlinkInformation[] hyperlinkMapping =
+            HyperlinkInfo[] hyperlinkMapping =
                 hyperlinks.Select(x => x.WithOffset(documentRelationId))
                           .ToArray();
 

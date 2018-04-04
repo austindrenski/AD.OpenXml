@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -18,104 +18,35 @@ namespace AD.OpenXml.Structures
     {
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
-        [NotNull] private readonly Dictionary<int, Entry> _dictionary;
-
         /// <summary>
         ///
         /// </summary>
-        /// <param name="key"></param>
-        public Entry this[int key] => _dictionary[key];
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="source"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public Relationships([NotNull] IEnumerable<(int key, Entry value)> source)
-        {
-            if (source is null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            _dictionary = new Dictionary<int, Entry>();
-            foreach ((int key, Entry value) in source)
-            {
-                Add(key, value);
-            }
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="entry"></param>
-        public void Add(int key, Entry entry)
-        {
-            _dictionary.Add(key, entry);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="oldKey"></param>
-        /// <param name="newKey"></param>
-        /// <exception cref="KeyNotFoundException" />
-        /// <exception cref="ArgumentException" />
-        public void Update(int oldKey, int newKey)
-        {
-            if (!_dictionary.ContainsKey(oldKey))
-            {
-                throw new KeyNotFoundException(nameof(oldKey));
-            }
-
-            if (_dictionary.ContainsKey(newKey))
-            {
-                throw new ArgumentException("The new key is already in use.");
-            }
-
-            Entry entry = this[oldKey];
-
-            _dictionary.Remove(oldKey);
-
-            _dictionary.Add(newKey, entry);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="oldValue"></param>
-        /// <param name="newValue"></param>
-        /// <exception cref="KeyNotFoundException" />
-        /// <exception cref="ArgumentException" />
-        public void Update(Entry oldValue, Entry newValue)
-        {
-            if (!_dictionary.ContainsValue(oldValue))
-            {
-                throw new ArgumentException("The old value was not found.");
-            }
-
-            if (_dictionary.Count(x => x.Value == oldValue) > 1)
-            {
-                throw new AmbiguousMatchException("The old value matches more than one entry.");
-            }
-
-            int key = _dictionary.Single(x => x.Value == oldValue).Key;
-
-            _dictionary.Remove(key);
-
-            _dictionary.Add(key, newValue);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        [Pure]
         [NotNull]
-        public Relationships Refresh()
+        public IImmutableSet<Entry> Entries { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="key">
+        ///
+        /// </param>
+        public Entry this[string key] => Entries.Single(x => x.Id == key);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="entries">
+        ///
+        /// </param>
+        /// <exception cref="ArgumentNullException"/>
+        public Relationships([NotNull] IEnumerable<Entry> entries)
         {
-            return new Relationships(_dictionary.OrderBy(x => x.Key).Select((x, i) => (key: i, value: x.Value)));
+            if (entries is null)
+            {
+                throw new ArgumentNullException(nameof(entries));
+            }
+
+            Entries = entries.ToImmutableHashSet();
         }
 
         /// <summary>
@@ -128,7 +59,7 @@ namespace AD.OpenXml.Structures
         [NotNull]
         public XElement ToXElement()
         {
-            return new XElement(P + "Relationships", _dictionary.Select(x => x.ToXElement()));
+            return new XElement(P + "Relationships", Entries.Select(x => x.ToXElement()));
         }
 
         /// <inheritdoc />

@@ -11,7 +11,7 @@ namespace AD.OpenXml.Structures
     /// <summary>
     /// </summary>
     [PublicAPI]
-    public readonly struct HyperlinkInformation : IEquatable<HyperlinkInformation>
+    public readonly struct HyperlinkInfo : IEquatable<HyperlinkInfo>
     {
         /// <summary>
         ///
@@ -50,7 +50,7 @@ namespace AD.OpenXml.Structures
         /// <param name="target"></param>
         /// <param name="targetMode"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        private HyperlinkInformation(uint id, StringSegment target, StringSegment targetMode)
+        private HyperlinkInfo(uint id, StringSegment target, StringSegment targetMode)
         {
             _id = id;
             Target = target;
@@ -65,11 +65,11 @@ namespace AD.OpenXml.Structures
         /// <param name="targetMode"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
-        public static HyperlinkInformation Create(StringSegment rId, StringSegment target, StringSegment targetMode)
+        public static HyperlinkInfo Create(StringSegment rId, StringSegment target, StringSegment targetMode)
         {
             uint id = uint.Parse(rId.Substring(3));
 
-            return new HyperlinkInformation(id, target, targetMode);
+            return new HyperlinkInfo(id, target, targetMode);
         }
 
         /// <summary>
@@ -79,9 +79,9 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public HyperlinkInformation WithOffset(uint offset)
+        public HyperlinkInfo WithOffset(uint offset)
         {
-            return new HyperlinkInformation(_id + offset, Target, TargetMode);
+            return new HyperlinkInfo(_id + offset, Target, TargetMode);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public HyperlinkInformation WithRelationId([NotNull] string rId)
+        public HyperlinkInfo WithRelationId([NotNull] string rId)
         {
             if (rId is null)
             {
@@ -126,18 +126,18 @@ namespace AD.OpenXml.Structures
         [Pure]
         public override bool Equals([CanBeNull] object obj)
         {
-            return obj is HyperlinkInformation hyperlink && Equals(hyperlink);
+            return obj is HyperlinkInfo hyperlink && Equals(hyperlink);
         }
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(HyperlinkInformation other)
+        public bool Equals(HyperlinkInfo other)
         {
             return _id == other._id && Equals(Target, other.Target) && Equals(TargetMode, other.TargetMode);
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.HyperlinkInformation" /> objects have the same values.
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.HyperlinkInfo" /> objects have the same values.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.
@@ -149,13 +149,13 @@ namespace AD.OpenXml.Structures
         /// true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator ==(HyperlinkInformation left, HyperlinkInformation right)
+        public static bool operator ==(HyperlinkInfo left, HyperlinkInfo right)
         {
             return left.Equals(right);
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.HyperlinkInformation" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.HyperlinkInfo" /> objects have different values.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.
@@ -167,7 +167,7 @@ namespace AD.OpenXml.Structures
         /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator !=(HyperlinkInformation left, HyperlinkInformation right)
+        public static bool operator !=(HyperlinkInfo left, HyperlinkInfo right)
         {
             return !left.Equals(right);
         }

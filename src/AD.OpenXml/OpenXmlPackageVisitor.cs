@@ -63,19 +63,19 @@ namespace AD.OpenXml
         /// word/charts/chart#.xml.
         /// </summary>
         [NotNull]
-        public IImmutableSet<ChartInformation> Charts { get; }
+        public IImmutableSet<ChartInfo> Charts { get; }
 
         /// <summary>
         /// word/media/image#.[jpeg|png|svg].
         /// </summary>
         [NotNull]
-        public IImmutableSet<ImageInformation> Images { get; }
+        public IImmutableSet<ImageInfo> Images { get; }
 
         /// <summary>
         /// Hyperlinks
         /// </summary>
         [NotNull]
-        public IImmutableSet<HyperlinkInformation> HyperLinks { get; }
+        public IImmutableSet<HyperlinkInfo> HyperLinks { get; }
 
         /// <summary>
         /// [Content_Types].xml
@@ -223,7 +223,7 @@ namespace AD.OpenXml
                                              Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
                                          })
                                  .Where(x => x.Target.StartsWith("charts/"))
-                                 .Select(x => new ChartInformation(x.Id, archive.ReadXml($"word/{x.Target}")))
+                                 .Select(x => new ChartInfo(x.Id, archive.ReadXml($"word/{x.Target}")))
                                  .ToImmutableHashSet();
 
             Images =
@@ -236,7 +236,7 @@ namespace AD.OpenXml
                                              Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
                                          })
                                  .Where(x => x.Target.StartsWith("media/"))
-                                 .Select(x => ImageInformation.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
+                                 .Select(x => ImageInfo.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
                                  .ToImmutableHashSet();
 
             HyperLinks =
@@ -250,7 +250,7 @@ namespace AD.OpenXml
                                              TargetMode = (string) x.Attribute("TargetMode")
                                          })
                                  .Where(x => x.TargetMode != null)
-                                 .Select(x => HyperlinkInformation.Create(x.Id, x.Target, x.TargetMode))
+                                 .Select(x => HyperlinkInfo.Create(x.Id, x.Target, x.TargetMode))
                                  .ToImmutableHashSet();
 
             DocumentRelations =
@@ -299,9 +299,9 @@ namespace AD.OpenXml
             [NotNull] XElement styles,
             [NotNull] XElement numbering,
             [NotNull] XElement theme1,
-            [NotNull] IEnumerable<ChartInformation> charts,
-            [NotNull] IEnumerable<ImageInformation> images,
-            [NotNull] IEnumerable<HyperlinkInformation> hyperlinks)
+            [NotNull] IEnumerable<ChartInfo> charts,
+            [NotNull] IEnumerable<ImageInfo> images,
+            [NotNull] IEnumerable<HyperlinkInfo> hyperlinks)
         {
             if (document is null)
             {
@@ -392,9 +392,9 @@ namespace AD.OpenXml
             [CanBeNull] XElement styles = default,
             [CanBeNull] XElement numbering = default,
             [CanBeNull] XElement theme1 = default,
-            [CanBeNull] IEnumerable<ChartInformation> charts = default,
-            [CanBeNull] IEnumerable<ImageInformation> images = default,
-            [CanBeNull] IEnumerable<HyperlinkInformation> hyperlinks = default)
+            [CanBeNull] IEnumerable<ChartInfo> charts = default,
+            [CanBeNull] IEnumerable<ImageInfo> images = default,
+            [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
             return new OpenXmlPackageVisitor(
                 document ?? Document,
@@ -464,7 +464,7 @@ namespace AD.OpenXml
                 Theme1.Save(stream);
             }
 
-            foreach (ChartInformation item in Charts)
+            foreach (ChartInfo item in Charts)
             {
                 using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
                 {
@@ -472,7 +472,7 @@ namespace AD.OpenXml
                 }
             }
 
-            foreach (ImageInformation item in Images)
+            foreach (ImageInfo item in Images)
             {
                 using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
                 {
@@ -601,11 +601,11 @@ namespace AD.OpenXml
 //                              subject.Theme1.Elements(),
 //                              XNode.EqualityComparer));
 
-            IEnumerable<ChartInformation> charts = Charts.Concat(subject.Charts);
+            IEnumerable<ChartInfo> charts = Charts.Concat(subject.Charts);
 
-            IEnumerable<ImageInformation> images = Images.Concat(subject.Images);
+            IEnumerable<ImageInfo> images = Images.Concat(subject.Images);
 
-            IEnumerable<HyperlinkInformation> hyperlinks = HyperLinks.Concat(subject.HyperLinks);
+            IEnumerable<HyperlinkInfo> hyperlinks = HyperLinks.Concat(subject.HyperLinks);
 
             return
                 With(

@@ -11,7 +11,7 @@ namespace AD.OpenXml.Structures
     ///
     /// </summary>
     [PublicAPI]
-    public readonly struct ImageInformation : IEquatable<ImageInformation>
+    public readonly struct ImageInfo : IEquatable<ImageInfo>
     {
         [NotNull] private static readonly Regex RegexTarget = new Regex("media/image(?<id>[0-9]+)\\.(?<extension>png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -58,7 +58,7 @@ namespace AD.OpenXml.Structures
         ///  <param name="id"></param>
         /// <param name="extension"></param>
         /// <param name="image"></param>
-        public ImageInformation(uint id, StringSegment extension, [NotNull] byte[] image)
+        public ImageInfo(uint id, StringSegment extension, [NotNull] byte[] image)
         {
             if (image is null)
             {
@@ -77,7 +77,7 @@ namespace AD.OpenXml.Structures
         ///  <param name="id"></param>
         /// <param name="extension"></param>
         /// <param name="image"></param>
-        public ImageInformation(uint id, StringSegment extension, ReadOnlyMemory<byte> image)
+        public ImageInfo(uint id, StringSegment extension, ReadOnlyMemory<byte> image)
         {
             _id = id;
             Extension = extension;
@@ -92,7 +92,7 @@ namespace AD.OpenXml.Structures
         ///  <param name="image"></param>
         ///  <returns></returns>
         ///  <exception cref="ArgumentNullException"></exception>
-        public static ImageInformation Create(StringSegment rId, StringSegment target, [NotNull] byte[] image)
+        public static ImageInfo Create(StringSegment rId, StringSegment target, [NotNull] byte[] image)
         {
             if (!RegexTarget.IsMatch(target.Value))
             {
@@ -109,7 +109,7 @@ namespace AD.OpenXml.Structures
             uint id = uint.Parse(rId.Substring(3));
             string extension = m.Groups["extension"].Value;
 
-            return new ImageInformation(id, extension, image);
+            return new ImageInfo(id, extension, image);
         }
 
         /// <summary>
@@ -119,9 +119,9 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public ImageInformation WithOffset(uint offset)
+        public ImageInfo WithOffset(uint offset)
         {
-            return new ImageInformation(_id + offset, Extension, Image);
+            return new ImageInfo(_id + offset, Extension, Image);
         }
 
         /// <summary>
@@ -153,19 +153,19 @@ namespace AD.OpenXml.Structures
         [Pure]
         public override bool Equals([CanBeNull] object obj)
         {
-            return obj is ImageInformation information && Equals(information);
+            return obj is ImageInfo information && Equals(information);
         }
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(ImageInformation other)
+        public bool Equals(ImageInfo other)
         {
             // ReSharper disable once ImpureMethodCallOnReadonlyValueField
             return Equals(Target, other.Target) && Image.Equals(other.Image);
         }
 
         /// <summary>
-        /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Structures.ImageInformation" /> objects are equal.
+        /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Structures.ImageInfo" /> objects are equal.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.
@@ -177,13 +177,13 @@ namespace AD.OpenXml.Structures
         /// true if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator ==(ImageInformation left, ImageInformation right)
+        public static bool operator ==(ImageInfo left, ImageInfo right)
         {
             return left.Equals(right);
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ImageInformation" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ImageInfo" /> objects have different values.
         /// </summary>
         /// <param name="left">
         /// The first value to compare.
@@ -195,7 +195,7 @@ namespace AD.OpenXml.Structures
         /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator !=(ImageInformation left, ImageInformation right)
+        public static bool operator !=(ImageInfo left, ImageInfo right)
         {
             return !left.Equals(right);
         }
