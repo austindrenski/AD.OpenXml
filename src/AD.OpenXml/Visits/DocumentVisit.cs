@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using AD.OpenXml.Elements;
+using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -41,10 +42,11 @@ namespace AD.OpenXml.Visits
         /// <returns>The updated document node of the source file.</returns>
         public DocumentVisit(OpenXmlPackageVisitor subject, uint revisionId)
         {
-            XElement document = Execute(subject.Document, (int) (revisionId + 1));
+            XElement document = Execute(subject.Document.Content, (int) (revisionId + 1));
 
-            Result =
-                subject.With(document: document);
+            Document resultDoc = new Document(document, subject.Document.Charts, subject.Document.Images, subject.Document.Hyperlinks);
+
+            Result = subject.With(document: resultDoc);
         }
 
         /// <summary>

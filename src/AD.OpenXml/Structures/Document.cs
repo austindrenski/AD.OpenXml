@@ -40,7 +40,17 @@ namespace AD.OpenXml.Structures
         /// Hyperlinks
         /// </summary>
         [NotNull]
-        public IImmutableSet<HyperlinkInfo> HyperLinks { get; }
+        public IImmutableSet<HyperlinkInfo> Hyperlinks { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull]
+        public Relationships Relationships =>
+            new Relationships(
+                Charts.Select(x => x.RelationshipEntry),
+                Images.Select(x => x.RelationshipEntry),
+                Hyperlinks.Select(x => x.RelationshipEntry));
 
         /// <summary>
         ///
@@ -82,7 +92,7 @@ namespace AD.OpenXml.Structures
             Content = content;
             Charts = charts.ToImmutableHashSet();
             Images = images.ToImmutableHashSet();
-            HyperLinks = hyperlinks.ToImmutableHashSet();
+            Hyperlinks = hyperlinks.ToImmutableHashSet();
         }
 
         /// <summary>
@@ -129,7 +139,7 @@ namespace AD.OpenXml.Structures
                                  .Select(x => ImageInfo.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
                                  .ToImmutableHashSet();
 
-            HyperLinks =
+            Hyperlinks =
                 documentRelations.Elements()
                                  .Select(
                                      x =>
@@ -144,31 +154,12 @@ namespace AD.OpenXml.Structures
                                  .ToImmutableHashSet();
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns>
-        ///
-        /// </returns>
-        [Pure]
-        [NotNull]
-        public XElement ToXElement()
-        {
-            return
-                new XElement(
-                    P + "Relationships",
-//                    documentRelations.Elements().Where(x => !UpdatableRelationTypes.Contains(x.Attribute("Type").Value)),
-                    Charts.Select(x => (XElement) x.RelationshipEntry),
-                    Images.Select(x => (XElement) x.RelationshipEntry),
-                    HyperLinks.Select(x => (XElement) x.RelationshipEntry));
-        }
-
-        /// <inheritdoc />
-        [Pure]
-        [NotNull]
-        public override string ToString()
-        {
-            return ToXElement().ToString();
-        }
+//        /// <inheritdoc />
+//        [Pure]
+//        [NotNull]
+//        public override string ToString()
+//        {
+//            return ToXElement().ToString();
+//        }
     }
 }

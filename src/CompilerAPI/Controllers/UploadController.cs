@@ -124,7 +124,7 @@ namespace CompilerAPI.Controllers
                         {
                             Content =
                                 HtmlVisitor.Create(visitor.ChartReferences, visitor.ImageReferences)
-                                           .Visit(visitor.Document, visitor.Footnotes, title ?? "", stylesheet ?? "")
+                                           .Visit(visitor.Document.Content, visitor.Footnotes, title ?? "", stylesheet ?? "")
                                            .ToString(),
                             ContentType = "text/html",
                             StatusCode = 200
@@ -136,7 +136,7 @@ namespace CompilerAPI.Controllers
                     return
                         new ContentResult
                         {
-                            Content = visitor.Document.ToString(),
+                            Content = visitor.Document.Content.ToString(),
                             ContentType = "text/xml",
                             StatusCode = 200
                         };

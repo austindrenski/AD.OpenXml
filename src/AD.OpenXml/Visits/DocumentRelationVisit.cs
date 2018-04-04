@@ -40,18 +40,15 @@ namespace AD.OpenXml.Visits
         {
             (var document, var charts, var images, var hyperlinks) =
                 Execute(
-                    subject.Document,
-                    subject.Charts,
-                    subject.Images,
-                    subject.HyperLinks,
+                    subject.Document.Content,
+                    subject.Document.Charts,
+                    subject.Document.Images,
+                    subject.Document.Hyperlinks,
                     documentRelationId);
 
-            Result =
-                subject.With(
-                    document: document,
-                    charts: charts,
-                    images: images,
-                    hyperlinks: hyperlinks);
+            Document resultDoc = new Document(document, charts, images, hyperlinks);
+
+            Result = subject.With(document: resultDoc);
         }
 
         /// <summary>

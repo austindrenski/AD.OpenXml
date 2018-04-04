@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using AD.OpenXml.Elements;
+using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -51,14 +52,13 @@ namespace AD.OpenXml.Visits
             (XElement document, XElement footnotes) =
                 Execute(
                     subject.Footnotes,
-                    subject.Document,
+                    subject.Document.Content,
                     (int) footnoteId + 1,
                     (int) revisionId + 1);
 
-            Result =
-                subject.With(
-                    document: document,
-                    footnotes: footnotes);
+            Document resultDoc = new Document(document, subject.Document.Charts, subject.Document.Images, subject.Document.Hyperlinks);
+
+            Result = subject.With(document: resultDoc, footnotes: footnotes);
         }
 
         [Pure]

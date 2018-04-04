@@ -50,6 +50,18 @@ namespace AD.OpenXml.Structures
         }
 
         /// <summary>
+        ///
+        /// </summary>
+        /// <param name="entries">
+        ///
+        /// </param>
+        /// <exception cref="ArgumentNullException"/>
+        public Relationships([ItemNotNull] params IEnumerable<Entry>[] entries)
+        {
+            Entries = entries.SelectMany(x => x).ToImmutableHashSet();
+        }
+
+        /// <summary>
         /// Returns the dictionary as an <see cref="XElement"/>.
         /// </summary>
         /// <returns>
