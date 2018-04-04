@@ -323,14 +323,11 @@ namespace AD.OpenXml
         {
             ZipArchive archive = new ZipArchive(DocxFilePath.Create(), ZipArchiveMode.Update);
 
-            using (Stream stream = archive.GetEntry("word/document.xml").Open())
-            {
-                Document.Content.Save(stream);
-            }
+            Document.Save(archive);
 
+            // TODO: remove when fully encapsulated
             using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path).Open())
             {
-//                Document.Relationships.ToXElement().Save(stream);
                 DocumentRelations.Save(stream);
             }
 
@@ -367,25 +364,6 @@ namespace AD.OpenXml
                                    archive.CreateEntry("word/theme/theme1.xml").Open())
             {
                 Theme1.Save(stream);
-            }
-
-            foreach (ChartInfo item in Document.Charts)
-            {
-                using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
-                {
-                    item.Chart.Save(stream);
-                }
-            }
-
-            foreach (ImageInfo item in Document.Images)
-            {
-                using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
-                {
-                    for (int i = 0; i < item.Image.Span.Length; i++)
-                    {
-                        stream.WriteByte(item.Image.Span[i]);
-                    }
-                }
             }
 
             return archive;

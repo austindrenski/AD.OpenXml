@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
@@ -161,5 +162,49 @@ namespace AD.OpenXml.Structures
 //        {
 //            return ToXElement().ToString();
 //        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="archive">
+        ///
+        /// </param>
+        /// <exception cref="ArgumentNullException" />
+        public void Save([NotNull] ZipArchive archive)
+        {
+            if (archive is null)
+            {
+                throw new ArgumentNullException(nameof(archive));
+            }
+
+            using (Stream stream = archive.GetEntry("word/document.xml").Open())
+            {
+                Content.Save(stream);
+            }
+
+            using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path).Open())
+            {
+                Relationships.ToXElement().Save(stream);
+            }
+
+            foreach (ChartInfo item in Charts)
+            {
+                using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
+                {
+                    item.Chart.Save(stream);
+                }
+            }
+
+            foreach (ImageInfo item in Images)
+            {
+                using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
+                {
+                    for (int i = 0; i < item.Image.Span.Length; i++)
+                    {
+                        stream.WriteByte(item.Image.Span[i]);
+                    }
+                }
+            }
+        }
     }
 }
