@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using AD.Xml;
@@ -16,7 +18,15 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Relationships
     {
+        /// <summary>
+        ///
+        /// </summary>
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull] public static readonly Relationships Empty = new Relationships();
 
         /// <summary>
         ///
@@ -47,11 +57,19 @@ namespace AD.OpenXml.Structures
                        .ToImmutableHashSet();
         }
 
+        /// <inheritdoc />
+        [Pure]
+        [NotNull]
+        public override string ToString()
+        {
+            return ToXElement().ToString();
+        }
+
         /// <summary>
-        /// Returns the dictionary as an <see cref="XElement"/>.
+        ///
         /// </summary>
         /// <returns>
-        /// The dictionary as an <see cref="XElement"/>.
+        ///
         /// </returns>
         [Pure]
         [NotNull]
@@ -60,16 +78,30 @@ namespace AD.OpenXml.Structures
             return
                 new XElement(
                     P + "Relationships",
-                    Entries.OrderBy(x => x)
-                           .Select(x => x.ToXElement()));
+                    Entries.OrderBy(x => x).Select(x => x.ToXElement()));
         }
 
-        /// <inheritdoc />
-        [Pure]
-        [NotNull]
-        public override string ToString()
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="archive">
+        ///
+        /// </param>
+        /// <param name="path">
+        ///
+        /// </param>
+        /// <exception cref="ArgumentNullException" />
+        public void Save([NotNull] ZipArchive archive, string path)
         {
-            return ToXElement().ToString();
+            if (archive is null)
+            {
+                throw new ArgumentNullException(nameof(archive));
+            }
+
+            using (Stream stream = archive.GetEntry(path).Open())
+            {
+                ToXElement().Save(stream);
+            }
         }
 
         /// <inheritdoc cref="IEquatable{T}"/>
@@ -79,12 +111,12 @@ namespace AD.OpenXml.Structures
         [PublicAPI]
         public readonly struct Entry : IComparable<Entry>, IEquatable<Entry>
         {
-            private static readonly Comparer<uint> Comparer = Comparer<uint>.Default;
+            private static readonly Comparer<int> Comparer = Comparer<int>.Default;
 
             /// <summary>
             ///
             /// </summary>
-            public uint NumericId => uint.Parse(Id.Subsegment(3).Value);
+            public int NumericId => int.Parse(Id.Substring(3));
 
             /// <summary>
             ///

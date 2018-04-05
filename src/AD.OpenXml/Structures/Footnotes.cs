@@ -6,7 +6,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
-using AD.OpenXml.Elements;
 using AD.Xml;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
@@ -19,65 +18,120 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Footnotes
     {
-        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        private static readonly StringValues UpdatableRelationTypes =
-            new string[]
+        [NotNull] private static readonly IEnumerable<XName> Revisions =
+            new XName[]
             {
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
+                W + "ins",
+                W + "del",
+                W + "rPrChange",
+                W + "moveToRangeStart",
+                W + "moveToRangeEnd",
+                W + "moveTo"
             };
 
         /// <summary>
-        /// The XML file located at: /word/Footnotes.xml.
+        ///
+        /// </summary>
+        private static readonly StringSegment MimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml";
+
+        /// <summary>
+        ///
+        /// </summary>
+        private static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes";
+
+        /// <summary>
+        ///
+        /// </summary>
+        public readonly StringSegment RelationId;
+
+        /// <summary>
+        ///
+        /// </summary>
+        public readonly StringSegment Target = "footnotes.xml";
+
+        /// <summary>
+        /// The XML file located at: /word/footnotes.xml.
         /// </summary>
         [NotNull]
         public XElement Content { get; }
 
         /// <summary>
-        /// The XML files located in: /word/charts/.
-        /// </summary>
-        [NotNull]
-        public IImmutableSet<ChartInfo> Charts { get; }
-
-        /// <summary>
-        /// The XML files located in: /word/media/.
-        /// </summary>
-        [NotNull]
-        public IImmutableSet<ImageInfo> Images { get; }
-
-        /// <summary>
-        /// The hyperlinks listed in: /word/_rels/Footnotes.xml.rels.
+        /// The hyperlinks listed in: /word/_rels/footnotes.xml.rels.
         /// </summary>
         [NotNull]
         public IImmutableSet<HyperlinkInfo> Hyperlinks { get; }
 
         /// <summary>
+        ///
+        /// </summary>
+        public StringSegment PartName => $"/word/{Target}";
+
+        /// <summary>
+        ///
+        /// </summary>
+        public ContentTypes.Override ContentTypeEntry => new ContentTypes.Override(PartName, MimeType);
+
+        /// <summary>
+        ///
+        /// </summary>
+        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, SchemaType);
+
+        /// <summary>
+        /// The current footnote count.
+        /// </summary>
+        public int Count =>
+            Content.Elements()
+                   .SkipWhile(x => (int) x.Attribute(W + "id") <= 0)
+                   .Count();
+
+        /// <summary>
         /// The number of relationships in the Footnotes.
         /// </summary>
-        public uint Relationships =>
-            Charts.Select(x => x.NumericId)
-                  .Concat(Images.Select(x => x.NumericId))
-                  .Concat(Hyperlinks.Select(x => x.NumericId))
-                  .DefaultIfEmpty(default)
-                  .Max();
+        public int RelationshipsMax =>
+            Hyperlinks.Select(x => x.NumericId)
+                      .DefaultIfEmpty(default)
+                      .Max();
 
         /// <summary>
-        /// Maps chart reference id to chart node.
+        /// The current revision number.
         /// </summary>
-        [NotNull]
-        public IDictionary<string, XElement> ChartReferences =>
-            Charts.ToDictionary(x => x.RelationId.Value, x => x.Chart);
+        public int RevisionId =>
+            Content.Descendants()
+                   .Where(x => Revisions.Contains(x.Name))
+                   .Select(x => (int) x.Attribute(W + "id"))
+                   .DefaultIfEmpty(default)
+                   .Max();
 
         /// <summary>
-        /// Maps image reference id to image node.
+        ///
         /// </summary>
-        [NotNull]
-        public IDictionary<string, (string mime, string description, string base64)> ImageReferences =>
-            Images.ToDictionary(x => x.RelationId.Value, x => (x.Extension.Value, string.Empty, x.Base64String));
+        /// <param name="rId">
+        ///
+        /// </param>
+        /// <param name="content">
+        ///
+        /// </param>
+        /// <param name="hyperlinks">
+        ///
+        /// </param>
+        public Footnotes(StringSegment rId, [NotNull] XElement content, [NotNull] IEnumerable<HyperlinkInfo> hyperlinks)
+        {
+            if (content is null)
+            {
+                throw new ArgumentNullException(nameof(content));
+            }
+
+            if (hyperlinks is null)
+            {
+                throw new ArgumentNullException(nameof(hyperlinks));
+            }
+
+            RelationId = rId;
+            Content = content;
+            Hyperlinks = hyperlinks.ToImmutableHashSet();
+        }
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading Footnotes parts into memory.
@@ -93,113 +147,43 @@ namespace AD.OpenXml.Structures
                 throw new ArgumentNullException(nameof(archive));
             }
 
-            Content = archive.ReadXml();
+            RelationId =
+                archive.ReadXml(DocumentRelsInfo.Path)
+                       .Elements(DocumentRelsInfo.Elements.Relationship)
+                       .Single(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) == SchemaType)
+                       .Attribute(DocumentRelsInfo.Attributes.Id)
+                       .Value;
 
-            XElement footnotesRelations = archive.ReadXml("word/_rels/footnotes.xml.rels");
+            // TODO: hard-coding to rId1 until other package parts are migrated.
+            RelationId = "rId1";
 
-            Charts =
-                footnotesRelations.Elements()
-                                 .Select(
-                                     x =>
-                                         new
-                                         {
-                                             Id = (string) x.Attribute("Id"),
-                                             Target = (string) x.Attribute("Target")
-                                         })
-                                 .Where(x => x.Target.StartsWith("charts/"))
-                                 .Select(x => new ChartInfo(x.Id, archive.ReadXml($"word/{x.Target}")))
-                                 .ToImmutableHashSet();
-
-            Images =
-                footnotesRelations.Elements()
-                                 .Select(
-                                     x =>
-                                         new
-                                         {
-                                             Id = (string) x.Attribute("Id"),
-                                             Target = (string) x.Attribute("Target")
-                                         })
-                                 .Where(x => x.Target.StartsWith("media/"))
-                                 .Select(x => ImageInfo.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
-                                 .ToImmutableHashSet();
+            Content = archive.ReadXml(PartName.Substring(1), new XElement(W + "footnotes"));
 
             Hyperlinks =
-                footnotesRelations.Elements()
-                                 .Select(
-                                     x =>
-                                         new
-                                         {
-                                             Id = (string) x.Attribute("Id"),
-                                             Target = (string) x.Attribute("Target"),
-                                             TargetMode = (string) x.Attribute("TargetMode")
-                                         })
-                                 .Where(x => x.TargetMode != null)
-                                 .Select(x => HyperlinkInfo.Create(x.Id, x.Target, x.TargetMode))
-                                 .ToImmutableHashSet();
+                archive.ReadXml(FootnotesRelsInfo.Path, Relationships.Empty.ToXElement())
+                       .Elements()
+                       .Select(
+                           x =>
+                               new
+                               {
+                                   Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
+                                   Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target),
+                                   TargetMode = (string) x.Attribute(FootnotesRelsInfo.Attributes.TargetMode)
+                               })
+                       .Where(x => x.TargetMode != null)
+                       .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
+                       .ToImmutableHashSet();
         }
 
-        /// <summary>
+        ///  <summary>
         ///
-        /// </summary>
-        /// <param name="content">
-        ///
-        /// </param>
-        /// <param name="charts">
-        ///
-        /// </param>
-        /// <param name="images">
-        ///
-        /// </param>
-        /// <param name="hyperlinks">
-        ///
-        /// </param>
-        public Footnotes(
-            [NotNull] XElement content,
-            [NotNull] IEnumerable<ChartInfo> charts,
-            [NotNull] IEnumerable<ImageInfo> images,
-            [NotNull] IEnumerable<HyperlinkInfo> hyperlinks)
-        {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
-
-            if (charts is null)
-            {
-                throw new ArgumentNullException(nameof(charts));
-            }
-
-            if (images is null)
-            {
-                throw new ArgumentNullException(nameof(images));
-            }
-
-            if (hyperlinks is null)
-            {
-                throw new ArgumentNullException(nameof(hyperlinks));
-            }
-
-            Content = content;
-            Charts = charts.ToImmutableHashSet();
-            Images = images.ToImmutableHashSet();
-            Hyperlinks = hyperlinks.ToImmutableHashSet();
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
+        ///  </summary>
         /// <param name="content"></param>
-        /// <param name="charts"></param>
-        /// <param name="images"></param>
-        /// <param name="hyperlinks"></param>
-        /// <returns></returns>
-        public Footnotes With(
-            [CanBeNull] XElement content = default,
-            [CanBeNull] IEnumerable<ChartInfo> charts = default,
-            [CanBeNull] IEnumerable<ImageInfo> images = default,
-            [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
+        ///  <param name="hyperlinks"></param>
+        ///  <returns></returns>
+        public Footnotes With([CanBeNull] XElement content = default, [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
-            return new Footnotes(content ?? Content, charts ?? Charts, images ?? Images, hyperlinks ?? Hyperlinks);
+            return new Footnotes(RelationId, content ?? Content, hyperlinks ?? Hyperlinks);
         }
 
         /// <summary>
@@ -209,22 +193,16 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         public Footnotes Concat([NotNull] Footnotes other)
         {
-            return Concat(other.Content, other.Charts, other.Images, other.Hyperlinks);
+            return Concat(other.Content, other.Hyperlinks);
         }
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="content"></param>
-        /// <param name="charts"></param>
-        /// <param name="images"></param>
         /// <param name="hyperlinks"></param>
         /// <returns></returns>
-        public Footnotes Concat(
-            [CanBeNull] XElement content = default,
-            [CanBeNull] IEnumerable<ChartInfo> charts = default,
-            [CanBeNull] IEnumerable<ImageInfo> images = default,
-            [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
+        public Footnotes Concat([CanBeNull] XElement content = default, [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
             XElement footnotes =
                 content is default
@@ -232,19 +210,10 @@ namespace AD.OpenXml.Structures
                     : new XElement(
                         Content.Name,
                         Content.Attributes(),
-                        new XElement(
-                            W + "body",
-                            Content.Element(W + "body").Elements(),
-                            content.Element(W + "body").Elements()));
+                        Content.Elements(),
+                        content.Elements());
 
-            footnotes.RemoveDuplicateSectionProperties();
-
-            return
-                new Footnotes(
-                    content is default ? Content : footnotes,
-                    charts is default ? Charts : Charts.Concat(charts),
-                    images is default ? Images : Images.Concat(images),
-                    hyperlinks is default ? Hyperlinks : Hyperlinks.Concat(hyperlinks));
+            return new Footnotes(RelationId, footnotes, hyperlinks is default ? Hyperlinks : Hyperlinks.Concat(hyperlinks));
         }
 
 //        /// <inheritdoc />
@@ -269,28 +238,9 @@ namespace AD.OpenXml.Structures
                 throw new ArgumentNullException(nameof(archive));
             }
 
-            using (Stream stream = archive.GetEntry("word/Footnotes.xml").Open())
+            using (Stream stream = archive.GetEntry(PartName.Substring(1)).Open())
             {
                 Content.Save(stream);
-            }
-
-            foreach (ChartInfo item in Charts)
-            {
-                using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
-                {
-                    item.Chart.Save(stream);
-                }
-            }
-
-            foreach (ImageInfo item in Images)
-            {
-                using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
-                {
-                    for (int i = 0; i < item.Image.Span.Length; i++)
-                    {
-                        stream.WriteByte(item.Image.Span[i]);
-                    }
-                }
             }
         }
     }

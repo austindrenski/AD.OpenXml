@@ -31,47 +31,7 @@ namespace AD.OpenXml
     {
         [NotNull] private static readonly ZipArchive DefaultOpenXml = new ZipArchive(DocxFilePath.Create());
 
-        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-
-        [NotNull] private static readonly IEnumerable<XName> Revisions =
-            new XName[]
-            {
-                W + "ins",
-                W + "del",
-                W + "rPrChange",
-                W + "moveToRangeStart",
-                W + "moveToRangeEnd",
-                W + "moveTo"
-            };
-
-        [NotNull] private static readonly IEnumerable<string> UpdatableRelationTypes =
-            new string[]
-            {
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
-            };
-
-        /// <summary>
-        /// [Content_Types].xml
-        /// </summary>
-        [NotNull]
-        public ContentTypes ContentTypes =>
-            ContentTypes.Create(
-                new ContentTypes.Override[]
-                {
-                    new ContentTypes.Override("/docProps/app.xml", "application/vnd.openxmlformats-officedocument.extended-properties+xml"),
-                    new ContentTypes.Override("/docProps/core.xml", "application/vnd.openxmlformats-package.core-properties+xml"),
-                    new ContentTypes.Override("/word/document.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"),
-                    new ContentTypes.Override("/word/settings.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"),
-                    new ContentTypes.Override("/word/styles.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"),
-                    new ContentTypes.Override("/word/theme/theme1.xml", "application/vnd.openxmlformats-officedocument.theme+xml"),
-                    new ContentTypes.Override("/word/footnotes.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"),
-                    new ContentTypes.Override("/word/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"),
-                },
-                Document.Charts.Select(x => x.ContentTypeEntry));
 
         /// <summary>
         ///
@@ -80,22 +40,10 @@ namespace AD.OpenXml
         public Document Document { get; }
 
         /// <summary>
-        /// word/footnotes.xml
-        /// </summary>
-        [NotNull]
-        public XElement Footnotes { get; }
-
-        /// <summary>
-        /// word/_rels/footnotes.xml.rels
-        /// </summary>
-        [NotNull]
-        public XElement FootnoteRelations { get; }
-
-        /// <summary>
         ///
         /// </summary>
         [NotNull]
-        public Footnotes FootnotesTest { get; }
+        public Footnotes Footnotes { get; }
 
         /// <summary>
         /// word/styles.xml
@@ -116,30 +64,9 @@ namespace AD.OpenXml
         public XElement Theme1 { get; }
 
         /// <summary>
-        /// The current footnote count.
-        /// </summary>
-        public uint FootnoteCount => (uint) Footnotes.Elements().Skip(2).Count();
-
-        /// <summary>
-        /// The current footnote relation count.
-        /// </summary>
-        public uint FootnoteRelationCount => (uint) FootnoteRelations.Elements().Count();
-
-        /// <summary>
         /// The current revision number.
         /// </summary>
-        public uint RevisionId =>
-            (uint) Math.Max(
-                Document.Content.Descendants()
-                        .Where(x => Revisions.Contains(x.Name))
-                        .Select(x => (int) x.Attribute(W + "id"))
-                        .DefaultIfEmpty(0)
-                        .Max(),
-                Footnotes.Descendants()
-                         .Where(x => Revisions.Contains(x.Name))
-                         .Select(x => (int) x.Attribute(W + "id"))
-                         .DefaultIfEmpty(0)
-                         .Max());
+        public int RevisionId => Math.Max(Document.RevisionId, Footnotes.RevisionId);
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
@@ -156,8 +83,7 @@ namespace AD.OpenXml
             }
 
             Document = new Document(archive);
-            Footnotes = archive.ReadXml("word/footnotes.xml", new XElement(W + "footnotes"));
-            FootnoteRelations = archive.ReadXml("word/_rels/footnotes.xml.rels", new XElement(P + "Relationships"));
+            Footnotes = new Footnotes(archive);
             Styles = archive.ReadXml("word/styles.xml");
             Numbering = archive.ReadXml("word/numbering.xml", new XElement(W + "numbering"));
             Theme1 = archive.ReadXml("word/theme/theme1.xml");
@@ -168,15 +94,13 @@ namespace AD.OpenXml
         /// </summary>
         /// <param name="document"></param>
         /// <param name="footnotes"></param>
-        /// <param name="footnoteRelations"></param>
         /// <param name="styles"></param>
         /// <param name="numbering"></param>
         /// <param name="theme1"></param>
         /// <exception cref="ArgumentNullException"></exception>
         private OpenXmlPackageVisitor(
             [NotNull] Document document,
-            [NotNull] XElement footnotes,
-            [NotNull] XElement footnoteRelations,
+            [NotNull] Footnotes footnotes,
             [NotNull] XElement styles,
             [NotNull] XElement numbering,
             [NotNull] XElement theme1)
@@ -189,11 +113,6 @@ namespace AD.OpenXml
             if (footnotes is null)
             {
                 throw new ArgumentNullException(nameof(footnotes));
-            }
-
-            if (footnoteRelations is null)
-            {
-                throw new ArgumentNullException(nameof(footnoteRelations));
             }
 
             if (styles is null)
@@ -213,7 +132,6 @@ namespace AD.OpenXml
 
             Document = document;
             Footnotes = footnotes;
-            FootnoteRelations = footnoteRelations;
             Styles = styles;
             Numbering = numbering;
             Theme1 = theme1;
@@ -224,78 +142,26 @@ namespace AD.OpenXml
         /// </summary>
         /// <param name="document"></param>
         /// <param name="footnotes"></param>
-        /// <param name="footnoteRelations"></param>
         /// <param name="styles"></param>
         /// <param name="numbering"></param>
         /// <param name="theme1"></param>
         /// <returns></returns>
+        [Pure]
+        [NotNull]
         public OpenXmlPackageVisitor With(
             [CanBeNull] Document document = default,
-            [CanBeNull] XElement footnotes = default,
-            [CanBeNull] XElement footnoteRelations = default,
+            [CanBeNull] Footnotes footnotes = default,
             [CanBeNull] XElement styles = default,
             [CanBeNull] XElement numbering = default,
             [CanBeNull] XElement theme1 = default)
         {
-            return new OpenXmlPackageVisitor(
-                document ?? Document,
-                footnotes ?? Footnotes,
-                footnoteRelations ?? FootnoteRelations,
-                styles ?? Styles,
-                numbering ?? Numbering,
-                theme1 ?? Theme1);
-        }
-
-        /// <summary>
-        /// Writes the <see cref="OpenXmlPackageVisitor"/> to the <see cref="DocxFilePath"/>.
-        /// </summary>
-        /// <returns>
-        /// The stream to which the <see cref="DocxFilePath"/> is written.
-        /// </returns>
-        public ZipArchive Save()
-        {
-            ZipArchive archive = new ZipArchive(DocxFilePath.Create(), ZipArchiveMode.Update);
-
-            Document.Save(archive);
-
-            using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path).Open())
-            {
-                DocumentRelationships().ToXElement().Save(stream);
-            }
-
-            using (Stream stream = archive.GetEntry("word/footnotes.xml").Open())
-            {
-                Footnotes.Save(stream);
-            }
-
-            using (Stream stream = archive.GetEntry("word/_rels/footnotes.xml.rels").Open())
-            {
-                FootnoteRelations.Save(stream);
-            }
-
-            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
-            {
-                ContentTypes.ToXElement().Save(stream);
-            }
-
-            using (Stream stream = archive.GetEntry("word/styles.xml").Open())
-            {
-                Styles.Save(stream);
-            }
-
-            using (Stream stream = archive.GetEntry("word/numbering.xml")?.Open() ??
-                                   archive.CreateEntry("word/numbering.xml").Open())
-            {
-                Numbering.Save(stream);
-            }
-
-            using (Stream stream = archive.GetEntry("word/theme/theme1.xml")?.Open() ??
-                                   archive.CreateEntry("word/theme/theme1.xml").Open())
-            {
-                Theme1.Save(stream);
-            }
-
-            return archive;
+            return
+                new OpenXmlPackageVisitor(
+                    document ?? Document,
+                    footnotes ?? Footnotes,
+                    styles ?? Styles,
+                    numbering ?? Numbering,
+                    theme1 ?? Theme1);
         }
 
         /// <summary>
@@ -305,7 +171,8 @@ namespace AD.OpenXml
         /// The archive to visit.
         /// </param>
         [Pure]
-        public OpenXmlPackageVisitor Visit(ZipArchive archive)
+        [NotNull]
+        public OpenXmlPackageVisitor Visit([NotNull] ZipArchive archive)
         {
             if (archive is null)
             {
@@ -314,9 +181,9 @@ namespace AD.OpenXml
 
             OpenXmlPackageVisitor subject = new OpenXmlPackageVisitor(archive);
             OpenXmlPackageVisitor documentVisitor = new DocumentVisit(subject, RevisionId).Result;
-            OpenXmlPackageVisitor footnoteVisitor = new FootnoteVisit(documentVisitor, FootnoteCount, RevisionId).Result;
-            OpenXmlPackageVisitor documentRelationVisitor = new DocumentRelationVisit(footnoteVisitor, Document.Relationships).Result;
-            OpenXmlPackageVisitor footnoteRelationVisitor = new FootnoteRelationVisit(documentRelationVisitor, FootnoteRelationCount).Result;
+            OpenXmlPackageVisitor footnoteVisitor = new FootnoteVisit(documentVisitor, Footnotes.Count, RevisionId).Result;
+            OpenXmlPackageVisitor documentRelationVisitor = new DocumentRelationVisit(footnoteVisitor, Document.RelationshipsMax).Result;
+            OpenXmlPackageVisitor footnoteRelationVisitor = new FootnoteRelationVisit(documentRelationVisitor, Footnotes.RelationshipsMax).Result;
             OpenXmlPackageVisitor styleVisitor = new StyleVisit(footnoteRelationVisitor).Result;
             OpenXmlPackageVisitor numberingVisitor = new NumberingVisit(styleVisitor).Result;
 
@@ -330,7 +197,8 @@ namespace AD.OpenXml
         /// The archives to visit.
         /// </param>
         [Pure]
-        public static OpenXmlPackageVisitor VisitAndFold(IEnumerable<ZipArchive> archives)
+        [NotNull]
+        public static OpenXmlPackageVisitor VisitAndFold([NotNull] [ItemNotNull] IEnumerable<ZipArchive> archives)
         {
             if (archives is null)
             {
@@ -348,7 +216,7 @@ namespace AD.OpenXml
         /// </param>
         [Pure]
         [NotNull]
-        public OpenXmlPackageVisitor Fold(OpenXmlPackageVisitor subject)
+        public OpenXmlPackageVisitor Fold([NotNull] OpenXmlPackageVisitor subject)
         {
             if (subject is null)
             {
@@ -357,21 +225,7 @@ namespace AD.OpenXml
 
             Document document = Document.Concat(subject.Document);
 
-            XElement footnotes =
-                new XElement(
-                    Footnotes.Name,
-                    Footnotes.Attributes(),
-                    Footnotes.Elements(),
-                    subject.Footnotes.Elements());
-
-            XElement footnoteRelations =
-                new XElement(
-                    FootnoteRelations.Name,
-                    FootnoteRelations.Attributes(),
-                    FootnoteRelations.Elements(),
-                    subject.FootnoteRelations
-                           .Elements()
-                           .Where(x => UpdatableRelationTypes.Contains((string) x.Attribute("Type"))));
+            Footnotes footnotes = Footnotes.Concat(subject.Footnotes);
 
             XElement styles =
                 new XElement(
@@ -408,10 +262,71 @@ namespace AD.OpenXml
                 With(
                     document: document,
                     footnotes: footnotes,
-                    footnoteRelations: footnoteRelations,
                     styles: styles,
                     numbering: numbering,
                     theme1: subject.Theme1);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ZipArchive"/> from the <see cref="OpenXmlPackageVisitor"/>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="ZipArchive"/> representing the OpenXML package.
+        /// </returns>
+        [Pure]
+        [NotNull]
+        public ZipArchive ToZipArchive()
+        {
+            ZipArchive archive = new ZipArchive(DocxFilePath.Create(), ZipArchiveMode.Update);
+
+            Document.Save(archive);
+            Footnotes.Save(archive);
+
+            BuildContentTypes().Save(archive);
+            BuildDocumentRelationships().Save(archive, DocumentRelsInfo.Path);
+            BuildFootnoteRelationships().Save(archive, FootnotesRelsInfo.Path);
+
+            using (Stream stream = archive.GetEntry("word/styles.xml").Open())
+            {
+                Styles.Save(stream);
+            }
+
+            using (Stream stream = archive.GetEntry("word/numbering.xml")?.Open() ??
+                                   archive.CreateEntry("word/numbering.xml").Open())
+            {
+                Numbering.Save(stream);
+            }
+
+            using (Stream stream = archive.GetEntry("word/theme/theme1.xml")?.Open() ??
+                                   archive.CreateEntry("word/theme/theme1.xml").Open())
+            {
+                Theme1.Save(stream);
+            }
+
+            return archive;
+        }
+
+        /// <summary>
+        /// [Content_Types].xml
+        /// </summary>
+        [Pure]
+        [NotNull]
+        private ContentTypes BuildContentTypes()
+        {
+            return
+                new ContentTypes(
+                    new ContentTypes.Override[]
+                    {
+                        new ContentTypes.Override("/docProps/app.xml", "application/vnd.openxmlformats-officedocument.extended-properties+xml"),
+                        new ContentTypes.Override("/docProps/core.xml", "application/vnd.openxmlformats-package.core-properties+xml"),
+                        new ContentTypes.Override("/word/document.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"),
+                        new ContentTypes.Override("/word/settings.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"),
+                        new ContentTypes.Override("/word/styles.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"),
+                        new ContentTypes.Override("/word/theme/theme1.xml", "application/vnd.openxmlformats-officedocument.theme+xml"),
+                        Footnotes.ContentTypeEntry,
+                        new ContentTypes.Override("/word/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"),
+                    },
+                    Document.Charts.Select(x => x.ContentTypeEntry));
         }
 
         /// <summary>
@@ -419,13 +334,13 @@ namespace AD.OpenXml
         /// </summary>
         [Pure]
         [NotNull]
-        private Relationships DocumentRelationships()
+        private Relationships BuildDocumentRelationships()
         {
             return
                 new Relationships(
                     new Relationships.Entry[]
                     {
-                        new Relationships.Entry("rId1", "footnotes.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes"),
+                        Footnotes.RelationshipEntry,
                         new Relationships.Entry("rId2", "numbering.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
                         new Relationships.Entry("rId3", "settings.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings"),
                         new Relationships.Entry("rId4", "styles.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"),
@@ -441,13 +356,9 @@ namespace AD.OpenXml
         /// </summary>
         [Pure]
         [NotNull]
-        private Relationships FootnoteRelationships()
+        private Relationships BuildFootnoteRelationships()
         {
-            return
-                new Relationships(
-                    FootnotesTest.Charts.Select(x => x.RelationshipEntry),
-                    FootnotesTest.Images.Select(x => x.RelationshipEntry),
-                    FootnotesTest.Hyperlinks.Select(x => x.RelationshipEntry));
+            return new Relationships(Footnotes.Hyperlinks.Select(x => x.RelationshipEntry));
         }
     }
 }

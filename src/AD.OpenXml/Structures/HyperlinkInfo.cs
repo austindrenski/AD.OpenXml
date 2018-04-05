@@ -3,6 +3,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
 
+// BUG: Temporary. Should be fixed in .NET Core 2.1.
 // ReSharper disable ImpureMethodCallOnReadonlyValueField
 
 namespace AD.OpenXml.Structures
@@ -16,32 +17,32 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        private readonly uint _id;
+        private static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink";
 
         /// <summary>
         ///
         /// </summary>
-        public static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink";
+        [NotNull] public static readonly HyperlinkInfo[] Empty = new HyperlinkInfo[0];
 
         /// <summary>
         ///
         /// </summary>
-        public StringSegment RelationId => $"rId{_id}";
+        public readonly StringSegment RelationId;
 
         /// <summary>
         ///
         /// </summary>
-        public uint NumericId => uint.Parse(RelationId.Substring(3));
+        public readonly StringSegment Target;
 
         /// <summary>
         ///
         /// </summary>
-        public StringSegment Target { get; }
+        public readonly StringSegment TargetMode;
 
         /// <summary>
         ///
         /// </summary>
-        public StringSegment TargetMode { get; }
+        public int NumericId => int.Parse(RelationId.Substring(3));
 
         /// <summary>
         ///
@@ -51,30 +52,20 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="target"></param>
-        /// <param name="targetMode"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        private HyperlinkInfo(uint id, StringSegment target, StringSegment targetMode)
-        {
-            _id = id;
-            Target = target;
-            TargetMode = targetMode;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
         /// <param name="rId"></param>
         /// <param name="target"></param>
         /// <param name="targetMode"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException" />
-        public static HyperlinkInfo Create(StringSegment rId, StringSegment target, StringSegment targetMode)
+        /// <exception cref="ArgumentNullException"></exception>
+        public HyperlinkInfo(StringSegment rId, StringSegment target, StringSegment targetMode)
         {
-            uint id = uint.Parse(rId.Substring(3));
+            if (!rId.StartsWith("rId", StringComparison.Ordinal))
+            {
+                throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
+            }
 
-            return new HyperlinkInfo(id, target, targetMode);
+            RelationId = rId;
+            Target = target;
+            TargetMode = targetMode;
         }
 
         /// <summary>
@@ -84,9 +75,9 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public HyperlinkInfo WithOffset(uint offset)
+        public HyperlinkInfo WithOffset(int offset)
         {
-            return new HyperlinkInfo(_id + offset, Target, TargetMode);
+            return new HyperlinkInfo($"rId{NumericId + offset}", Target, TargetMode);
         }
 
         /// <summary>
@@ -96,20 +87,12 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public HyperlinkInfo WithRelationId([NotNull] string rId)
+        public HyperlinkInfo WithRelationId(StringSegment rId)
         {
-            if (rId is null)
-            {
-                throw new ArgumentNullException(nameof(rId));
-            }
-
-            return Create(rId, Target, TargetMode);
+            return new HyperlinkInfo(rId, Target, TargetMode);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         [Pure]
         [NotNull]
         public override string ToString()
@@ -123,7 +106,10 @@ namespace AD.OpenXml.Structures
         {
             unchecked
             {
-                return (397 * _id.GetHashCode()) ^ (397 * Target.GetHashCode()) ^ (397 * TargetMode.GetHashCode());
+                int hashCode = RelationId.GetHashCode();
+                hashCode = (hashCode * 397) ^ Target.GetHashCode();
+                hashCode = (hashCode * 397) ^ TargetMode.GetHashCode();
+                return hashCode;
             }
         }
 
@@ -138,7 +124,7 @@ namespace AD.OpenXml.Structures
         [Pure]
         public bool Equals(HyperlinkInfo other)
         {
-            return _id == other._id && Equals(Target, other.Target) && Equals(TargetMode, other.TargetMode);
+            return Equals(RelationId, other.RelationId) && Equals(Target, other.Target) && Equals(TargetMode, other.TargetMode);
         }
 
         /// <summary>

@@ -3,17 +3,17 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Structures
 {
-    // TODO: document DocumentRelsInfo file.
+    // TODO: Document FootnotesRelsInfo file.
     /// <summary>
     ///
     /// </summary>
     [PublicAPI]
-    public static class DocumentRelsInfo
+    public static class FootnotesRelsInfo
     {
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public const string Path = "word/_rels/document.xml.rels";
+        [NotNull] public const string Path = "word/_rels/footnotes.xml.rels";
 
         /// <summary>
         ///

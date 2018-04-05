@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Linq;
 using System.Xml.Linq;
 using AD.OpenXml.Structures;
 using AD.Xml;
@@ -17,17 +15,7 @@ namespace AD.OpenXml.Visits
     {
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
-        [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
-
-        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-
-        [NotNull] private static readonly Regex TargetChart = new Regex("charts/chart(?<id>[0-9]+)\\.xml$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        [NotNull] private static readonly Regex TargetImage = new Regex("media/image(?<id>[0-9]+)\\.(?<extension>jpeg|png|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
         /// <inheritdoc />
-        ///  <summary>
-        ///  </summary>
         public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
@@ -36,58 +24,49 @@ namespace AD.OpenXml.Visits
         /// <param name="subject">The file from which content is copied.</param>
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
-        public DocumentRelationVisit(OpenXmlPackageVisitor subject, uint documentRelationId)
+        public DocumentRelationVisit(OpenXmlPackageVisitor subject, int documentRelationId)
         {
-            Document document =
-                Execute(
-                    subject.Document.Content,
-                    subject.Document.Charts,
-                    subject.Document.Images,
-                    subject.Document.Hyperlinks,
-                    documentRelationId);
+            Document document = Execute(subject.Document, documentRelationId);
 
-            Result = subject.With(document: document);
+            Result = subject.With(document);
         }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
         /// <param name="document"></param>
-        /// <param name="charts"></param>
-        /// <param name="images"></param>
-        /// <param name="hyperlinks"></param>
         /// <param name="documentRelationId"></param>
-        /// <returns>The updated document node of the source file.</returns>
+        /// <returns>
+        /// The updated document node of the source file.
+        /// </returns>
         [Pure]
-        private static Document Execute(
-            [NotNull] XElement document,
-            [NotNull] IEnumerable<ChartInfo> charts,
-            [NotNull] IEnumerable<ImageInfo> images,
-            [NotNull] IEnumerable<HyperlinkInfo> hyperlinks,
-            uint documentRelationId)
+        private static Document Execute(Document document, int documentRelationId)
         {
             XElement modifiedDocument =
                 new XElement(
-                    document.Name,
-                    document.Attributes().Select(x => Update(x, documentRelationId)),
-                    document.Elements().Select(x => Update(x, documentRelationId)));
+                    document.Content.Name,
+                    document.Content.Attributes().Select(x => Update(x, documentRelationId)),
+                    document.Content.Elements().Select(x => Update(x, documentRelationId)));
 
             ChartInfo[] chartMapping =
-                charts.Select(x => x.WithOffset(documentRelationId))
-                      .ToArray();
+                document.Charts
+                        .Select(x => x.WithOffset(documentRelationId))
+                        .ToArray();
 
             ImageInfo[] imageMapping =
-                images.Select(x => x.WithOffset(documentRelationId))
-                      .ToArray();
+                document.Images
+                        .Select(x => x.WithOffset(documentRelationId))
+                        .ToArray();
 
             HyperlinkInfo[] hyperlinkMapping =
-                hyperlinks.Select(x => x.WithOffset(documentRelationId))
-                          .ToArray();
+                document.Hyperlinks
+                        .Select(x => x.WithOffset(documentRelationId))
+                        .ToArray();
 
             return new Document(modifiedDocument, chartMapping, imageMapping, hyperlinkMapping);
         }
 
-        private static XObject Update(XObject node, uint offset)
+        private static XObject Update(XObject node, int offset)
         {
             switch (node)
             {
@@ -102,7 +81,7 @@ namespace AD.OpenXml.Visits
                 }
                 case XAttribute a when a.Name == R + "id" || a.Name == R + "embed":
                 {
-                    return new XAttribute(a.Name, $"rId{offset + uint.Parse(a.Value.Substring(3))}");
+                    return new XAttribute(a.Name, $"rId{offset + int.Parse(a.Value.Substring(3))}");
                 }
                 default:
                 {

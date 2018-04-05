@@ -1,8 +1,13 @@
 ﻿using System;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
+
+// BUG: Temporary. Should be fixed in .NET Core 2.1.
+// ReSharper disable ImpureMethodCallOnReadonlyValueField
 
 namespace AD.OpenXml.Structures
 {
@@ -15,37 +20,46 @@ namespace AD.OpenXml.Structures
     {
         [NotNull] private static readonly Regex RegexTarget = new Regex("media/image(?<id>[0-9]+)\\.(?<extension>png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private readonly uint _id;
+        /// <summary>
+        ///
+        /// </summary>
+        private static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
 
         /// <summary>
         ///
         /// </summary>
-        public static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
+        [NotNull] public static readonly ImageInfo[] Empty = new ImageInfo[0];
 
         /// <summary>
         ///
         /// </summary>
-        public StringSegment Extension { get; }
+        public readonly StringSegment Extension;
 
         /// <summary>
         ///
         /// </summary>
-        public StringSegment RelationId => $"rId{_id}";
-
-        /// <summary>
-        ///
-        /// </summary>
-        public uint NumericId => uint.Parse(RelationId.Substring(3));
-
-        /// <summary>
-        ///
-        /// </summary>
-        public StringSegment Target => $"media/image{_id}.{Extension}";
+        public readonly StringSegment RelationId;
 
         /// <summary>
         ///
         /// </summary>
         public readonly ReadOnlyMemory<byte> Image;
+
+        /// <summary>
+        ///
+        /// </summary>
+        public int NumericId => int.Parse(RelationId.Substring(3));
+
+        /// <summary>
+        ///
+        /// </summary>
+        public StringSegment Target => $"media/image{RelationId.Subsegment(3)}.{Extension}";
+
+
+        /// <summary>
+        ///
+        /// </summary>
+        public StringSegment PartName => $"/word/{Target}";
 
         /// <summary>
         ///
@@ -60,18 +74,22 @@ namespace AD.OpenXml.Structures
         ///  <summary>
         ///
         ///  </summary>
-        ///  <param name="id"></param>
+        ///  <param name="rId"></param>
         /// <param name="extension"></param>
         /// <param name="image"></param>
-        public ImageInfo(uint id, StringSegment extension, [NotNull] byte[] image)
+        public ImageInfo(StringSegment rId, StringSegment extension, [NotNull] byte[] image)
         {
+            if (!rId.StartsWith("rId", StringComparison.Ordinal))
+            {
+                throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
+            }
+
             if (image is null)
             {
                 throw new ArgumentNullException(nameof(image));
             }
 
-
-            _id = id;
+            RelationId = rId;
             Extension = extension;
             Image = image.ToArray();
         }
@@ -79,12 +97,17 @@ namespace AD.OpenXml.Structures
         ///  <summary>
         ///
         ///  </summary>
-        ///  <param name="id"></param>
+        ///  <param name="rId"></param>
         /// <param name="extension"></param>
         /// <param name="image"></param>
-        public ImageInfo(uint id, StringSegment extension, ReadOnlyMemory<byte> image)
+        public ImageInfo(StringSegment rId, StringSegment extension, ReadOnlyMemory<byte> image)
         {
-            _id = id;
+            if (!rId.StartsWith("rId", StringComparison.Ordinal))
+            {
+                throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
+            }
+
+            RelationId = rId;
             Extension = extension;
             Image = image;
         }
@@ -111,10 +134,9 @@ namespace AD.OpenXml.Structures
 
             Match m = RegexTarget.Match(target.Value);
 
-            uint id = uint.Parse(rId.Substring(3));
             string extension = m.Groups["extension"].Value;
 
-            return new ImageInfo(id, extension, image);
+            return new ImageInfo(rId, extension, image);
         }
 
         /// <summary>
@@ -124,9 +146,9 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public ImageInfo WithOffset(uint offset)
+        public ImageInfo WithOffset(int offset)
         {
-            return new ImageInfo(_id + offset, Extension, Image);
+            return new ImageInfo($"rId{NumericId + offset}", Extension, Image);
         }
 
         /// <summary>
@@ -143,13 +165,35 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
+        /// <param name="archive">
+        ///
+        /// </param>
+        /// <exception cref="ArgumentNullException" />
+        public void Save([NotNull] ZipArchive archive)
+        {
+            if (archive is null)
+            {
+                throw new ArgumentNullException(nameof(archive));
+            }
+
+            using (Stream stream = archive.CreateEntry(PartName.Subsegment(1).Value).Open())
+            {
+                for (int i = 0; i < Image.Span.Length; i++)
+                {
+                    stream.WriteByte(Image.Span[i]);
+                }
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
         /// <returns></returns>
         [Pure]
         public override int GetHashCode()
         {
             unchecked
             {
-                // ReSharper disable once ImpureMethodCallOnReadonlyValueField
                 return (397 * Target.GetHashCode()) ^ Image.GetHashCode();
             }
         }
@@ -165,7 +209,6 @@ namespace AD.OpenXml.Structures
         [Pure]
         public bool Equals(ImageInfo other)
         {
-            // ReSharper disable once ImpureMethodCallOnReadonlyValueField
             return Equals(Target, other.Target) && Image.Equals(other.Image);
         }
 

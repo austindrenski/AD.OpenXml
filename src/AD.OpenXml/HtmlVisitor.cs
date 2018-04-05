@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using AD.OpenXml.Structures;
 using JetBrains.Annotations;
 
 // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
@@ -73,6 +74,7 @@ namespace AD.OpenXml
         /// <summary>
         /// The mapping of image id to data.
         /// </summary>
+        [NotNull]
         protected IDictionary<string, (string mime, string description, string base64)> Images { get; }
 
         /// <summary>
@@ -119,31 +121,7 @@ namespace AD.OpenXml
         /// <param name="images">
         /// Image data referenced in the content to be visited.
         /// </param>
-        protected HtmlVisitor(bool returnOnDefault, IDictionary<string, XElement> charts, IDictionary<string, (string mime, string description, string base64)> images) : base(returnOnDefault)
-        {
-            Charts = new Dictionary<string, XElement>(charts);
-            Images = new Dictionary<string, (string mime, string description, string base64)>(images);
-        }
-
-        /// <summary>
-        /// Returns a new <see cref="HtmlVisitor"/>.
-        /// </summary>
-        /// <param name="charts">
-        /// Chart data referenced in the content to be visited.
-        /// </param>
-        /// <param name="images">
-        /// Image data referenced in the content to be visited.
-        /// </param>
-        /// <param name="returnOnDefault">
-        /// True if an element should be returned when handling the default dispatch case.
-        /// </param>
-        /// <returns>
-        /// An <see cref="HtmlVisitor"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        [NotNull]
-        public static HtmlVisitor Create([NotNull] IDictionary<string, XElement> charts, [NotNull] IDictionary<string, (string mime, string description, string base64)> images, bool returnOnDefault = false)
+        protected HtmlVisitor(bool returnOnDefault, [NotNull] IDictionary<string, XElement> charts, [NotNull] IDictionary<string, (string mime, string description, string base64)> images) : base(returnOnDefault)
         {
             if (charts is null)
             {
@@ -155,34 +133,89 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(images));
             }
 
-            return new HtmlVisitor(false, charts, images);
+            Charts = new Dictionary<string, XElement>(charts);
+            Images = new Dictionary<string, (string mime, string description, string base64)>(images);
         }
 
-        ///  <summary>
-        ///   Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
-        ///  </summary>
-        ///  <param name="document">
-        ///   The w:document node.
-        ///  </param>
-        ///  <param name="footnotes">
+        /// <summary>
+        /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
+        /// </summary>
+        /// <param name="document">
+        /// The w:document node.
+        /// </param>
+        /// <param name="footnotes">
         ///
-        ///  </param>
+        /// </param>
         /// <param name="title">
-        ///   The name of this HTML document.
-        ///  </param>
-        ///  <param name="stylesheet">
-        ///   The name, relative path, or absolute path to a CSS stylesheet.
-        ///  </param>
-        ///  <returns>
-        ///   An <see cref="XElement"/> "html
-        ///  </returns>
-        ///  <exception cref="ArgumentNullException" />
+        /// The name of this HTML document.
+        /// </param>
+        /// <param name="stylesheet">
+        /// The name, relative path, or absolute path to a CSS stylesheet.
+        /// </param>
+        /// <returns>
+        /// An <see cref="XElement"/> "html
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
         [Pure]
-        public XObject Visit(XElement document, XElement footnotes, string title, string stylesheet)
+        [NotNull]
+        public static XObject Visit([NotNull] Document document, [NotNull] Footnotes footnotes, [NotNull] string title, [NotNull] string stylesheet)
         {
             if (document is null)
             {
                 throw new ArgumentNullException(nameof(document));
+            }
+
+            if (footnotes is null)
+            {
+                throw new ArgumentNullException(nameof(footnotes));
+            }
+
+            if (title is null)
+            {
+                throw new ArgumentNullException(nameof(title));
+            }
+
+            if (stylesheet is null)
+            {
+                throw new ArgumentNullException(nameof(stylesheet));
+            }
+
+            return
+                new HtmlVisitor(false, document.ChartReferences, document.ImageReferences)
+                    .Visit(document.Content, footnotes.Content, title, stylesheet);
+        }
+
+        /// <summary>
+        /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
+        /// </summary>
+        /// <param name="document">
+        /// The w:document node.
+        /// </param>
+        /// <param name="footnotes">
+        ///
+        /// </param>
+        /// <param name="title">
+        /// The name of this HTML document.
+        /// </param>
+        /// <param name="stylesheet">
+        /// The name, relative path, or absolute path to a CSS stylesheet.
+        /// </param>
+        /// <returns>
+        /// An <see cref="XElement"/> "html
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [NotNull]
+        public XObject Visit([NotNull] XElement document, [NotNull] XElement footnotes, [NotNull] string title, [NotNull] string stylesheet)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            if (footnotes is null)
+            {
+                throw new ArgumentNullException(nameof(footnotes));
             }
 
             if (title is null)

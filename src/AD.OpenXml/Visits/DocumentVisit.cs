@@ -40,13 +40,11 @@ namespace AD.OpenXml.Visits
         /// The current revision number incremented by one.
         /// </param>
         /// <returns>The updated document node of the source file.</returns>
-        public DocumentVisit(OpenXmlPackageVisitor subject, uint revisionId)
+        public DocumentVisit(OpenXmlPackageVisitor subject, int revisionId)
         {
-            XElement document = Execute(subject.Document.Content, (int) (revisionId + 1));
+            Document document = Execute(subject.Document, revisionId + 1);
 
-            Document resultDoc = subject.Document.With(document);
-
-            Result = subject.With(document: resultDoc);
+            Result = subject.With(document);
         }
 
         /// <summary>
@@ -72,6 +70,22 @@ namespace AD.OpenXml.Visits
             }
 
             return Execute(cell, revisionId);
+        }
+
+        [Pure]
+        [NotNull]
+        private static Document Execute([NotNull] Document document, int revisionId)
+        {
+            if (document is null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            return
+                document.With(
+                    Execute(
+                        document.Content,
+                        revisionId));
         }
 
         [Pure]

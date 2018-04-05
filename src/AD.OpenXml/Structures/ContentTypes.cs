@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
+
+// BUG: Temporary. Should be fixed in .NET Core 2.1.
+// ReSharper disable ImpureMethodCallOnReadonlyValueField
 
 namespace AD.OpenXml.Structures
 {
@@ -50,13 +55,15 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="overrides"></param>
-        /// <returns></returns>
-        [Pure]
-        [NotNull]
-        public static ContentTypes Create([ItemNotNull] params IEnumerable<Override>[] overrides)
+        public ContentTypes([ItemNotNull] params IEnumerable<Override>[] overrides)
         {
-            return new ContentTypes(Default.StandardEntries, overrides.SelectMany(x => x));
+            if (overrides is null)
+            {
+                throw new ArgumentNullException(nameof(overrides));
+            }
+
+            Defaults = Default.StandardEntries;
+            Overrides = overrides.SelectMany(x => x).ToArray();
         }
 
         /// <summary>
@@ -80,6 +87,26 @@ namespace AD.OpenXml.Structures
         public override string ToString()
         {
             return ToXElement().ToString();
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="archive">
+        ///
+        /// </param>
+        /// <exception cref="ArgumentNullException" />
+        public void Save([NotNull] ZipArchive archive)
+        {
+            if (archive is null)
+            {
+                throw new ArgumentNullException(nameof(archive));
+            }
+
+            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
+            {
+                ToXElement().Save(stream);
+            }
         }
 
         /// <inheritdoc cref="IComparable{T}"/>
@@ -108,12 +135,12 @@ namespace AD.OpenXml.Structures
             /// <summary>
             ///
             /// </summary>
-            public StringSegment Extension { get; }
+            public readonly StringSegment Extension;
 
             /// <summary>
             ///
             /// </summary>
-            public StringSegment ContentType { get; }
+            public readonly StringSegment ContentType;
 
             /// <summary>
             ///
@@ -220,12 +247,12 @@ namespace AD.OpenXml.Structures
             /// <summary>
             ///
             /// </summary>
-            public StringSegment PartName { get; }
+            public readonly StringSegment PartName;
 
             /// <summary>
             ///
             /// </summary>
-            public StringSegment ContentType { get; }
+            public readonly StringSegment ContentType;
 
             /// <summary>
             ///

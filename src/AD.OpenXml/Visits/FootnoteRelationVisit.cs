@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 using AD.OpenXml.Elements;
+using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -14,8 +15,6 @@ namespace AD.OpenXml.Visits
     [PublicAPI]
     public sealed class FootnoteRelationVisit : IOpenXmlPackageVisit
     {
-        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
 
         /// <inheritdoc />
@@ -24,48 +23,44 @@ namespace AD.OpenXml.Visits
         /// <summary>
         /// Marshals footnotes from the source document into the container.
         /// </summary>
-        /// <param name="subject">The file from which content is copied.</param>
-        /// <param name="footnoteRelationId"></param>
-        /// <returns>The updated document node of the source file.</returns>
-        public FootnoteRelationVisit(OpenXmlPackageVisitor subject, uint footnoteRelationId)
+        /// <param name="subject">
+        /// The file from which content is copied.
+        /// </param>
+        /// <param name="footnoteRelationId">
+        ///
+        /// </param>
+        /// <returns>
+        /// The updated document node of the source file.
+        /// </returns>
+        public FootnoteRelationVisit(OpenXmlPackageVisitor subject, int footnoteRelationId)
         {
-            (var footnoteRelations, var footnotes) =
-                Execute(
-                    subject.Footnotes.RemoveRsidAttributes(),
-                    subject.FootnoteRelations.RemoveRsidAttributes(),
-                    footnoteRelationId);
-            Result =
-                subject.With(
-                    footnotes: footnotes,
-                    footnoteRelations: footnoteRelations);
+            Footnotes footnotes = Execute(subject.Footnotes, footnoteRelationId);
+
+            Result = subject.With(footnotes: footnotes);
         }
 
         [Pure]
-        private static (XElement FootnoteRelations, XElement Footnotes) Execute([NotNull] XElement footnotes, [NotNull] XElement footnoteRelations, uint footnoteRelationId)
+        private static Footnotes Execute(Footnotes footnotes, int footnoteRelationId)
         {
             if (footnotes is null)
             {
                 throw new ArgumentNullException(nameof(footnotes));
             }
 
-            if (footnoteRelations is null)
-            {
-                throw new ArgumentNullException(nameof(footnoteRelations));
-            }
-
-            XElement modifiedFootnoteRelations =
-                new XElement(
-                    footnoteRelations.Name,
-                    footnoteRelations.Attributes(),
-                    footnoteRelations.Elements().Select(UpdateElements));
+            XElement f = footnotes.Content.RemoveRsidAttributes();
 
             XElement modifiedFootnotes =
                 new XElement(
-                    footnotes.Name,
-                    footnotes.Attributes(),
-                    footnotes.Elements().Select(UpdateElements));
+                    f.Name,
+                    f.Attributes(),
+                    f.Elements().Select(UpdateElements));
 
-            return (modifiedFootnoteRelations, modifiedFootnotes);
+            HyperlinkInfo[] hyperlinks =
+                footnotes.Hyperlinks
+                         .Select(x => x.WithOffset(footnoteRelationId))
+                         .ToArray();
+
+            return new Footnotes(footnotes.RelationId, modifiedFootnotes, hyperlinks);
 
             XElement UpdateElements(XElement e)
             {

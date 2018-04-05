@@ -1,10 +1,13 @@
 using System;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
 
+// BUG: Temporary. Should be fixed in .NET Core 2.1.
 // ReSharper disable ImpureMethodCallOnReadonlyValueField
 
 namespace AD.OpenXml.Structures
@@ -20,12 +23,17 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        public static readonly StringSegment MimeType = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
+        private static readonly StringSegment MimeType = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
 
         /// <summary>
         ///
         /// </summary>
-        public static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart";
+        private static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart";
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull] public static readonly ChartInfo[] Empty = new ChartInfo[0];
 
         /// <summary>
         ///
@@ -36,12 +44,12 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        public StringSegment RelationId { get; }
+        public readonly StringSegment RelationId;
 
         /// <summary>
         ///
         /// </summary>
-        public uint NumericId => uint.Parse(RelationId.Substring(3));
+        public int NumericId => int.Parse(RelationId.Substring(3));
 
         /// <summary>
         ///
@@ -63,11 +71,15 @@ namespace AD.OpenXml.Structures
         /// </summary>
         public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, SchemaType);
 
-        ///  <summary>
+        /// <summary>
         ///
-        ///  </summary>
-        ///  <param name="rId"></param>
-        /// <param name="chart"></param>
+        /// </summary>
+        /// <param name="rId">
+        ///
+        /// </param>
+        /// <param name="chart">
+        ///
+        /// </param>
         public ChartInfo(StringSegment rId, [NotNull] XElement chart)
         {
             if (!rId.StartsWith("rId", StringComparison.Ordinal))
@@ -81,9 +93,7 @@ namespace AD.OpenXml.Structures
             }
 
             RelationId = rId;
-            XElement clone = chart.Clone();
-            clone.Descendants(C + "externalData").Remove();
-            Chart = clone;
+            Chart = chart.Clone().RemoveByAll(C + "externalData");
         }
 
         /// <summary>
@@ -93,9 +103,9 @@ namespace AD.OpenXml.Structures
         /// <returns></returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        public ChartInfo WithOffset(uint offset)
+        public ChartInfo WithOffset(int offset)
         {
-            return new ChartInfo($"rId{uint.Parse(RelationId.Substring(3)) + offset}", Chart);
+            return new ChartInfo($"rId{NumericId + offset}", Chart);
         }
 
         /// <summary>
@@ -110,15 +120,32 @@ namespace AD.OpenXml.Structures
             return new ChartInfo(rId, Chart);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         [Pure]
         [NotNull]
         public override string ToString()
         {
-            return $"(Id: {RelationId}, Target: {Target})";
+            return $"(Id: {RelationId}, PartName: {PartName})";
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="archive">
+        ///
+        /// </param>
+        /// <exception cref="ArgumentNullException" />
+        public void Save([NotNull] ZipArchive archive)
+        {
+            if (archive is null)
+            {
+                throw new ArgumentNullException(nameof(archive));
+            }
+
+            using (Stream stream = archive.CreateEntry(PartName.Subsegment(1).Value).Open())
+            {
+                Chart.Save(stream);
+            }
         }
 
         /// <inheritdoc />

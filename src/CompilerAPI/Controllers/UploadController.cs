@@ -122,16 +122,7 @@ namespace CompilerAPI.Controllers
                     return
                         new ContentResult
                         {
-                            Content =
-                                HtmlVisitor.Create(
-                                               visitor.Document.ChartReferences,
-                                               visitor.Document.ImageReferences)
-                                           .Visit(
-                                               visitor.Document.Content,
-                                               visitor.Footnotes,
-                                               title ?? "",
-                                               stylesheet ?? "")
-                                           .ToString(),
+                            Content = HtmlVisitor.Visit(visitor.Document, visitor.Footnotes, title ?? "", stylesheet ?? "").ToString(),
                             ContentType = "text/html",
                             StatusCode = 200
                         };
@@ -182,7 +173,7 @@ namespace CompilerAPI.Controllers
             return await
                        OpenXmlPackageVisitor
                            .VisitAndFold(files)
-                           .Save()
+                           .ToZipArchive()
                            .AddHeaders(title)
                            .AddFooters(publisher, website)
                            .ToStream()

@@ -9,7 +9,6 @@ using AD.IO;
 using AD.OpenXml.Elements;
 using AD.Xml;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
 
 namespace AD.OpenXml.Structures
 {
@@ -19,16 +18,17 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Document
     {
-        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        private static readonly StringValues UpdatableRelationTypes =
-            new string[]
+        [NotNull] private static readonly IEnumerable<XName> Revisions =
+            new XName[]
             {
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
+                W + "ins",
+                W + "del",
+                W + "rPrChange",
+                W + "moveToRangeStart",
+                W + "moveToRangeEnd",
+                W + "moveTo"
             };
 
         /// <summary>
@@ -58,12 +58,22 @@ namespace AD.OpenXml.Structures
         /// <summary>
         /// The number of relationships in the document.
         /// </summary>
-        public uint Relationships =>
+        public int RelationshipsMax =>
             Charts.Select(x => x.NumericId)
                   .Concat(Images.Select(x => x.NumericId))
                   .Concat(Hyperlinks.Select(x => x.NumericId))
                   .DefaultIfEmpty(default)
                   .Max();
+
+        /// <summary>
+        /// The current revision number.
+        /// </summary>
+        public int RevisionId =>
+            Content.Descendants()
+                   .Where(x => Revisions.Contains(x.Name))
+                   .Select(x => (int) x.Attribute(W + "id"))
+                   .DefaultIfEmpty(0)
+                   .Max();
 
         /// <summary>
         /// Maps chart reference id to chart node.
@@ -95,7 +105,7 @@ namespace AD.OpenXml.Structures
 
             Content = archive.ReadXml();
 
-            XElement documentRelations = archive.ReadXml(DocumentRelsInfo.Path);
+            XElement documentRelations = archive.ReadXml(DocumentRelsInfo.Path, Relationships.Empty.ToXElement());
 
             // TODO: re-enumerate ids at this stage.
             // TODO: find charts and images by *starting* with the content refs.
@@ -138,7 +148,7 @@ namespace AD.OpenXml.Structures
                                              TargetMode = (string) x.Attribute("TargetMode")
                                          })
                                  .Where(x => x.TargetMode != null)
-                                 .Select(x => HyperlinkInfo.Create(x.Id, x.Target, x.TargetMode))
+                                 .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
                                  .ToImmutableHashSet();
         }
 
@@ -245,7 +255,7 @@ namespace AD.OpenXml.Structures
 
             return
                 new Document(
-                    content is default ? Content : document,
+                    document,
                     charts is default ? Charts : Charts.Concat(charts),
                     images is default ? Images : Images.Concat(images),
                     hyperlinks is default ? Hyperlinks : Hyperlinks.Concat(hyperlinks));
@@ -280,21 +290,12 @@ namespace AD.OpenXml.Structures
 
             foreach (ChartInfo item in Charts)
             {
-                using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
-                {
-                    item.Chart.Save(stream);
-                }
+                item.Save(archive);
             }
 
             foreach (ImageInfo item in Images)
             {
-                using (Stream stream = archive.CreateEntry($"word/{item.Target}").Open())
-                {
-                    for (int i = 0; i < item.Image.Span.Length; i++)
-                    {
-                        stream.WriteByte(item.Image.Span[i]);
-                    }
-                }
+                item.Save(archive);
             }
         }
     }
