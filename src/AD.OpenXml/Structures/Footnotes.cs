@@ -17,7 +17,7 @@ namespace AD.OpenXml.Structures
     ///
     /// </summary>
     [PublicAPI]
-    public class Document
+    public class Footnotes
     {
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
 
@@ -32,7 +32,7 @@ namespace AD.OpenXml.Structures
             };
 
         /// <summary>
-        /// The XML file located at: /word/document.xml.
+        /// The XML file located at: /word/Footnotes.xml.
         /// </summary>
         [NotNull]
         public XElement Content { get; }
@@ -50,13 +50,13 @@ namespace AD.OpenXml.Structures
         public IImmutableSet<ImageInfo> Images { get; }
 
         /// <summary>
-        /// The hyperlinks listed in: /word/_rels/document.xml.rels.
+        /// The hyperlinks listed in: /word/_rels/Footnotes.xml.rels.
         /// </summary>
         [NotNull]
         public IImmutableSet<HyperlinkInfo> Hyperlinks { get; }
 
         /// <summary>
-        /// The number of relationships in the document.
+        /// The number of relationships in the Footnotes.
         /// </summary>
         public uint Relationships =>
             Charts.Select(x => x.NumericId)
@@ -80,13 +80,13 @@ namespace AD.OpenXml.Structures
             Images.ToDictionary(x => x.RelationId.Value, x => (x.Extension.Value, string.Empty, x.Base64String));
 
         /// <summary>
-        /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
+        /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading Footnotes parts into memory.
         /// </summary>
         /// <param name="archive">
         /// The archive to which changes can be saved.
         /// </param>
         /// <exception cref="ArgumentNullException"/>
-        public Document([NotNull] ZipArchive archive)
+        public Footnotes([NotNull] ZipArchive archive)
         {
             if (archive is null)
             {
@@ -95,42 +95,42 @@ namespace AD.OpenXml.Structures
 
             Content = archive.ReadXml();
 
-            XElement documentRelations = archive.ReadXml(DocumentRelsInfo.Path);
+            XElement FootnotesRelations = archive.ReadXml(FootnotesRelsInfo.Path);
 
             Charts =
-                documentRelations.Elements()
+                FootnotesRelations.Elements()
                                  .Select(
                                      x =>
                                          new
                                          {
-                                             Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
-                                             Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
+                                             Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
+                                             Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target)
                                          })
                                  .Where(x => x.Target.StartsWith("charts/"))
                                  .Select(x => new ChartInfo(x.Id, archive.ReadXml($"word/{x.Target}")))
                                  .ToImmutableHashSet();
 
             Images =
-                documentRelations.Elements()
+                FootnotesRelations.Elements()
                                  .Select(
                                      x =>
                                          new
                                          {
-                                             Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
-                                             Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
+                                             Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
+                                             Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target)
                                          })
                                  .Where(x => x.Target.StartsWith("media/"))
                                  .Select(x => ImageInfo.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
                                  .ToImmutableHashSet();
 
             Hyperlinks =
-                documentRelations.Elements()
+                FootnotesRelations.Elements()
                                  .Select(
                                      x =>
                                          new
                                          {
-                                             Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
-                                             Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target),
+                                             Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
+                                             Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target),
                                              TargetMode = (string) x.Attribute("TargetMode")
                                          })
                                  .Where(x => x.TargetMode != null)
@@ -153,7 +153,7 @@ namespace AD.OpenXml.Structures
         /// <param name="hyperlinks">
         ///
         /// </param>
-        public Document(
+        public Footnotes(
             [NotNull] XElement content,
             [NotNull] IEnumerable<ChartInfo> charts,
             [NotNull] IEnumerable<ImageInfo> images,
@@ -193,13 +193,13 @@ namespace AD.OpenXml.Structures
         /// <param name="images"></param>
         /// <param name="hyperlinks"></param>
         /// <returns></returns>
-        public Document With(
+        public Footnotes With(
             [CanBeNull] XElement content = default,
             [CanBeNull] IEnumerable<ChartInfo> charts = default,
             [CanBeNull] IEnumerable<ImageInfo> images = default,
             [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
-            return new Document(content ?? Content, charts ?? Charts, images ?? Images, hyperlinks ?? Hyperlinks);
+            return new Footnotes(content ?? Content, charts ?? Charts, images ?? Images, hyperlinks ?? Hyperlinks);
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace AD.OpenXml.Structures
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Document Concat([NotNull] Document other)
+        public Footnotes Concat([NotNull] Footnotes other)
         {
             return Concat(other.Content, other.Charts, other.Images, other.Hyperlinks);
         }
@@ -220,13 +220,13 @@ namespace AD.OpenXml.Structures
         /// <param name="images"></param>
         /// <param name="hyperlinks"></param>
         /// <returns></returns>
-        public Document Concat(
+        public Footnotes Concat(
             [CanBeNull] XElement content = default,
             [CanBeNull] IEnumerable<ChartInfo> charts = default,
             [CanBeNull] IEnumerable<ImageInfo> images = default,
             [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
-            XElement document =
+            XElement Footnotes =
                 content is default
                     ? Content
                     : new XElement(
@@ -237,23 +237,23 @@ namespace AD.OpenXml.Structures
                             Content.Element(W + "body").Elements(),
                             content.Element(W + "body").Elements()));
 
-            document.RemoveDuplicateSectionProperties();
+            Footnotes.RemoveDuplicateSectionProperties();
 
             return
-                new Document(
-                    content is default ? Content : document,
+                new Footnotes(
+                    content is default ? Content : Footnotes,
                     charts is default ? Charts : Charts.Concat(charts),
                     images is default ? Images : Images.Concat(images),
                     hyperlinks is default ? Hyperlinks : Hyperlinks.Concat(hyperlinks));
         }
 
-        /// <inheritdoc />
-        [Pure]
-        [NotNull]
-        public override string ToString()
-        {
-            return $"Document: (Charts: {Charts.Count}, Images: {Images.Count}, Hyperlinks: {Hyperlinks.Count})";
-        }
+//        /// <inheritdoc />
+//        [Pure]
+//        [NotNull]
+//        public override string ToString()
+//        {
+//            return ToXElement().ToString();
+//        }
 
         /// <summary>
         ///
@@ -269,7 +269,7 @@ namespace AD.OpenXml.Structures
                 throw new ArgumentNullException(nameof(archive));
             }
 
-            using (Stream stream = archive.GetEntry("word/document.xml").Open())
+            using (Stream stream = archive.GetEntry("word/Footnotes.xml").Open())
             {
                 Content.Save(stream);
             }

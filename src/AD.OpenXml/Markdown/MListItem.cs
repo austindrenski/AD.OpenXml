@@ -151,7 +151,7 @@ namespace AD.OpenXml.Markdown
         {
             unchecked
             {
-                return (397 * Item.GetHashCode()) ^ Level;
+                return (397 * Item.GetHashCode()) ^ Level.GetHashCode();
             }
         }
 

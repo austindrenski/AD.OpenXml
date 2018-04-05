@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 using AD.IO;
 using AD.IO.Paths;
@@ -81,10 +80,10 @@ namespace AD.OpenXml
         public Document Document { get; }
 
         /// <summary>
-        /// word/_rels/document.xml.rels
+        /// word/footnotes.xml
         /// </summary>
         [NotNull]
-        public XElement DocumentRelations { get; }
+        public XElement Footnotes { get; }
 
         /// <summary>
         /// word/_rels/footnotes.xml.rels
@@ -93,10 +92,10 @@ namespace AD.OpenXml
         public XElement FootnoteRelations { get; }
 
         /// <summary>
-        /// word/footnotes.xml
+        ///
         /// </summary>
         [NotNull]
-        public XElement Footnotes { get; }
+        public Footnotes FootnotesTest { get; }
 
         /// <summary>
         /// word/styles.xml
@@ -115,11 +114,6 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull]
         public XElement Theme1 { get; }
-
-        /// <summary>
-        /// The current document relation count.
-        /// </summary>
-        public uint DocumentRelationCount => DocumentRelations.Elements().Max(x => uint.Parse(x.Attribute("Id").Value.Substring(3)));
 
         /// <summary>
         /// The current footnote count.
@@ -167,38 +161,12 @@ namespace AD.OpenXml
             Styles = archive.ReadXml("word/styles.xml");
             Numbering = archive.ReadXml("word/numbering.xml", new XElement(W + "numbering"));
             Theme1 = archive.ReadXml("word/theme/theme1.xml");
-
-            XElement documentRelations = archive.ReadXml(DocumentRelsInfo.Path);
-
-            DocumentRelations =
-                new XElement(
-                    P + "Relationships",
-                    documentRelations.Elements().Where(x => !UpdatableRelationTypes.Contains(x.Attribute("Type").Value)),
-                    Document.Charts.Select(x => (XElement) x.RelationshipEntry),
-                    Document.Images.Select(x => (XElement) x.RelationshipEntry),
-                    Document.Hyperlinks.Select(x => (XElement) x.RelationshipEntry));
-
-            // ReSharper disable once InvertIf
-            if (!Numbering.HasElements)
-            {
-                DocumentRelations =
-                    new XElement(
-                        DocumentRelations.Name,
-                        DocumentRelations.Attributes(),
-                        DocumentRelations.Elements().Where(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Target) != "numbering.xml"),
-                        new XElement(
-                            P + "Relationship",
-                            new XAttribute("Id", $"rId{DocumentRelationCount + 1}"),
-                            new XAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
-                            new XAttribute("Target", "numbering.xml")));
-            }
         }
 
         /// <summary>
         /// Initializes a new <see cref="OpenXmlPackageVisitor"/> from the supplied components.
         /// </summary>
         /// <param name="document"></param>
-        /// <param name="documentRelations"></param>
         /// <param name="footnotes"></param>
         /// <param name="footnoteRelations"></param>
         /// <param name="styles"></param>
@@ -207,7 +175,6 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"></exception>
         private OpenXmlPackageVisitor(
             [NotNull] Document document,
-            [NotNull] XElement documentRelations,
             [NotNull] XElement footnotes,
             [NotNull] XElement footnoteRelations,
             [NotNull] XElement styles,
@@ -217,11 +184,6 @@ namespace AD.OpenXml
             if (document is null)
             {
                 throw new ArgumentNullException(nameof(document));
-            }
-
-            if (documentRelations is null)
-            {
-                throw new ArgumentNullException(nameof(documentRelations));
             }
 
             if (footnotes is null)
@@ -255,13 +217,6 @@ namespace AD.OpenXml
             Styles = styles;
             Numbering = numbering;
             Theme1 = theme1;
-            DocumentRelations =
-                new XElement(
-                    P + "Relationships",
-                    documentRelations.Elements().Where(x => !UpdatableRelationTypes.Contains(x.Attribute("Type").Value)),
-                    Document.Charts.Select(x => (XElement) x.RelationshipEntry),
-                    Document.Images.Select(x => (XElement) x.RelationshipEntry),
-                    Document.Hyperlinks.Select(x => (XElement) x.RelationshipEntry));
         }
 
         /// <summary>
@@ -284,7 +239,6 @@ namespace AD.OpenXml
         {
             return new OpenXmlPackageVisitor(
                 document ?? Document,
-                DocumentRelations,
                 footnotes ?? Footnotes,
                 footnoteRelations ?? FootnoteRelations,
                 styles ?? Styles,
@@ -304,10 +258,9 @@ namespace AD.OpenXml
 
             Document.Save(archive);
 
-            // TODO: remove when fully encapsulated
             using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path).Open())
             {
-                DocumentRelations.Save(stream);
+                DocumentRelationships().ToXElement().Save(stream);
             }
 
             using (Stream stream = archive.GetEntry("word/footnotes.xml").Open())
@@ -315,17 +268,14 @@ namespace AD.OpenXml
                 Footnotes.Save(stream);
             }
 
-            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
-            {
-                using (StreamWriter writer = new StreamWriter(stream, Encoding.UTF8))
-                {
-                    writer.Write(ContentTypes.ToString());
-                }
-            }
-
             using (Stream stream = archive.GetEntry("word/_rels/footnotes.xml.rels").Open())
             {
                 FootnoteRelations.Save(stream);
+            }
+
+            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
+            {
+                ContentTypes.ToXElement().Save(stream);
             }
 
             using (Stream stream = archive.GetEntry("word/styles.xml").Open())
@@ -365,7 +315,7 @@ namespace AD.OpenXml
             OpenXmlPackageVisitor subject = new OpenXmlPackageVisitor(archive);
             OpenXmlPackageVisitor documentVisitor = new DocumentVisit(subject, RevisionId).Result;
             OpenXmlPackageVisitor footnoteVisitor = new FootnoteVisit(documentVisitor, FootnoteCount, RevisionId).Result;
-            OpenXmlPackageVisitor documentRelationVisitor = new DocumentRelationVisit(footnoteVisitor, DocumentRelationCount).Result;
+            OpenXmlPackageVisitor documentRelationVisitor = new DocumentRelationVisit(footnoteVisitor, Document.Relationships).Result;
             OpenXmlPackageVisitor footnoteRelationVisitor = new FootnoteRelationVisit(documentRelationVisitor, FootnoteRelationCount).Result;
             OpenXmlPackageVisitor styleVisitor = new StyleVisit(footnoteRelationVisitor).Result;
             OpenXmlPackageVisitor numberingVisitor = new NumberingVisit(styleVisitor).Result;
@@ -462,6 +412,42 @@ namespace AD.OpenXml
                     styles: styles,
                     numbering: numbering,
                     theme1: subject.Theme1);
+        }
+
+        /// <summary>
+        /// Cosntructs a <see cref="Relationships"/> instance for /word/_rels/document.xml.rels.
+        /// </summary>
+        [Pure]
+        [NotNull]
+        private Relationships DocumentRelationships()
+        {
+            return
+                new Relationships(
+                    new Relationships.Entry[]
+                    {
+                        new Relationships.Entry("rId1", "footnotes.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes"),
+                        new Relationships.Entry("rId2", "numbering.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
+                        new Relationships.Entry("rId3", "settings.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings"),
+                        new Relationships.Entry("rId4", "styles.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"),
+                        new Relationships.Entry("rId5", "theme/theme1.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme"),
+                    },
+                    Document.Charts.Select(x => x.RelationshipEntry),
+                    Document.Images.Select(x => x.RelationshipEntry),
+                    Document.Hyperlinks.Select(x => x.RelationshipEntry));
+        }
+
+        /// <summary>
+        /// Cosntructs a <see cref="Relationships"/> instance for /word/_rels/footnote.xml.rels.
+        /// </summary>
+        [Pure]
+        [NotNull]
+        private Relationships FootnoteRelationships()
+        {
+            return
+                new Relationships(
+                    FootnotesTest.Charts.Select(x => x.RelationshipEntry),
+                    FootnotesTest.Images.Select(x => x.RelationshipEntry),
+                    FootnotesTest.Hyperlinks.Select(x => x.RelationshipEntry));
         }
     }
 }

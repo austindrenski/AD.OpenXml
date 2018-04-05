@@ -35,6 +35,11 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
+        public uint NumericId => uint.Parse(RelationId.Substring(3));
+
+        /// <summary>
+        ///
+        /// </summary>
         public StringSegment Target => $"media/image{_id}.{Extension}";
 
         /// <summary>

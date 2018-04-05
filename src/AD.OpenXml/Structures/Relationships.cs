@@ -41,7 +41,10 @@ namespace AD.OpenXml.Structures
         /// <exception cref="ArgumentNullException"/>
         public Relationships(params IEnumerable<Entry>[] entries)
         {
-            Entries = entries.Where(x => x != null).SelectMany(x => x).ToImmutableHashSet();
+            Entries =
+                entries.Where(x => x != null)
+                       .SelectMany(x => x)
+                       .ToImmutableHashSet();
         }
 
         /// <summary>
@@ -54,7 +57,11 @@ namespace AD.OpenXml.Structures
         [NotNull]
         public XElement ToXElement()
         {
-            return new XElement(P + "Relationships", Entries.Select(x => x.ToXElement()));
+            return
+                new XElement(
+                    P + "Relationships",
+                    Entries.OrderBy(x => x)
+                           .Select(x => x.ToXElement()));
         }
 
         /// <inheritdoc />
@@ -72,6 +79,13 @@ namespace AD.OpenXml.Structures
         [PublicAPI]
         public readonly struct Entry : IComparable<Entry>, IEquatable<Entry>
         {
+            private static readonly Comparer<uint> Comparer = Comparer<uint>.Default;
+
+            /// <summary>
+            ///
+            /// </summary>
+            public uint NumericId => uint.Parse(Id.Subsegment(3).Value);
+
             /// <summary>
             ///
             /// </summary>
@@ -159,7 +173,7 @@ namespace AD.OpenXml.Structures
             [Pure]
             public int CompareTo(Entry other)
             {
-                return StringComparer.Ordinal.Compare(Target.Value, other.Target.Value);
+                return Comparer.Compare(NumericId, other.NumericId);
             }
 
             /// <inheritdoc />
