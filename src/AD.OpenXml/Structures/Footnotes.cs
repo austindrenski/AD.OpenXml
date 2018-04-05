@@ -95,42 +95,42 @@ namespace AD.OpenXml.Structures
 
             Content = archive.ReadXml();
 
-            XElement FootnotesRelations = archive.ReadXml(FootnotesRelsInfo.Path);
+            XElement footnotesRelations = archive.ReadXml("word/_rels/footnotes.xml.rels");
 
             Charts =
-                FootnotesRelations.Elements()
+                footnotesRelations.Elements()
                                  .Select(
                                      x =>
                                          new
                                          {
-                                             Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
-                                             Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target)
+                                             Id = (string) x.Attribute("Id"),
+                                             Target = (string) x.Attribute("Target")
                                          })
                                  .Where(x => x.Target.StartsWith("charts/"))
                                  .Select(x => new ChartInfo(x.Id, archive.ReadXml($"word/{x.Target}")))
                                  .ToImmutableHashSet();
 
             Images =
-                FootnotesRelations.Elements()
+                footnotesRelations.Elements()
                                  .Select(
                                      x =>
                                          new
                                          {
-                                             Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
-                                             Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target)
+                                             Id = (string) x.Attribute("Id"),
+                                             Target = (string) x.Attribute("Target")
                                          })
                                  .Where(x => x.Target.StartsWith("media/"))
                                  .Select(x => ImageInfo.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
                                  .ToImmutableHashSet();
 
             Hyperlinks =
-                FootnotesRelations.Elements()
+                footnotesRelations.Elements()
                                  .Select(
                                      x =>
                                          new
                                          {
-                                             Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
-                                             Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target),
+                                             Id = (string) x.Attribute("Id"),
+                                             Target = (string) x.Attribute("Target"),
                                              TargetMode = (string) x.Attribute("TargetMode")
                                          })
                                  .Where(x => x.TargetMode != null)
@@ -226,7 +226,7 @@ namespace AD.OpenXml.Structures
             [CanBeNull] IEnumerable<ImageInfo> images = default,
             [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
-            XElement Footnotes =
+            XElement footnotes =
                 content is default
                     ? Content
                     : new XElement(
@@ -237,11 +237,11 @@ namespace AD.OpenXml.Structures
                             Content.Element(W + "body").Elements(),
                             content.Element(W + "body").Elements()));
 
-            Footnotes.RemoveDuplicateSectionProperties();
+            footnotes.RemoveDuplicateSectionProperties();
 
             return
                 new Footnotes(
-                    content is default ? Content : Footnotes,
+                    content is default ? Content : footnotes,
                     charts is default ? Charts : Charts.Concat(charts),
                     images is default ? Images : Images.Concat(images),
                     hyperlinks is default ? Hyperlinks : Hyperlinks.Concat(hyperlinks));

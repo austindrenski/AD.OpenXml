@@ -97,6 +97,10 @@ namespace AD.OpenXml.Structures
 
             XElement documentRelations = archive.ReadXml(DocumentRelsInfo.Path);
 
+            // TODO: re-enumerate ids at this stage.
+            // TODO: find charts and images by *starting* with the content refs.
+//            Content.ChangeXAttributeValues("Id", "", "");
+
             Charts =
                 documentRelations.Elements()
                                  .Select(
