@@ -9,12 +9,11 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits
 {
-    /// <inheritdoc />
     /// <summary>
     /// Marshals content from the 'document.xml' file of a Word document as an idiomatic XML object.
     /// </summary>
     [PublicAPI]
-    public sealed class DocumentVisit : IOpenXmlPackageVisit
+    public static class DocumentVisit
     {
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -28,24 +27,6 @@ namespace AD.OpenXml.Visits
                 W + "moveToRangeEnd",
                 W + "moveTo"
             };
-
-        /// <inheritdoc />
-        public OpenXmlPackageVisitor Result { get; }
-
-        /// <summary>
-        /// Marshals content from the source document to be added into the container.
-        /// </summary>
-        /// <param name="subject">The file from which content is copied.</param>
-        /// <param name="revisionId">
-        /// The current revision number incremented by one.
-        /// </param>
-        /// <returns>The updated document node of the source file.</returns>
-        public DocumentVisit(OpenXmlPackageVisitor subject, int revisionId)
-        {
-            Document document = Execute(subject.Document, revisionId + 1);
-
-            Result = subject.With(document);
-        }
 
         /// <summary>
         ///
@@ -69,23 +50,32 @@ namespace AD.OpenXml.Visits
                 throw new ArgumentNullException(nameof(cell));
             }
 
-            return Execute(cell, revisionId);
+            return Execute(cell, revisionId + 1);
         }
 
+        /// <summary>
+        /// Marshals content from the source document to be added into the container.
+        /// </summary>
+        /// <param name="subject">The file from which content is copied.</param>
+        /// <param name="revisionId">
+        /// The current revision number incremented by one.
+        /// </param>
+        /// <returns>The updated document node of the source file.</returns>
         [Pure]
         [NotNull]
-        private static Document Execute([NotNull] Document document, int revisionId)
+        public static OpenXmlPackageVisitor VisitDoc([NotNull] this OpenXmlPackageVisitor subject, int revisionId)
         {
-            if (document is null)
+            if (subject is null)
             {
-                throw new ArgumentNullException(nameof(document));
+                throw new ArgumentNullException(nameof(subject));
             }
 
+            Document document = subject.Document;
+
             return
-                document.With(
-                    Execute(
-                        document.Content,
-                        revisionId));
+                subject.With(
+                    document.With(
+                        Execute(document.Content, revisionId + 1)));
         }
 
         [Pure]

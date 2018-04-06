@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using AD.OpenXml.Elements;
-using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits
 {
-    /// <inheritdoc />
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public sealed class FootnoteVisit : IOpenXmlPackageVisit
+    public static class FootnoteVisit
     {
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -28,9 +26,6 @@ namespace AD.OpenXml.Visits
                 W + "moveToRangeEnd",
                 W + "moveTo"
             };
-
-        /// <inheritdoc />
-        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
@@ -47,8 +42,13 @@ namespace AD.OpenXml.Visits
         /// <returns>
         /// The updated document node of the source file.
         /// </returns>
-        public FootnoteVisit(OpenXmlPackageVisitor subject, int footnoteId, int revisionId)
+        public static OpenXmlPackageVisitor VisitFootnotes([NotNull] this OpenXmlPackageVisitor subject, int footnoteId, int revisionId)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             (XElement document, XElement footnotes) =
                 Execute(
                     subject.Footnotes.Content,
@@ -56,11 +56,10 @@ namespace AD.OpenXml.Visits
                     footnoteId + 1,
                     revisionId + 1);
 
-            Document documentResult = subject.Document.With(document);
-
-            Footnotes footnotesResult = subject.Footnotes.With(content: footnotes);
-
-            Result = subject.With(documentResult, footnotesResult);
+            return
+                subject.With(
+                    subject.Document.With(document),
+                    subject.Footnotes.With(footnotes));
         }
 
         [Pure]

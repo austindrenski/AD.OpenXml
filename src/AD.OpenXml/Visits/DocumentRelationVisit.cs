@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 using AD.OpenXml.Structures;
 using AD.Xml;
@@ -6,17 +7,13 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits
 {
-    /// <inheritdoc />
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public sealed class DocumentRelationVisit : IOpenXmlPackageVisit
+    public static class DocumentRelationVisit
     {
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
-
-        /// <inheritdoc />
-        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
@@ -24,24 +21,17 @@ namespace AD.OpenXml.Visits
         /// <param name="subject">The file from which content is copied.</param>
         /// <param name="documentRelationId"></param>
         /// <returns>The updated document node of the source file.</returns>
-        public DocumentRelationVisit(OpenXmlPackageVisitor subject, int documentRelationId)
-        {
-            Document document = Execute(subject.Document, documentRelationId);
-
-            Result = subject.With(document);
-        }
-
-        /// <summary>
-        /// Marshals footnotes from the source document into the container.
-        /// </summary>
-        /// <param name="document"></param>
-        /// <param name="documentRelationId"></param>
-        /// <returns>
-        /// The updated document node of the source file.
-        /// </returns>
         [Pure]
-        private static Document Execute(Document document, int documentRelationId)
+        [NotNull]
+        public static OpenXmlPackageVisitor VisitDocRels([NotNull] this OpenXmlPackageVisitor subject, int documentRelationId)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
+            Document document = subject.Document;
+
             XElement modifiedDocument =
                 new XElement(
                     document.Content.Name,
@@ -63,7 +53,7 @@ namespace AD.OpenXml.Visits
                         .Select(x => x.WithOffset(documentRelationId))
                         .ToArray();
 
-            return new Document(modifiedDocument, chartMapping, imageMapping, hyperlinkMapping);
+            return subject.With(new Document(modifiedDocument, chartMapping, imageMapping, hyperlinkMapping));
         }
 
         private static XObject Update(XObject node, int offset)

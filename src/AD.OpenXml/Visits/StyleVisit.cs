@@ -9,10 +9,11 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits
 {
-    /// <inheritdoc />
     /// <summary>
+    ///
     /// </summary>
-    public sealed class StyleVisit : IOpenXmlPackageVisit
+    [PublicAPI]
+    public static class StyleVisit
     {
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -56,9 +57,6 @@ namespace AD.OpenXml.Visits
         [NotNull] private static readonly XElement TOC3;
         [NotNull] private static readonly XElement TOC4;
         [NotNull] private static readonly XElement TOCHeading;
-
-        /// <inheritdoc />
-        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         ///
@@ -272,11 +270,16 @@ namespace AD.OpenXml.Visits
         ///
         /// </summary>
         /// <param name="subject"></param>
-        public StyleVisit(OpenXmlPackageVisitor subject)
+        public static OpenXmlPackageVisitor VisitStyles([NotNull] this OpenXmlPackageVisitor subject)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             XElement styles = Execute(subject.Styles.Clone());
 
-            Result = subject.With(styles: styles);
+            return subject.With(styles: styles);
         }
 
         [Pure]

@@ -8,17 +8,13 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits
 {
-    /// <inheritdoc />
     /// <summary>
     /// Marshals footnotes from the 'footnotes.xml' file of a Word document as idiomatic XML objects.
     /// </summary>
     [PublicAPI]
-    public sealed class FootnoteRelationVisit : IOpenXmlPackageVisit
+    public static class FootnoteRelationVisit
     {
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
-
-        /// <inheritdoc />
-        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         /// Marshals footnotes from the source document into the container.
@@ -32,11 +28,16 @@ namespace AD.OpenXml.Visits
         /// <returns>
         /// The updated document node of the source file.
         /// </returns>
-        public FootnoteRelationVisit(OpenXmlPackageVisitor subject, int footnoteRelationId)
+        public static OpenXmlPackageVisitor VisitFootnotesRels([NotNull] this OpenXmlPackageVisitor subject, int footnoteRelationId)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             Footnotes footnotes = Execute(subject.Footnotes, footnoteRelationId);
 
-            Result = subject.With(footnotes: footnotes);
+            return subject.With(footnotes: footnotes);
         }
 
         [Pure]

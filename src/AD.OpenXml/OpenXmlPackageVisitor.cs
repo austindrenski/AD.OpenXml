@@ -179,15 +179,14 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(archive));
             }
 
-            OpenXmlPackageVisitor subject = new OpenXmlPackageVisitor(archive);
-            OpenXmlPackageVisitor documentVisitor = new DocumentVisit(subject, RevisionId).Result;
-            OpenXmlPackageVisitor footnoteVisitor = new FootnoteVisit(documentVisitor, Footnotes.Count, RevisionId).Result;
-            OpenXmlPackageVisitor documentRelationVisitor = new DocumentRelationVisit(footnoteVisitor, Document.RelationshipsMax).Result;
-            OpenXmlPackageVisitor footnoteRelationVisitor = new FootnoteRelationVisit(documentRelationVisitor, Footnotes.RelationshipsMax).Result;
-            OpenXmlPackageVisitor styleVisitor = new StyleVisit(footnoteRelationVisitor).Result;
-            OpenXmlPackageVisitor numberingVisitor = new NumberingVisit(styleVisitor).Result;
-
-            return numberingVisitor;
+            return
+                new OpenXmlPackageVisitor(archive)
+                    .VisitDoc(RevisionId)
+                    .VisitFootnotes(Footnotes.Count, RevisionId)
+                    .VisitDocRels(Document.RelationshipsMax)
+                    .VisitFootnotesRels(Footnotes.RelationshipsMax)
+                    .VisitStyles()
+                    .VisitNumbering();
         }
 
         /// <summary>

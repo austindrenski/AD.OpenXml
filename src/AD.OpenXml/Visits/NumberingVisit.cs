@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
@@ -7,19 +8,15 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Visits
 {
-    /// <inheritdoc />
     /// <summary>
     /// </summary>
     [PublicAPI]
-    public sealed class NumberingVisit : IOpenXmlPackageVisit
+    public static class NumberingVisit
     {
         [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
         [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
         [NotNull] private static readonly XElement Numbering;
-
-        /// <inheritdoc />
-        public OpenXmlPackageVisitor Result { get; }
 
         /// <summary>
         ///
@@ -38,11 +35,16 @@ namespace AD.OpenXml.Visits
         ///
         /// </summary>
         /// <param name="subject"></param>
-        public NumberingVisit(OpenXmlPackageVisitor subject)
+        public static OpenXmlPackageVisitor VisitNumbering([NotNull] this OpenXmlPackageVisitor subject)
         {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
             XElement numbering = Numbering.Clone();
 
-            Result = subject.With(numbering: numbering);
+            return subject.With(numbering: numbering);
         }
     }
 }
