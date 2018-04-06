@@ -23,10 +23,6 @@
     <DocumentationFile>bin\Release\netstandard2.0\AD.OpenXml.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Templates\*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </EmbeddedResource>
     <EmbeddedResource Include="Styles\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>

@@ -2,8 +2,6 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Xml.Linq;
 using AD.IO;
 using AD.OpenXml.Structures;
@@ -40,32 +38,9 @@ namespace AD.OpenXml.Documents
         [NotNull] private static readonly string HeaderRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header";
 
         /// <summary>
-        ///
+        /// The XML declaration.
         /// </summary>
-        [NotNull] private static readonly XElement Header1;
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull] private static readonly XElement Header2;
-
-        /// <summary>
-        ///
-        /// </summary>
-        static AddHeadersExtensions()
-        {
-            Assembly assembly = typeof(AddHeadersExtensions).GetTypeInfo().Assembly;
-
-            using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Templates.Header1.xml"), Encoding.UTF8))
-            {
-                Header1 = XElement.Parse(reader.ReadToEnd());
-            }
-
-            using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Templates.Header2.xml"), Encoding.UTF8))
-            {
-                Header2 = XElement.Parse(reader.ReadToEnd());
-            }
-        }
+        [NotNull] private static readonly XDeclaration Declaration = new XDeclaration("1.0", "utf-8", "yes");
 
         /// <summary>
         /// Add headers to a Word document.
@@ -114,7 +89,6 @@ namespace AD.OpenXml.Documents
                       .DefaultIfEmpty(0)
                       .Max();
 
-
             // Add headers
             AddOddPageHeader(result, $"rId{++currentRelationshipId}");
             AddEvenPageHeader(result, $"rId{++currentRelationshipId}", title);
@@ -142,11 +116,11 @@ namespace AD.OpenXml.Documents
             }
 
             // Remove headers from document.xml
-            archive.GetEntry("word/header2.xml")?.Delete();
-            using (Stream stream = archive.CreateEntry("word/header2.xml").Open())
+            using (Stream stream = archive.GetEntry("word/header2.xml")?.Open() ??
+                                   archive.CreateEntry("word/header2.xml").Open())
             {
                 stream.SetLength(0);
-                Header2.Save(stream);
+                Header2().Save(stream);
             }
 
             XElement documentRelation = archive.ReadXml(DocumentRelsInfo.Path);
@@ -154,15 +128,9 @@ namespace AD.OpenXml.Documents
             documentRelation.Add(
                 new XElement(
                     DocumentRelsInfo.Elements.Relationship,
-                    new XAttribute(
-                        DocumentRelsInfo.Attributes.Id,
-                        headerId),
-                    new XAttribute(
-                        DocumentRelsInfo.Attributes.Type,
-                        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"),
-                    new XAttribute(
-                        DocumentRelsInfo.Attributes.Target,
-                        "header2.xml")));
+                    new XAttribute(DocumentRelsInfo.Attributes.Id, headerId),
+                    new XAttribute(DocumentRelsInfo.Attributes.Type, HeaderRelationshipType),
+                    new XAttribute(DocumentRelsInfo.Attributes.Target, "header2.xml")));
 
             using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path).Open())
             {
@@ -191,12 +159,8 @@ namespace AD.OpenXml.Documents
             packageRelation.Add(
                 new XElement(
                     ContentTypesInfo.Elements.Override,
-                    new XAttribute(
-                        ContentTypesInfo.Attributes.PartName,
-                        "/word/header2.xml"),
-                    new XAttribute(
-                        ContentTypesInfo.Attributes.ContentType,
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
+                    new XAttribute(ContentTypesInfo.Attributes.PartName, "/word/header2.xml"),
+                    new XAttribute(ContentTypesInfo.Attributes.ContentType, HeaderContentType)));
 
             using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
             {
@@ -230,11 +194,10 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(title));
             }
 
-            XElement header1 = Header1.Clone();
-            header1.Element(W + "p").Element(W + "r").Element(W + "t").Value = title;
+            XDocument header1 = Header1(title);
 
-            archive.GetEntry("word/header1.xml")?.Delete();
-            using (Stream stream = archive.CreateEntry("word/header1.xml").Open())
+            using (Stream stream = archive.GetEntry("word/header1.xml")?.Open() ??
+                                   archive.CreateEntry("word/header1.xml").Open())
             {
                 stream.SetLength(0);
                 header1.Save(stream);
@@ -245,15 +208,9 @@ namespace AD.OpenXml.Documents
             documentRelation.Add(
                 new XElement(
                     DocumentRelsInfo.Elements.Relationship,
-                    new XAttribute(
-                        DocumentRelsInfo.Attributes.Id,
-                        headerId),
-                    new XAttribute(
-                        DocumentRelsInfo.Attributes.Type,
-                        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"),
-                    new XAttribute(
-                        DocumentRelsInfo.Attributes.Target,
-                        "header1.xml")));
+                    new XAttribute(DocumentRelsInfo.Attributes.Id, headerId),
+                    new XAttribute(DocumentRelsInfo.Attributes.Type, HeaderRelationshipType),
+                    new XAttribute(DocumentRelsInfo.Attributes.Target, "header1.xml")));
 
             using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path).Open())
             {
@@ -282,18 +239,111 @@ namespace AD.OpenXml.Documents
             packageRelation.Add(
                 new XElement(
                     ContentTypesInfo.Elements.Override,
-                    new XAttribute(
-                        ContentTypesInfo.Attributes.PartName,
-                        "/word/header1.xml"),
-                    new XAttribute(
-                        ContentTypesInfo.Attributes.ContentType,
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml")));
+                    new XAttribute(ContentTypesInfo.Attributes.PartName, "/word/header1.xml"),
+                    new XAttribute(ContentTypesInfo.Attributes.ContentType, HeaderContentType)));
 
             using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
             {
                 stream.SetLength(0);
                 packageRelation.Save(stream);
             }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="title">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [NotNull]
+        private static XDocument Header1([NotNull] string title)
+        {
+            if (title is null)
+            {
+                throw new ArgumentNullException(nameof(title));
+            }
+
+            return
+                new XDocument(
+                    Declaration,
+                    new XElement(
+                        W + "hdr",
+                        new XElement(
+                            W + "p",
+                            new XElement(
+                                W + "pPr",
+                                new XElement(
+                                    W + "pStyle",
+                                    new XAttribute(W + "val", "Header")),
+                                new XElement(
+                                    W + "jc",
+                                    new XAttribute(W + "val", "left"))),
+                            new XElement(
+                                W + "r",
+                                new XElement(
+                                    W + "t",
+                                    new XText(title))))));
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [NotNull]
+        private static XDocument Header2()
+        {
+            return
+                new XDocument(
+                    Declaration,
+                    new XElement(
+                        W + "hdr",
+                        new XElement(
+                            W + "p",
+                            new XElement(
+                                W + "pPr",
+                                new XElement(
+                                    W + "pStyle",
+                                    new XAttribute(W + "val", "Header")),
+                                new XElement(
+                                    W + "jc",
+                                    new XAttribute(W + "val", "right"))),
+                            new XElement(
+                                W + "r",
+                                new XElement(
+                                    W + "t",
+                                    new XAttribute(XNamespace.Xml + "space", "preserve"),
+                                    new XText("Chapter "))),
+                            new XElement(
+                                W + "fldSimple",
+                                new XAttribute(W + "instr", " STYLEREF  \"heading 1\" \\s \\* MERGEFORMAT "),
+                                new XElement(
+                                    W + "r",
+                                    new XElement(
+                                        W + "t",
+                                        new XText(string.Empty)))),
+                            new XElement(
+                                W + "r",
+                                new XElement(
+                                    W + "t",
+                                    new XAttribute(XNamespace.Xml + "space", "preserve"),
+                                    new XText(": "))),
+                            new XElement(
+                                W + "fldSimple",
+                                new XAttribute(W + "instr", " STYLEREF  \"heading 1\" \\* MERGEFORMAT "),
+                                new XElement(
+                                    W + "r",
+                                    new XElement(
+                                        W + "t",
+                                        new XText(string.Empty)))))));
         }
     }
 }
