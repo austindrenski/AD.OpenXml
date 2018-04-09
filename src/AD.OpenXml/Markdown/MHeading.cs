@@ -2,6 +2,7 @@
 using System.Xml.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
+using AD.ApiExtensions.Primitives;
 
 // TODO: temporary until StringSegment is a readonly struct in 2.1
 // ReSharper disable ImpureMethodCallOnReadonlyValueField

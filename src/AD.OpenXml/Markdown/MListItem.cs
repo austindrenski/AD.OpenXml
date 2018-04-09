@@ -2,6 +2,7 @@
 using System.Xml.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
+using AD.ApiExtensions.Primitives;
 
 namespace AD.OpenXml.Markdown
 {

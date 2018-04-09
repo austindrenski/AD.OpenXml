@@ -20,12 +20,12 @@
     <ProjectReference Include="..\AD.OpenXml\AD.OpenXml.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AD.ApiExtensions" Version="1.1.34" />
+    <PackageReference Include="AD.ApiExtensions" Version="1.1.37" />
     <PackageReference Include="AD.IO" Version="1.5.25" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.4.0" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.6.362" />
