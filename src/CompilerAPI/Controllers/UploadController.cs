@@ -18,8 +18,8 @@ namespace CompilerAPI.Controllers
     /// Provides HTTP endpoints to submit and format Word documents.
     /// </summary>
     [PublicAPI]
+    [FormatFilter]
     [ApiVersion("1.0")]
-    [Route("[controller]")]
     public class UploadController : Controller
     {
         private static MediaTypeHeaderValue _microsoftWordDocument = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
@@ -84,7 +84,9 @@ namespace CompilerAPI.Controllers
                 return BadRequest("Invalid file length.");
             }
 
-            if (uploadedFiles.Any(x => x.ContentType != _microsoftWordDocument.ToString()))
+            if (uploadedFiles.Any(x => x.ContentType != _microsoftWordDocument.ToString() &&
+                                       x.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase) &&
+                                       x.FileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase)))
             {
                 return BadRequest("Invalid file format.");
             }
@@ -93,7 +95,24 @@ namespace CompilerAPI.Controllers
 
             foreach (IFormFile file in uploadedFiles)
             {
-                documentQueue.Enqueue(new ZipArchive(file.OpenReadStream()));
+                if (file.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
+                {
+                    documentQueue.Enqueue(new ZipArchive(file.OpenReadStream()));
+                }
+//                else
+//                {
+//                    StringSegment markdown = new StreamReader(file.OpenReadStream()).ReadToEnd();
+//                    MNode result = new MarkdownVisitor().Visit(in markdown);
+//
+//                    ZipArchive archive = new ZipArchive(DocxFilePath.Create(), ZipArchiveMode.Update);
+//
+//                    using (Stream stream = archive.GetEntry("word/document.xml")?.Open())
+//                    {
+//                        (result.ToOpenXml() as XElement)?.Save(stream);
+//                    }
+//
+//                    documentQueue.Enqueue(archive);
+//                }
             }
 
             MemoryStream output =
@@ -119,24 +138,12 @@ namespace CompilerAPI.Controllers
                 case "html":
                 {
                     OpenXmlPackageVisitor visitor = new OpenXmlPackageVisitor(new ZipArchive(output));
-                    return
-                        new ContentResult
-                        {
-                            Content = HtmlVisitor.Visit(visitor.Document, visitor.Footnotes, title ?? "", stylesheet ?? "").ToString(),
-                            ContentType = "text/html",
-                            StatusCode = 200
-                        };
+                    return Ok(HtmlVisitor.Visit(visitor.Document, visitor.Footnotes, title ?? "", stylesheet ?? "").ToString());
                 }
                 case "xml":
                 {
                     OpenXmlPackageVisitor visitor = new OpenXmlPackageVisitor(new ZipArchive(output));
-                    return
-                        new ContentResult
-                        {
-                            Content = visitor.Document.Content.ToString(),
-                            ContentType = "text/xml",
-                            StatusCode = 200
-                        };
+                    return Ok(visitor.Document.Content);
                 }
                 default:
                 {

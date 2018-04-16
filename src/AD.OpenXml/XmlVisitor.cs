@@ -322,7 +322,7 @@ namespace AD.OpenXml
         /// <returns>
         /// An <see cref="XObject"/> representing the lift operation.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />>
+        /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
         protected XObject LiftableHelper([NotNull] XElement element)
