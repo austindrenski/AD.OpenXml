@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using JetBrains.Annotations;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using AD.ApiExtensions.Configuration;
+using Microsoft.Extensions.Primitives;
 
 namespace CompilerAPI
 {
@@ -28,20 +28,14 @@ namespace CompilerAPI
         /// <returns></returns>
         [Pure]
         [NotNull]
-        public static IWebHost BuildWebHost([NotNull] [ItemNotNull] string[] args)
+        public static IWebHost BuildWebHost(StringValues args)
         {
-            IConfigurationRoot configuration =
-                new ConfigurationBuilder()
-                    .AddCommandLine(args)
-                    .Build();
-
             return
-                WebHost.CreateDefaultBuilder(args)
-                       .UseHttpSys()
-                       .UseConfiguration(configuration)
-                       .UseContentRoot(Directory.GetCurrentDirectory())
-                       .UseStartup<Startup>()
-                       .Build();
+                new WebHostBuilder()
+                    .UseContentRoot(Directory.GetCurrentDirectory())
+                    .UseStartup<Startup>(args)
+                    .UseHttpSys()
+                    .Build();
         }
     }
 }

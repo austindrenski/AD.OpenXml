@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using AD.ApiExtensions.Conventions;
 using AD.ApiExtensions.Filters;
+using AD.ApiExtensions.Primitives;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -11,61 +13,59 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace CompilerAPI
 {
+    // TODO: document Startup.
     /// <summary>
     ///
     /// </summary>
     [PublicAPI]
-    public class Startup
+    public class Startup : IStartup
     {
         /// <summary>
         ///
-        /// </summary>rm
-        public IConfigurationRoot Configuration { get; }
+        /// </summary>
+        private IConfiguration Configuration { get; }
 
         /// <summary>
         ///
         /// </summary>
-        public string EnvironmentName { get; }
+        private string EnvironmentName => Configuration[WebHostDefaults.EnvironmentKey];
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="environment"></param>
+        /// <param name="configuration"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Startup([NotNull] IHostingEnvironment environment)
+        public Startup([NotNull] IConfiguration configuration)
         {
-            if (environment is null)
+            if (configuration is null)
             {
-                throw new ArgumentNullException(nameof(environment));
+                throw new ArgumentNullException(nameof(configuration));
             }
 
-            EnvironmentName = environment.EnvironmentName;
-
-            Configuration =
-                new ConfigurationBuilder()
-                    .SetBasePath(environment.ContentRootPath)
-                    .AddEnvironmentVariables()
-                    .AddUserSecrets<Startup>()
-                    .Build();
+            Configuration = configuration;
         }
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
         /// </summary>
-        public void ConfigureServices([NotNull] IServiceCollection services)
+        public IServiceProvider ConfigureServices([NotNull] IServiceCollection services)
         {
             if (services is null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
 
-            // Add framework services.
-            services.AddApiVersioning(
+            return
+                // Add framework services.
+                services
+                    .AddLogging(x => x.AddConsole())
+                    .AddApiVersioning(
                         x =>
                         {
                             x.AssumeDefaultVersionWhenUnspecified = true;
@@ -81,17 +81,28 @@ namespace CompilerAPI
                             x.Cookie.HttpOnly = true;
                             x.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                         })
+                    .AddSwaggerGen(
+                        x =>
+                        {
+                            x.DescribeAllEnumsAsStrings();
+                            x.MapType<GroupingValues<string, string>>(() => new Schema { Type = "string" });
+                            x.IncludeXmlComments(Path.Combine(ApplicationEnvironment.ApplicationBasePath, $"{nameof(CompilerAPI)}.xml"));
+                            x.IgnoreObsoleteActions();
+                            x.IgnoreObsoleteProperties();
+                            x.SwaggerDoc("v1", new Info { Title = "Reports API", Version = "v1" });
+                            x.OperationFilter<SwaggerOptionalOperationFilter>();
+                        })
                     .AddMvc(
                         x =>
                         {
-//                            x.Conventions.Add(new KebabControllerModelConvention());
+                            x.Conventions.Add(new KebabControllerModelConvention());
 //                            x.FormatterMappings.SetMediaTypeMappingForFormat("xml", "application/xml");
 //                            x.FormatterMappings.SetMediaTypeMappingForFormat("html", "text/html");
 //                            x.FormatterMappings.SetMediaTypeMappingForFormat("xhtml", "text/xhtml");
 //                            x.FormatterMappings.SetMediaTypeMappingForFormat("csv", "text/csv");
 //                            x.FormatterMappings.SetMediaTypeMappingForFormat("psv", "text/psv");
 //                            x.FormatterMappings.SetMediaTypeMappingForFormat("tsv", "text/tsv");
-//                            x.ModelMetadataDetailsProviders.Add(new KebabBindingMetadataProvider());
+                            x.ModelMetadataDetailsProviders.Add(new KebabBindingMetadataProvider());
 //                            x.OutputFormatters.Add(new XmlOutputFormatter());
 //                            x.OutputFormatters.Add(new DelimitedOutputFormatter());
 //                            x.RespectBrowserAcceptHeader = true;
@@ -101,18 +112,10 @@ namespace CompilerAPI
                         {
                             x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
                             x.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+                            x.SerializerSettings.ContractResolver = new KebabContractResolver();
                         })
                     .Services
-                    .AddSwaggerGen(
-                        x =>
-                        {
-                            x.DescribeAllEnumsAsStrings();
-                            x.IncludeXmlComments(Path.Combine(ApplicationEnvironment.ApplicationBasePath, $"{nameof(CompilerAPI)}.xml"));
-                            x.IgnoreObsoleteActions();
-                            x.IgnoreObsoleteProperties();
-                            x.SwaggerDoc("v1", new Info { Title = "Reports API", Version = "v1" });
-                            x.OperationFilter<SwaggerOptionalOperationFilter>();
-                        });
+                    .BuildServiceProvider();
         }
 
         /// <summary>

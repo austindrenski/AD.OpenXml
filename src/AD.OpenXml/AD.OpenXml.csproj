@@ -29,14 +29,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AD.IO" Version="1.5.25" />
+    <PackageReference Include="AD.ApiExtensions" Version="1.1.64" />
+    <PackageReference Include="AD.IO" Version="1.5.32" />
     <PackageReference Include="AD.Xml" Version="1.4.13" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
-    <PackageReference Include="System.Memory" Version="4.5.0-preview1-26216-02" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="AD.ApiExtensions, Version=1.1.37.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\.nuget\packages\ad.apiextensions\1.1.37\lib\netstandard2.0\AD.ApiExtensions.dll</HintPath>
-    </Reference>
+    <PackageReference Include="System.Memory" Version="4.5.0-preview2-26406-04" />
   </ItemGroup>
 </Project>
