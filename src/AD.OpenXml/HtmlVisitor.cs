@@ -246,7 +246,7 @@ namespace AD.OpenXml
                                 new XAttribute("href", stylesheet)),
                             new XElement("script",
                                 new XAttribute("type", "text/javascript"),
-                                new XAttribute("src", "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=MML_CHTML"),
+                                new XAttribute("src", "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"),
                                 new XText(string.Empty)),
                             new XElement("style",
                                 new XText("article { counter-reset: chapter_counter; }"),
@@ -347,7 +347,7 @@ namespace AD.OpenXml
 
             XElement chartContent = Charts[(string) chart.Attribute(R + "id")].Element(C + "chart");
 
-            return LiftableHelper(chartContent);
+            return chartContent is null ? null : LiftableHelper(chartContent);
         }
 
         /// <inheritdoc />
@@ -704,7 +704,7 @@ namespace AD.OpenXml
             XElement headerRow =
                 new XElement("tr",
                     tableNodes.OfType<XElement>()
-                              .FirstOrDefault(x => x.Name == "tr")
+                              .FirstOrDefault(x => x.Name == "tr")?
                               .Nodes()
                               .Select(
                                   x => !(x is XElement e) || e.Name != "td"
@@ -807,7 +807,7 @@ namespace AD.OpenXml
                          .Select(
                              x =>
                                  new XElement("series",
-                                     x.Element(C + "tx")?.Element(C + "strRef")?.Element(C + "strCache").Value is string name
+                                     x.Element(C + "tx")?.Element(C + "strRef")?.Element(C + "strCache")?.Value is string name
                                          ? new XAttribute("name", name)
                                          : null,
                                      (x.Element(C + "cat")?.Element(C + "strRef")?.Element(C + "strCache") ??
@@ -816,7 +816,9 @@ namespace AD.OpenXml
                                      .Zip(
                                          (x.Element(C + "val")?.Element(C + "strRef")?.Element(C + "strCache") ??
                                           x.Element(C + "val")?.Element(C + "numRef")?.Element(C + "numCache"))?
-                                         .Elements(C + "pt"),
+                                         .Elements(C + "pt")
+                                         ??
+                                         Enumerable.Empty<XElement>(),
                                          (a, b) =>
                                              new XElement("observation",
                                                  new XAttribute("label", a.Value),

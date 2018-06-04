@@ -29,10 +29,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AD.ApiExtensions" Version="1.1.64" />
-    <PackageReference Include="AD.IO" Version="1.5.32" />
+    <PackageReference Include="AD.ApiExtensions" Version="1.1.102" />
+    <PackageReference Include="AD.IO" Version="1.5.35" />
     <PackageReference Include="AD.Xml" Version="1.4.13" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
-    <PackageReference Include="System.Memory" Version="4.5.0-preview2-26406-04" />
+    <PackageReference Include="System.Memory" Version="4.5.0" />
   </ItemGroup>
 </Project>

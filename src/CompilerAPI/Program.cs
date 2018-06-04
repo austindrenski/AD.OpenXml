@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Hosting;
-using AD.ApiExtensions.Configuration;
+using AD.ApiExtensions.Hosting;
 using Microsoft.Extensions.Primitives;
 
 namespace CompilerAPI
