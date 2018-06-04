@@ -2,7 +2,6 @@
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Hosting;
 using AD.ApiExtensions.Hosting;
-using Microsoft.Extensions.Primitives;
 
 namespace CompilerAPI
 {
@@ -16,10 +15,7 @@ namespace CompilerAPI
         ///
         /// </summary>
         /// <param name="args"></param>
-        public static void Main([NotNull] [ItemNotNull] string[] args)
-        {
-            BuildWebHost(args).Run();
-        }
+        public static void Main([NotNull] [ItemNotNull] string[] args) => CreateWebHostBuilder(args).Build().Run();
 
         /// <summary>
         ///
@@ -28,14 +24,10 @@ namespace CompilerAPI
         /// <returns></returns>
         [Pure]
         [NotNull]
-        public static IWebHost BuildWebHost(StringValues args)
-        {
-            return
-                new WebHostBuilder()
-                    .UseContentRoot(Directory.GetCurrentDirectory())
-                    .UseStartup<Startup>(args)
-                    .UseHttpSys()
-                    .Build();
-        }
+        public static IWebHostBuilder CreateWebHostBuilder([NotNull] string[] args)
+            => new WebHostBuilder()
+               .UseContentRoot(Directory.GetCurrentDirectory())
+               .UseStartup<Startup>(args)
+               .UseHttpSys();
     }
 }

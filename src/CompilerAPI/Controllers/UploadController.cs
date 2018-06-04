@@ -32,10 +32,7 @@ namespace CompilerAPI.Controllers
         /// </returns>
         [NotNull]
         [HttpGet]
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
 
         /// <summary>
         /// Receives file uploads from the user.
@@ -99,6 +96,7 @@ namespace CompilerAPI.Controllers
                 {
                     documentQueue.Enqueue(new ZipArchive(file.OpenReadStream()));
                 }
+
 //                else
 //                {
 //                    StringSegment markdown = new StreamReader(file.OpenReadStream()).ReadToEnd();
@@ -138,12 +136,12 @@ namespace CompilerAPI.Controllers
                 case "html":
                 {
                     OpenXmlPackageVisitor visitor = new OpenXmlPackageVisitor(new ZipArchive(output));
-                    return Ok(HtmlVisitor.Visit(visitor.Document, visitor.Footnotes, title ?? "", stylesheet ?? "").ToString());
+                    return Content(HtmlVisitor.Visit(visitor.Document, visitor.Footnotes, title ?? "", stylesheet ?? "").ToString(), "text/html");
                 }
                 case "xml":
                 {
                     OpenXmlPackageVisitor visitor = new OpenXmlPackageVisitor(new ZipArchive(output));
-                    return Ok(visitor.Document.Content);
+                    return Content(visitor.Document.Content.ToString(), "application/xml");
                 }
                 default:
                 {

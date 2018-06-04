@@ -154,15 +154,12 @@ namespace AD.OpenXml
             [CanBeNull] XElement styles = default,
             [CanBeNull] XElement numbering = default,
             [CanBeNull] XElement theme1 = default)
-        {
-            return
-                new OpenXmlPackageVisitor(
-                    document ?? Document,
-                    footnotes ?? Footnotes,
-                    styles ?? Styles,
-                    numbering ?? Numbering,
-                    theme1 ?? Theme1);
-        }
+            => new OpenXmlPackageVisitor(
+                document ?? Document,
+                footnotes ?? Footnotes,
+                styles ?? Styles,
+                numbering ?? Numbering,
+                theme1 ?? Theme1);
 
         /// <summary>
         /// Visit and join the component document into this <see cref="OpenXmlPackageVisitor"/>.
@@ -285,7 +282,7 @@ namespace AD.OpenXml
             BuildDocumentRelationships().Save(archive, DocumentRelsInfo.Path);
             BuildFootnoteRelationships().Save(archive, FootnotesRelsInfo.Path);
 
-            using (Stream stream = archive.GetEntry("word/styles.xml").Open())
+            using (Stream stream = archive.GetEntry("word/styles.xml")?.Open())
             {
                 Styles.Save(stream);
             }

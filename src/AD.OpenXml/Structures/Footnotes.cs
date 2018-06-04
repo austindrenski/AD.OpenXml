@@ -205,7 +205,7 @@ namespace AD.OpenXml.Structures
         public Footnotes Concat([CanBeNull] XElement content = default, [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
             XElement footnotes =
-                content is default
+                content is null
                     ? Content
                     : new XElement(
                         Content.Name,
@@ -213,16 +213,8 @@ namespace AD.OpenXml.Structures
                         Content.Elements(),
                         content.Elements());
 
-            return new Footnotes(RelationId, footnotes, hyperlinks is default ? Hyperlinks : Hyperlinks.Concat(hyperlinks));
+            return new Footnotes(RelationId, footnotes, hyperlinks is null ? Hyperlinks : Hyperlinks.Concat(hyperlinks));
         }
-
-//        /// <inheritdoc />
-//        [Pure]
-//        [NotNull]
-//        public override string ToString()
-//        {
-//            return ToXElement().ToString();
-//        }
 
         /// <summary>
         ///

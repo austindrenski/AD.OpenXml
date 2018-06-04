@@ -5,7 +5,6 @@ using AD.Xml;
 using JetBrains.Annotations;
 
 // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
-
 namespace AD.OpenXml
 {
     /// <inheritdoc />
@@ -36,6 +35,11 @@ namespace AD.OpenXml
         protected readonly IDictionary<XName, Func<XElement, XObject>> VisitLookup;
 
         /// <summary>
+        /// The mapping of OMML accent characters to MathML accent characters.
+        /// </summary>
+        protected readonly IDictionary<string, string> AccentLookup;
+
+        /// <summary>
         /// The supported operator characters.
         /// </summary>
         protected virtual ISet<string> SupportedOperators { get; } =
@@ -53,6 +57,22 @@ namespace AD.OpenXml
             };
 
         /// <summary>
+        /// The ignored nodes.
+        /// </summary>
+        protected virtual ISet<XName> IgnoredNodes { get; } =
+            new HashSet<XName>
+            {
+                M + "accPr",
+                M + "ctrlPr",
+                M + "dPr",
+                M + "eqArrPr",
+                M + "fPr",
+                M + "sSubPr",
+                M + "sSubSupPr",
+                M + "sSupPr"
+            };
+
+        /// <summary>
         /// Initializes an <see cref="MathMLVisitor"/>.
         /// </summary>
         /// <param name="returnOnDefault">
@@ -62,17 +82,29 @@ namespace AD.OpenXml
         {
             _returnOnDefault = returnOnDefault;
 
+            AccentLookup =
+                new Dictionary<string, string>
+                {
+                    ["\u0305"] = "\u02C9"
+                };
+
             VisitLookup =
                 new Dictionary<XName, Func<XElement, XObject>>
                 {
                     // @formatter:off
+                    [M + "acc"]       = VisitAccent,
                     [M + "d"]         = VisitDelimiter,
+                    [M + "den"]       = VisitDenominator,
                     [M + "e"]         = VisitBase,
+                    [M + "eqArr"]     = VisitArray,
+                    [M + "f"]         = VisitFraction,
+                    [M + "num"]       = VisitNumerator,
                     [M + "oMath"]     = VisitMath,
                     [M + "oMathPara"] = VisitMathParagraph,
                     [M + "r"]         = VisitRun,
                     [M + "sSub"]      = VisitSubscript,
-                    [M + "sSup"]      = VisitSuperscript,
+                    [M + "sSubSup"]   = VisitSubscriptSuperscript,
+                    [M + "sSup"]      = VisitSuperscript
                     // @formatter:on
                 };
         }
@@ -89,9 +121,42 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
-        public static MathMLVisitor Create(bool returnOnDefault = false)
+        public static MathMLVisitor Create(bool returnOnDefault = false) => new MathMLVisitor(returnOnDefault);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="array">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitArray([NotNull] XElement array) => new XElement("mtable", Visit(array.Nodes()));
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="accent">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitAccent([NotNull] XElement accent)
         {
-            return new MathMLVisitor(returnOnDefault);
+            string value = (string) accent.Element(M + "accPr")?.Element(M + "chr")?.Attribute(M + "val");
+            return
+                new XElement("mover",
+                    new XAttribute("accent", true),
+                    Visit(accent.Nodes()),
+                    new XElement("mo", AccentLookup.TryGetValue(value, out string mapped) ? mapped : value));
         }
 
         /// <summary>
@@ -106,15 +171,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitBase([NotNull] XElement baseItem)
-        {
-            if (baseItem is null)
-            {
-                throw new ArgumentNullException(nameof(baseItem));
-            }
-
-            return LiftableHelper(baseItem);
-        }
+        protected virtual XObject VisitBase([NotNull] XElement baseItem) => LiftableHelper(baseItem);
 
         /// <summary>
         ///
@@ -129,39 +186,53 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitDelimiter([NotNull] XElement delimiter)
-        {
-            if (delimiter is null)
-            {
-                throw new ArgumentNullException(nameof(delimiter));
-            }
+            => new XElement("mrow",
+                new XElement("mo",
+                    new XAttribute("fence", "true"),
+                    new XText("(")),
+                Visit(delimiter.Nodes()),
+                new XElement("mo",
+                    new XAttribute("fence", "true"),
+                    new XText(")")));
 
-            return
-                new XElement("mrow",
-                    new XElement("mo",
-                        new XAttribute("fence", "true"),
-                        new XText("(")),
-                    Visit(delimiter.Nodes()),
-                    new XElement("mo",
-                        new XAttribute("fence", "true"),
-                        new XText(")")));
-        }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="denominator">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitDenominator([NotNull] XElement denominator) => new XElement("mrow", Visit(denominator.Nodes()));
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitElement(XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
+            => VisitLookup.TryGetValue(element.Name, out Func<XElement, XObject> visit)
+                   ? visit(element)
+                   : IgnoredNodes.Contains(element.Name)
+                       ? null
+                       : _returnOnDefault
+                           ? base.VisitElement(element)
+                           : null;
 
-            return
-                VisitLookup.TryGetValue(element.Name, out Func<XElement, XObject> visit)
-                    ? visit(element)
-                    : _returnOnDefault
-                        ? base.VisitElement(element)
-                        : null;
-        }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="fraction">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitFraction([NotNull] XElement fraction) => new XElement("mfrac", Visit(fraction.Nodes()));
 
         /// <summary>
         ///
@@ -175,17 +246,21 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitMath([NotNull] XElement math)
-        {
-            if (math is null)
-            {
-                throw new ArgumentNullException(nameof(math));
-            }
+        protected virtual XObject VisitMath([NotNull] XElement math) => new XElement("math", Visit(math.Nodes()));
 
-            return
-                new XElement("math",
-                    Visit(math.Nodes()));
-        }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="numerator">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitNumerator([NotNull] XElement numerator) => new XElement("mrow", Visit(numerator.Nodes()));
 
         /// <summary>
         ///
@@ -199,15 +274,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitMathParagraph([NotNull] XElement mathParagraph)
-        {
-            if (mathParagraph is null)
-            {
-                throw new ArgumentNullException(nameof(mathParagraph));
-            }
-
-            return LiftableHelper(mathParagraph);
-        }
+        protected virtual XObject VisitMathParagraph([NotNull] XElement mathParagraph) => LiftableHelper(mathParagraph);
 
         /// <summary>
         ///
@@ -223,17 +290,12 @@ namespace AD.OpenXml
         [CanBeNull]
         protected virtual XObject VisitRun([NotNull] XElement run)
         {
-            if (run is null)
-            {
-                throw new ArgumentNullException(nameof(run));
-            }
-
             string value = run.Value.Trim();
 
             return
                 SupportedOperators.Contains(value)
                     ? new XElement("mo", value)
-                    : run.Parent.Name == M + "oMath"
+                    : run.Parent?.Name == M + "oMath"
                         ? new XElement("mi", value)
                         : Visit(value);
         }
@@ -251,17 +313,24 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitSubscript([NotNull] XElement subscript)
-        {
-            if (subscript is null)
-            {
-                throw new ArgumentNullException(nameof(subscript));
-            }
+            => new XElement("msub",
+                LiftableHelper(subscript.Element(M + "e")),
+                LiftableHelper(subscript.Element(M + "sub")));
 
-            return
-                new XElement("msub",
-                    LiftableHelper(subscript.Element(M + "e")),
-                    LiftableHelper(subscript.Element(M + "sub")));
-        }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="subscriptSuperscript">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitSubscriptSuperscript([NotNull] XElement subscriptSuperscript)
+            => new XElement("msubsup", Visit(subscriptSuperscript.Nodes()));
 
         /// <summary>
         ///
@@ -276,31 +345,17 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitSuperscript([NotNull] XElement superscript)
-        {
-            if (superscript is null)
-            {
-                throw new ArgumentNullException(nameof(superscript));
-            }
-
-            return
-                new XElement("msup",
-                    LiftableHelper(superscript.Element(M + "e")),
-                    LiftableHelper(superscript.Element(M + "sup")));
-        }
+            => new XElement("msup",
+                LiftableHelper(superscript.Element(M + "e")),
+                LiftableHelper(superscript.Element(M + "sup")));
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitText(XText text)
-        {
-            if (text is null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
-            return
-                double.TryParse(text.Value, out double _)
-                    ? new XElement("mn", text)
-                    : new XElement("mi", text);
-        }
+            => string.IsNullOrWhiteSpace(text.Value)
+                   ? null
+                   : double.TryParse(text.Value, out double value)
+                       ? new XElement("mn", value)
+                       : new XElement("mi", text);
     }
 }

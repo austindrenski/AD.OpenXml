@@ -212,19 +212,14 @@ namespace AD.OpenXml.Structures
             [CanBeNull] IEnumerable<ChartInfo> charts = default,
             [CanBeNull] IEnumerable<ImageInfo> images = default,
             [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
-        {
-            return new Document(content ?? Content, charts ?? Charts, images ?? Images, hyperlinks ?? Hyperlinks);
-        }
+            => new Document(content ?? Content, charts ?? Charts, images ?? Images, hyperlinks ?? Hyperlinks);
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Document Concat([NotNull] Document other)
-        {
-            return Concat(other.Content, other.Charts, other.Images, other.Hyperlinks);
-        }
+        public Document Concat([NotNull] Document other) => Concat(other.Content, other.Charts, other.Images, other.Hyperlinks);
 
         /// <summary>
         ///
@@ -241,33 +236,29 @@ namespace AD.OpenXml.Structures
             [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
             XElement document =
-                content is default
+                content is null
                     ? Content
                     : new XElement(
                         Content.Name,
                         Content.Attributes(),
                         new XElement(
                             W + "body",
-                            Content.Element(W + "body").Elements(),
-                            content.Element(W + "body").Elements()));
+                            Content.Element(W + "body")?.Elements(),
+                            content.Element(W + "body")?.Elements()));
 
             document.RemoveDuplicateSectionProperties();
 
             return
                 new Document(
                     document,
-                    charts is default ? Charts : Charts.Concat(charts),
-                    images is default ? Images : Images.Concat(images),
-                    hyperlinks is default ? Hyperlinks : Hyperlinks.Concat(hyperlinks));
+                    charts is null ? Charts : Charts.Concat(charts),
+                    images is null ? Images : Images.Concat(images),
+                    hyperlinks is null ? Hyperlinks : Hyperlinks.Concat(hyperlinks));
         }
 
         /// <inheritdoc />
         [Pure]
-        [NotNull]
-        public override string ToString()
-        {
-            return $"Document: (Charts: {Charts.Count}, Images: {Images.Count}, Hyperlinks: {Hyperlinks.Count})";
-        }
+        public override string ToString() => $"Document: (Charts: {Charts.Count}, Images: {Images.Count}, Hyperlinks: {Hyperlinks.Count})";
 
         /// <summary>
         ///
@@ -283,7 +274,7 @@ namespace AD.OpenXml.Structures
                 throw new ArgumentNullException(nameof(archive));
             }
 
-            using (Stream stream = archive.GetEntry("word/document.xml").Open())
+            using (Stream stream = archive.GetEntry("word/document.xml")?.Open())
             {
                 Content.Save(stream);
             }

@@ -34,122 +34,93 @@ namespace CompilerAPI
         /// <summary>
         ///
         /// </summary>
-        private string EnvironmentName => Configuration[WebHostDefaults.EnvironmentKey];
-
-        /// <summary>
-        ///
-        /// </summary>
         /// <param name="configuration"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public Startup([NotNull] IConfiguration configuration)
-        {
-            if (configuration is null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
-
-            Configuration = configuration;
-        }
+        public Startup([NotNull] IConfiguration configuration) => Configuration = configuration;
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
         /// </summary>
         public IServiceProvider ConfigureServices([NotNull] IServiceCollection services)
-        {
-            if (services is null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
-
-            return
-                // Add framework services.
-                services
-                    .AddLogging(x => x.AddConsole())
-                    .AddApiVersioning(
-                        x =>
-                        {
-                            x.AssumeDefaultVersionWhenUnspecified = true;
-                            x.DefaultApiVersion = new ApiVersion(1, 0);
-                        })
-                    .AddResponseCompression(x => x.Providers.Add<GzipCompressionProvider>())
-                    .Configure<GzipCompressionProviderOptions>(x => x.Level = CompressionLevel.Fastest)
-                    .AddRouting(x => x.LowercaseUrls = true)
-                    .AddAntiforgery(
-                        x =>
-                        {
-                            x.HeaderName = "x-xsrf-token";
-                            x.Cookie.HttpOnly = true;
-                            x.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-                        })
-                    .AddSwaggerGen(
-                        x =>
-                        {
-                            x.DescribeAllEnumsAsStrings();
-                            x.MapType<GroupingValues<string, string>>(() => new Schema { Type = "string" });
-                            x.IncludeXmlComments(Path.Combine(ApplicationEnvironment.ApplicationBasePath, $"{nameof(CompilerAPI)}.xml"));
-                            x.IgnoreObsoleteActions();
-                            x.IgnoreObsoleteProperties();
-                            x.SwaggerDoc("v1", new Info { Title = "Reports API", Version = "v1" });
-                            x.OperationFilter<SwaggerOptionalOperationFilter>();
-                        })
-                    .AddMvc(
-                        x =>
-                        {
-                            x.Conventions.Add(new KebabControllerModelConvention());
-//                            x.FormatterMappings.SetMediaTypeMappingForFormat("xml", "application/xml");
-//                            x.FormatterMappings.SetMediaTypeMappingForFormat("html", "text/html");
-//                            x.FormatterMappings.SetMediaTypeMappingForFormat("xhtml", "text/xhtml");
-//                            x.FormatterMappings.SetMediaTypeMappingForFormat("csv", "text/csv");
-//                            x.FormatterMappings.SetMediaTypeMappingForFormat("psv", "text/psv");
-//                            x.FormatterMappings.SetMediaTypeMappingForFormat("tsv", "text/tsv");
-                            x.ModelMetadataDetailsProviders.Add(new KebabBindingMetadataProvider());
-//                            x.OutputFormatters.Add(new XmlOutputFormatter());
-//                            x.OutputFormatters.Add(new DelimitedOutputFormatter());
-//                            x.RespectBrowserAcceptHeader = true;
-                        })
-                    .AddJsonOptions(
-                        x =>
-                        {
-                            x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
-                            x.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
-                            x.SerializerSettings.ContractResolver = new KebabContractResolver();
-                        })
-                    .Services
-                    .BuildServiceProvider();
-        }
+            => services.AddLogging(x => x.AddConsole())
+                       .AddApiVersioning(
+                           x =>
+                           {
+                               x.AssumeDefaultVersionWhenUnspecified = true;
+                               x.DefaultApiVersion = new ApiVersion(1, 0);
+                           })
+                       .AddResponseCompression(x => x.Providers.Add<GzipCompressionProvider>())
+                       .Configure<GzipCompressionProviderOptions>(x => x.Level = CompressionLevel.Fastest)
+                       .AddRouting(x => x.LowercaseUrls = true)
+                       .AddAntiforgery(
+                           x =>
+                           {
+                               x.HeaderName = "x-xsrf-token";
+                               x.Cookie.HttpOnly = true;
+                               x.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                           })
+                       .Configure<CookiePolicyOptions>(
+                           x =>
+                           {
+                               x.CheckConsentNeeded = context => true;
+                               x.MinimumSameSitePolicy = SameSiteMode.None;
+                           })
+                       .AddSwaggerGen(
+                           x =>
+                           {
+                               x.DescribeAllEnumsAsStrings();
+                               x.MapType<GroupingValues<string, string>>(() => new Schema { Type = "string" });
+                               x.IncludeXmlComments(Path.Combine(ApplicationEnvironment.ApplicationBasePath, $"{nameof(CompilerAPI)}.xml"));
+                               x.IgnoreObsoleteActions();
+                               x.IgnoreObsoleteProperties();
+                               x.SwaggerDoc("v1", new Info { Title = "Reports API", Version = "v1" });
+                               x.OperationFilter<SwaggerOptionalOperationFilter>();
+                           })
+                       .AddMvc(
+                           x =>
+                           {
+                               x.Conventions.Add(new KebabControllerModelConvention());
+                               x.FormatterMappings.SetMediaTypeMappingForFormat("xml", "application/xml");
+                               x.FormatterMappings.SetMediaTypeMappingForFormat("html", "text/html");
+                               x.ModelMetadataDetailsProviders.Add(new KebabBindingMetadataProvider());
+                               x.RespectBrowserAcceptHeader = true;
+                           })
+                       .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                       .AddJsonOptions(
+                           x =>
+                           {
+                               x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
+                               x.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+                               x.SerializerSettings.ContractResolver = new KebabContractResolver();
+                           })
+                       .Services
+                       .BuildServiceProvider();
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
         public void Configure([NotNull] IApplicationBuilder app)
-        {
-            if (app is null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-
-            app.Use(
-                   async (context, next) =>
-                   {
-                       context.Response.Headers.Add("referrer-policy", "no-referrer");
-                       context.Response.Headers.Add("x-content-type-options", "nosniff");
-                       context.Response.Headers.Add("x-frame-options", "deny");
-                       context.Response.Headers.Add("x-xss-protection", "1; mode=block");
-                       await next();
-                   })
-               .UseStaticFiles()
-               .UseSwagger(x => x.RouteTemplate = "docs/{documentName}/swagger.json")
-               .UseSwaggerUI(
-                   x =>
-                   {
-                       x.RoutePrefix = "docs";
-                       x.DocumentTitle = "Reports API Documentation";
-                       x.HeadContent = "Reports API Documentation";
-                       x.SwaggerEndpoint("v1/swagger.json", "Reports API Documentation");
-                       x.DocExpansion(DocExpansion.None);
-                   })
-               .UseResponseCompression()
-               .UseMvc();
-        }
+            => app.Use(
+                      async (context, next) =>
+                      {
+                          context.Response.Headers.Add("referrer-policy", "no-referrer");
+                          context.Response.Headers.Add("x-content-type-options", "nosniff");
+                          context.Response.Headers.Add("x-frame-options", "deny");
+                          context.Response.Headers.Add("x-xss-protection", "1; mode=block");
+                          await next();
+                      })
+                  .UseStaticFiles()
+                  .UseSwagger(x => x.RouteTemplate = "docs/{documentName}/swagger.json")
+                  .UseSwaggerUI(
+                      x =>
+                      {
+                          x.RoutePrefix = "docs";
+                          x.DocumentTitle = "Reports API Documentation";
+                          x.HeadContent = "Reports API Documentation";
+                          x.SwaggerEndpoint("v1/swagger.json", "Reports API Documentation");
+                          x.DocExpansion(DocExpansion.None);
+                      })
+                  .UseResponseCompression()
+                  .UseMvc();
     }
 }

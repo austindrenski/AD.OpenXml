@@ -119,9 +119,9 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject Visit([CanBeNull] string text)
-        {
-            return Visit(new XText(text));
-        }
+            => text is null
+                   ? null
+                   : Visit(new XText(text));
 
         /// <summary>
         /// Visits an <see cref="XAttribute"/>.
@@ -207,10 +207,7 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected XObject VisitObject([CanBeNull] XObject xObject)
-        {
-            return xObject;
-        }
+        protected XObject VisitObject([CanBeNull] XObject xObject) => xObject;
 
         /// <summary>
         /// Visits an <see cref="XText"/>.
@@ -246,12 +243,9 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected static XObject LiftSingleton([CanBeNull] XObject xObject)
-        {
-            return
-                xObject is XContainer container && container.Nodes().Count() <= 1
-                    ? container.FirstNode
-                    : xObject;
-        }
+            => xObject is XContainer container && container.Nodes().Count() <= 1
+                   ? container.FirstNode
+                   : xObject;
 
         /// <summary>
         /// Yields the <see cref="XObject"/> or the children of the <see cref="XObject"/> if the "data-liftable" attribute is present.
@@ -324,19 +318,13 @@ namespace AD.OpenXml
         /// </returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
-        [NotNull]
-        protected XObject LiftableHelper([NotNull] XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            return
-                new XElement("div",
-                    new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
-                    Visit(element.Elements()));
-        }
+        [CanBeNull]
+        protected XObject LiftableHelper([CanBeNull] XElement element)
+            => element is null
+                   ? null
+                   : new XElement("div",
+                       new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
+                       Visit(element.Elements()));
 
         ///  <summary>
         ///

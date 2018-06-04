@@ -4,8 +4,6 @@ using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 
-// ReSharper disable VirtualMemberNeverOverridden.Global
-
 namespace AD.OpenXml
 {
     /// <inheritdoc />
@@ -129,15 +127,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitAnchor([NotNull] XElement anchor)
-        {
-            if (anchor is null)
-            {
-                throw new ArgumentNullException(nameof(anchor));
-            }
-
-            return base.VisitElement(anchor);
-        }
+        protected virtual XObject VisitAnchor([NotNull] XElement anchor) => base.VisitElement(anchor);
 
         /// <summary>
         /// Visits the area chart node.
@@ -151,15 +141,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitAreaChart([NotNull] XElement areaChart)
-        {
-            if (areaChart is null)
-            {
-                throw new ArgumentNullException(nameof(areaChart));
-            }
-
-            return base.VisitElement(areaChart);
-        }
+        protected virtual XObject VisitAreaChart([NotNull] XElement areaChart) => base.VisitElement(areaChart);
 
         /// <summary>
         /// Visits the bar chart node.
@@ -173,15 +155,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitBarChart([NotNull] XElement barChart)
-        {
-            if (barChart is null)
-            {
-                throw new ArgumentNullException(nameof(barChart));
-            }
-
-            return base.VisitElement(barChart);
-        }
+        protected virtual XObject VisitBarChart([NotNull] XElement barChart) => base.VisitElement(barChart);
 
         /// <summary>
         /// Visits the body node.
@@ -195,15 +169,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitBody([NotNull] XElement body)
-        {
-            if (body is null)
-            {
-                throw new ArgumentNullException(nameof(body));
-            }
-
-            return base.VisitElement(body);
-        }
+        protected virtual XObject VisitBody([NotNull] XElement body) => base.VisitElement(body);
 
         /// <summary>
         /// Visits the chart node.
@@ -217,15 +183,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitChart([NotNull] XElement chart)
-        {
-            if (chart is null)
-            {
-                throw new ArgumentNullException(nameof(chart));
-            }
-
-            return base.VisitElement(chart);
-        }
+        protected virtual XObject VisitChart([NotNull] XElement chart) => base.VisitElement(chart);
 
         /// <summary>
         /// Visits the document node.
@@ -239,15 +197,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitDocument([NotNull] XElement document)
-        {
-            if (document is null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
-
-            return base.VisitElement(document);
-        }
+        protected virtual XObject VisitDocument([NotNull] XElement document) => base.VisitElement(document);
 
         /// <summary>
         /// Visits the document property node.
@@ -261,15 +211,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitDocumentProperty([NotNull] XElement docPr)
-        {
-            if (docPr is null)
-            {
-                throw new ArgumentNullException(nameof(docPr));
-            }
-
-            return base.VisitElement(docPr);
-        }
+        protected virtual XObject VisitDocumentProperty([NotNull] XElement docPr) => base.VisitElement(docPr);
 
         /// <summary>
         ///
@@ -283,15 +225,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitDiagram([NotNull] XElement diagram)
-        {
-            if (diagram is null)
-            {
-                throw new ArgumentNullException(nameof(diagram));
-            }
-
-            return base.VisitElement(diagram);
-        }
+        protected virtual XObject VisitDiagram([NotNull] XElement diagram) => base.VisitElement(diagram);
 
         /// <summary>
         /// Visits the drawing node.
@@ -305,32 +239,16 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitDrawing([NotNull] XElement drawing)
-        {
-            if (drawing is null)
-            {
-                throw new ArgumentNullException(nameof(drawing));
-            }
-
-            return base.VisitElement(drawing);
-        }
+        protected virtual XObject VisitDrawing([NotNull] XElement drawing) => base.VisitElement(drawing);
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitElement(XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            return
-                VisitLookup.TryGetValue(element.Name, out Func<XElement, XObject> visit)
-                    ? visit(element)
-                    : _returnOnDefault
-                        ? base.VisitElement(element)
-                        : null;
-        }
+            => VisitLookup.TryGetValue(element.Name, out Func<XElement, XObject> visit)
+                   ? visit(element)
+                   : _returnOnDefault
+                       ? base.VisitElement(element)
+                       : null;
 
         /// <summary>
         ///
@@ -344,15 +262,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitFootnote([NotNull] XElement footnote)
-        {
-            if (footnote is null)
-            {
-                throw new ArgumentNullException(nameof(footnote));
-            }
-
-            return base.VisitElement(footnote);
-        }
+        protected virtual XObject VisitFootnote([NotNull] XElement footnote) => base.VisitElement(footnote);
 
         /// <summary>
         ///
@@ -366,15 +276,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitFootnotes([NotNull] XElement footnotes)
-        {
-            if (footnotes is null)
-            {
-                throw new ArgumentNullException(nameof(footnotes));
-            }
-
-            return base.VisitElement(footnotes);
-        }
+        protected virtual XObject VisitFootnotes([NotNull] XElement footnotes) => base.VisitElement(footnotes);
 
         /// <summary>
         ///
@@ -388,15 +290,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitGraphic([NotNull] XElement graphic)
-        {
-            if (graphic is null)
-            {
-                throw new ArgumentNullException(nameof(graphic));
-            }
-
-            return base.VisitElement(graphic);
-        }
+        protected virtual XObject VisitGraphic([NotNull] XElement graphic) => base.VisitElement(graphic);
 
         /// <summary>
         ///
@@ -410,15 +304,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitGraphicData([NotNull] XElement graphicData)
-        {
-            if (graphicData is null)
-            {
-                throw new ArgumentNullException(nameof(graphicData));
-            }
-
-            return base.VisitElement(graphicData);
-        }
+        protected virtual XObject VisitGraphicData([NotNull] XElement graphicData) => base.VisitElement(graphicData);
 
         /// <summary>
         ///
@@ -432,15 +318,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitInline([NotNull] XElement inline)
-        {
-            if (inline is null)
-            {
-                throw new ArgumentNullException(nameof(inline));
-            }
-
-            return base.VisitElement(inline);
-        }
+        protected virtual XObject VisitInline([NotNull] XElement inline) => base.VisitElement(inline);
 
         /// <summary>
         /// Visits the line chart node.
@@ -454,15 +332,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitLineChart([NotNull] XElement lineChart)
-        {
-            if (lineChart is null)
-            {
-                throw new ArgumentNullException(nameof(lineChart));
-            }
-
-            return base.VisitElement(lineChart);
-        }
+        protected virtual XObject VisitLineChart([NotNull] XElement lineChart) => base.VisitElement(lineChart);
 
         /// <summary>
         ///
@@ -476,15 +346,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitParagraph([NotNull] XElement paragraph)
-        {
-            if (paragraph is null)
-            {
-                throw new ArgumentNullException(nameof(paragraph));
-            }
-
-            return base.VisitElement(paragraph);
-        }
+        protected virtual XObject VisitParagraph([NotNull] XElement paragraph) => base.VisitElement(paragraph);
 
         /// <summary>
         ///
@@ -498,15 +360,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitMath([NotNull] XElement math)
-        {
-            if (math is null)
-            {
-                throw new ArgumentNullException(nameof(math));
-            }
-
-            return base.VisitElement(math);
-        }
+        protected virtual XObject VisitMath([NotNull] XElement math) => base.VisitElement(math);
 
         /// <summary>
         /// Visits the picture node.
@@ -520,15 +374,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitPicture([NotNull] XElement picture)
-        {
-            if (picture is null)
-            {
-                throw new ArgumentNullException(nameof(picture));
-            }
-
-            return base.VisitElement(picture);
-        }
+        protected virtual XObject VisitPicture([NotNull] XElement picture) => base.VisitElement(picture);
 
         /// <summary>
         /// Visits the pie chart node.
@@ -542,15 +388,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitPieChart([NotNull] XElement pieChart)
-        {
-            if (pieChart is null)
-            {
-                throw new ArgumentNullException(nameof(pieChart));
-            }
-
-            return base.VisitElement(pieChart);
-        }
+        protected virtual XObject VisitPieChart([NotNull] XElement pieChart) => base.VisitElement(pieChart);
 
         /// <summary>
         /// Visits the plot area node.
@@ -564,15 +402,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitPlotArea([NotNull] XElement plotArea)
-        {
-            if (plotArea is null)
-            {
-                throw new ArgumentNullException(nameof(plotArea));
-            }
-
-            return base.VisitElement(plotArea);
-        }
+        protected virtual XObject VisitPlotArea([NotNull] XElement plotArea) => base.VisitElement(plotArea);
 
         /// <summary>
         ///
@@ -586,15 +416,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitRun([NotNull] XElement run)
-        {
-            if (run is null)
-            {
-                throw new ArgumentNullException(nameof(run));
-            }
-
-            return base.VisitElement(run);
-        }
+        protected virtual XObject VisitRun([NotNull] XElement run) => base.VisitElement(run);
 
         /// <summary>
         ///
@@ -608,15 +430,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        private XObject VisitShape([NotNull] XElement shape)
-        {
-            if (shape is null)
-            {
-                throw new ArgumentNullException(nameof(shape));
-            }
-
-            return base.VisitElement(shape);
-        }
+        private XObject VisitShape([NotNull] XElement shape) => base.VisitElement(shape);
 
         /// <summary>
         ///
@@ -630,15 +444,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitTable([NotNull] XElement table)
-        {
-            if (table is null)
-            {
-                throw new ArgumentNullException(nameof(table));
-            }
-
-            return base.VisitElement(table);
-        }
+        protected virtual XObject VisitTable([NotNull] XElement table) => base.VisitElement(table);
 
         /// <summary>
         ///
@@ -652,15 +458,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitTableCell([NotNull] XElement cell)
-        {
-            if (cell is null)
-            {
-                throw new ArgumentNullException(nameof(cell));
-            }
-
-            return base.VisitElement(cell);
-        }
+        protected virtual XObject VisitTableCell([NotNull] XElement cell) => base.VisitElement(cell);
 
         /// <summary>
         ///
@@ -674,14 +472,6 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitTableRow([NotNull] XElement row)
-        {
-            if (row is null)
-            {
-                throw new ArgumentNullException(nameof(row));
-            }
-
-            return base.VisitElement(row);
-        }
+        protected virtual XObject VisitTableRow([NotNull] XElement row) => base.VisitElement(row);
     }
 }
