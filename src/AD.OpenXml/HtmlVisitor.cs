@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using AD.OpenXml.Structures;
 using JetBrains.Annotations;
 
+// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
 namespace AD.OpenXml
 {
     /// <inheritdoc />
@@ -216,13 +217,9 @@ namespace AD.OpenXml
                                 new XAttribute("name", MetaName),
                                 new XAttribute("content", MetaContent)),
                             new XElement("title", title),
-                            new XElement("link",
-                                new XAttribute("type", "text/css"),
-                                new XAttribute("rel", "stylesheet"),
-                                new XAttribute("href", stylesheet)),
                             new XElement("script",
                                 new XAttribute("type", "text/javascript"),
-                                new XAttribute("src", "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"),
+                                new XAttribute("src", "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"),
                                 new XText(string.Empty)),
                             new XElement("style",
                                 new XText("article { counter-reset: chapter_counter; }"),
@@ -240,7 +237,11 @@ namespace AD.OpenXml
                                 new XText("a[aria-describedby=\"footnote-label\"] { font-size: 0.5em; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { margin-left: 1px; }"),
                                 new XText("a[aria-describedby=\"footnote-label\"] { text-decoration: none; }"),
-                                new XText("a[aria-describedby=\"footnote-label\"] { vertical-align: super; }"))),
+                                new XText("a[aria-describedby=\"footnote-label\"] { vertical-align: super; }")),
+                            new XElement("link",
+                                new XAttribute("type", "text/css"),
+                                new XAttribute("rel", "stylesheet"),
+                                new XAttribute("href", stylesheet))),
                         // TODO: dispatch sequences of nodes optionally (e.g. virtual) instead of each node to support section-encapsulation.
                         Lift(Visit(document)),
                         // TODO: handle this as a call at the end of an encapsulated section so that each section can be served as stand alone content.
