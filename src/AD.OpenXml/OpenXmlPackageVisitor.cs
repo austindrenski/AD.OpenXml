@@ -71,16 +71,12 @@ namespace AD.OpenXml
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
         /// </summary>
-        /// <param name="archive">
-        /// The archive to which changes can be saved.
-        /// </param>
+        /// <param name="archive">The archive to which changes can be saved.</param>
         /// <exception cref="ArgumentNullException"/>
         public OpenXmlPackageVisitor([NotNull] ZipArchive archive)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             Document = new Document(archive);
             Footnotes = new Footnotes(archive);
@@ -106,29 +102,19 @@ namespace AD.OpenXml
             [NotNull] XElement theme1)
         {
             if (document is null)
-            {
                 throw new ArgumentNullException(nameof(document));
-            }
 
             if (footnotes is null)
-            {
                 throw new ArgumentNullException(nameof(footnotes));
-            }
 
             if (styles is null)
-            {
                 throw new ArgumentNullException(nameof(styles));
-            }
 
             if (numbering is null)
-            {
                 throw new ArgumentNullException(nameof(numbering));
-            }
 
             if (theme1 is null)
-            {
                 throw new ArgumentNullException(nameof(theme1));
-            }
 
             Document = document;
             Footnotes = footnotes;
@@ -172,9 +158,7 @@ namespace AD.OpenXml
         public OpenXmlPackageVisitor Visit([NotNull] ZipArchive archive)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             return
                 new OpenXmlPackageVisitor(archive)
@@ -197,9 +181,7 @@ namespace AD.OpenXml
         public static OpenXmlPackageVisitor VisitAndFold([NotNull] [ItemNotNull] IEnumerable<ZipArchive> archives)
         {
             if (archives is null)
-            {
                 throw new ArgumentNullException(nameof(archives));
-            }
 
             return archives.Aggregate(new OpenXmlPackageVisitor(DefaultOpenXml), (current, next) => current.Fold(current.Visit(next)));
         }
@@ -212,12 +194,10 @@ namespace AD.OpenXml
         /// </param>
         [Pure]
         [NotNull]
-        public OpenXmlPackageVisitor Fold([NotNull] OpenXmlPackageVisitor subject)
+        protected OpenXmlPackageVisitor Fold([NotNull] OpenXmlPackageVisitor subject)
         {
             if (subject is null)
-            {
                 throw new ArgumentNullException(nameof(subject));
-            }
 
             Document document = Document.Concat(subject.Document);
 
