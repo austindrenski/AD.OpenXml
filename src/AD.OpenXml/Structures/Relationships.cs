@@ -37,33 +37,22 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="key">
-        ///
-        /// </param>
+        /// <param name="key"></param>
         public Entry this[string key] => Entries.Single(x => x.Id == key);
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="entries">
-        ///
-        /// </param>
-        /// <exception cref="ArgumentNullException"/>
+        /// <param name="entries"></param>
         public Relationships(params IEnumerable<Entry>[] entries)
-        {
-            Entries =
-                entries.Where(x => x != null)
-                       .SelectMany(x => x)
-                       .ToImmutableHashSet();
-        }
+            => Entries =
+                   entries.Where(x => x != null)
+                          .SelectMany(x => x)
+                          .ToImmutableHashSet();
 
         /// <inheritdoc />
         [Pure]
-        [NotNull]
-        public override string ToString()
-        {
-            return ToXElement().ToString();
-        }
+        public override string ToString() => ToXElement().ToString();
 
         /// <summary>
         ///
@@ -74,22 +63,14 @@ namespace AD.OpenXml.Structures
         [Pure]
         [NotNull]
         public XElement ToXElement()
-        {
-            return
-                new XElement(
-                    P + "Relationships",
-                    Entries.OrderBy(x => x).Select(x => x.ToXElement()));
-        }
+            => new XElement(P + "Relationships",
+                Entries.OrderBy(x => x).Select(x => x.ToXElement()));
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="archive">
-        ///
-        /// </param>
-        /// <param name="path">
-        ///
-        /// </param>
+        /// <param name="archive"></param>
+        /// <param name="path"></param>
         /// <exception cref="ArgumentNullException" />
         public void Save([NotNull] ZipArchive archive, string path)
         {
@@ -98,7 +79,7 @@ namespace AD.OpenXml.Structures
                 throw new ArgumentNullException(nameof(archive));
             }
 
-            using (Stream stream = archive.GetEntry(path).Open())
+            using (Stream stream = archive.GetEntry(path)?.Open() ?? throw new FileNotFoundException(path))
             {
                 ToXElement().Save(stream);
             }
@@ -111,7 +92,7 @@ namespace AD.OpenXml.Structures
         [PublicAPI]
         public readonly struct Entry : IComparable<Entry>, IEquatable<Entry>
         {
-            private static readonly Comparer<int> Comparer = Comparer<int>.Default;
+            [NotNull] private static readonly Comparer<int> Comparer = Comparer<int>.Default;
 
             /// <summary>
             ///
@@ -141,19 +122,10 @@ namespace AD.OpenXml.Structures
             /// <summary>
             ///
             /// </summary>
-            /// <param name="type">
-            ///
-            /// </param>
-            /// <param name="id">
-            ///
-            /// </param>
-            /// <param name="target">
-            ///
-            /// </param>
-            /// <param name="targetMode">
-            ///
-            /// </param>
-            /// <exception cref="ArgumentNullException" />
+            /// <param name="type"></param>
+            /// <param name="id"></param>
+            /// <param name="target"></param>
+            /// <param name="targetMode"></param>
             public Entry(StringSegment id, StringSegment target, StringSegment type, StringSegment targetMode = default)
             {
                 Id = id;
@@ -166,13 +138,12 @@ namespace AD.OpenXml.Structures
             ///
             /// </summary>
             /// <param name="entry"></param>
-            /// <returns></returns>
+            /// <returns>
+            ///
+            /// </returns>
             [Pure]
             [NotNull]
-            public static explicit operator XElement(Entry entry)
-            {
-                return entry.ToXElement();
-            }
+            public static explicit operator XElement(Entry entry) => entry.ToXElement();
 
             /// <summary>
             /// Returns the entry as an <see cref="XElement"/>.
@@ -183,44 +154,27 @@ namespace AD.OpenXml.Structures
             [Pure]
             [NotNull]
             public XElement ToXElement()
-            {
-                return
-                    new XElement(
-                        P + "Relationship",
-                        new XAttribute("Id", Id),
-                        new XAttribute("Type", Type),
-                        new XAttribute("Target", Target),
-                        TargetMode.HasValue ? new XAttribute("TargetMode", TargetMode) : null);
-            }
+                => new XElement(P + "Relationship",
+                    new XAttribute("Id", Id),
+                    new XAttribute("Type", Type),
+                    new XAttribute("Target", Target),
+                    TargetMode.HasValue ? new XAttribute("TargetMode", TargetMode) : null);
 
             /// <inheritdoc />
             [Pure]
-            [NotNull]
-            public override string ToString()
-            {
-                return ToXElement().ToString();
-            }
+            public override string ToString() => ToXElement().ToString();
 
             /// <inheritdoc />
             [Pure]
-            public int CompareTo(Entry other)
-            {
-                return Comparer.Compare(NumericId, other.NumericId);
-            }
+            public int CompareTo(Entry other) => Comparer.Compare(NumericId, other.NumericId);
 
             /// <inheritdoc />
             [Pure]
-            public bool Equals(Entry other)
-            {
-                return Id.Equals(other.Id) && Type.Equals(other.Type) && Target.Equals(other.Target) && TargetMode.Equals(other.TargetMode);
-            }
+            public bool Equals(Entry other) => Id.Equals(other.Id) && Type.Equals(other.Type) && Target.Equals(other.Target) && TargetMode.Equals(other.TargetMode);
 
             /// <inheritdoc />
             [Pure]
-            public override bool Equals([CanBeNull] object obj)
-            {
-                return obj is Entry entry && Equals(entry);
-            }
+            public override bool Equals(object obj) => obj is Entry entry && Equals(entry);
 
             /// <inheritdoc />
             [Pure]
@@ -236,25 +190,27 @@ namespace AD.OpenXml.Structures
                 }
             }
 
-            /// <summary>Returns a value that indicates whether the values of two <see cref="Entry" /> objects are equal.</summary>
+            /// <summary>
+            /// Returns a value that indicates whether the values of two <see cref="Entry" /> objects are equal.
+            /// </summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
-            /// <returns>true if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.</returns>
+            /// <returns>
+            /// True if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.
+            /// </returns>
             [Pure]
-            public static bool operator ==(Entry left, Entry right)
-            {
-                return left.Equals(right);
-            }
+            public static bool operator ==(Entry left, Entry right) => left.Equals(right);
 
-            /// <summary>Returns a value that indicates whether two <see cref="Entry" /> objects have different values.</summary>
+            /// <summary>
+            /// Returns a value that indicates whether two <see cref="Entry" /> objects have different values.
+            /// </summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
-            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.</returns>
+            /// <returns>
+            /// True if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
+            /// </returns>
             [Pure]
-            public static bool operator !=(Entry left, Entry right)
-            {
-                return !left.Equals(right);
-            }
+            public static bool operator !=(Entry left, Entry right) => !left.Equals(right);
         }
     }
 }

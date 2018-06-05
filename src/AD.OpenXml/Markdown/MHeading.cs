@@ -4,9 +4,6 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
 using AD.ApiExtensions.Primitives;
 
-// TODO: temporary until StringSegment is a readonly struct in 2.1
-// ReSharper disable ImpureMethodCallOnReadonlyValueField
-
 namespace AD.OpenXml.Markdown
 {
     /// <inheritdoc cref="MNode"/>
@@ -35,9 +32,7 @@ namespace AD.OpenXml.Markdown
         /// <summary>
         /// Constructs an <see cref="MHeading"/>.
         /// </summary>
-        /// <param name="text">
-        /// The raw text of the heading.
-        /// </param>
+        /// <param name="text">The raw text of the heading.</param>
         public MHeading(in StringSegment text)
         {
             if (!Accept(in text))
@@ -53,9 +48,7 @@ namespace AD.OpenXml.Markdown
         /// <summary>
         /// Checks if the segment is a well-formed Markdown heading.
         /// </summary>
-        /// <param name="segment">
-        /// The segment to test.
-        /// </param>
+        /// <param name="segment">The segment to test.</param>
         /// <returns>
         /// True if the segment is a well-formed Markdown heading; otherwise false.
         /// </returns>
@@ -81,103 +74,65 @@ namespace AD.OpenXml.Markdown
         ///   4) one ' ' from the end;
         ///   5) normalizing inner whitespace.
         /// </summary>
-        /// <param name="segment">
-        /// The segment to normalize.
-        /// </param>
+        /// <param name="segment">The segment to normalize.</param>
         /// <returns>
         /// The normalized segment.
         /// </returns>
         [Pure]
         private static StringSegment Normalize(in StringSegment segment)
-        {
-            return segment.TrimStart(' ', 3).TrimEnd().TrimEnd('#').TrimEnd(' ', 1).NormalizeInner(' ');
-        }
+            => segment.TrimStart(' ', 3).TrimEnd().TrimEnd('#').TrimEnd(' ', 1).NormalizeInner(' ');
 
         /// <inheritdoc />
         [Pure]
-        [NotNull]
-        public override string ToString()
-        {
-            return $"{new string('#', Level)} {Heading}";
-        }
+        public override string ToString() => $"{new string('#', Level)} {Heading}";
 
         /// <inheritdoc />
         [Pure]
-        public override XNode ToHtml()
-        {
-            return new XElement($"h{Level}", Heading.ToHtml());
-        }
+        public override XNode ToHtml() => new XElement($"h{Level}", Heading.ToHtml());
 
         /// <inheritdoc />
         [Pure]
         public override XNode ToOpenXml()
-        {
-            return
-                new XElement(W + "p",
-                    new XElement(W + "pPr",
-                        new XElement(W + "pStyle",
-                            new XAttribute(W + "val", $"Heading{Level}"))),
-                    new XElement(W + "r", Heading.ToOpenXml()));
-        }
+            => new XElement(W + "p",
+                new XElement(W + "pPr",
+                    new XElement(W + "pStyle",
+                        new XAttribute(W + "val", $"Heading{Level}"))),
+                new XElement(W + "r", Heading.ToOpenXml()));
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals([CanBeNull] MHeading other)
-        {
-            return !(other is null) && Heading.Equals(other.Heading) && Level == other.Level;
-        }
+        public bool Equals(MHeading other) => !(other is null) && Heading.Equals(other.Heading) && Level == other.Level;
 
         /// <inheritdoc />
         [Pure]
-        public override bool Equals([CanBeNull] object obj)
-        {
-            return obj is MHeading heading && Equals(heading);
-        }
+        public override bool Equals(object obj) => obj is MHeading heading && Equals(heading);
 
         /// <inheritdoc />
         [Pure]
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (397 * Heading.GetHashCode()) ^ Level.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => unchecked((397 * Heading.GetHashCode()) ^ Level.GetHashCode());
 
         /// <summary>
         /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Markdown.MHeading" /> objects are equal.
         /// </summary>
-        /// <param name="left">
-        /// The first value to compare.
-        /// </param>
-        /// <param name="right">
-        /// The second value to compare.
-        /// </param>
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
         /// <returns>
-        /// true if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.
+        /// True if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.
         /// </returns>
         [Pure]
         public static bool operator ==([CanBeNull] MHeading left, [CanBeNull] MHeading right)
-        {
-            return !(left is null) && !(right is null) && left.Equals(right);
-        }
+            => !(left is null) && !(right is null) && left.Equals(right);
 
         /// <summary>
         /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Markdown.MHeading" /> objects have different values.
         /// </summary>
-        /// <param name="left">
-        /// The first value to compare.
-        /// </param>
-        /// <param name="right">
-        /// The second value to compare.
-        /// </param>
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
         /// <returns>
-        /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
+        /// True if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
         [Pure]
         public static bool operator !=([CanBeNull] MHeading left, [CanBeNull] MHeading right)
-        {
-            return left is null || right is null || !left.Equals(right);
-        }
+            => left is null || right is null || !left.Equals(right);
     }
 }

@@ -6,9 +6,7 @@ using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
 
-// BUG: Temporary. Should be fixed in .NET Core 2.1.
 // ReSharper disable ImpureMethodCallOnReadonlyValueField
-
 namespace AD.OpenXml.Structures
 {
     /// <inheritdoc cref="IEquatable{T}" />
@@ -18,7 +16,8 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public readonly struct ImageInfo : IEquatable<ImageInfo>
     {
-        [NotNull] private static readonly Regex RegexTarget = new Regex("media/image(?<id>[0-9]+)\\.(?<extension>png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        [NotNull] private static readonly Regex RegexTarget =
+            new Regex("media/image(?<id>[0-9]+)\\.(?<extension>png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         ///
@@ -55,7 +54,6 @@ namespace AD.OpenXml.Structures
         /// </summary>
         public StringSegment Target => $"media/image{RelationId.Subsegment(3)}.{Extension}";
 
-
         /// <summary>
         ///
         /// </summary>
@@ -71,66 +69,58 @@ namespace AD.OpenXml.Structures
         /// </summary>
         public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, SchemaType);
 
-        ///  <summary>
+        /// <summary>
         ///
-        ///  </summary>
+        /// </summary>
         ///  <param name="rId"></param>
         /// <param name="extension"></param>
         /// <param name="image"></param>
         public ImageInfo(StringSegment rId, StringSegment extension, [NotNull] byte[] image)
         {
             if (!rId.StartsWith("rId", StringComparison.Ordinal))
-            {
                 throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
-            }
 
             if (image is null)
-            {
                 throw new ArgumentNullException(nameof(image));
-            }
 
             RelationId = rId;
             Extension = extension;
             Image = image.ToArray();
         }
 
-        ///  <summary>
+        /// <summary>
         ///
-        ///  </summary>
-        ///  <param name="rId"></param>
+        /// </summary>
+        /// <param name="rId"></param>
         /// <param name="extension"></param>
         /// <param name="image"></param>
         public ImageInfo(StringSegment rId, StringSegment extension, ReadOnlyMemory<byte> image)
         {
             if (!rId.StartsWith("rId", StringComparison.Ordinal))
-            {
                 throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
-            }
 
             RelationId = rId;
             Extension = extension;
             Image = image;
         }
 
-        ///  <summary>
+        /// <summary>
         ///
-        ///  </summary>
+        /// </summary>
         /// <param name="rId"></param>
         /// <param name="target"></param>
-        ///  <param name="image"></param>
-        ///  <returns></returns>
-        ///  <exception cref="ArgumentNullException"></exception>
+        /// <param name="image"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
         public static ImageInfo Create(StringSegment rId, StringSegment target, [NotNull] byte[] image)
         {
             if (!RegexTarget.IsMatch(target.Value))
-            {
                 throw new ArgumentException(nameof(target));
-            }
 
             if (image is null)
-            {
                 throw new ArgumentNullException(nameof(image));
-            }
 
             Match m = RegexTarget.Match(target.Value);
 
@@ -143,38 +133,21 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         /// <param name="offset"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException" />
+        /// <returns>
+        ///
+        /// </returns>
         [Pure]
-        public ImageInfo WithOffset(int offset)
-        {
-            return new ImageInfo($"rId{NumericId + offset}", Extension, Image);
-        }
+        public ImageInfo WithOffset(int offset) => new ImageInfo($"rId{NumericId + offset}", Extension, Image);
 
         /// <summary>
         ///
         /// </summary>
-        /// <returns></returns>
-        [Pure]
-        [NotNull]
-        public override string ToString()
-        {
-            return $"(Id: {RelationId}, Target: {Target})";
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="archive">
-        ///
-        /// </param>
+        /// <param name="archive"> </param>
         /// <exception cref="ArgumentNullException" />
         public void Save([NotNull] ZipArchive archive)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             using (Stream stream = archive.CreateEntry(PartName.Subsegment(1).Value).Open())
             {
@@ -185,67 +158,42 @@ namespace AD.OpenXml.Structures
             }
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         [Pure]
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (397 * Target.GetHashCode()) ^ Image.GetHashCode();
-            }
-        }
+        public override string ToString() => $"(Id: {RelationId}, Target: {Target})";
 
         /// <inheritdoc />
         [Pure]
-        public override bool Equals([CanBeNull] object obj)
-        {
-            return obj is ImageInfo information && Equals(information);
-        }
+        public override int GetHashCode() => unchecked((397 * Target.GetHashCode()) ^ Image.GetHashCode());
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(ImageInfo other)
-        {
-            return Equals(Target, other.Target) && Image.Equals(other.Image);
-        }
+        public override bool Equals(object obj) => obj is ImageInfo information && Equals(information);
+
+        /// <inheritdoc />
+        [Pure]
+        public bool Equals(ImageInfo other) => Equals(Target, other.Target) && Image.Equals(other.Image);
 
         /// <summary>
         /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Structures.ImageInfo" /> objects are equal.
         /// </summary>
-        /// <param name="left">
-        /// The first value to compare.
-        /// </param>
-        /// <param name="right">
-        /// The second value to compare.
-        /// </param>
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
         /// <returns>
-        /// true if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.
+        /// True if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator ==(ImageInfo left, ImageInfo right)
-        {
-            return left.Equals(right);
-        }
+        public static bool operator ==(ImageInfo left, ImageInfo right) => left.Equals(right);
 
         /// <summary>
         /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ImageInfo" /> objects have different values.
         /// </summary>
-        /// <param name="left">
-        /// The first value to compare.
-        /// </param>
-        /// <param name="right">
-        /// The second value to compare.
-        /// </param>
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
         /// <returns>
-        /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
+        /// True if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator !=(ImageInfo left, ImageInfo right)
-        {
-            return !left.Equals(right);
-        }
+        public static bool operator !=(ImageInfo left, ImageInfo right) => !left.Equals(right);
     }
 }

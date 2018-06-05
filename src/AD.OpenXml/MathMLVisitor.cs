@@ -4,13 +4,13 @@ using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 
-// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
 namespace AD.OpenXml
 {
     /// <inheritdoc />
     /// <summary>
     /// Represents a <see cref="MathMLVisitor"/> that can transform an OpenXML math node into a well-formed MathML node.
     /// </summary>
+    // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
     public class MathMLVisitor : XmlVisitor
     {
         /// <summary>

@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 namespace AD.OpenXml.Visits
 {
     /// <summary>
+    ///
     /// </summary>
     [PublicAPI]
     public static class NumberingVisit
@@ -21,11 +22,16 @@ namespace AD.OpenXml.Visits
         /// <summary>
         ///
         /// </summary>
+        /// <exception cref="FileNotFoundException" />
         static NumberingVisit()
         {
             Assembly assembly = typeof(NumberingVisit).GetTypeInfo().Assembly;
 
-            using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream("AD.OpenXml.Styles.Numbering.xml"), Encoding.UTF8))
+            using (StreamReader reader =
+                new StreamReader(
+                    assembly.GetManifestResourceStream("AD.OpenXml.Styles.Numbering.xml")
+                    ?? throw new FileNotFoundException("AD.OpenXml.Styles.Numbering.xml"),
+                    Encoding.UTF8))
             {
                 Numbering = XElement.Parse(reader.ReadToEnd());
             }
@@ -35,12 +41,13 @@ namespace AD.OpenXml.Visits
         ///
         /// </summary>
         /// <param name="subject"></param>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [NotNull]
         public static OpenXmlPackageVisitor VisitNumbering([NotNull] this OpenXmlPackageVisitor subject)
         {
             if (subject is null)
-            {
                 throw new ArgumentNullException(nameof(subject));
-            }
 
             XElement numbering = Numbering.Clone();
 

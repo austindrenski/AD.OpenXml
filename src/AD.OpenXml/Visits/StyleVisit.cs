@@ -7,6 +7,8 @@ using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 
+// TODO: this class throws, find a better pattern.
+// ReSharper disable AssignNullToNotNullAttribute
 namespace AD.OpenXml.Visits
 {
     /// <summary>

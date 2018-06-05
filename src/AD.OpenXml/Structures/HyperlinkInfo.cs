@@ -3,9 +3,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
 
-// BUG: Temporary. Should be fixed in .NET Core 2.1.
 // ReSharper disable ImpureMethodCallOnReadonlyValueField
-
 namespace AD.OpenXml.Structures
 {
     /// <inheritdoc cref="IEquatable{T}" />
@@ -55,13 +53,11 @@ namespace AD.OpenXml.Structures
         /// <param name="rId"></param>
         /// <param name="target"></param>
         /// <param name="targetMode"></param>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentNullException" />
         public HyperlinkInfo(StringSegment rId, StringSegment target, StringSegment targetMode)
         {
             if (!rId.StartsWith("rId", StringComparison.Ordinal))
-            {
                 throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
-            }
 
             RelationId = rId;
             Target = target;
@@ -72,33 +68,25 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         /// <param name="offset"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException" />
+        /// <returns>
+        ///
+        /// </returns>
         [Pure]
-        public HyperlinkInfo WithOffset(int offset)
-        {
-            return new HyperlinkInfo($"rId{NumericId + offset}", Target, TargetMode);
-        }
+        public HyperlinkInfo WithOffset(int offset) => new HyperlinkInfo($"rId{NumericId + offset}", Target, TargetMode);
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="rId"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException" />
+        /// <returns>
+        ///
+        /// </returns>
         [Pure]
-        public HyperlinkInfo WithRelationId(StringSegment rId)
-        {
-            return new HyperlinkInfo(rId, Target, TargetMode);
-        }
+        public HyperlinkInfo WithRelationId(StringSegment rId) => new HyperlinkInfo(rId, Target, TargetMode);
 
         /// <inheritdoc />
         [Pure]
-        [NotNull]
-        public override string ToString()
-        {
-            return $"(Id: {RelationId}, Target: {Target}, TargetMode: {TargetMode})";
-        }
+        public override string ToString() => $"(Id: {RelationId}, Target: {Target}, TargetMode: {TargetMode})";
 
         /// <inheritdoc />
         [Pure]
@@ -115,52 +103,32 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
-        public override bool Equals([CanBeNull] object obj)
-        {
-            return obj is HyperlinkInfo hyperlink && Equals(hyperlink);
-        }
+        public override bool Equals(object obj) => obj is HyperlinkInfo hyperlink && Equals(hyperlink);
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(HyperlinkInfo other)
-        {
-            return Equals(RelationId, other.RelationId) && Equals(Target, other.Target) && Equals(TargetMode, other.TargetMode);
-        }
+        public bool Equals(HyperlinkInfo other) => Equals(RelationId, other.RelationId) && Equals(Target, other.Target) && Equals(TargetMode, other.TargetMode);
 
         /// <summary>
         /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.HyperlinkInfo" /> objects have the same values.
         /// </summary>
-        /// <param name="left">
-        /// The first value to compare.
-        /// </param>
-        /// <param name="right">
-        /// The second value to compare.
-        /// </param>
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
         /// <returns>
-        /// true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.
+        /// True if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator ==(HyperlinkInfo left, HyperlinkInfo right)
-        {
-            return left.Equals(right);
-        }
+        public static bool operator ==(HyperlinkInfo left, HyperlinkInfo right) => left.Equals(right);
 
         /// <summary>
         /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.HyperlinkInfo" /> objects have different values.
         /// </summary>
-        /// <param name="left">
-        /// The first value to compare.
-        /// </param>
-        /// <param name="right">
-        /// The second value to compare.
-        /// </param>
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
         /// <returns>
-        /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
+        /// True if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator !=(HyperlinkInfo left, HyperlinkInfo right)
-        {
-            return !left.Equals(right);
-        }
+        public static bool operator !=(HyperlinkInfo left, HyperlinkInfo right) => !left.Equals(right);
     }
 }

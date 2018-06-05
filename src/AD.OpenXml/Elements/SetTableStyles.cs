@@ -27,15 +27,13 @@ namespace AD.OpenXml.Elements
         public static XElement SetTableStyles(this XElement source, int revisionId)
         {
             if (source.Name != W + "document")
-            {
                 return source;
-            }
 
             foreach (XElement item in source.Descendants(W + "tblPr"))
             {
                 item.RemoveAll();
 
-                if (item.Parent.Element(W + "tblGrid")?.Elements(W + "gridCol")?.Count() == 1)
+                if (item.Parent?.Element(W + "tblGrid")?.Elements(W + "gridCol").Count() == 1)
                 {
                     item.Add(
                         new XElement(W + "tblStyle",
@@ -75,7 +73,7 @@ namespace AD.OpenXml.Elements
             {
                 // TODO: this is an ugly way to fix a problem. Too much state being managed. Also...weak heuristic.
                 // tc -> tr -> tbl -> tblGrid
-                if (cell.Parent.Parent.Element(W + "tblGrid")?.Elements(W + "gridCol")?.Count() == 1)
+                if (cell.Parent?.Parent?.Element(W + "tblGrid")?.Elements(W + "gridCol").Count() == 1)
                 {
                     XElement result = DocumentVisit.ExecuteForTableRecursion(cell, revisionId);
                     cell.RemoveNodes();
@@ -83,9 +81,7 @@ namespace AD.OpenXml.Elements
                 }
 
                 if (!cell.Value.Contains("@>"))
-                {
                     continue;
-                }
 
                 foreach (XElement paragraphWithSymbol in cell.Elements(W + "p").Where(x => x.Value.Contains("@>")))
                 {
@@ -123,7 +119,7 @@ namespace AD.OpenXml.Elements
             source.Descendants(W + "trPr").Remove();
             //source.Descendants(W + "gridCol").Attributes(W + "w").Remove();
 
-            foreach (XElement table in source.Element(W + "body").Elements(W + "tbl"))
+            foreach (XElement table in source.Element(W + "body")?.Elements(W + "tbl") ?? Enumerable.Empty<XElement>())
             {
                 table.RemoveBy(W + "pPr");
             }

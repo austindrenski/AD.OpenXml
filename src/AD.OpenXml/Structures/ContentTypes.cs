@@ -8,9 +8,6 @@ using AD.Xml;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
 
-// BUG: Temporary. Should be fixed in .NET Core 2.1.
-// ReSharper disable ImpureMethodCallOnReadonlyValueField
-
 namespace AD.OpenXml.Structures
 {
     /// <summary>
@@ -39,14 +36,10 @@ namespace AD.OpenXml.Structures
         public ContentTypes([NotNull] IEnumerable<Default> defaults, [NotNull] IEnumerable<Override> overrides)
         {
             if (defaults is null)
-            {
                 throw new ArgumentNullException(nameof(defaults));
-            }
 
             if (overrides is null)
-            {
                 throw new ArgumentNullException(nameof(overrides));
-            }
 
             Defaults = defaults.ToArray();
             Overrides = overrides.ToArray();
@@ -58,9 +51,7 @@ namespace AD.OpenXml.Structures
         public ContentTypes([ItemNotNull] params IEnumerable<Override>[] overrides)
         {
             if (overrides is null)
-            {
                 throw new ArgumentNullException(nameof(overrides));
-            }
 
             Defaults = Default.StandardEntries;
             Overrides = overrides.SelectMany(x => x).ToArray();
@@ -69,25 +60,19 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        ///
+        /// </returns>
         [Pure]
         [NotNull]
         public XElement ToXElement()
-        {
-            return
-                new XElement(
-                    T + "Types",
-                    Defaults.OrderBy(x => x).Select(x => x.ToXElement()),
-                    Overrides.OrderBy(x => x).Select(x => x.ToXElement()));
-        }
+            => new XElement(T + "Types",
+                Defaults.OrderBy(x => x).Select(x => x.ToXElement()),
+                Overrides.OrderBy(x => x).Select(x => x.ToXElement()));
 
         /// <inheritdoc />
         [Pure]
-        [NotNull]
-        public override string ToString()
-        {
-            return ToXElement().ToString();
-        }
+        public override string ToString() => ToXElement().ToString();
 
         /// <summary>
         ///
@@ -99,11 +84,12 @@ namespace AD.OpenXml.Structures
         public void Save([NotNull] ZipArchive archive)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
-            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path).Open())
+            if (!(archive.GetEntry(ContentTypesInfo.Path) is ZipArchiveEntry entry))
+                throw new FileNotFoundException(ContentTypesInfo.Path);
+
+            using (Stream stream = entry.Open())
             {
                 ToXElement().Save(stream);
             }
@@ -121,7 +107,7 @@ namespace AD.OpenXml.Structures
             /// </summary>
             [NotNull]
             public static Default[] StandardEntries =>
-                new Default[]
+                new[]
                 {
                     new Default("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"),
                     new Default("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
@@ -151,14 +137,10 @@ namespace AD.OpenXml.Structures
             public Default(StringSegment extension, StringSegment contentType)
             {
                 if (!extension.HasValue)
-                {
                     throw new ArgumentNullException(nameof(extension));
-                }
 
                 if (!contentType.HasValue)
-                {
                     throw new ArgumentNullException(nameof(contentType));
-                }
 
                 Extension = extension;
                 ContentType = contentType;
@@ -171,70 +153,41 @@ namespace AD.OpenXml.Structures
             [Pure]
             [NotNull]
             public XElement ToXElement()
-            {
-                return
-                    new XElement(
-                        T + "Default",
-                        new XAttribute("Extension", Extension),
-                        new XAttribute("ContentType", ContentType));
-            }
+                => new XElement(T + "Default",
+                    new XAttribute("Extension", Extension),
+                    new XAttribute("ContentType", ContentType));
 
             /// <inheritdoc />
             [Pure]
-            [NotNull]
-            public override string ToString()
-            {
-                return ToXElement().ToString();
-            }
+            public override string ToString() => ToXElement().ToString();
 
             /// <inheritdoc />
             [Pure]
-            public int CompareTo(Default other)
-            {
-                return StringComparer.Ordinal.Compare(Extension.Value, other.Extension.Value);
-            }
+            public int CompareTo(Default other) => StringComparer.Ordinal.Compare(Extension.Value, other.Extension.Value);
 
             /// <inheritdoc />
             [Pure]
-            public bool Equals(Default other)
-            {
-                return Extension.Equals(other.Extension) && ContentType.Equals(other.ContentType);
-            }
+            public bool Equals(Default other) => Extension.Equals(other.Extension) && ContentType.Equals(other.ContentType);
 
             /// <inheritdoc />
             [Pure]
-            public override bool Equals([CanBeNull] object obj)
-            {
-                return obj is Default d && Equals(d);
-            }
+            public override bool Equals(object obj) => obj is Default d && Equals(d);
 
             /// <inheritdoc />
             [Pure]
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    return (Extension.GetHashCode() * 397) ^ ContentType.GetHashCode();
-                }
-            }
+            public override int GetHashCode() => unchecked((Extension.GetHashCode() * 397) ^ ContentType.GetHashCode());
 
             /// <summary>Returns a value that indicates whether two <see cref="Default" /> objects have equal values.</summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
             /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.</returns>            [Pure]
-            public static bool operator ==(Default left, Default right)
-            {
-                return left.Equals(right);
-            }
+            public static bool operator ==(Default left, Default right) => left.Equals(right);
 
             /// <summary>Returns a value that indicates whether two <see cref="Default" /> objects have different values.</summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
             /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.</returns>            [Pure]
-            public static bool operator !=(Default left, Default right)
-            {
-                return !left.Equals(right);
-            }
+            public static bool operator !=(Default left, Default right) => !left.Equals(right);
         }
 
         /// <inheritdoc cref="IComparable{T}"/>
@@ -263,14 +216,10 @@ namespace AD.OpenXml.Structures
             public Override(StringSegment partName, StringSegment contentType)
             {
                 if (!partName.HasValue)
-                {
                     throw new ArgumentNullException(nameof(partName));
-                }
 
                 if (!contentType.HasValue)
-                {
                     throw new ArgumentNullException(nameof(contentType));
-                }
 
                 PartName = partName;
                 ContentType = contentType;
@@ -279,76 +228,57 @@ namespace AD.OpenXml.Structures
             /// <summary>
             ///
             /// </summary>
-            /// <returns></returns>
+            /// <returns>
+            ///
+            /// </returns>
             [Pure]
             [NotNull]
             public XElement ToXElement()
-            {
-                return
-                    new XElement(
-                        T + "Override",
-                        new XAttribute("PartName", PartName),
-                        new XAttribute("ContentType", ContentType));
-            }
+                => new XElement(T + "Override",
+                    new XAttribute("PartName", PartName),
+                    new XAttribute("ContentType", ContentType));
 
             /// <inheritdoc />
             [Pure]
-            [NotNull]
-            public override string ToString()
-            {
-                return ToXElement().ToString();
-            }
+            public override string ToString() => ToXElement().ToString();
 
             /// <inheritdoc />
             [Pure]
-            public int CompareTo(Override other)
-            {
-                return StringComparer.Ordinal.Compare(PartName.Value, other.PartName.Value);
-            }
+            public int CompareTo(Override other) => StringComparer.Ordinal.Compare(PartName.Value, other.PartName.Value);
 
             /// <inheritdoc />
             [Pure]
-            public bool Equals(Override other)
-            {
-                return PartName.Equals(other.PartName) && ContentType.Equals(other.ContentType);
-            }
+            public bool Equals(Override other) => PartName.Equals(other.PartName) && ContentType.Equals(other.ContentType);
 
             /// <inheritdoc />
             [Pure]
-            public override bool Equals([CanBeNull] object obj)
-            {
-                return obj is Override over && Equals(over);
-            }
+            public override bool Equals(object obj) => obj is Override over && Equals(over);
 
             /// <inheritdoc />
             [Pure]
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    return (PartName.GetHashCode() * 397) ^ ContentType.GetHashCode();
-                }
-            }
+            public override int GetHashCode() => unchecked((397 * PartName.GetHashCode()) ^ ContentType.GetHashCode());
 
-            /// <summary>Returns a value that indicates whether two <see cref="Override" /> objects have equal values.</summary>
+            /// <summary>
+            /// Returns a value that indicates whether two <see cref="Override" /> objects have equal values.
+            /// </summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
-            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.</returns>
+            /// <returns>T
+            /// True if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.
+            /// </returns>
             [Pure]
-            public static bool operator ==(Override left, Override right)
-            {
-                return left.Equals(right);
-            }
+            public static bool operator ==(Override left, Override right) => left.Equals(right);
 
-            /// <summary>Returns a value that indicates whether two <see cref="Override" /> objects have different values.</summary>
+            /// <summary>
+            /// Returns a value that indicates whether two <see cref="Override" /> objects have different values.
+            /// </summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
-            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.</returns>
+            /// <returns>
+            /// True if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
+            /// </returns>
             [Pure]
-            public static bool operator !=(Override left, Override right)
-            {
-                return !left.Equals(right);
-            }
+            public static bool operator !=(Override left, Override right) => !left.Equals(right);
         }
     }
 }

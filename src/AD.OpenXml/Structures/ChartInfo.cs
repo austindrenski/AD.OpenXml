@@ -7,13 +7,13 @@ using AD.Xml;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
 
-// BUG: Temporary. Should be fixed in .NET Core 2.1.
-// ReSharper disable ImpureMethodCallOnReadonlyValueField
-
 namespace AD.OpenXml.Structures
 {
+    // ReSharper disable ImpureMethodCallOnReadonlyValueField
+
     /// <inheritdoc cref="IEquatable{T}" />
     /// <summary>
+    ///
     /// </summary>
     [PublicAPI]
     public readonly struct ChartInfo : IEquatable<ChartInfo>
@@ -74,12 +74,9 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="rId">
-        ///
-        /// </param>
-        /// <param name="chart">
-        ///
-        /// </param>
+        /// <param name="rId"></param>
+        /// <param name="chart"></param>
+        /// <exception cref="ArgumentNullException" />
         public ChartInfo(StringSegment rId, [NotNull] XElement chart)
         {
             if (!rId.StartsWith("rId", StringComparison.Ordinal))
@@ -100,33 +97,25 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         /// <param name="offset"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException" />
+        /// <returns>
+        ///
+        /// </returns>
         [Pure]
-        public ChartInfo WithOffset(int offset)
-        {
-            return new ChartInfo($"rId{NumericId + offset}", Chart);
-        }
+        public ChartInfo WithOffset(int offset) => new ChartInfo($"rId{NumericId + offset}", Chart);
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="rId"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException" />
+        /// <returns>
+        ///
+        /// </returns>
         [Pure]
-        public ChartInfo WithRelationId(StringSegment rId)
-        {
-            return new ChartInfo(rId, Chart);
-        }
+        public ChartInfo WithRelationId(StringSegment rId) => new ChartInfo(rId, Chart);
 
         /// <inheritdoc />
         [Pure]
-        [NotNull]
-        public override string ToString()
-        {
-            return $"(Id: {RelationId}, PartName: {PartName})";
-        }
+        public override string ToString() => $"(Id: {RelationId}, PartName: {PartName})";
 
         /// <summary>
         ///
@@ -150,62 +139,36 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (397 * RelationId.GetHashCode()) ^ Chart.GetHashCode();
-            }
-        }
+        public override int GetHashCode() => unchecked((397 * RelationId.GetHashCode()) ^ Chart.GetHashCode());
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(ChartInfo other)
-        {
-            return Equals(RelationId, other.RelationId) && XNode.DeepEquals(Chart, other.Chart);
-        }
+        public bool Equals(ChartInfo other) => Equals(RelationId, other.RelationId) && XNode.DeepEquals(Chart, other.Chart);
 
         /// <inheritdoc />
         [Pure]
-        public override bool Equals([CanBeNull] object obj)
-        {
-            return obj is ChartInfo chart && Equals(chart);
-        }
+        public override bool Equals(object obj) => obj is ChartInfo chart && Equals(chart);
 
         /// <summary>
         /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ChartInfo" /> objects have the same values.
         /// </summary>
-        /// <param name="left">
-        /// The first value to compare.
-        /// </param>
-        /// <param name="right">
-        /// The second value to compare.
-        /// </param>
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
         /// <returns>
-        /// true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.
+        /// True if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator ==(ChartInfo left, ChartInfo right)
-        {
-            return left.Equals(right);
-        }
+        public static bool operator ==(ChartInfo left, ChartInfo right) => left.Equals(right);
 
         /// <summary>
         /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ChartInfo" /> objects have different values.
         /// </summary>
-        /// <param name="left">
-        /// The first value to compare.
-        /// </param>
-        /// <param name="right">
-        /// The second value to compare.
-        /// </param>
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
         /// <returns>
-        /// true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
+        /// True if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator !=(ChartInfo left, ChartInfo right)
-        {
-            return !left.Equals(right);
-        }
+        public static bool operator !=(ChartInfo left, ChartInfo right) => !left.Equals(right);
     }
 }

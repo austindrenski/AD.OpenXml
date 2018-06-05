@@ -150,9 +150,7 @@ namespace AD.OpenXml
         /// <summary>
         /// Visit and join the component document into this <see cref="OpenXmlPackageVisitor"/>.
         /// </summary>
-        /// <param name="archive">
-        /// The archive to visit.
-        /// </param>
+        /// <param name="archive">The archive to visit.</param>
         [Pure]
         [NotNull]
         public OpenXmlPackageVisitor Visit([NotNull] ZipArchive archive)
@@ -173,9 +171,7 @@ namespace AD.OpenXml
         /// <summary>
         /// Visit and fold the component documents into this <see cref="OpenXmlPackageVisitor"/>.
         /// </summary>
-        /// <param name="archives">
-        /// The archives to visit.
-        /// </param>
+        /// <param name="archives">The archives to visit.</param>
         [Pure]
         [NotNull]
         public static OpenXmlPackageVisitor VisitAndFold([NotNull] [ItemNotNull] IEnumerable<ZipArchive> archives)
@@ -189,12 +185,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Folds <paramref name="subject"/> into this <see cref="OpenXmlPackageVisitor"/>.
         /// </summary>
-        /// <param name="subject">
-        /// The <see cref="OpenXmlPackageVisitor"/> that is folded into this <see cref="OpenXmlPackageVisitor"/>.
-        /// </param>
+        /// <param name="subject">The visitor that is folded into the current visitor.</param>
         [Pure]
         [NotNull]
-        protected OpenXmlPackageVisitor Fold([NotNull] OpenXmlPackageVisitor subject)
+        private OpenXmlPackageVisitor Fold([NotNull] OpenXmlPackageVisitor subject)
         {
             if (subject is null)
                 throw new ArgumentNullException(nameof(subject));
@@ -288,22 +282,19 @@ namespace AD.OpenXml
         [Pure]
         [NotNull]
         private ContentTypes BuildContentTypes()
-        {
-            return
-                new ContentTypes(
-                    new ContentTypes.Override[]
-                    {
-                        new ContentTypes.Override("/docProps/app.xml", "application/vnd.openxmlformats-officedocument.extended-properties+xml"),
-                        new ContentTypes.Override("/docProps/core.xml", "application/vnd.openxmlformats-package.core-properties+xml"),
-                        new ContentTypes.Override("/word/document.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"),
-                        new ContentTypes.Override("/word/settings.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"),
-                        new ContentTypes.Override("/word/styles.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"),
-                        new ContentTypes.Override("/word/theme/theme1.xml", "application/vnd.openxmlformats-officedocument.theme+xml"),
-                        Footnotes.ContentTypeEntry,
-                        new ContentTypes.Override("/word/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"),
-                    },
-                    Document.Charts.Select(x => x.ContentTypeEntry));
-        }
+            => new ContentTypes(
+                new[]
+                {
+                    new ContentTypes.Override("/docProps/app.xml", "application/vnd.openxmlformats-officedocument.extended-properties+xml"),
+                    new ContentTypes.Override("/docProps/core.xml", "application/vnd.openxmlformats-package.core-properties+xml"),
+                    new ContentTypes.Override("/word/document.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"),
+                    new ContentTypes.Override("/word/settings.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"),
+                    new ContentTypes.Override("/word/styles.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"),
+                    new ContentTypes.Override("/word/theme/theme1.xml", "application/vnd.openxmlformats-officedocument.theme+xml"),
+                    Footnotes.ContentTypeEntry,
+                    new ContentTypes.Override("/word/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"),
+                },
+                Document.Charts.Select(x => x.ContentTypeEntry));
 
         /// <summary>
         /// Cosntructs a <see cref="Relationships"/> instance for /word/_rels/document.xml.rels.
@@ -311,30 +302,24 @@ namespace AD.OpenXml
         [Pure]
         [NotNull]
         private Relationships BuildDocumentRelationships()
-        {
-            return
-                new Relationships(
-                    new Relationships.Entry[]
-                    {
-                        Footnotes.RelationshipEntry,
-                        new Relationships.Entry("rId2", "numbering.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
-                        new Relationships.Entry("rId3", "settings.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings"),
-                        new Relationships.Entry("rId4", "styles.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"),
-                        new Relationships.Entry("rId5", "theme/theme1.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme"),
-                    },
-                    Document.Charts.Select(x => x.RelationshipEntry),
-                    Document.Images.Select(x => x.RelationshipEntry),
-                    Document.Hyperlinks.Select(x => x.RelationshipEntry));
-        }
+            => new Relationships(
+                new Relationships.Entry[]
+                {
+                    Footnotes.RelationshipEntry,
+                    new Relationships.Entry("rId2", "numbering.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
+                    new Relationships.Entry("rId3", "settings.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings"),
+                    new Relationships.Entry("rId4", "styles.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"),
+                    new Relationships.Entry("rId5", "theme/theme1.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme"),
+                },
+                Document.Charts.Select(x => x.RelationshipEntry),
+                Document.Images.Select(x => x.RelationshipEntry),
+                Document.Hyperlinks.Select(x => x.RelationshipEntry));
 
         /// <summary>
         /// Cosntructs a <see cref="Relationships"/> instance for /word/_rels/footnote.xml.rels.
         /// </summary>
         [Pure]
         [NotNull]
-        private Relationships BuildFootnoteRelationships()
-        {
-            return new Relationships(Footnotes.Hyperlinks.Select(x => x.RelationshipEntry));
-        }
+        private Relationships BuildFootnoteRelationships() => new Relationships(Footnotes.Hyperlinks.Select(x => x.RelationshipEntry));
     }
 }

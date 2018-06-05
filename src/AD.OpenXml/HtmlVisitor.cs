@@ -6,8 +6,6 @@ using System.Xml.Linq;
 using AD.OpenXml.Structures;
 using JetBrains.Annotations;
 
-// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
-
 namespace AD.OpenXml
 {
     /// <inheritdoc />

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 
-// ReSharper disable VirtualMemberNeverOverridden.Global
 namespace AD.OpenXml
 {
     /// <summary>

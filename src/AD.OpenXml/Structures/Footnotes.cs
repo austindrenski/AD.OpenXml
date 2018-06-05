@@ -107,26 +107,16 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="rId">
-        ///
-        /// </param>
-        /// <param name="content">
-        ///
-        /// </param>
-        /// <param name="hyperlinks">
-        ///
-        /// </param>
+        /// <param name="rId"></param>
+        /// <param name="content"></param>
+        /// <param name="hyperlinks"></param>
         public Footnotes(StringSegment rId, [NotNull] XElement content, [NotNull] IEnumerable<HyperlinkInfo> hyperlinks)
         {
             if (content is null)
-            {
                 throw new ArgumentNullException(nameof(content));
-            }
 
             if (hyperlinks is null)
-            {
                 throw new ArgumentNullException(nameof(hyperlinks));
-            }
 
             RelationId = rId;
             Content = content;
@@ -136,22 +126,18 @@ namespace AD.OpenXml.Structures
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading Footnotes parts into memory.
         /// </summary>
-        /// <param name="archive">
-        /// The archive to which changes can be saved.
-        /// </param>
+        /// <param name="archive">The archive to which changes can be saved.</param>
         /// <exception cref="ArgumentNullException"/>
         public Footnotes([NotNull] ZipArchive archive)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             RelationId =
                 archive.ReadXml(DocumentRelsInfo.Path)
                        .Elements(DocumentRelsInfo.Elements.Relationship)
                        .Single(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) == SchemaType)
-                       .Attribute(DocumentRelsInfo.Attributes.Id)
+                       .Attribute(DocumentRelsInfo.Attributes.Id)?
                        .Value;
 
             // TODO: hard-coding to rId1 until other package parts are migrated.
@@ -175,62 +161,62 @@ namespace AD.OpenXml.Structures
                        .ToImmutableHashSet();
         }
 
-        ///  <summary>
+        /// <summary>
         ///
-        ///  </summary>
+        /// </summary>
         /// <param name="content"></param>
-        ///  <param name="hyperlinks"></param>
-        ///  <returns></returns>
+        /// <param name="hyperlinks"></param>
+        /// <returns>
+        ///
+        /// </returns>
         public Footnotes With([CanBeNull] XElement content = default, [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
-        {
-            return new Footnotes(RelationId, content ?? Content, hyperlinks ?? Hyperlinks);
-        }
+            => new Footnotes(RelationId, content ?? Content, hyperlinks ?? Hyperlinks);
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="other"></param>
-        /// <returns></returns>
-        public Footnotes Concat([NotNull] Footnotes other)
-        {
-            return Concat(other.Content, other.Hyperlinks);
-        }
+        /// <returns>
+        ///
+        /// </returns>
+        public Footnotes Concat([NotNull] Footnotes other) => Concat(other.Content, other.Hyperlinks);
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="content"></param>
         /// <param name="hyperlinks"></param>
-        /// <returns></returns>
+        /// <returns>
+        ///
+        /// </returns>
         public Footnotes Concat([CanBeNull] XElement content = default, [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
-        {
-            XElement footnotes =
+            => new Footnotes(
+                RelationId,
                 content is null
                     ? Content
                     : new XElement(
                         Content.Name,
                         Content.Attributes(),
                         Content.Elements(),
-                        content.Elements());
-
-            return new Footnotes(RelationId, footnotes, hyperlinks is null ? Hyperlinks : Hyperlinks.Concat(hyperlinks));
-        }
+                        content.Elements()),
+                hyperlinks is null
+                    ? Hyperlinks
+                    : Hyperlinks.Concat(hyperlinks));
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="archive">
-        ///
-        /// </param>
+        /// <param name="archive"></param>
         /// <exception cref="ArgumentNullException" />
+        /// <exception cref="FileNotFoundException" />
         public void Save([NotNull] ZipArchive archive)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
-            using (Stream stream = archive.GetEntry(PartName.Substring(1)).Open())
+            using (Stream stream =
+                archive.GetEntry(PartName.Substring(1))?.Open() ??
+                throw new FileNotFoundException(PartName.Substring(1)))
             {
                 Content.Save(stream);
             }
