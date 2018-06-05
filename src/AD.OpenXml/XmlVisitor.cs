@@ -88,12 +88,10 @@ namespace AD.OpenXml
         [Pure]
         [NotNull]
         [ItemCanBeNull]
-        protected virtual IEnumerable<XObject> Visit([NotNull] [ItemCanBeNull] IEnumerable<XObject> source)
+        protected IEnumerable<XObject> Visit([NotNull] [ItemCanBeNull] IEnumerable<XObject> source)
         {
             if (source is null)
-            {
                 throw new ArgumentNullException(nameof(source));
-            }
 
             foreach (XObject item in source)
             {
@@ -110,10 +108,7 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject Visit([CanBeNull] string text)
-            => text is null
-                   ? null
-                   : Visit(new XText(text));
+        protected XObject Visit([CanBeNull] string text) => text is null ? null : Visit(new XText(text));
 
         /// <summary>
         /// Visits an <see cref="XAttribute"/>.
@@ -183,6 +178,52 @@ namespace AD.OpenXml
         protected virtual XObject VisitText([NotNull] XText text) => new XText(text.Value);
 
         /// <summary>
+        /// Constructs a liftable div element.
+        /// </summary>
+        /// <param name="element">The <see cref="XElement"/> from which nodes can be lifted.</param>
+        /// <returns>
+        /// An <see cref="XObject"/> representing the lift operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected XObject LiftableHelper([CanBeNull] XElement element)
+            => element is null
+                   ? null
+                   : new XElement("div",
+                       new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
+                       Visit(element.Elements()));
+
+        /// <summary>
+        /// Constructs a liftable div element.
+        /// </summary>
+        /// <param name="nodes">The <see cref="XNode"/> collection from which nodes can be lifted.</param>
+        /// <returns>
+        /// An <see cref="XObject"/> representing the lift operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected XObject LiftableHelper([CanBeNull] IEnumerable<XObject> nodes)
+            => nodes is null
+                   ? null
+                   : new XElement("div",
+                       new XAttribute(Liftable, "from-nodes"),
+                       Visit(nodes));
+
+        /// <summary>
+        /// Constructs a liftable div element.
+        /// </summary>
+        /// <param name="nodes">The <see cref="XNode"/> collection from which nodes can be lifted.</param>
+        /// <returns>
+        /// An <see cref="XObject"/> representing the lift operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected XObject LiftableHelper([CanBeNull] params XObject[] nodes) => LiftableHelper((IEnumerable<XObject>) nodes);
+
+        /// <summary>
         /// Lifts a singleton <see cref="XObject"/>.
         /// </summary>
         /// <param name="xObject">The <see cref="XObject"/> to visit and lift.</param>
@@ -228,23 +269,6 @@ namespace AD.OpenXml
                 yield return item;
             }
         }
-
-        /// <summary>
-        /// Constructs a liftable div element.
-        /// </summary>
-        /// <param name="element">The <see cref="XElement"/> from which nodes can be lifted.</param>
-        /// <returns>
-        /// An <see cref="XObject"/> representing the lift operation.
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        [CanBeNull]
-        protected XObject LiftableHelper([CanBeNull] XElement element)
-            => element is null
-                   ? null
-                   : new XElement("div",
-                       new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
-                       Visit(element.Elements()));
 
         /// <summary>
         /// Yields the <see cref="XObject"/> or the children of the <see cref="XObject"/> if the "data-liftable" attribute is present.
