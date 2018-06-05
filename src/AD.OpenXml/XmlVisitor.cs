@@ -5,7 +5,6 @@ using System.Xml.Linq;
 using JetBrains.Annotations;
 
 // ReSharper disable VirtualMemberNeverOverridden.Global
-
 namespace AD.OpenXml
 {
     /// <summary>
@@ -17,14 +16,12 @@ namespace AD.OpenXml
         /// <summary>
         /// The "data-liftable" attribute.
         /// </summary>
-        [NotNull] protected const string Liftable = "data-liftable";
+        [NotNull] private const string Liftable = "data-liftable";
 
         /// <summary>
         /// Visits the <see cref="XObject"/>.
         /// </summary>
-        /// <param name="xObject">
-        /// The <see cref="XObject"/> to visit.
-        /// </param>
+        /// <param name="xObject">The <see cref="XObject"/> to visit.</param>
         /// <returns>
         /// The visited <see cref="XObject"/>.
         /// </returns>
@@ -84,9 +81,7 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits an <see cref="XObject"/> collection.
         /// </summary>
-        /// <param name="source">
-        /// The <see cref="XObject"/> collection to visit.
-        /// </param>
+        /// <param name="source">The <see cref="XObject"/> collection to visit.</param>
         /// <returns>
         /// A visited <see cref="XObject"/> collection.
         /// </returns>
@@ -110,9 +105,7 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the text as an <see cref="XText"/> node.
         /// </summary>
-        /// <param name="text">
-        /// The text to visit.
-        /// </param>
+        /// <param name="text">The text to visit.</param>
         /// <returns>
         /// A visited <see cref="XObject"/>.
         /// </returns>
@@ -136,24 +129,14 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitAttribute([NotNull] XAttribute attribute)
-        {
-            if (attribute is null)
-            {
-                throw new ArgumentNullException(nameof(attribute));
-            }
-
-            return
-                new XAttribute(
-                    VisitName(attribute.Name),
-                    attribute.Value);
-        }
+            => new XAttribute(
+                VisitName(attribute.Name),
+                attribute.Value);
 
         /// <summary>
         /// Visits an <see cref="XElement"/>.
         /// </summary>
-        /// <param name="element">
-        /// The <see cref="XElement"/> to visit.
-        /// </param>
+        /// <param name="element">The <see cref="XElement"/> to visit.</param>
         /// <returns>
         /// The visited <see cref="XElement"/>.
         /// </returns>
@@ -161,47 +144,26 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitElement([NotNull] XElement element)
-        {
-            if (element is null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            return
-                new XElement(
-                    VisitName(element.Name),
-                    Visit(element.Attributes()),
-                    Visit(element.Nodes()));
-        }
+            => new XElement(
+                VisitName(element.Name),
+                Visit(element.Attributes()), Visit(element.Nodes()));
 
         /// <summary>
         /// Visits an <see cref="XName"/>.
         /// </summary>
-        /// <param name="name">
-        /// The name to visit.
-        /// </param>
+        /// <param name="name">The name to visit.</param>
         /// <returns>
         /// A visited <see cref="XName"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual XName VisitName([NotNull] XName name)
-        {
-            if (name is null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            return name;
-        }
+        protected virtual XName VisitName([NotNull] XName name) => name;
 
         /// <summary>
         /// Visits an <see cref="XObject"/> that was unhandled by known derived type methods.
         /// </summary>
-        /// <param name="xObject">
-        /// The <see cref="XObject"/> to visit.
-        /// </param>
+        /// <param name="xObject">The <see cref="XObject"/> to visit.</param>
         /// <returns>
         /// The visited <see cref="XObject"/>.
         /// </returns>
@@ -212,47 +174,34 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits an <see cref="XText"/>.
         /// </summary>
-        /// <param name="text">
-        /// The <see cref="XText"/> to visit.
-        /// </param>
+        /// <param name="text">The <see cref="XText"/> to visit.</param>
         /// <returns>
         /// The visited <see cref="XText"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitText([NotNull] XText text)
-        {
-            if (text is null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
-            return new XText(text.Value);
-        }
+        protected virtual XObject VisitText([NotNull] XText text) => new XText(text.Value);
 
         /// <summary>
         /// Lifts a singleton <see cref="XObject"/>.
         /// </summary>
-        /// <param name="xObject">
-        /// The <see cref="XObject"/> to visit and lift.
-        /// </param>
+        /// <param name="xObject">The <see cref="XObject"/> to visit and lift.</param>
         /// <returns>
         /// The visited <see cref="XObject"/>.
         /// </returns>
         [Pure]
         [CanBeNull]
         protected static XObject LiftSingleton([CanBeNull] XObject xObject)
-            => xObject is XContainer container && container.Nodes().Count() <= 1
+            => xObject is XContainer container &&
+               container.Nodes().Count() <= 1
                    ? container.FirstNode
                    : xObject;
 
         /// <summary>
         /// Yields the <see cref="XObject"/> or the children of the <see cref="XObject"/> if the "data-liftable" attribute is present.
         /// </summary>
-        /// <param name="xObject">
-        /// The <see cref="XObject"/> to visit.
-        /// </param>
+        /// <param name="xObject">The <see cref="XObject"/> to visit.</param>
         /// <returns>
         /// The <see cref="XObject"/> or the children of the <see cref="XObject"/>.
         /// </returns>
@@ -282,11 +231,26 @@ namespace AD.OpenXml
         }
 
         /// <summary>
+        /// Constructs a liftable div element.
+        /// </summary>
+        /// <param name="element">The <see cref="XElement"/> from which nodes can be lifted.</param>
+        /// <returns>
+        /// An <see cref="XObject"/> representing the lift operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected XObject LiftableHelper([CanBeNull] XElement element)
+            => element is null
+                   ? null
+                   : new XElement("div",
+                       new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
+                       Visit(element.Elements()));
+
+        /// <summary>
         /// Yields the <see cref="XObject"/> or the children of the <see cref="XObject"/> if the "data-liftable" attribute is present.
         /// </summary>
-        /// <param name="source">
-        /// The collection of <see cref="XObject"/> to visit.
-        /// </param>
+        /// <param name="source">The collection of <see cref="XObject"/> to visit.</param>
         /// <returns>
         /// The <see cref="XObject"/> or the children of the <see cref="XObject"/>.
         /// </returns>
@@ -308,43 +272,18 @@ namespace AD.OpenXml
         }
 
         /// <summary>
-        /// Constructs a liftable div element.
+        ///
         /// </summary>
-        /// <param name="element">
-        /// The <see cref="XElement"/> from which nodes can be lifted.
-        /// </param>
+        /// <param name="current">  </param>
+        /// <param name="cast"> </param>
+        /// <param name="predicates">  </param>
         /// <returns>
-        /// An <see cref="XObject"/> representing the lift operation.
+        ///
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        [CanBeNull]
-        protected XObject LiftableHelper([CanBeNull] XElement element)
-            => element is null
-                   ? null
-                   : new XElement("div",
-                       new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
-                       Visit(element.Elements()));
-
-        ///  <summary>
-        ///
-        ///  </summary>
-        ///  <param name="current">
-        ///
-        ///  </param>
-        /// <param name="cast">
-        ///
-        /// </param>
-        /// <param name="predicates">
-        ///
-        ///  </param>
-        ///  <returns>
-        ///
-        ///  </returns>
         [Pure]
         [NotNull]
         [ItemNotNull]
-        protected IEnumerable<T> NextWhile<T>([NotNull] XNode current, Func<XNode, T> cast, [NotNull] [ItemNotNull] params Func<T, bool>[] predicates) where T : class
+        protected static IEnumerable<T> NextWhile<T>([NotNull] XNode current, Func<XNode, T> cast, [NotNull] [ItemNotNull] params Func<T, bool>[] predicates) where T : class
         {
             if (current is null)
             {

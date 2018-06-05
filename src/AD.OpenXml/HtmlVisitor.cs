@@ -69,37 +69,37 @@ namespace AD.OpenXml
         /// The mapping of chart id to node.
         /// </summary>
         [NotNull]
-        protected IDictionary<string, XElement> Charts { get; }
+        protected virtual IDictionary<string, XElement> Charts { get; }
 
         /// <summary>
         /// The mapping of image id to data.
         /// </summary>
         [NotNull]
-        protected IDictionary<string, (string mime, string description, string base64)> Images { get; }
+        protected virtual IDictionary<string, (string mime, string description, string base64)> Images { get; }
 
         /// <summary>
         /// The 'charset' tage value.
         /// </summary>
         [NotNull]
-        protected string CharacterSet { get; } = "utf-8";
+        protected virtual string CharacterSet => "utf-8";
 
         /// <summary>
         /// The 'lang' tage value.
         /// </summary>
         [NotNull]
-        protected string Language { get; } = "en";
+        protected virtual string Language => "en";
 
         /// <summary>
         /// The value for the 'name' attribute on the 'meta' tag.
         /// </summary>
         [NotNull]
-        protected string MetaName { get; } = "viewport";
+        protected virtual string MetaName => "viewport";
 
         /// <summary>
         /// The value for the 'content' attribute on the 'meta' tag.
         /// </summary>
         [NotNull]
-        protected string MetaContent { get; } = "width=device-width,minimum-scale=1,initial-scale=1";
+        protected virtual string MetaContent => "width=device-width,minimum-scale=1,initial-scale=1";
 
         /// <inheritdoc />
         protected HtmlVisitor(bool returnOnDefault) : base(returnOnDefault)
@@ -112,15 +112,9 @@ namespace AD.OpenXml
         /// <summary>
         /// Initializes an <see cref="HtmlVisitor"/>.
         /// </summary>
-        /// <param name="returnOnDefault">
-        /// True if an element should be returned when handling the default dispatch case.
-        /// </param>
-        /// <param name="charts">
-        /// Chart data referenced in the content to be visited.
-        /// </param>
-        /// <param name="images">
-        /// Image data referenced in the content to be visited.
-        /// </param>
+        /// <param name="returnOnDefault">True if an element should be returned when handling the default dispatch case.</param>
+        /// <param name="charts">Chart data referenced in the content to be visited.</param>
+        /// <param name="images">Image data referenced in the content to be visited.</param>
         protected HtmlVisitor(bool returnOnDefault, [NotNull] IDictionary<string, XElement> charts, [NotNull] IDictionary<string, (string mime, string description, string base64)> images) : base(returnOnDefault)
         {
             if (charts is null)
@@ -140,18 +134,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
         /// </summary>
-        /// <param name="document">
-        /// The w:document node.
-        /// </param>
-        /// <param name="footnotes">
-        ///
-        /// </param>
-        /// <param name="title">
-        /// The name of this HTML document.
-        /// </param>
-        /// <param name="stylesheet">
-        /// The name, relative path, or absolute path to a CSS stylesheet.
-        /// </param>
+        /// <param name="document">The w:document node.</param>
+        /// <param name="footnotes"></param>
+        /// <param name="title">The name of this HTML document.</param>
+        /// <param name="stylesheet">The name, relative path, or absolute path to a CSS stylesheet.</param>
         /// <returns>
         /// An <see cref="XElement"/> "html
         /// </returns>
@@ -188,18 +174,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
         /// </summary>
-        /// <param name="document">
-        /// The w:document node.
-        /// </param>
-        /// <param name="footnotes">
-        ///
-        /// </param>
-        /// <param name="title">
-        /// The name of this HTML document.
-        /// </param>
-        /// <param name="stylesheet">
-        /// The name, relative path, or absolute path to a CSS stylesheet.
-        /// </param>
+        /// <param name="document">The w:document node.</param>
+        /// <param name="footnotes"></param>
+        /// <param name="title">The name of this HTML document.</param>
+        /// <param name="stylesheet">The name, relative path, or absolute path to a CSS stylesheet.</param>
         /// <returns>
         /// An <see cref="XElement"/> "html
         /// </returns>
@@ -253,7 +231,7 @@ namespace AD.OpenXml
                                 new XText("h1 { page-break-before: always; }"),
                                 new XText("h1 { counter-increment: chapter_counter; }"),
                                 new XText("h1 { counter-reset: footnote_counter figure_counter table_counter; }"),
-                                new XText("h1::before { content:'Chapter ' counter(chapter_counter) '\\A'; white-space: pre; }"),
+//                                new XText("h1::before { content:'Chapter ' counter(chapter_counter) '\\A'; white-space: pre; }"),
                                 new XText("footer::target { background: yellow; }"),
                                 new XText("table { counter-increment: table_counter; }"),
                                 new XText("figure { counter-increment: figure_counter; }"),
@@ -273,127 +251,56 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitAnchor(XElement anchor)
-        {
-            if (anchor is null)
-            {
-                throw new ArgumentNullException(nameof(anchor));
-            }
-
-            return LiftableHelper(anchor);
-        }
+        protected override XObject VisitAnchor(XElement anchor) => LiftableHelper(anchor);
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitAreaChart(XElement areaChart)
-        {
-            if (areaChart is null)
-            {
-                throw new ArgumentNullException(nameof(areaChart));
-            }
-
-            return ChartHelper(areaChart);
-        }
+        protected override XObject VisitAreaChart(XElement areaChart) => ChartHelper(areaChart);
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitAttribute(XAttribute attribute)
-        {
-            if (attribute is null)
-            {
-                throw new ArgumentNullException(nameof(attribute));
-            }
-
-            XName name = VisitName(attribute.Name);
-
-            return SupportedAttributes.Contains(name) ? new XAttribute(name, attribute.Value) : null;
-        }
+            => VisitName(attribute.Name) is XName name &&
+               SupportedAttributes.Contains(name)
+                   ? new XAttribute(name, attribute.Value)
+                   : null;
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitBarChart(XElement barChart)
-        {
-            if (barChart is null)
-            {
-                throw new ArgumentNullException(nameof(barChart));
-            }
-
-            return ChartHelper(barChart);
-        }
+        protected override XObject VisitBarChart(XElement barChart) => ChartHelper(barChart);
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitBody(XElement body)
-        {
-            if (body is null)
-            {
-                throw new ArgumentNullException(nameof(body));
-            }
-
-            return
-                new XElement(
-                    VisitName(body.Name),
-                    Visit(body.Elements()));
-        }
+            => new XElement(
+                VisitName(body.Name),
+                Visit(body.Elements()));
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitChart(XElement chart)
-        {
-            if (chart is null)
-            {
-                throw new ArgumentNullException(nameof(chart));
-            }
-
-            XElement chartContent = Charts[(string) chart.Attribute(R + "id")].Element(C + "chart");
-
-            return chartContent is null ? null : LiftableHelper(chartContent);
-        }
+            => LiftableHelper(Charts[(string) chart.Attribute(R + "id")].Element(C + "chart"));
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitDocument(XElement document)
-        {
-            if (document is null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
-
-            return
-                new XElement(
-                    VisitName(document.Name),
-                    Visit(document.Elements()));
-        }
+            => new XElement(
+                VisitName(document.Name),
+                Visit(document.Elements()));
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitDocumentProperty(XElement docPr)
-        {
-            if (docPr is null)
-            {
-                throw new ArgumentNullException(nameof(docPr));
-            }
-
-            return
-                new XElement(
-                    VisitName(docPr.Name),
-                    Visit((string) docPr.Attribute("title") ?? string.Empty));
-        }
+            => new XElement(
+                VisitName(docPr.Name),
+                Visit((string) docPr.Attribute("title") ?? string.Empty));
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitDrawing(XElement drawing)
-        {
-            if (drawing is null)
-            {
-                throw new ArgumentNullException(nameof(drawing));
-            }
-
-            return
-                new XElement(
-                    VisitName(drawing.Name),
-                    Visit(drawing.Elements()));
-        }
+            => new XElement(
+                VisitName(drawing.Name),
+                Visit(drawing.Elements()));
 
         /// <inheritdoc />
         [Pure]
@@ -418,94 +325,41 @@ namespace AD.OpenXml
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitFootnotes(XElement footnotes)
-        {
-            if (footnotes is null)
-            {
-                throw new ArgumentNullException(nameof(footnotes));
-            }
-
-            return
-                new XElement("footer",
-                    new XAttribute("class", "footnotes"),
-                    new XElement("h2",
-                        new XAttribute("id", "footnote-label"),
-                        new XText("Footnotes")),
-                    // TODO: use <ol> once footnotes are encapsulated by the chapter section.
-                    new XElement("ul",
-                        Visit(footnotes.Elements().Where(x => (int) x.Attribute(W + "id") > 0))));
-        }
+            => new XElement("footer",
+                new XAttribute("class", "footnotes"),
+                new XElement("h2",
+                    new XAttribute("id", "footnote-label"),
+                    new XText("Footnotes")),
+                // TODO: use <ol> once footnotes are encapsulated by the chapter section.
+                new XElement("ul",
+                    Visit(footnotes.Elements().Where(x => (int) x.Attribute(W + "id") > 0))));
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitGraphic(XElement graphic)
-        {
-            if (graphic is null)
-            {
-                throw new ArgumentNullException(nameof(graphic));
-            }
-
-            return LiftableHelper(graphic);
-        }
+        protected override XObject VisitGraphic(XElement graphic) => LiftableHelper(graphic);
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitGraphicData(XElement graphicData)
-        {
-            if (graphicData is null)
-            {
-                throw new ArgumentNullException(nameof(graphicData));
-            }
-
-            return LiftableHelper(graphicData);
-        }
+        protected override XObject VisitGraphicData(XElement graphicData) => LiftableHelper(graphicData);
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitInline(XElement inline)
-        {
-            if (inline is null)
-            {
-                throw new ArgumentNullException(nameof(inline));
-            }
-
-            return LiftableHelper(inline);
-        }
+        protected override XObject VisitInline(XElement inline) => LiftableHelper(inline);
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitLineChart(XElement lineChart)
-        {
-            if (lineChart is null)
-            {
-                throw new ArgumentNullException(nameof(lineChart));
-            }
-
-            return ChartHelper(lineChart);
-        }
+        protected override XObject VisitLineChart(XElement lineChart) => ChartHelper(lineChart);
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitMath(XElement math)
-        {
-            if (math is null)
-            {
-                throw new ArgumentNullException(nameof(math));
-            }
-
-            return MathMLVisitor.Create(true).Visit(math);
-        }
+        protected override XObject VisitMath(XElement math) => MathMLVisitor.Create(true).Visit(math);
 
         /// <inheritdoc />
         [Pure]
         protected override XName VisitName(XName name)
-        {
-            if (name is null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            return Renames.TryGetValue(name, out XName result) ? result : name.LocalName;
-        }
+            => Renames.TryGetValue(name, out XName result)
+                   ? result
+                   : name.LocalName;
 
         /// <inheritdoc />
         [Pure]
@@ -586,27 +440,11 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitPieChart(XElement pieChart)
-        {
-            if (pieChart is null)
-            {
-                throw new ArgumentNullException(nameof(pieChart));
-            }
-
-            return ChartHelper(pieChart);
-        }
+        protected override XObject VisitPieChart(XElement pieChart) => ChartHelper(pieChart);
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitPlotArea(XElement plotArea)
-        {
-            if (plotArea is null)
-            {
-                throw new ArgumentNullException(nameof(plotArea));
-            }
-
-            return LiftableHelper(plotArea);
-        }
+        protected override XObject VisitPlotArea(XElement plotArea) => LiftableHelper(plotArea);
 
         /// <inheritdoc />
         [Pure]
@@ -773,79 +611,55 @@ namespace AD.OpenXml
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitText(XText text)
-        {
-            if (text is null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
-            return SequenceRegex.IsMatch(text.Value) || StyleReferenceRegex.IsMatch(text.Value) ? null : text;
-        }
+            => SequenceRegex.IsMatch(text.Value) ||
+               StyleReferenceRegex.IsMatch(text.Value)
+                   ? null
+                   : text;
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="chart">
-        ///
-        /// </param>
+        /// <param name="chart"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
         private static XObject ChartHelper([NotNull] XElement chart)
-        {
-            if (chart is null)
-            {
-                throw new ArgumentNullException(nameof(chart));
-            }
-
-            return
-                new XElement("data",
-                    chart.Elements(C + "ser")
-                         .Select(
-                             x =>
-                                 new XElement("series",
-                                     x.Element(C + "tx")?.Element(C + "strRef")?.Element(C + "strCache")?.Value is string name
-                                         ? new XAttribute("name", name)
-                                         : null,
-                                     (x.Element(C + "cat")?.Element(C + "strRef")?.Element(C + "strCache") ??
-                                      x.Element(C + "cat")?.Element(C + "numRef")?.Element(C + "numCache"))?
+            => new XElement("data",
+                chart.Elements(C + "ser")
+                     .Select(
+                         x =>
+                             new XElement("series",
+                                 x.Element(C + "tx")?.Element(C + "strRef")?.Element(C + "strCache")?.Value is string name
+                                     ? new XAttribute("name", name)
+                                     : null,
+                                 (x.Element(C + "cat")?.Element(C + "strRef")?.Element(C + "strCache") ??
+                                  x.Element(C + "cat")?.Element(C + "numRef")?.Element(C + "numCache"))?
+                                 .Elements(C + "pt")
+                                 .Zip(
+                                     (x.Element(C + "val")?.Element(C + "strRef")?.Element(C + "strCache") ??
+                                      x.Element(C + "val")?.Element(C + "numRef")?.Element(C + "numCache"))?
                                      .Elements(C + "pt")
-                                     .Zip(
-                                         (x.Element(C + "val")?.Element(C + "strRef")?.Element(C + "strCache") ??
-                                          x.Element(C + "val")?.Element(C + "numRef")?.Element(C + "numCache"))?
-                                         .Elements(C + "pt")
-                                         ??
-                                         Enumerable.Empty<XElement>(),
-                                         (a, b) =>
-                                             new XElement("observation",
-                                                 new XAttribute("label", a.Value),
-                                                 new XAttribute("value", b.Value))))));
-        }
+                                     ??
+                                     Enumerable.Empty<XElement>(),
+                                     (a, b) =>
+                                         new XElement("observation",
+                                             new XAttribute("label", a.Value),
+                                             new XAttribute("value", b.Value))))));
 
         /// <summary>
         /// Space delimits the attribute values into a 'class' attribute.
         /// </summary>
-        /// <param name="attributes">
-        /// The <see cref="XAttribute"/> collection to combine.
-        /// </param>
+        /// <param name="attributes">The <see cref="XAttribute"/> collection to combine.</param>
         /// <returns>
         /// An <see cref="XAttribute"/> with the name 'class' and the values from <paramref name="attributes"/>.
         /// </returns>
         [Pure]
         [CanBeNull]
         private static XAttribute MakeClassAttribute([NotNull] [ItemCanBeNull] params XAttribute[] attributes)
-        {
-            XAttribute[] notNull =
-                attributes.Where(x => x != null)
-                          .ToArray();
-
-            return
-                notNull.Any()
-                    ? new XAttribute("class", string.Join(" ", attributes.Where(x => x != null).Select(x => (string) x)))
-                    : null;
-        }
+            => attributes.Any(x => x != null)
+                   ? new XAttribute("class", string.Join(" ", attributes.Where(x => x != null).Select(x => (string) x)))
+                   : null;
     }
 }
