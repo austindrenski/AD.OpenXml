@@ -136,38 +136,25 @@ namespace AD.OpenXml
         /// <param name="document">The w:document node.</param>
         /// <param name="footnotes"></param>
         /// <param name="title">The name of this HTML document.</param>
-        /// <param name="stylesheet">The name, relative path, or absolute path to a CSS stylesheet.</param>
-        /// <returns>
+        /// <param name="stylesheetUrl">The name, relative path, or absolute path to a CSS stylesheet.</param>
+        /// <param name="styles">The CSS styles to include in a style node.</param>        /// <returns>
         /// An <see cref="XElement"/> "html
         /// </returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
-        public static XObject Visit([NotNull] Document document, [NotNull] Footnotes footnotes, [NotNull] string title, [NotNull] string stylesheet)
+        public static XObject Visit([NotNull] Document document, [NotNull] Footnotes footnotes, [CanBeNull] string title, [CanBeNull] string stylesheetUrl, [CanBeNull] string styles)
         {
             if (document is null)
-            {
                 throw new ArgumentNullException(nameof(document));
-            }
 
             if (footnotes is null)
-            {
                 throw new ArgumentNullException(nameof(footnotes));
-            }
 
-            if (title is null)
-            {
-                throw new ArgumentNullException(nameof(title));
-            }
-
-            if (stylesheet is null)
-            {
-                throw new ArgumentNullException(nameof(stylesheet));
-            }
 
             return
                 new HtmlVisitor(false, document.ChartReferences, document.ImageReferences)
-                    .Visit(document.Content, footnotes.Content, title, stylesheet);
+                    .Visit(document.Content, footnotes.Content, title, stylesheetUrl, styles);
         }
 
         /// <summary>
@@ -176,34 +163,21 @@ namespace AD.OpenXml
         /// <param name="document">The w:document node.</param>
         /// <param name="footnotes"></param>
         /// <param name="title">The name of this HTML document.</param>
-        /// <param name="stylesheet">The name, relative path, or absolute path to a CSS stylesheet.</param>
+        /// <param name="stylesheetUrl">The name, relative path, or absolute path to a CSS stylesheet.</param>
+        /// <param name="styles">The CSS styles to include in a style node.</param>
         /// <returns>
         /// An <see cref="XElement"/> "html
         /// </returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
-        public XObject Visit([NotNull] XElement document, [NotNull] XElement footnotes, [NotNull] string title, [NotNull] string stylesheet)
+        public XObject Visit([NotNull] XElement document, [NotNull] XElement footnotes, [CanBeNull] string title, [CanBeNull] string stylesheetUrl, [CanBeNull] string styles)
         {
             if (document is null)
-            {
                 throw new ArgumentNullException(nameof(document));
-            }
 
             if (footnotes is null)
-            {
                 throw new ArgumentNullException(nameof(footnotes));
-            }
-
-            if (title is null)
-            {
-                throw new ArgumentNullException(nameof(title));
-            }
-
-            if (stylesheet is null)
-            {
-                throw new ArgumentNullException(nameof(stylesheet));
-            }
 
             return
                 new XDocument(
@@ -216,24 +190,38 @@ namespace AD.OpenXml
                             new XElement("meta",
                                 new XAttribute("name", MetaName),
                                 new XAttribute("content", MetaContent)),
-                            new XElement("title", title),
+                            new XElement("title", title ?? string.Empty),
                             new XElement("script",
                                 new XAttribute("type", "text/javascript"),
                                 new XAttribute("src", "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"),
                                 new XText(string.Empty)),
                             new XElement("style",
-                                new XText("h1 { counter-reset: footnote_counter; }"),
-                                new XText("footer:target { background: yellow; }"),
-                                new XText("a[aria-describedby=\"footnote-label\"]::after { content: '[' counter(footnote_counter) ']'; }"),
-                                new XText("a[aria-describedby=\"footnote-label\"] { counter-increment: footnote_counter; }"),
-                                new XText("a[aria-describedby=\"footnote-label\"] { font-size: 0.5em; }"),
-                                new XText("a[aria-describedby=\"footnote-label\"] { margin-left: 1px; }"),
-                                new XText("a[aria-describedby=\"footnote-label\"] { text-decoration: none; }"),
-                                new XText("a[aria-describedby=\"footnote-label\"] { vertical-align: super; }")),
+                                @"
+body>article>h1 {
+    counter-reset: footnote_counter;
+}
+
+article a[aria-describedby='footnote-label']::before {
+    content: '[' counter(footnote_counter) ']';
+    counter-increment: footnote_counter;
+}
+
+article a[aria-describedby='footnote-label'] {
+    font-size: 0.5em;
+    margin-left: 1px;
+    text-decoration: none;
+    vertical-align: super;
+}
+
+footer.footnotes a[aria-label='Return to content'] {
+    text-decoration: none;
+}"
+                            ),
+                            new XElement("style", styles ?? string.Empty),
                             new XElement("link",
                                 new XAttribute("type", "text/css"),
                                 new XAttribute("rel", "stylesheet"),
-                                new XAttribute("href", stylesheet))),
+                                new XAttribute("href", stylesheetUrl ?? string.Empty))),
                         // TODO: dispatch sequences of nodes optionally (e.g. virtual) instead of each node to support section-encapsulation.
                         Lift(Visit(document)),
                         // TODO: handle this as a call at the end of an encapsulated section so that each section can be served as stand alone content.
@@ -321,8 +309,7 @@ namespace AD.OpenXml
                 new XElement("h2",
                     new XAttribute("id", "footnote-label"),
                     new XText("Footnotes")),
-                // TODO: use <ol> once footnotes are encapsulated by the chapter section.
-                new XElement("ul",
+                new XElement("ol",
                     Visit(footnotes.Elements().Where(x => (int) x.Attribute(W + "id") > 0))));
 
         /// <inheritdoc />

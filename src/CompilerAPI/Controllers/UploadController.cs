@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using AD.OpenXml;
 using AD.OpenXml.Documents;
 using JetBrains.Annotations;
@@ -22,7 +23,8 @@ namespace CompilerAPI.Controllers
     [ApiVersion("1.0")]
     public class UploadController : Controller
     {
-        private static MediaTypeHeaderValue _microsoftWordDocument = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        private static MediaTypeHeaderValue _microsoftWordDocument =
+            new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
         /// <summary>
         /// Returns the webpage with an upload form for documents.
@@ -37,24 +39,13 @@ namespace CompilerAPI.Controllers
         /// <summary>
         /// Receives file uploads from the user.
         /// </summary>
-        /// <param name="files">
-        /// The collection of files submitted by POST request.
-        /// </param>
-        /// <param name="format">
-        /// The format to produce
-        /// </param>
-        /// <param name="title">
-        /// The title of the document to be returned.
-        /// </param>
-        /// <param name="publisher">
-        /// The name of the publisher for the document to be returned.
-        /// </param>
-        /// <param name="website">
-        /// The website of the publisher.
-        /// </param>
-        /// <param name="stylesheet">
-        /// A style sheet reference link to be included on the HTML document.
-        /// </param>
+        /// <param name="files">The collection of files submitted by POST request.</param>
+        /// <param name="format">The format to produce.</param>
+        /// <param name="title">The title of the document to be returned.</param>
+        /// <param name="publisher">The name of the publisher for the document to be returned.</param>
+        /// <param name="website">The website of the publisher.</param>
+        /// <param name="stylesheetUrl">A style sheet reference link to be included on the HTML document.</param>
+        /// <param name="stylesheet">A style sheet to embed in the HTML document.</param>
         /// <returns>
         /// The combined and formatted document.
         /// </returns>
@@ -62,40 +53,37 @@ namespace CompilerAPI.Controllers
         [NotNull]
         [HttpPost]
         [ItemNotNull]
-        public async Task<IActionResult> Index([NotNull] [ItemNotNull] IEnumerable<IFormFile> files, [CanBeNull] string format, [CanBeNull] string title, [CanBeNull] string publisher, [CanBeNull] string website, [CanBeNull] string stylesheet)
+        public async Task<IActionResult> Index(
+            [NotNull] [ItemNotNull] IEnumerable<IFormFile> files,
+            [CanBeNull] string format,
+            [CanBeNull] string title,
+            [CanBeNull] string publisher,
+            [CanBeNull] string website,
+            [CanBeNull] string stylesheetUrl,
+            [CanBeNull] IFormFile stylesheet)
         {
             if (files is null)
-            {
                 throw new ArgumentNullException(nameof(files));
-            }
 
             IFormFile[] uploadedFiles = files.ToArray();
 
             if (uploadedFiles.Length == 0)
-            {
                 return BadRequest("No files uploaded.");
-            }
 
             if (uploadedFiles.Any(x => x.Length <= 0))
-            {
                 return BadRequest("Invalid file length.");
-            }
 
             if (uploadedFiles.Any(x => x.ContentType != _microsoftWordDocument.ToString() &&
                                        x.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase) &&
                                        x.FileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase)))
-            {
                 return BadRequest("Invalid file format.");
-            }
 
             Queue<ZipArchive> documentQueue = new Queue<ZipArchive>(uploadedFiles.Length);
 
             foreach (IFormFile file in uploadedFiles)
             {
                 if (file.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
-                {
                     documentQueue.Enqueue(new ZipArchive(file.OpenReadStream()));
-                }
 
 //                else
 //                {
@@ -130,65 +118,43 @@ namespace CompilerAPI.Controllers
             switch (format)
             {
                 case "docx":
-                {
                     return new FileStreamResult(output, _microsoftWordDocument);
-                }
+
                 case "html":
                 {
+                    string styles = stylesheet is null ? null : new StreamReader(stylesheet.OpenReadStream()).ReadToEnd();
                     OpenXmlPackageVisitor visitor = new OpenXmlPackageVisitor(new ZipArchive(output));
-                    return Content(HtmlVisitor.Visit(visitor.Document, visitor.Footnotes, title ?? "", stylesheet ?? "").ToString(), "text/html");
+                    XObject html = HtmlVisitor.Visit(visitor.Document, visitor.Footnotes, title, stylesheetUrl, styles);
+                    return Content(html.ToString(), "text/html");
                 }
                 case "xml":
-                {
-                    OpenXmlPackageVisitor visitor = new OpenXmlPackageVisitor(new ZipArchive(output));
-                    return Content(visitor.Document.Content.ToString(), "application/xml");
-                }
+                    return Content(new OpenXmlPackageVisitor(new ZipArchive(output)).Document.Content.ToString(), "application/xml");
+
                 default:
-                {
                     return BadRequest(ModelState);
-                }
             }
         }
 
         [Pure]
         [NotNull]
         [ItemNotNull]
-        private static async Task<MemoryStream> Process([NotNull] [ItemNotNull] IEnumerable<ZipArchive> files, [NotNull] string title, [NotNull] string publisher, [NotNull] string website)
-        {
-            if (files is null)
-            {
-                throw new ArgumentNullException(nameof(files));
-            }
-
-            if (title is null)
-            {
-                throw new ArgumentNullException(nameof(title));
-            }
-
-            if (publisher is null)
-            {
-                throw new ArgumentNullException(nameof(publisher));
-            }
-
-            if (website is null)
-            {
-                throw new ArgumentNullException(nameof(website));
-            }
-
-            return await
-                       OpenXmlPackageVisitor
-                           .VisitAndFold(files)
-                           .ToZipArchive()
-                           .AddHeaders(title)
-                           .AddFooters(publisher, website)
-                           .ToStream()
-                           .PositionChartsInline()
-                           .PositionChartsInner()
-                           .PositionChartsOuter()
-                           .ModifyBarChartStyles()
-                           .ModifyPieChartStyles()
-                           .ModifyLineChartStyles()
-                           .ModifyAreaChartStyles();
-        }
+        private static async Task<MemoryStream> Process(
+            [NotNull] [ItemNotNull] IEnumerable<ZipArchive> files,
+            [NotNull] string title,
+            [NotNull] string publisher,
+            [NotNull] string website)
+            => await OpenXmlPackageVisitor
+                     .VisitAndFold(files)
+                     .ToZipArchive()
+                     .AddHeaders(title)
+                     .AddFooters(publisher, website)
+                     .ToStream()
+                     .PositionChartsInline()
+                     .PositionChartsInner()
+                     .PositionChartsOuter()
+                     .ModifyBarChartStyles()
+                     .ModifyPieChartStyles()
+                     .ModifyLineChartStyles()
+                     .ModifyAreaChartStyles();
     }
 }

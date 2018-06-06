@@ -24,6 +24,23 @@
         <input type="text" name="website" class="form-control" aria-label="URL to the publisher's website" placeholder="[PUBLISHER WEBSITE]">
     </div>
 
+    <div class="input-group mb-3 mt-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">Stylesheet URL:</span>
+        </div>
+        <input type="text" name="stylesheetUrl" class="form-control" aria-label="The URL to a CSS file to apply when HTML is selected." placeholder="[STYLESHEET URL]">
+    </div>
+
+    <div class="input-group mb-3 mt-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">Stylesheet:</span>
+        </div>
+        <div class="custom-file">
+            <input id="stylesheet" name="stylesheet" type="file" class="custom-file-input" accept=".css">
+            <label class="custom-file-label" for="stylesheet">Choose stylesheet (optional)</label>
+        </div>
+    </div>
+
     <div class="btn-group btn-group-toggle" data-toggle="buttons">
         <label class="btn btn-outline-secondary active">
             <input type="radio" id="docx" name="format" value="docx" checked>
