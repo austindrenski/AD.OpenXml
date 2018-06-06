@@ -336,7 +336,7 @@ namespace AD.OpenXml
                     ? new XElement("mo", value)
                     : run.Parent?.Name == M + "oMath"
                         ? new XElement("mi", value)
-                        : Visit(value);
+                        : VisitString(value);
         }
 
         /// <summary>

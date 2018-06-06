@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 
+// ReSharper disable VirtualMemberNeverOverridden.Global
 namespace AD.OpenXml
 {
     /// <summary>
@@ -17,8 +19,11 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull] private const string Liftable = "data-liftable";
 
+        #region Main
+
         /// <summary>
         /// Visits the <see cref="XObject"/>.
+        /// This method can dispatch to <see cref="VisitObject"/>.
         /// </summary>
         /// <param name="xObject">The <see cref="XObject"/> to visit.</param>
         /// <returns>
@@ -26,106 +31,142 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        public XObject Visit([CanBeNull] XObject xObject)
-        {
-            switch (xObject)
-            {
-                case null:
-                {
-                    return null;
-                }
-                case XAttribute a:
-                {
-                    return VisitAttribute(a);
-                }
-                case XElement e:
-                {
-                    return VisitElement(e);
-                }
-                case XText t:
-                {
-                    return VisitText(t);
-                }
-                case XDocument _:
-                {
-                    throw new NotImplementedException();
-                }
-                case XContainer _:
-                {
-                    throw new NotImplementedException();
-                }
-                case XComment _:
-                {
-                    throw new NotImplementedException();
-                }
-                case XDocumentType _:
-                {
-                    throw new NotImplementedException();
-                }
-                case XProcessingInstruction _:
-                {
-                    throw new NotImplementedException();
-                }
-                case XNode _:
-                {
-                    throw new NotImplementedException();
-                }
-                default:
-                {
-                    return VisitObject(xObject);
-                }
-            }
-        }
+        public XObject Visit([CanBeNull] XObject xObject) => xObject is null ? null : VisitObject(xObject);
 
         /// <summary>
         /// Visits an <see cref="XObject"/> collection.
+        /// This method can dispatch to <see cref="Visit"/>.
         /// </summary>
         /// <param name="source">The <see cref="XObject"/> collection to visit.</param>
+        /// <param name="other">Additional <see cref="XObject"/> content to visit.</param>
         /// <returns>
         /// A visited <see cref="XObject"/> collection.
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        [ItemCanBeNull]
-        protected IEnumerable<XObject> Visit([NotNull] [ItemCanBeNull] IEnumerable<XObject> source)
+        [LinqTunnel]
+        [ItemNotNull]
+        [CollectionAccess(CollectionAccessType.Read)]
+        protected IEnumerable<XObject> Visit([CanBeNull] [ItemCanBeNull] IEnumerable<XObject> source, [CanBeNull] [ItemCanBeNull] params XObject[] other)
         {
             if (source is null)
-                throw new ArgumentNullException(nameof(source));
+                yield break;
 
             foreach (XObject item in source)
             {
-                yield return Visit(item);
+                if (Visit(item) is XObject result)
+                    yield return result;
+            }
+
+            if (other is null)
+                yield break;
+
+            foreach (XObject item in other)
+            {
+                if (Visit(item) is XObject result)
+                    yield return result;
             }
         }
 
-        /// <summary>
-        /// Visits the text as an <see cref="XText"/> node.
-        /// </summary>
-        /// <param name="text">The text to visit.</param>
-        /// <returns>
-        /// A visited <see cref="XObject"/>.
-        /// </returns>
-        [Pure]
-        [CanBeNull]
-        protected XObject Visit([CanBeNull] string text) => text is null ? null : Visit(new XText(text));
+        #endregion
+
+        #region Visits
 
         /// <summary>
         /// Visits an <see cref="XAttribute"/>.
         /// </summary>
-        /// <param name="attribute">
-        /// The <see cref="XAttribute"/> to visit.
-        /// </param>
+        /// <param name="attribute">The <see cref="XAttribute"/> to visit.</param>
         /// <returns>
-        /// The visited <see cref="XAttribute"/>.
+        /// The visited <see cref="XObject"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitAttribute([NotNull] XAttribute attribute)
-            => new XAttribute(
-                VisitName(attribute.Name),
-                attribute.Value);
+            => new XAttribute(VisitName(attribute.Name), attribute.Value);
+
+        /// <summary>
+        /// Visits an <see cref="XCData"/>.
+        /// </summary>
+        /// <param name="data">The <see cref="XCData"/> to visit.</param>
+        /// <returns>
+        /// The visited <see cref="XObject"/>.
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitCData([NotNull] XCData data) => new XCData(data.Value);
+
+        /// <summary>
+        /// Visits an <see cref="XComment "/>.
+        /// </summary>
+        /// <param name="comment">The <see cref="XComment "/> to visit.</param>
+        /// <returns>
+        /// The visited <see cref="XObject"/>.
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitComment([NotNull] XComment comment) => new XComment(comment.Value);
+
+        /// <summary>
+        /// Visits the <see cref="XContainer"/>.
+        /// This method can dispatch to <see cref="VisitElement"/> and <see cref="VisitDocument"/>.
+        /// </summary>
+        /// <param name="container">The <see cref="XContainer"/> to visit.</param>
+        /// <returns>
+        /// The visited <see cref="XObject"/>.
+        /// </returns>
+        /// <exception cref="VisitorException">No dispatch was found for the derived type.</exception>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitContainer([NotNull] XContainer container)
+        {
+            switch (container)
+            {
+                case XElement e:
+                    return VisitElement(e);
+
+                case XDocument d:
+                    return VisitDocument(d);
+
+                default:
+                    throw new VisitorException(container.GetType());
+            }
+        }
+
+        /// <summary>
+        /// Visits the <see cref="XDeclaration"/>.
+        /// </summary>
+        /// <param name="declaration">The <see cref="XDeclaration"/> to visit.</param>
+        /// <returns>
+        /// The visited <see cref="XObject"/>.
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XDeclaration VisitDeclaration([NotNull] XDeclaration declaration)
+            => new XDeclaration(declaration.Version, declaration.Encoding, declaration.Standalone);
+
+        /// <summary>
+        /// Visits the <see cref="XDocument"/>.
+        /// </summary>
+        /// <param name="document">The <see cref="XDocument"/> to visit.</param>
+        /// <returns>
+        /// The visited <see cref="XObject"/>.
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitDocument([NotNull] XDocument document)
+            => new XDocument(VisitDeclaration(document.Declaration), Visit(document.Nodes()));
+
+        /// <summary>
+        /// Visits the <see cref="XDocumentType"/>.
+        /// </summary>
+        /// <param name="type">The <see cref="XDocumentType"/> to visit.</param>
+        /// <returns>
+        /// The visited <see cref="XObject"/>.
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitDocumentType([NotNull] XDocumentType type)
+            => new XDocumentType(type.Name, type.PublicId, type.SystemId, type.InternalSubset);
 
         /// <summary>
         /// Visits an <see cref="XElement"/>.
@@ -134,13 +175,10 @@ namespace AD.OpenXml
         /// <returns>
         /// The visited <see cref="XElement"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitElement([NotNull] XElement element)
-            => new XElement(
-                VisitName(element.Name),
-                Visit(element.Attributes()), Visit(element.Nodes()));
+            => new XElement(VisitName(element.Name), Visit(element.Nodes()));
 
         /// <summary>
         /// Visits an <see cref="XName"/>.
@@ -149,33 +187,131 @@ namespace AD.OpenXml
         /// <returns>
         /// A visited <see cref="XName"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [NotNull]
-        protected virtual XName VisitName([NotNull] XName name) => name;
+        protected virtual XName VisitName([NotNull] XName name) => VisitNamespace(name.Namespace) + name.LocalName;
 
         /// <summary>
-        /// Visits an <see cref="XObject"/> that was unhandled by known derived type methods.
+        /// Visits an <see cref="XNamespace"/>.
+        /// </summary>
+        /// <param name="xNamespace">The namespace to visit.</param>
+        /// <returns>
+        /// A visited <see cref="XName"/>.
+        /// </returns>
+        [Pure]
+        [NotNull]
+        protected virtual XNamespace VisitNamespace([NotNull] XNamespace xNamespace) => xNamespace;
+
+        /// <summary>
+        /// Visits the <see cref="XNode"/>.
+        /// This method can dispatch to <see cref="VisitComment"/>, <see cref="VisitContainer"/>,
+        /// <see cref="VisitDocumentType"/>, <see cref="VisitProcessingInstruction"/>, and <see cref="VisitText"/>.
+        /// </summary>
+        /// <param name="node">The <see cref="XNode"/> to visit.</param>
+        /// <returns>
+        /// The visited <see cref="XObject"/>.
+        /// </returns>
+        /// <exception cref="VisitorException">No dispatch was found for the derived type.</exception>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitNode([NotNull] XNode node)
+        {
+            switch (node)
+            {
+                case XComment c:
+                    return VisitComment(c);
+
+                case XContainer c:
+                    return VisitContainer(c);
+
+                case XDocumentType d:
+                    return VisitDocumentType(d);
+
+                case XProcessingInstruction p:
+                    return VisitProcessingInstruction(p);
+
+                case XText t:
+                    return VisitText(t);
+
+                default:
+                    throw new VisitorException(node.GetType());
+            }
+        }
+
+        /// <summary>
+        /// Visits an <see cref="XObject"/>.
+        /// This method can dispatch to <see cref="VisitAttribute"/> and <see cref="VisitNode"/>.
         /// </summary>
         /// <param name="xObject">The <see cref="XObject"/> to visit.</param>
         /// <returns>
         /// The visited <see cref="XObject"/>.
         /// </returns>
+        /// <exception cref="VisitorException">No dispatch was found for the derived type.</exception>
         [Pure]
         [CanBeNull]
-        protected XObject VisitObject([CanBeNull] XObject xObject) => xObject;
+        protected virtual XObject VisitObject([NotNull] XObject xObject)
+        {
+            switch (xObject)
+            {
+                case XAttribute a:
+                    return VisitAttribute(a);
+
+                case XNode n:
+                    return VisitNode(n);
+
+                default:
+                    throw new VisitorException(xObject.GetType());
+            }
+        }
+
+        /// <summary>
+        /// Visits an <see cref="XProcessingInstruction"/>.
+        /// </summary>
+        /// <param name="instruction">The <see cref="XProcessingInstruction"/> to visit.</param>
+        /// <returns>
+        /// The visited <see cref="XObject"/>.
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitProcessingInstruction([NotNull] XProcessingInstruction instruction)
+            => new XProcessingInstruction(instruction.Target, instruction.Data);
+
+        /// <summary>
+        /// Visits the <see cref="string"/> as <see cref="XText"/>.
+        /// </summary>
+        /// <param name="text">The <see cref="string"/> to visit.</param>
+        /// <returns>
+        /// A visited <see cref="XObject"/>.
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitString([CanBeNull] string text) => text is null ? null : Visit(new XText(text));
 
         /// <summary>
         /// Visits an <see cref="XText"/>.
+        /// This method can dispatch to <see cref="VisitCData"/>.
         /// </summary>
         /// <param name="text">The <see cref="XText"/> to visit.</param>
         /// <returns>
-        /// The visited <see cref="XText"/>.
+        /// The visited <see cref="XObject"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitText([NotNull] XText text) => new XText(text.Value);
+        protected virtual XObject VisitText([NotNull] XText text)
+        {
+            switch (text)
+            {
+                case XCData c:
+                    return VisitCData(c);
+
+                default:
+                    return new XText(text.Value);
+            }
+        }
+
+        #endregion
+
+        #region Helpers
 
         /// <summary>
         /// Constructs a liftable div element.
@@ -189,10 +325,10 @@ namespace AD.OpenXml
         [CanBeNull]
         protected XObject LiftableHelper([CanBeNull] XElement element)
             => element is null
-                   ? null
-                   : new XElement("div",
-                       new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
-                       Visit(element.Elements()));
+                ? null
+                : new XElement("div",
+                    new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
+                    Visit(element.Nodes()));
 
         /// <summary>
         /// Constructs a liftable div element.
@@ -206,10 +342,10 @@ namespace AD.OpenXml
         [CanBeNull]
         protected XObject LiftableHelper([CanBeNull] IEnumerable<XObject> nodes)
             => nodes is null
-                   ? null
-                   : new XElement("div",
-                       new XAttribute(Liftable, "from-nodes"),
-                       Visit(nodes));
+                ? null
+                : new XElement("div",
+                    new XAttribute(Liftable, "from-nodes"),
+                    Visit(nodes));
 
         /// <summary>
         /// Constructs a liftable div element.
@@ -235,8 +371,8 @@ namespace AD.OpenXml
         protected static XObject LiftSingleton([CanBeNull] XObject xObject)
             => xObject is XContainer container &&
                container.Nodes().Count() <= 1
-                   ? container.FirstNode
-                   : xObject;
+                ? container.FirstNode
+                : xObject;
 
         /// <summary>
         /// Yields the <see cref="XObject"/> or the children of the <see cref="XObject"/> if the "data-liftable" attribute is present.
@@ -328,5 +464,26 @@ namespace AD.OpenXml
                 yield return item;
             }
         }
+
+        #endregion
+
+        #region Exceptions
+
+        /// <summary>
+        /// The exception that is thrown when the visitor encounters a derived type that is not supported.
+        /// </summary>
+        /// <inheritdoc />
+        protected class VisitorException : NotSupportedException
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="VisitorException"/> class for a specified type.
+            /// </summary>
+            /// <param name="type">The type that could not be dispatched.</param>
+            /// <param name="callerName">The method that could not dispatch the type.</param>
+            public VisitorException(Type type, [CallerMemberName] string callerName = default)
+                : base($"No dispatch was found in '${callerName}' for derived type '${type.Name}'.") {}
+        }
+
+        #endregion
     }
 }

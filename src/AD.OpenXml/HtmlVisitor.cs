@@ -147,7 +147,6 @@ namespace AD.OpenXml
             if (footnotes is null)
                 throw new ArgumentNullException(nameof(footnotes));
 
-
             return
                 new HtmlVisitor(false, document.ChartReferences, document.ImageReferences)
                     .Visit(document.Content, footnotes.Content, title, stylesheetUrl, styles);
@@ -237,8 +236,8 @@ footer.footnotes a[aria-label='Return to content'] {
         protected override XObject VisitAttribute(XAttribute attribute)
             => VisitName(attribute.Name) is XName name &&
                SupportedAttributes.Contains(name)
-                   ? new XAttribute(name, attribute.Value)
-                   : null;
+                ? new XAttribute(name, attribute.Value)
+                : null;
 
         /// <inheritdoc />
         [Pure]
@@ -268,7 +267,7 @@ footer.footnotes a[aria-label='Return to content'] {
         protected override XObject VisitDocumentProperty(XElement docPr)
             => new XElement(
                 VisitName(docPr.Name),
-                Visit((string) docPr.Attribute("title") ?? string.Empty));
+                VisitString((string) docPr.Attribute("title")));
 
         /// <inheritdoc />
         [Pure]
@@ -330,8 +329,8 @@ footer.footnotes a[aria-label='Return to content'] {
         [Pure]
         protected override XName VisitName(XName name)
             => Renames.TryGetValue(name, out XName result)
-                   ? result
-                   : name.LocalName;
+                ? result
+                : name.LocalName;
 
         /// <inheritdoc />
         [Pure]
@@ -348,7 +347,7 @@ footer.footnotes a[aria-label='Return to content'] {
                     new XElement(
                         $"h{match.Groups["level"].Value}",
                         Visit(paragraph.Attributes()),
-                        Visit(paragraph.Value));
+                        VisitString((string) paragraph));
             }
 
             if ((string) classAttribute == "FiguresTablesSourceNote" && !paragraph.Descendants(W + "drawing").Any())
@@ -455,7 +454,7 @@ footer.footnotes a[aria-label='Return to content'] {
             {
                 return
                     new XElement("sup",
-                        Visit(run.Value));
+                        VisitString((string) run));
             }
 
             if ((string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") == "subscript" ||
@@ -463,7 +462,7 @@ footer.footnotes a[aria-label='Return to content'] {
             {
                 return
                     new XElement("sub",
-                        Visit(run.Value));
+                        VisitString((string) run));
             }
 
             if (run.Element(W + "rPr")?.Element(W + "b") != null ||
@@ -471,7 +470,7 @@ footer.footnotes a[aria-label='Return to content'] {
             {
                 return
                     new XElement("b",
-                        Visit(run.Value));
+                        VisitString((string) run));
             }
 
             if (run.Element(W + "rPr")?.Element(W + "i") != null ||
@@ -479,10 +478,10 @@ footer.footnotes a[aria-label='Return to content'] {
             {
                 return
                     new XElement("i",
-                        Visit(run.Value));
+                        VisitString((string) run));
             }
 
-            return Visit(run.Value);
+            return VisitString((string) run);
         }
 
         /// <inheritdoc />
@@ -508,10 +507,10 @@ footer.footnotes a[aria-label='Return to content'] {
                               .Nodes()
                               .Select(
                                   x => !(x is XElement e) || e.Name != "td"
-                                           ? x
-                                           : new XElement("th",
-                                               e.Attributes(),
-                                               e.Nodes())));
+                                      ? x
+                                      : new XElement("th",
+                                          e.Attributes(),
+                                          e.Nodes())));
 
             IEnumerable<XObject> bodyRows =
                 tableNodes.SkipWhile(x => !(x is XElement e) || e.Name != "tr")
@@ -573,8 +572,8 @@ footer.footnotes a[aria-label='Return to content'] {
         protected override XObject VisitText(XText text)
             => SequenceRegex.IsMatch(text.Value) ||
                StyleReferenceRegex.IsMatch(text.Value)
-                   ? null
-                   : text;
+                ? null
+                : text;
 
         /// <summary>
         ///
@@ -619,7 +618,7 @@ footer.footnotes a[aria-label='Return to content'] {
         [CanBeNull]
         private static XAttribute MakeClassAttribute([NotNull] [ItemCanBeNull] params XAttribute[] attributes)
             => attributes.Any(x => x != null)
-                   ? new XAttribute("class", string.Join(" ", attributes.Where(x => x != null).Select(x => (string) x)))
-                   : null;
+                ? new XAttribute("class", string.Join(" ", attributes.Where(x => x != null).Select(x => (string) x)))
+                : null;
     }
 }

@@ -40,8 +40,10 @@ namespace AD.OpenXml.Elements
                     }
                 }
 
+                // ReSharper disable once InvertIf
                 if (paragraph.Elements(W + "r").LastOrDefault() is XElement last)
                 {
+                    // ReSharper disable once InvertIf
                     if (last.Element(W + "t") is XElement text)
                     {
                         if (text.Value.EndsWith(" "))

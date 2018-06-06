@@ -228,13 +228,7 @@ namespace AD.OpenXml
 //                              subject.Theme1.Elements(),
 //                              XNode.EqualityComparer));
 
-            return
-                With(
-                    document: document,
-                    footnotes: footnotes,
-                    styles: styles,
-                    numbering: numbering,
-                    theme1: subject.Theme1);
+            return With(document, footnotes, styles, numbering, subject.Theme1);
         }
 
         /// <summary>
@@ -292,7 +286,7 @@ namespace AD.OpenXml
                     new ContentTypes.Override("/word/styles.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"),
                     new ContentTypes.Override("/word/theme/theme1.xml", "application/vnd.openxmlformats-officedocument.theme+xml"),
                     Footnotes.ContentTypeEntry,
-                    new ContentTypes.Override("/word/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"),
+                    new ContentTypes.Override("/word/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml")
                 },
                 Document.Charts.Select(x => x.ContentTypeEntry));
 
@@ -309,7 +303,7 @@ namespace AD.OpenXml
                     new Relationships.Entry("rId2", "numbering.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
                     new Relationships.Entry("rId3", "settings.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings"),
                     new Relationships.Entry("rId4", "styles.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"),
-                    new Relationships.Entry("rId5", "theme/theme1.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme"),
+                    new Relationships.Entry("rId5", "theme/theme1.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme")
                 },
                 Document.Charts.Select(x => x.RelationshipEntry),
                 Document.Images.Select(x => x.RelationshipEntry),

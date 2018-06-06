@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 
+// ReSharper disable VirtualMemberNeverOverridden.Global
 namespace AD.OpenXml
 {
     /// <inheritdoc />
@@ -245,10 +246,10 @@ namespace AD.OpenXml
         [Pure]
         protected override XObject VisitElement(XElement element)
             => VisitLookup.TryGetValue(element.Name, out Func<XElement, XObject> visit)
-                   ? visit(element)
-                   : _returnOnDefault
-                       ? base.VisitElement(element)
-                       : null;
+                ? visit(element)
+                : _returnOnDefault
+                    ? base.VisitElement(element)
+                    : null;
 
         /// <summary>
         ///
