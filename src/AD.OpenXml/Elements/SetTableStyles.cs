@@ -86,25 +86,19 @@ namespace AD.OpenXml.Elements
                 foreach (XElement paragraphWithSymbol in cell.Elements(W + "p").Where(x => x.Value.Contains("@>")))
                 {
                     if (paragraphWithSymbol.Element(W + "pPr") is null)
-                    {
                         paragraphWithSymbol.AddFirst(new XElement(W + "pPr"));
-                    }
 
                     foreach (XElement textToIndent in paragraphWithSymbol.Descendants(W + "t").Where(x => x.Value.Contains("@>")))
                     {
                         if (textToIndent.Ancestors(W + "p").First().Element(W + "pPr")?.Element(W + "ind") is null)
-                        {
                             textToIndent.Ancestors(W + "p").First().Element(W + "pPr")?.Add(new XElement(W + "ind"));
-                        }
 
                         XElement indent = textToIndent.Ancestors(W + "p").First().Element(W + "pPr")?.Element(W + "ind");
 
                         int count = textToIndent.Parent?.Parent?.Value.SkipWhile(x => x != '@').Skip(1).TakeWhile(x => x == '>').Count() ?? 0;
 
                         if (indent is null)
-                        {
                             throw new ArgumentException("Indentation symbol code error.");
-                        }
 
                         int left = indent.Attribute(W + "left")?.Value.ParseInt() ?? 0;
 

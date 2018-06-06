@@ -275,9 +275,7 @@ namespace AD.OpenXml.Visits
         public static OpenXmlPackageVisitor VisitStyles([NotNull] this OpenXmlPackageVisitor subject)
         {
             if (subject is null)
-            {
                 throw new ArgumentNullException(nameof(subject));
-            }
 
             XElement styles = Execute(subject.Styles.Clone());
 
@@ -289,9 +287,7 @@ namespace AD.OpenXml.Visits
         private static XElement Execute([NotNull] XElement styles)
         {
             if (styles is null)
-            {
                 throw new ArgumentNullException(nameof(styles));
-            }
 
             XElement results =
                 new XElement(
@@ -341,9 +337,7 @@ namespace AD.OpenXml.Visits
             foreach (XElement style in results.Elements())
             {
                 if (style.Elements().First().Name == W + "name")
-                {
                     continue;
-                }
 
                 XElement name = style.Element(W + "name");
                 name?.Remove();
@@ -353,9 +347,7 @@ namespace AD.OpenXml.Visits
             foreach (XElement style in results.Elements())
             {
                 if (style.Element(W + "name")?.Next()?.Name == W + "next")
-                {
                     continue;
-                }
 
                 XElement next = style.Element(W + "next");
                 next?.Remove();

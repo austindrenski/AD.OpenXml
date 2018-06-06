@@ -45,9 +45,7 @@ namespace AD.OpenXml.Elements
             {
                 item.RemoveBy(W + "pStyle");
                 if (!item.Elements(W + "pPr").Any())
-                {
                     item.AddFirst(new XElement(W + "pPr"));
-                }
                 item.Element(W + "pPr")?.AddFirst(new XElement(W + "pStyle", new XAttribute(W + "val", "FiguresTablesSourceNote")));
             }
 

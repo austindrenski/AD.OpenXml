@@ -45,9 +45,7 @@ namespace AD.OpenXml.Visits
         public static OpenXmlPackageVisitor VisitFootnotes([NotNull] this OpenXmlPackageVisitor subject, int footnoteId, int revisionId)
         {
             if (subject is null)
-            {
                 throw new ArgumentNullException(nameof(subject));
-            }
 
             (XElement document, XElement footnotes) =
                 Execute(
@@ -66,14 +64,10 @@ namespace AD.OpenXml.Visits
         private static (XElement Document, XElement Footnotes) Execute([NotNull] XElement footnotes, [NotNull] XElement document, int footnoteId, int revisionId)
         {
             if (footnotes is null)
-            {
                 throw new ArgumentNullException(nameof(footnotes));
-            }
 
             if (document is null)
-            {
                 throw new ArgumentNullException(nameof(document));
-            }
 
             XElement modifiedFootnotes =
                 footnotes
@@ -157,9 +151,7 @@ namespace AD.OpenXml.Visits
                           .ToArray();
 
                 if (distinct.Any(x => (string) x.Attribute(W + "val") == "FootnoteReference"))
-                {
                     distinct = distinct.Where(x => (string) x.Attribute(W + "val") == "FootnoteReference");
-                }
 
                 runProperties.AddFirst(distinct);
             }

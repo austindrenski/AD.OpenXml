@@ -60,19 +60,13 @@ namespace AD.OpenXml.Documents
         public static ZipArchive AddFooters([NotNull] this ZipArchive archive, [NotNull] string publisher, [NotNull] string website)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             if (publisher is null)
-            {
                 throw new ArgumentNullException(nameof(publisher));
-            }
 
             if (website is null)
-            {
                 throw new ArgumentNullException(nameof(website));
-            }
 
             ZipArchive result =
                 archive.With(
@@ -114,19 +108,13 @@ namespace AD.OpenXml.Documents
         private static void AddOddPageFooter([NotNull] ZipArchive archive, [NotNull] string footerId, [NotNull] string publisher)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             if (footerId is null)
-            {
                 throw new ArgumentNullException(nameof(footerId));
-            }
 
             if (publisher is null)
-            {
                 throw new ArgumentNullException(nameof(publisher));
-            }
 
             XDocument footer1 = Footer1(publisher);
 
@@ -203,19 +191,13 @@ namespace AD.OpenXml.Documents
         private static void AddEvenPageFooter([NotNull] ZipArchive archive, [NotNull] string footerId, [NotNull] string website)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             if (footerId is null)
-            {
                 throw new ArgumentNullException(nameof(footerId));
-            }
 
             if (website is null)
-            {
                 throw new ArgumentNullException(nameof(website));
-            }
 
             XDocument footer2 = Footer2(website);
 
@@ -304,9 +286,7 @@ namespace AD.OpenXml.Documents
         private static XDocument Footer1([NotNull] string publisher)
         {
             if (publisher is null)
-            {
                 throw new ArgumentNullException(nameof(publisher));
-            }
 
             return
                 new XDocument(
@@ -349,9 +329,7 @@ namespace AD.OpenXml.Documents
         private static XDocument Footer2([NotNull] string website)
         {
             if (website is null)
-            {
                 throw new ArgumentNullException(nameof(website));
-            }
 
             return
                 new XDocument(

@@ -29,14 +29,10 @@ namespace AD.OpenXml
         public static XElement Recurse([NotNull] this XElement element, [NotNull] Func<XElement, bool> predicate)
         {
             if (element is null)
-            {
                 throw new ArgumentNullException(nameof(element));
-            }
 
             if (predicate is null)
-            {
                 throw new ArgumentNullException(nameof(predicate));
-            }
 
             return
                 new XElement(

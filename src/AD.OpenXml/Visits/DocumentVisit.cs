@@ -46,9 +46,7 @@ namespace AD.OpenXml.Visits
         public static XElement ExecuteForTableRecursion([NotNull] XElement cell, int revisionId)
         {
             if (cell is null)
-            {
                 throw new ArgumentNullException(nameof(cell));
-            }
 
             return Execute(cell, revisionId + 1);
         }
@@ -66,9 +64,7 @@ namespace AD.OpenXml.Visits
         public static OpenXmlPackageVisitor VisitDoc([NotNull] this OpenXmlPackageVisitor subject, int revisionId)
         {
             if (subject is null)
-            {
                 throw new ArgumentNullException(nameof(subject));
-            }
 
             Document document = subject.Document;
 
@@ -83,9 +79,7 @@ namespace AD.OpenXml.Visits
         private static XElement Execute([NotNull] XElement document, int revisionId)
         {
             if (document is null)
-            {
                 throw new ArgumentNullException(nameof(document));
-            }
 
             XElement source =
                 document
@@ -179,9 +173,7 @@ namespace AD.OpenXml.Visits
                 IEnumerable<XElement> distinct = styles.Distinct(XNode.EqualityComparer).Cast<XElement>().ToArray();
 
                 if (distinct.Any(x => (string) x.Attribute(W + "val") == "FootnoteReference"))
-                {
                     distinct = distinct.Where(x => (string) x.Attribute(W + "val") == "FootnoteReference");
-                }
 
                 runProperties.AddFirst(distinct);
             }
@@ -211,9 +203,7 @@ namespace AD.OpenXml.Visits
             source.Descendants(W + "tr").Attributes().Remove();
 
             if (source.Element(W + "body")?.Elements().FirstOrDefault()?.Name == W + "sectPr")
-            {
                 source.Element(W + "body")?.Elements().First().Remove();
-            }
 
             if (source.Element(W + "body")?.Elements().LastOrDefault()?.Name == W + "sectPr")
             {
@@ -230,9 +220,7 @@ namespace AD.OpenXml.Visits
                 }
 
                 if (!previous?.Elements(W + "pPr").Any() ?? false)
-                {
                     previous.AddFirst(new XElement(W + "pPr", sectionProperties));
-                }
 
                 previous?.Element(W + "pPr")?.Add(sectionProperties);
             }
@@ -248,9 +236,7 @@ namespace AD.OpenXml.Visits
                 item.RemoveByAll(W + "pStyle");
 
                 if (!item.Elements(W + "pPr").Any())
-                {
                     item.AddFirst(new XElement(W + "pPr"));
-                }
 
                 item.Element(W + "pPr")?
                     .AddFirst(

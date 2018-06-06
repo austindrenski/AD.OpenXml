@@ -43,9 +43,7 @@ namespace AD.OpenXml.Elements
                 item.AddTableCaption();
                 item.RemoveBy(W + "pStyle");
                 if (!item.Elements(W + "pPr").Any())
-                {
                     item.AddFirst(new XElement(W + "pPr"));
-                }
                 else
                 {
                     XElement pPr = item.Element(W + "pPr");

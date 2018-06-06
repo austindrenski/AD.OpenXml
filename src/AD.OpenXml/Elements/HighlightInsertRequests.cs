@@ -28,13 +28,9 @@ namespace AD.OpenXml.Elements
             foreach (XElement item in appendices.Descendants(W + "r"))
             {
                 if (item.Parent?.Element(W + "pPr") is null)
-                {
                     item.Parent?.AddFirst(new XElement(W + "pPr"));
-                }
                 if (item.Parent?.Element(W + "pPr")?.Element(W + "pStyle") is null)
-                {
                     item.Parent?.Element(W + "pPr")?.AddFirst(new XElement(W + "pStyle"));
-                }
 
                 item.Parent?
                     .Element(W + "pPr")?
@@ -43,9 +39,7 @@ namespace AD.OpenXml.Elements
                 XElement text = item.Element(W + "t");
 
                 if (text is null)
-                {
                     continue;
-                }
 
                 text.Value = text.Value.Replace("{", null);
                 text.Value = text.Value.Replace("APPENDIX", null);
@@ -59,13 +53,9 @@ namespace AD.OpenXml.Elements
             foreach (XElement item in bibliographies.Descendants(W + "r"))
             {
                 if (item.Parent?.Element(W + "pPr") is null)
-                {
                     item.Parent?.AddFirst(new XElement(W + "pPr"));
-                }
                 if (item.Parent?.Element(W + "pPr")?.Element(W + "pStyle") is null)
-                {
                     item.Parent?.Element(W + "pPr")?.AddFirst(new XElement(W + "pStyle"));
-                }
 
                 item.Parent?
                     .Element(W + "pPr")?
@@ -74,9 +64,7 @@ namespace AD.OpenXml.Elements
                 XElement text = item.Element(W + "t");
 
                 if (text is null)
-                {
                     continue;
-                }
 
                 text.Value = text.Value.Replace("{", null);
                 text.Value = text.Value.Replace("BIBLIOGRAPHY", "Bibliography");
@@ -90,9 +78,7 @@ namespace AD.OpenXml.Elements
             foreach (XElement item in inserts.Descendants(W + "r"))
             {
                 if (item.Element(W + "rPr") is null)
-                {
                     item.AddFirst(new XElement(W + "rPr"));
-                }
 
                 item.Element(W + "rPr")?
                     .Add(

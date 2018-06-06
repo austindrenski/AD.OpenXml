@@ -284,9 +284,7 @@ namespace AD.OpenXml
         protected static IEnumerable<XObject> Lift([NotNull] IEnumerable<XObject> source)
         {
             if (source is null)
-            {
                 throw new ArgumentNullException(nameof(source));
-            }
 
             foreach (XObject item in source.SelectMany(Lift))
             {
@@ -309,30 +307,22 @@ namespace AD.OpenXml
         protected static IEnumerable<T> NextWhile<T>([NotNull] XNode current, Func<XNode, T> cast, [NotNull] [ItemNotNull] params Func<T, bool>[] predicates) where T : class
         {
             if (current is null)
-            {
                 throw new ArgumentNullException(nameof(current));
-            }
 
             if (predicates.Any(x => x is null))
-            {
                 throw new ArgumentNullException(nameof(predicates));
-            }
 
             for (XNode next = current.NextNode; next != null; next = next.NextNode)
             {
                 T item = cast(next);
 
                 if (item is null)
-                {
                     yield break;
-                }
 
                 for (int i = 0; i < predicates.Length; i++)
                 {
                     if (!predicates[i](item))
-                    {
                         yield break;
-                    }
                 }
 
                 yield return item;

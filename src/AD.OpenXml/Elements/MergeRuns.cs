@@ -36,9 +36,7 @@ namespace AD.OpenXml.Elements
                     if (first.Element(W + "t") is XElement text)
                     {
                         if (text.Value.StartsWith(" "))
-                        {
                             text.Value = text.Value.TrimStart();
-                        }
                     }
                 }
 
@@ -47,9 +45,7 @@ namespace AD.OpenXml.Elements
                     if (last.Element(W + "t") is XElement text)
                     {
                         if (text.Value.EndsWith(" "))
-                        {
                             text.Value = text.Value.TrimEnd();
-                        }
                     }
                 }
             }
@@ -67,16 +63,12 @@ namespace AD.OpenXml.Elements
         public static void RemoveDuplicateSpacing([NotNull] XElement text)
         {
             if (text is null)
-            {
                 throw new ArgumentNullException(nameof(text));
-            }
 
             text.Value = Spaces.Replace((string) text, " ");
 
             if (text.Value.StartsWith(" ") || text.Value.EndsWith(" "))
-            {
                 text.SetAttributeValue(XNamespace.Xml + "space", "preserve");
-            }
         }
 
         private static void ProcessRuns(XElement paragraph)
@@ -87,46 +79,30 @@ namespace AD.OpenXml.Elements
                 XElement currentText = run.Element(W + "t");
 
                 if (currentText is null)
-                {
                     continue;
-                }
 
                 RemoveDuplicateSpacing(currentText);
 
                 if ((string) run.Element(W + "rPr") != (string) run.Next()?.Element(W + "rPr"))
-                {
                     continue;
-                }
 
                 if (run.Next()?.Name != W + "r")
-                {
                     continue;
-                }
 
                 if (run.Element(W + "drawing") != null)
-                {
                     continue;
-                }
 
                 if (run.Element(W + "fldChar") != null)
-                {
                     continue;
-                }
 
                 if (run.Next()?.Element(W + "fldChar") != null)
-                {
                     continue;
-                }
 
                 if (run.Next()?.Element(W + "footnoteReference") != null)
-                {
                     continue;
-                }
 
                 if (!run.Next()?.Elements(W + "t").Any() ?? false)
-                {
                     run.Next()?.Add(new XElement(W + "t"));
-                }
 
                 if (run.Next()?.Element(W + "t") is XElement nextText)
                 {

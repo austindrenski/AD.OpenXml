@@ -36,9 +36,7 @@ namespace AD.OpenXml.Markdown
         public MListItem(in StringSegment text)
         {
             if (!Accept(in text))
-            {
                 throw new ArgumentException($"Heading must begin with 1-6 '#' characters followed by a ' ' character: '{text}'");
-            }
 
             StringSegment normalized = Normalize(in text);
             Level = normalized.IndexOf(' ');

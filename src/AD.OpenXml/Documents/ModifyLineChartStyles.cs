@@ -35,9 +35,7 @@ namespace AD.OpenXml.Documents
         public static async Task<MemoryStream> ModifyLineChartStyles([NotNull] [ItemNotNull] this Task<MemoryStream> stream)
         {
             if (stream is null)
-            {
                 throw new ArgumentNullException(nameof(stream));
-            }
 
             return await ModifyLineChartStyles(await stream);
         }
@@ -54,9 +52,7 @@ namespace AD.OpenXml.Documents
         public static async Task<MemoryStream> ModifyLineChartStyles([NotNull] this MemoryStream stream)
         {
             if (stream is null)
-            {
                 throw new ArgumentNullException(nameof(stream));
-            }
 
             MemoryStream result = await stream.CopyPure();
 
@@ -82,14 +78,10 @@ namespace AD.OpenXml.Documents
         private static XElement ModifyLineChartStyles([NotNull] this XElement element)
         {
             if (element is null)
-            {
                 throw new ArgumentNullException(nameof(element));
-            }
 
             if (!element.Descendants(C + "lineChart").Any())
-            {
                 return element;
-            }
 
             foreach (XElement series in element.Descendants(C + "ser"))
             {

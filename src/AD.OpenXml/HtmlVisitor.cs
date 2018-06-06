@@ -117,14 +117,10 @@ namespace AD.OpenXml
         protected HtmlVisitor(bool returnOnDefault, [NotNull] IDictionary<string, XElement> charts, [NotNull] IDictionary<string, (string mime, string description, string base64)> images) : base(returnOnDefault)
         {
             if (charts is null)
-            {
                 throw new ArgumentNullException(nameof(charts));
-            }
 
             if (images is null)
-            {
                 throw new ArgumentNullException(nameof(images));
-            }
 
             Charts = new Dictionary<string, XElement>(charts);
             Images = new Dictionary<string, (string mime, string description, string base64)>(images);
@@ -286,9 +282,7 @@ footer.footnotes a[aria-label='Return to content'] {
         protected override XObject VisitFootnote(XElement footnote)
         {
             if (footnote is null)
-            {
                 throw new ArgumentNullException(nameof(footnote));
-            }
 
             string footnoteReference = (string) footnote.Attribute(W + "id");
 
@@ -344,9 +338,7 @@ footer.footnotes a[aria-label='Return to content'] {
         protected override XObject VisitParagraph(XElement paragraph)
         {
             if (paragraph is null)
-            {
                 throw new ArgumentNullException(nameof(paragraph));
-            }
 
             XAttribute classAttribute = paragraph.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
 
@@ -400,9 +392,7 @@ footer.footnotes a[aria-label='Return to content'] {
         protected override XObject VisitPicture(XElement picture)
         {
             if (picture is null)
-            {
                 throw new ArgumentNullException(nameof(picture));
-            }
 
             XAttribute imageId = picture.Element(PIC + "blipFill")?.Element(A + "blip")?.Attribute(R + "embed");
 
@@ -429,14 +419,10 @@ footer.footnotes a[aria-label='Return to content'] {
         protected override XObject VisitRun(XElement run)
         {
             if (run is null)
-            {
                 throw new ArgumentNullException(nameof(run));
-            }
 
             if (run.Element(W + "drawing") is XElement drawing)
-            {
                 return Visit(drawing);
-            }
 
             if (run.NextNode is XElement next && next.Element(W + "fldChar") is XElement fieldChar)
             {
@@ -504,9 +490,7 @@ footer.footnotes a[aria-label='Return to content'] {
         protected override XObject VisitTable(XElement table)
         {
             if (table is null)
-            {
                 throw new ArgumentNullException(nameof(table));
-            }
 
             IEnumerable<XObject> caption =
                 table.PreviousNode is XElement p && p.Name == W + "p" && (string) p.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "CaptionTable"
@@ -563,9 +547,7 @@ footer.footnotes a[aria-label='Return to content'] {
         protected override XObject VisitTableCell(XElement cell)
         {
             if (cell is null)
-            {
                 throw new ArgumentNullException(nameof(cell));
-            }
 
             XAttribute alignment = cell.Elements(W + "p").FirstOrDefault()?.Element(W + "pPr")?.Element(W + "jc")?.Attribute(W + "val");
 

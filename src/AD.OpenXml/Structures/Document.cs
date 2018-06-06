@@ -99,9 +99,7 @@ namespace AD.OpenXml.Structures
         public Document([NotNull] ZipArchive archive)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             Content = archive.ReadXml();
 
@@ -174,24 +172,16 @@ namespace AD.OpenXml.Structures
             [NotNull] IEnumerable<HyperlinkInfo> hyperlinks)
         {
             if (content is null)
-            {
                 throw new ArgumentNullException(nameof(content));
-            }
 
             if (charts is null)
-            {
                 throw new ArgumentNullException(nameof(charts));
-            }
 
             if (images is null)
-            {
                 throw new ArgumentNullException(nameof(images));
-            }
 
             if (hyperlinks is null)
-            {
                 throw new ArgumentNullException(nameof(hyperlinks));
-            }
 
             Content = content;
             Charts = charts.ToImmutableHashSet();
@@ -270,9 +260,7 @@ namespace AD.OpenXml.Structures
         public void Save([NotNull] ZipArchive archive)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             using (Stream stream = archive.GetEntry("word/document.xml")?.Open())
             {

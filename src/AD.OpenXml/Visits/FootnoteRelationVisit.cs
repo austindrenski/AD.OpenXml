@@ -31,9 +31,7 @@ namespace AD.OpenXml.Visits
         public static OpenXmlPackageVisitor VisitFootnotesRels([NotNull] this OpenXmlPackageVisitor subject, int footnoteRelationId)
         {
             if (subject is null)
-            {
                 throw new ArgumentNullException(nameof(subject));
-            }
 
             Footnotes footnotes = Execute(subject.Footnotes, footnoteRelationId);
 
@@ -44,9 +42,7 @@ namespace AD.OpenXml.Visits
         private static Footnotes Execute(Footnotes footnotes, int footnoteRelationId)
         {
             if (footnotes is null)
-            {
                 throw new ArgumentNullException(nameof(footnotes));
-            }
 
             XElement f = footnotes.Content.RemoveRsidAttributes();
 

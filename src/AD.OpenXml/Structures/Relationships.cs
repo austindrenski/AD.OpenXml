@@ -75,9 +75,7 @@ namespace AD.OpenXml.Structures
         public void Save([NotNull] ZipArchive archive, string path)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             using (Stream stream = archive.GetEntry(path)?.Open() ?? throw new FileNotFoundException(path))
             {

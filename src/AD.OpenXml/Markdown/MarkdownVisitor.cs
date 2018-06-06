@@ -21,9 +21,7 @@ namespace AD.OpenXml.Markdown
         public MNode Visit(in StringSegment segment)
         {
             if (MHeading.Accept(in segment))
-            {
                 return new MHeading(in segment);
-            }
 
             return new MParagraph(in segment);
         }

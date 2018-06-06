@@ -30,9 +30,7 @@ namespace AD.OpenXml.Documents
         public static async Task<MemoryStream> PositionChartsInner(this Task<MemoryStream> stream)
         {
             if (stream is null)
-            {
                 throw new ArgumentNullException(nameof(stream));
-            }
 
             return await PositionChartsInner(await stream);
         }
@@ -46,9 +44,7 @@ namespace AD.OpenXml.Documents
         public static async Task<MemoryStream> PositionChartsInner(this MemoryStream stream)
         {
             if (stream is null)
-            {
                 throw new ArgumentNullException(nameof(stream));
-            }
 
             MemoryStream result = await stream.CopyPure();
 

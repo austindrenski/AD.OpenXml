@@ -27,9 +27,7 @@ namespace AD.OpenXml.Elements
         internal static void RemoveDuplicateSectionProperties([NotNull] this XElement document)
         {
             if (document is null)
-            {
                 throw new ArgumentNullException(nameof(document));
-            }
 
             XElement[] sections =
                 document.Descendants(W + "sectPr")
@@ -41,9 +39,7 @@ namespace AD.OpenXml.Elements
                 string current = sections[i].Element(W + "pgSz")?.Attribute(W + "orient")?.Value;
 
                 if (previous == current)
-                {
                     sections[i - 1].Remove();
-                }
             }
         }
     }

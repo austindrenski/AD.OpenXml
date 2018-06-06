@@ -36,9 +36,7 @@ namespace AD.OpenXml.Documents
         public static async Task<IEnumerable<string>> EnumerateChartPartNames([NotNull] this Task<MemoryStream> stream)
         {
             if (stream is null)
-            {
                 throw new ArgumentNullException(nameof(stream));
-            }
 
             return await EnumerateChartPartNames(await stream);
         }
@@ -58,9 +56,7 @@ namespace AD.OpenXml.Documents
         public static async Task<IEnumerable<string>> EnumerateChartPartNames([NotNull] this MemoryStream stream)
         {
             if (stream is null)
-            {
                 throw new ArgumentNullException(nameof(stream));
-            }
 
             using (MemoryStream result = await stream.CopyPure())
             {

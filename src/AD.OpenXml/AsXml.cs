@@ -27,9 +27,7 @@ namespace AD.OpenXml
         public static XElement AsXml([NotNull] this XElement element)
         {
             if (element is null)
-            {
                 throw new ArgumentNullException(nameof(element));
-            }
 
             return
                 new XElement(
@@ -44,9 +42,7 @@ namespace AD.OpenXml
         private static XObject AsXml([NotNull] this XAttribute attribute)
         {
             if (attribute is null)
-            {
                 throw new ArgumentNullException(nameof(attribute));
-            }
 
             switch (attribute.Name.LocalName)
             {

@@ -52,14 +52,10 @@ namespace AD.OpenXml.Documents
         public static ZipArchive AddHeaders([NotNull] this ZipArchive archive, [NotNull] string title)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             if (title is null)
-            {
                 throw new ArgumentNullException(nameof(title));
-            }
 
             ZipArchive result =
                 archive.With(
@@ -108,14 +104,10 @@ namespace AD.OpenXml.Documents
         private static void AddOddPageHeader([NotNull] ZipArchive archive, [NotNull] string headerId)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             if (headerId is null)
-            {
                 throw new ArgumentNullException(nameof(headerId));
-            }
 
             // Remove headers from document.xml
             using (Stream stream = archive.GetEntry("word/header2.xml")?.Open() ??
@@ -182,19 +174,13 @@ namespace AD.OpenXml.Documents
         private static void AddEvenPageHeader([NotNull] ZipArchive archive, [NotNull] string headerId, [NotNull] string title)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             if (headerId is null)
-            {
                 throw new ArgumentNullException(nameof(headerId));
-            }
 
             if (title is null)
-            {
                 throw new ArgumentNullException(nameof(title));
-            }
 
             XDocument header1 = Header1(title);
 

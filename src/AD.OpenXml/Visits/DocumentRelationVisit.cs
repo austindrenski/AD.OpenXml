@@ -26,9 +26,7 @@ namespace AD.OpenXml.Visits
         public static OpenXmlPackageVisitor VisitDocRels([NotNull] this OpenXmlPackageVisitor subject, int documentRelationId)
         {
             if (subject is null)
-            {
                 throw new ArgumentNullException(nameof(subject));
-            }
 
             Document document = subject.Document;
 

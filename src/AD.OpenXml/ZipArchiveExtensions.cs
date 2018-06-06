@@ -31,9 +31,7 @@ namespace AD.OpenXml
         public static ZipArchive With([NotNull] this ZipArchive archive, params (string Path, Func<ZipArchive, XElement> Operation)[] tuples)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             ZipArchive result = archive.ToArchive();
 
@@ -69,9 +67,7 @@ namespace AD.OpenXml
         public static ZipArchive ToArchive([NotNull] this ZipArchive archive, ZipArchiveMode mode = ZipArchiveMode.Update)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             return new ZipArchive(archive.ToStream(), mode);
         }
@@ -91,9 +87,7 @@ namespace AD.OpenXml
         public static MemoryStream ToStream([NotNull] this ZipArchive archive)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             MemoryStream ms = new MemoryStream();
 

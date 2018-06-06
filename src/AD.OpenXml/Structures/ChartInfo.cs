@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -80,14 +79,10 @@ namespace AD.OpenXml.Structures
         public ChartInfo(StringSegment rId, [NotNull] XElement chart)
         {
             if (!rId.StartsWith("rId", StringComparison.Ordinal))
-            {
                 throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
-            }
 
             if (chart is null)
-            {
                 throw new ArgumentNullException(nameof(chart));
-            }
 
             RelationId = rId;
             Chart = chart.Clone().RemoveByAll(C + "externalData");
@@ -127,9 +122,7 @@ namespace AD.OpenXml.Structures
         public void Save([NotNull] ZipArchive archive)
         {
             if (archive is null)
-            {
                 throw new ArgumentNullException(nameof(archive));
-            }
 
             using (Stream stream = archive.CreateEntry(PartName.Subsegment(1).Value).Open())
             {
