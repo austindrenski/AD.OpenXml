@@ -40,9 +40,15 @@ namespace AD.OpenXml
             {
                 "(",
                 ")",
+                "[",
+                "]",
+                "{",
+                "{",
                 ",",
                 "+",
                 "-",
+                "*",
+                "/",
                 "=",
                 "!",
                 "exp",
@@ -86,17 +92,6 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="array"></param>
-        /// <returns>
-        ///
-        /// </returns>
-        [Pure]
-        [CanBeNull]
-        protected virtual XObject VisitArray([NotNull] XElement array) => new XElement("mtable", Visit(array.Nodes()));
-
-        /// <summary>
-        ///
-        /// </summary>
         /// <param name="accent"></param>
         /// <returns>
         ///
@@ -110,6 +105,32 @@ namespace AD.OpenXml
                        Visit(accent.Nodes()),
                        new XElement("mo", AccentLookup.TryGetValue(value, out string mapped) ? mapped : value))
                    : null;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitArray([NotNull] XElement array) => new XElement("mtable", Visit(array.Nodes()));
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="bar"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitBar([NotNull] XElement bar)
+            => new XElement("mover",
+                new XAttribute("accent", true),
+                Visit(bar.Nodes()),
+                new XElement("mo", '\u02C9'));
 
         /// <summary>
         ///
@@ -134,12 +155,12 @@ namespace AD.OpenXml
         protected virtual XObject VisitDelimiter([NotNull] XElement delimiter)
             => new XElement("mrow",
                 new XElement("mo",
-                    new XAttribute("fence", "true"),
-                    new XText("(")),
+                    new XAttribute("fence", true),
+                    new XText(delimiter.Element(M + "dPr")?.Element(M + "begChr")?.Attribute(M + "val")?.Value ?? "(")),
                 Visit(delimiter.Nodes()),
                 new XElement("mo",
-                    new XAttribute("fence", "true"),
-                    new XText(")")));
+                    new XAttribute("fence", true),
+                    new XText(delimiter.Element(M + "dPr")?.Element(M + "endChr")?.Attribute(M + "val")?.Value ?? ")")));
 
         /// <summary>
         ///
@@ -150,7 +171,8 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitDenominator([NotNull] XElement denominator) => new XElement("mrow", Visit(denominator.Nodes()));
+        protected virtual XObject VisitDenominator([NotNull] XElement denominator)
+            => new XElement("mrow", Visit(denominator.Nodes()));
 
         /// <inheritdoc />
         [Pure]
@@ -166,6 +188,9 @@ namespace AD.OpenXml
             {
                 case "acc":
                     return VisitAccent(element);
+
+                case "bar":
+                    return VisitBar(element);
 
                 case "d":
                     return VisitDelimiter(element);
@@ -229,7 +254,13 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitFraction([NotNull] XElement fraction) => new XElement("mfrac", Visit(fraction.Nodes()));
+        protected virtual XObject VisitFraction([NotNull] XElement fraction)
+            => "noBar" == (string) fraction.Element(M + "fPr")?.Element(M + "type")?.Attribute(M + "val")
+                   ? new XElement("mtable",
+                       new XAttribute("maligngroup", "center"),
+                       Visit(fraction.Element(M + "num")),
+                       Visit(fraction.Element(M + "den")))
+                   : new XElement("mfrac", Visit(fraction.Nodes()));
 
         /// <summary>
         ///
