@@ -469,10 +469,11 @@ namespace AD.OpenXml
         protected class VisitorException : NotSupportedException
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="VisitorException"/> class for a specified type.
+            /// Initializes a new instance of the <see cref="VisitorException" /> class for a specified type.
             /// </summary>
             /// <param name="type">The type that could not be dispatched.</param>
             /// <param name="callerName">The method that could not dispatch the type.</param>
+            /// <inheritdoc />
             public VisitorException(Type type, [CallerMemberName] string callerName = default)
                 : base($"No dispatch was found in '${callerName}' for derived type '${type.Name}'.") {}
         }
