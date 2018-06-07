@@ -311,7 +311,7 @@ namespace AD.OpenXml
 
         #endregion
 
-        #region Helpers
+        #region Utilities
 
         /// <summary>
         /// Constructs a liftable div element.
@@ -418,7 +418,7 @@ namespace AD.OpenXml
         [LinqTunnel]
         [ItemNotNull]
         [CollectionAccess(CollectionAccessType.Read)]
-        protected static IEnumerable<XNode> NextWhile([NotNull] XElement current, [NotNull] Func<XNode, bool> predicate)
+        protected static IEnumerable<XNode> NextWhile([NotNull] XNode current, [NotNull] Func<XNode, bool> predicate)
         {
             for (XNode n = current.NextNode; n != null; n = n.NextNode)
             {
