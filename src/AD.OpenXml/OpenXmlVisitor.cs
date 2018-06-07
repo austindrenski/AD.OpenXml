@@ -26,23 +26,20 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull] protected static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
-        // TODO: move into AD.Xml
         /// <summary>
         /// Represents the 'dgm:' prefix seen in the markup for 'drawing' elements.
         /// </summary>
-        [NotNull] protected static readonly XNamespace DGM = "http://schemas.openxmlformats.org/drawingml/2006/diagram";
+        [NotNull] protected static readonly XNamespace DGM = XNamespaces.OpenXmlDrawingmlDiagram;
 
-        // TODO: move into AD.Xml
         /// <summary>
         /// Represents the 'm:' prefix seen in the markup for math elements.
         /// </summary>
-        [NotNull] protected static readonly XNamespace M = "http://schemas.openxmlformats.org/officeDocument/2006/math";
+        [NotNull] protected static readonly XNamespace M = XNamespaces.OpenXmlMath;
 
-        // TODO: move into AD.Xml
         /// <summary>
         /// Represents the 'pic:' prefix seen in the markup for 'drawing' elements.
         /// </summary>
-        [NotNull] protected static readonly XNamespace PIC = "http://schemas.openxmlformats.org/drawingml/2006/picture";
+        [NotNull] protected static readonly XNamespace PIC = XNamespaces.OpenXmlDrawingmlPicture;
 
         /// <summary>
         /// Represents the 'r:' prefix seen in the markup of document.xml.
@@ -59,11 +56,10 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull] protected static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
 
-        // TODO: move into AD.Xml
         /// <summary>
         /// Represents the 'wps:' prefix seen in the markup for 'wsp' elements.
         /// </summary>
-        [NotNull] protected static readonly XNamespace WPS = "http://schemas.microsoft.com/office/word/2010/wordprocessingShape";
+        [NotNull] protected static readonly XNamespace WPS = XNamespaces.OpenXmlWordprocessingShape;
 
         #endregion
 
@@ -250,10 +246,10 @@ namespace AD.OpenXml
         [Pure]
         protected override XObject VisitElement(XElement element)
             => VisitLookup.TryGetValue(element.Name, out Func<XElement, XObject> visit)
-                ? visit(element)
-                : _allowBaseMethod
-                    ? base.VisitElement(element)
-                    : null;
+                   ? visit(element)
+                   : _allowBaseMethod
+                       ? base.VisitElement(element)
+                       : null;
 
         /// <summary>
         ///

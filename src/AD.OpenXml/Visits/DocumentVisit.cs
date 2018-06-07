@@ -209,14 +209,14 @@ namespace AD.OpenXml.Visits
             {
                 XElement sectionProperties = source.Element(W + "body")?.Elements().Last();
 
-                XElement previous = sectionProperties.Previous();
+                XElement previous = sectionProperties?.Previous();
 
                 sectionProperties?.Remove();
 
                 if (previous?.Name != W + "p")
                 {
                     previous?.AddAfterSelf(new XElement(W + "p"));
-                    previous = previous.Next();
+                    previous = previous?.Next();
                 }
 
                 if (!previous?.Elements(W + "pPr").Any() ?? false)
@@ -233,7 +233,7 @@ namespace AD.OpenXml.Visits
 
             foreach (XElement item in charts)
             {
-                item.RemoveByAll(W + "pStyle");
+                item.Descendants(W + "pStyle").Remove();
 
                 if (!item.Elements(W + "pPr").Any())
                     item.AddFirst(new XElement(W + "pPr"));

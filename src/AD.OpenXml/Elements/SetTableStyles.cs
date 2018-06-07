@@ -113,9 +113,11 @@ namespace AD.OpenXml.Elements
             source.Descendants(W + "trPr").Remove();
             //source.Descendants(W + "gridCol").Attributes(W + "w").Remove();
 
-            foreach (XElement table in source.Element(W + "body")?.Elements(W + "tbl") ?? Enumerable.Empty<XElement>())
+            XElement[] tables = source.Element(W + "body")?.Elements(W + "tbl").ToArray() ?? new XElement[0];
+
+            for (int i = 0; i < tables.Length; i++)
             {
-                table.RemoveBy(W + "pPr");
+                tables[i].Descendants(W + "pPr").Remove();
             }
 
             return source;

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
+using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml
@@ -16,11 +17,10 @@ namespace AD.OpenXml
         /// </summary>
         private readonly bool _returnOnDefault;
 
-        // TODO: move into AD.Xml
         /// <summary>
         /// Represents the 'm:' prefix seen in the markup for math elements.
         /// </summary>
-        [NotNull] protected static readonly XNamespace M = "http://schemas.openxmlformats.org/officeDocument/2006/math";
+        [NotNull] protected static readonly XNamespace M = XNamespaces.OpenXmlMath;
 
         /// <summary>
         /// The mapping of OMML accent characters to MathML accent characters.

@@ -15,9 +15,9 @@ namespace AD.OpenXml.Elements
         private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
-        /// Removes all &lt;u [val=...]/&gt; descendant elements from the &lt;rPr [...]/&gt; elements 
+        /// Removes all &lt;u [val=...]/&gt; descendant elements from the &lt;rPr [...]/&gt; elements
         /// and places a &lt;pStyle val="FiguresTablesSourceNote" /&gt; on the &lt;pPr [...]/&gt; elements.
-        /// 
+        ///
         /// This method works on the existing <see cref="XElement"/> and returns a reference to it for a fluent syntax.
         /// </summary>
         /// <param name="element">The element to search for descendants.</param>
@@ -25,8 +25,8 @@ namespace AD.OpenXml.Elements
         /// <exception cref="System.ArgumentException"/>
         /// <exception cref="System.ArgumentNullException"/>
         public static XElement ChangeUnderlineToSourceNote(this XElement element)
-        { 
-            IEnumerable<XElement> paragraphs = 
+        {
+            IEnumerable<XElement> paragraphs =
                 element.Descendants(W + "u")
                        .Select(x => x.Parent)
                        .Where(x => x?.Name == W + "rPr")
@@ -43,7 +43,7 @@ namespace AD.OpenXml.Elements
 
             foreach (XElement item in paragraphs)
             {
-                item.RemoveBy(W + "pStyle");
+                item.Descendants(W + "pStyle").Remove();
                 if (!item.Elements(W + "pPr").Any())
                     item.AddFirst(new XElement(W + "pPr"));
                 item.Element(W + "pPr")?.AddFirst(new XElement(W + "pStyle", new XAttribute(W + "val", "FiguresTablesSourceNote")));

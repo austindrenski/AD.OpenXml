@@ -88,23 +88,20 @@ namespace AD.OpenXml.Documents
                 series.Element(C + "idx")?.SetAttributeValue("val", (string) series.Element(C + "order")?.Attribute("val"));
             }
 
-            element.Descendants(C + "userShapes").Remove();
-            element.Descendants(C + "clrMapOvr").Remove();
-            element.Descendants().Where(x => x.Name.LocalName == "docPr").Remove();
-
-            element.Element(C + "chart")?.Element(C + "title")?.Remove();
-
             element =
-                element.RemoveByAll(C + "spPr")
-                       .RemoveByAll(C + "txPr");
-
-            element.Descendants(C + "legend").Remove();
-            element.Descendants(C + "numfmt").Remove();
-            element.Descendants(C + "majorGridlines").Remove();
-            element.Descendants(A + "endParaRPr").Remove();
-            element.Descendants(C + "overlap").Remove();
-            element.Descendants(C + "autoTitleDeleted").Remove();
-            element.Descendants(C + "noMultiLvlLbl").Remove();
+                element.RemoveByAll(x => x.Name.LocalName == "docPr")
+                       .RemoveByAll(x => x.Name == C + "title")
+                       .RemoveByAll(C + "spPr")
+                       .RemoveByAll(C + "txPr")
+                       .RemoveByAll(C + "userShapes")
+                       .RemoveByAll(C + "clrMapOvr")
+                       .RemoveByAll(C + "legend")
+                       .RemoveByAll(C + "numfmt")
+                       .RemoveByAll(C + "majorGridlines")
+                       .RemoveByAll(A + "endParaRPr")
+                       .RemoveByAll(C + "overlap")
+                       .RemoveByAll(C + "autoTitleDeleted")
+                       .RemoveByAll(C + "noMultiLvlLbl");
 
             element.Descendants(C + "varyColors").SetAttributeValues("val", "1");
             element.Descendants(C + "gapWidth").SetAttributeValues("val", "150");
@@ -123,7 +120,7 @@ namespace AD.OpenXml.Documents
                         new XElement(A + "noFill"))));
 
             element.Element(C + "chart")?
-                .Add(
+               .Add(
                     new XElement(C + "legend",
                         new XElement(C + "legendPos",
                             new XAttribute("val", "b")),
@@ -131,8 +128,8 @@ namespace AD.OpenXml.Documents
                             new XAttribute("val", "0"))));
 
             element.Element(C + "chart")?
-                .Element(C + "plotArea")?
-                .Add(
+               .Element(C + "plotArea")?
+               .Add(
                     new XElement(C + "spPr",
                         new XElement(A + "noFill"),
                         new XElement(A + "ln",
@@ -141,9 +138,9 @@ namespace AD.OpenXml.Documents
                                     new XAttribute("val", "black"))))));
 
             element.Element(C + "chart")?
-                .Element(C + "plotArea")?
-                .Element(C + "valAx")?
-                .AddFirst(
+               .Element(C + "plotArea")?
+               .Element(C + "valAx")?
+               .AddFirst(
                     new XElement(C + "spPr",
                         new XElement(A + "noFill"),
                         new XElement(A + "ln",
@@ -152,9 +149,9 @@ namespace AD.OpenXml.Documents
                                     new XAttribute("val", "black"))))));
 
             element.Element(C + "chart")?
-                .Element(C + "plotArea")?
-                .Element(C + "catAx")?
-                .AddFirst(
+               .Element(C + "plotArea")?
+               .Element(C + "catAx")?
+               .AddFirst(
                     new XElement(C + "spPr",
                         new XElement(A + "noFill"),
                         new XElement(A + "ln",

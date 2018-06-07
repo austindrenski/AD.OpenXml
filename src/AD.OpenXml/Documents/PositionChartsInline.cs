@@ -77,7 +77,7 @@ namespace AD.OpenXml.Documents
                             .RemoveAttributesBy(Wp2010 + "anchorId")
                             .RemoveAttributesBy(Wp2010 + "editId")));
 
-                item.RemoveBy(WP + "anchor");
+                item.Descendants(WP + "anchor").Remove();
             }
 
             return await document.WriteIntoAsync(result, "word/document.xml");
