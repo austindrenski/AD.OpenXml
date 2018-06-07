@@ -360,21 +360,6 @@ namespace AD.OpenXml
         protected XObject LiftableHelper([CanBeNull] params XObject[] nodes) => LiftableHelper((IEnumerable<XObject>) nodes);
 
         /// <summary>
-        /// Lifts a singleton <see cref="XObject"/>.
-        /// </summary>
-        /// <param name="xObject">The <see cref="XObject"/> to visit and lift.</param>
-        /// <returns>
-        /// The visited <see cref="XObject"/>.
-        /// </returns>
-        [Pure]
-        [CanBeNull]
-        protected static XObject LiftSingleton([CanBeNull] XObject xObject)
-            => xObject is XContainer container &&
-               container.Nodes().Count() <= 1
-                ? container.FirstNode
-                : xObject;
-
-        /// <summary>
         /// Yields the <see cref="XObject"/> or the children of the <see cref="XObject"/> if the "data-liftable" attribute is present.
         /// </summary>
         /// <param name="xObject">The <see cref="XObject"/> to visit.</param>
@@ -383,24 +368,27 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [NotNull]
-        [ItemCanBeNull]
+        [LinqTunnel]
+        [ItemNotNull]
+        [CollectionAccess(CollectionAccessType.Read)]
         protected static IEnumerable<XObject> Lift([CanBeNull] XObject xObject)
         {
+            if (xObject is null)
+                yield break;
+
             if (!(xObject is XElement e))
             {
                 yield return xObject;
-
                 yield break;
             }
 
             if (e.Attribute(Liftable) is null)
             {
                 yield return new XElement(e.Name, e.Attributes(), Lift(e.Nodes()));
-
                 yield break;
             }
 
-            foreach (XObject item in e.Elements().SelectMany(Lift))
+            foreach (XObject item in Lift(e.Nodes()))
             {
                 yield return item;
             }
@@ -413,55 +401,60 @@ namespace AD.OpenXml
         /// <returns>
         /// The <see cref="XObject"/> or the children of the <see cref="XObject"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
-        [ItemCanBeNull]
-        protected static IEnumerable<XObject> Lift([NotNull] IEnumerable<XObject> source)
+        [LinqTunnel]
+        [ItemNotNull]
+        [CollectionAccess(CollectionAccessType.Read)]
+        protected static IEnumerable<XObject> Lift([CanBeNull] [ItemCanBeNull] IEnumerable<XObject> source)
         {
             if (source is null)
-                throw new ArgumentNullException(nameof(source));
+                yield break;
 
-            foreach (XObject item in source.SelectMany(Lift))
+            foreach (XObject item in source)
             {
-                yield return item;
+                foreach (XObject lifted in Lift(item))
+                {
+                    yield return lifted;
+                }
             }
         }
 
         /// <summary>
+        /// Lifts the first node or null of an <see cref="XContainer"/> when it is empty or has a single node.
+        /// </summary>
+        /// <param name="container">The <see cref="XContainer"/> to visit and lift.</param>
+        /// <returns>
+        /// The inner <see cref="XNode"/> or the <see cref="XContainer"/>.
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected static XObject LiftSingleton([NotNull] XContainer container) => container.Nodes().Count() <= 1 ? container.FirstNode : container;
+
+        /// <summary>
         ///
         /// </summary>
-        /// <param name="current">  </param>
-        /// <param name="cast"> </param>
-        /// <param name="predicates">  </param>
+        /// <param name="current"></param>
+        /// <param name="predicates"></param>
         /// <returns>
         ///
         /// </returns>
         [Pure]
         [NotNull]
+        [LinqTunnel]
         [ItemNotNull]
-        protected static IEnumerable<T> NextWhile<T>([NotNull] XNode current, Func<XNode, T> cast, [NotNull] [ItemNotNull] params Func<T, bool>[] predicates) where T : class
+        [CollectionAccess(CollectionAccessType.Read)]
+        protected static IEnumerable<XNode> NextWhile([NotNull] XElement current, [NotNull] [ItemNotNull] params Func<XNode, bool>[] predicates)
         {
-            if (current is null)
-                throw new ArgumentNullException(nameof(current));
-
-            if (predicates.Any(x => x is null))
-                throw new ArgumentNullException(nameof(predicates));
-
-            for (XNode next = current.NextNode; next != null; next = next.NextNode)
+            for (XNode n = current.NextNode; n != null; n = n.NextNode)
             {
-                T item = cast(next);
-
-                if (item is null)
-                    yield break;
-
                 for (int i = 0; i < predicates.Length; i++)
                 {
-                    if (!predicates[i](item))
+                    if (!predicates[i](n))
                         yield break;
                 }
 
-                yield return item;
+                yield return n;
             }
         }
 

@@ -138,6 +138,8 @@ namespace AD.OpenXml
 
         #endregion
 
+        #region Main
+
         /// <summary>
         /// Returns an <see cref="XObject"/> repesenting a well-formed HTML document from the supplied w:document node.
         /// </summary>
@@ -200,6 +202,8 @@ footer.footnotes a[aria-label='Return to content'] {
                     // TODO: handle this as a call at the end of an encapsulated section so that each section can be served as stand alone content.
                     Visit(footnotes)));
 
+        #endregion
+
         #region Visits
 
         /// <inheritdoc />
@@ -214,7 +218,8 @@ footer.footnotes a[aria-label='Return to content'] {
         [Pure]
         protected override XObject VisitAttribute(XAttribute attribute)
             => VisitName(attribute.Name) is XName name &&
-               SupportedAttributes.Contains(name)
+               SupportedAttributes.Contains(name) &&
+               !string.IsNullOrWhiteSpace(attribute.Value)
                 ? new XAttribute(name, attribute.Value)
                 : null;
 
@@ -224,45 +229,29 @@ footer.footnotes a[aria-label='Return to content'] {
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitBody(XElement body)
-            => new XElement(VisitName(body.Name), Visit(body.Attributes()), Visit(body.Nodes()));
-
-        /// <inheritdoc />
-        [Pure]
         protected override XObject VisitChart(XElement chart)
             => LiftableHelper(Charts[(string) chart.Attribute(R + "id")].Element(C + "chart"));
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitDocument(XElement document)
-            => new XElement(VisitName(document.Name), Visit(document.Attributes()), Visit(document.Nodes()));
-
-        /// <inheritdoc />
-        [Pure]
         protected override XObject VisitDocumentProperty(XElement docPr)
-            => new XElement(
-                VisitName(docPr.Name),
-                VisitString((string) docPr.Attribute("title")));
-
-        /// <inheritdoc />
-        [Pure]
-        protected override XObject VisitDrawing(XElement drawing)
-            => new XElement(VisitName(drawing.Name), Visit(drawing.Attributes()), Visit(drawing.Nodes()));
+            => new XElement(VisitName(docPr.Name), VisitString((string) docPr.Attribute("title")));
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitFootnote(XElement footnote)
         {
-            string footnoteReference = (string) footnote.Attribute(W + "id");
+            int footnoteReference = (int) footnote.Attribute(W + "id");
 
             return
-                new XElement("li",
-                    new XAttribute("id", $"footnote_{footnoteReference}"),
-                    new XElement("a",
-                        new XAttribute("href", $"#footnote_ref_{footnoteReference}"),
-                        new XAttribute("aria-label", "Return to content"),
-                        Visit(footnote.Attributes()),
-                        Visit(footnote.Nodes())));
+                footnoteReference > 0
+                    ? new XElement("li",
+                        new XAttribute("id", $"footnote_{footnoteReference}"),
+                        new XElement("a",
+                            new XAttribute("href", $"#footnote_ref_{footnoteReference}"),
+                            new XAttribute("aria-label", "Return to content"),
+                            Visit(footnote.Nodes())))
+                    : null;
         }
 
         /// <inheritdoc />
@@ -274,7 +263,7 @@ footer.footnotes a[aria-label='Return to content'] {
                     new XAttribute("id", "footnote-label"),
                     new XText("Footnotes")),
                 new XElement("ol",
-                    Visit(footnotes.Elements().Where(x => (int) x.Attribute(W + "id") > 0))));
+                    Visit(footnotes.Nodes())));
 
         /// <inheritdoc />
         [Pure]
@@ -298,51 +287,66 @@ footer.footnotes a[aria-label='Return to content'] {
 
         /// <inheritdoc />
         [Pure]
-        protected override XName VisitName(XName name)
-            => Renames.TryGetValue(name, out XName result)
-                ? result
-                : name.LocalName;
+        protected override XName VisitName(XName name) => Renames.TryGetValue(name, out XName result) ? result : name.LocalName;
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitParagraph(XElement paragraph)
         {
-            XAttribute classAttribute = paragraph.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
+            XAttribute classAttribute = ParagraphStyle(paragraph);
 
-            if (classAttribute != null && HeadingRegex.Match((string) classAttribute) is Match match && match.Success)
+            if (classAttribute is null)
+                return base.VisitParagraph(paragraph);
+
+            // TODO: can we handle list paragraphs?
+//            if ((string) classAttribute == "ListParagraph")
+//            {
+//                // currently building a list
+//                if (PreviousParagraphStyleEquals(paragraph, "ListParagraph"))
+//                {
+//                    return
+//                        new XElement("li",
+//                            Visit(paragraph.Attributes()),
+//                            Visit(paragraph.Nodes()));
+//                }
+//
+//                // start building a list
+//                return
+//                    new XElement("ol",
+//                        Visit(paragraph.Attributes()),
+//                        new XElement("li",
+//                            Visit(paragraph.Attributes()),
+//                            Visit(paragraph.Nodes())),
+//                        Visit(NextWhile(paragraph, x => x is XElement e && "ListParagraph" == (string) ParagraphStyle(e))));
+//            }
+
+            if (HeadingRegex.Match((string) classAttribute) is Match match && match.Success)
             {
                 return
-                    new XElement(
-                        $"h{match.Groups["level"].Value}",
+                    new XElement($"h{match.Groups["level"].Value}",
                         Visit(paragraph.Attributes()),
                         VisitString((string) paragraph));
             }
 
+            // Not handled. Greedily subsumed by table nodes.
             if ((string) classAttribute == "FiguresTablesSourceNote" && !paragraph.Descendants(W + "drawing").Any())
-            {
-                // Not handled. Greedily subsumed by table nodes.
                 return null;
-            }
 
             // ReSharper disable once InvertIf
             if (paragraph.NextNode is XElement next)
             {
                 switch ((string) classAttribute)
                 {
+                    // Handled by VisitTable.
                     case "CaptionTable" when next.Name == W + "tbl":
-                    {
-                        // Handled by VisitTable.
                         return null;
-                    }
+
+                    // Not handled. <figcaption/> created from <w:docPr/>.
                     case "CaptionFigure" when next.Descendants(W + "drawing").Any():
-                    {
-                        // Not handled. <figcaption/> created from <w:docPr/>.
                         return null;
-                    }
+
                     default:
-                    {
                         break;
-                    }
                 }
             }
 
@@ -387,18 +391,14 @@ footer.footnotes a[aria-label='Return to content'] {
 
             if (run.NextNode is XElement next && next.Element(W + "fldChar") is XElement fieldChar)
             {
+                // Not handled. Field characters are not supported.
                 if (fieldChar.Attribute(W + "fldCharType") != null)
-                {
-                    // Not handled. Field characters are not supported.
                     return null;
-                }
             }
 
+            // Not handled. Field character formatting codes are not supported.
             if (run.Element(W + "instrText") != null)
-            {
-                // Not handled. Field character formatting codes are not supported.
                 return null;
-            }
 
             if ((string) run.Element(W + "footnoteReference")?.Attribute(W + "id") is string footnoteReference)
             {
@@ -410,21 +410,21 @@ footer.footnotes a[aria-label='Return to content'] {
                         new XText(string.Empty));
             }
 
-            if ("superscript" == (string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") ||
-                "superscript" == (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") ||
-                "FootnoteReference" == (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val"))
+            XElement rPr = run.Element(W + "rPr");
+
+            if ("superscript" == (string) rPr?.Element(W + "vertAlign")?.Attribute(W + "val") ||
+                "superscript" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val") ||
+                "FootnoteReference" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
                 return new XElement("sup", VisitString((string) run));
 
-            if ("subscript" == (string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") ||
-                "subscript" == (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val"))
+            if ("subscript" == (string) rPr?.Element(W + "vertAlign")?.Attribute(W + "val") ||
+                "subscript" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
                 return new XElement("sub", VisitString((string) run));
 
-            if (null != run.Element(W + "rPr")?.Element(W + "b") ||
-                "Strong" == (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val"))
+            if (null != rPr?.Element(W + "b") || "Strong" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
                 return new XElement("b", VisitString((string) run));
 
-            if (null != run.Element(W + "rPr")?.Element(W + "i") ||
-                "Emphasis" == (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val"))
+            if (null != rPr?.Element(W + "i") || "Emphasis" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
                 return new XElement("i", VisitString((string) run));
 
             return VisitString((string) run);
@@ -434,10 +434,12 @@ footer.footnotes a[aria-label='Return to content'] {
         [Pure]
         protected override XObject VisitTable(XElement table)
         {
-            IEnumerable<XObject> caption =
-                table.PreviousNode is XElement p && p.Name == W + "p" && (string) p.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "CaptionTable"
+            IEnumerable<XNode> caption =
+                table.PreviousNode is XElement p &&
+                W + "p" == p.Name &&
+                "CaptionTable" == (string) p.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val")
                     ? p.Nodes()
-                    : Enumerable.Empty<XObject>();
+                    : Enumerable.Empty<XNode>();
 
             XAttribute classAttribute = table.Element(W + "tblPr")?.Element(W + "tblStyle")?.Attribute(W + "val");
 
@@ -460,9 +462,9 @@ footer.footnotes a[aria-label='Return to content'] {
 
             IEnumerable<XElement> footerItems =
                 NextWhile(
-                    table,
-                    x => x as XElement,
-                    x => (string) x.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "FiguresTablesSourceNote");
+                        table,
+                        x => x is XElement e && (string) e.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "FiguresTablesSourceNote")
+                    .OfType<XElement>();
 
             return
                 new XElement(
@@ -487,7 +489,6 @@ footer.footnotes a[aria-label='Return to content'] {
         protected override XObject VisitTableCell(XElement cell)
         {
             XAttribute alignment = cell.Elements(W + "p").FirstOrDefault()?.Element(W + "pPr")?.Element(W + "jc")?.Attribute(W + "val");
-
             XAttribute style = cell.Element(W + "p")?.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
 
             // Lift attributes and content to the cell when the parapgraph is a singleton.
@@ -495,12 +496,12 @@ footer.footnotes a[aria-label='Return to content'] {
                 cell.Elements(W + "p").Count() == 1
                     ? new XElement(
                         VisitName(cell.Name),
-                        Visit(MakeClassAttribute(alignment, style)),
+                        Visit(new XAttribute("class", string.Join(" ", (string) alignment, (string) style).Trim())),
                         Visit(cell.Attributes()),
-                        Visit(cell.Nodes()).Select(LiftSingleton))
+                        Visit(cell.Nodes()).Select(x => x is XContainer c ? LiftSingleton(c) : x))
                     : new XElement(
                         VisitName(cell.Name),
-                        Visit(alignment),
+                        Visit(new XAttribute("class", (string) alignment ?? string.Empty)),
                         Visit(cell.Attributes()),
                         Visit(cell.Nodes()));
         }
@@ -508,10 +509,7 @@ footer.footnotes a[aria-label='Return to content'] {
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitText(XText text)
-            => SequenceRegex.IsMatch(text.Value) ||
-               StyleReferenceRegex.IsMatch(text.Value)
-                ? null
-                : text;
+            => SequenceRegex.IsMatch(text.Value) || StyleReferenceRegex.IsMatch(text.Value) ? null : text;
 
         #endregion
 
@@ -550,18 +548,39 @@ footer.footnotes a[aria-label='Return to content'] {
                                              new XAttribute("value", b.Value))))));
 
         /// <summary>
-        /// Space delimits the attribute values into a 'class' attribute.
+        ///
         /// </summary>
-        /// <param name="attributes">The <see cref="XAttribute"/> collection to combine.</param>
+        /// <param name="paragraph"></param>
         /// <returns>
-        /// An <see cref="XAttribute"/> with the name 'class' and the values from <paramref name="attributes"/>.
+        ///
         /// </returns>
         [Pure]
-        [CanBeNull]
-        private static XAttribute MakeClassAttribute([NotNull] [ItemCanBeNull] params XAttribute[] attributes)
-            => attributes.Any(x => x != null)
-                ? new XAttribute("class", string.Join(" ", attributes.Where(x => x != null).Select(x => (string) x)))
-                : null;
+        private static XAttribute ParagraphStyle([CanBeNull] XElement paragraph)
+            => paragraph?.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="paragraph"></param>
+        /// <param name="style"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        private static bool NextParagraphStyleEquals([CanBeNull] XElement paragraph, [CanBeNull] string style)
+            => paragraph?.NextNode is XElement e && W + "p" == e.Name && style == (string) ParagraphStyle(e);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="paragraph"></param>
+        /// <param name="style"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        private static bool PreviousParagraphStyleEquals([CanBeNull] XElement paragraph, [CanBeNull] string style)
+            => paragraph?.PreviousNode is XElement e && W + "p" == e.Name && style == (string) ParagraphStyle(e);
 
         #endregion
     }
