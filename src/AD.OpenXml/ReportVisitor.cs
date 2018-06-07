@@ -32,8 +32,6 @@ namespace AD.OpenXml
         protected IDictionary<string, (string mime, string description, string base64)> Images { get; set; }
 
         /// <inheritdoc />
-        protected ReportVisitor(bool returnOnDefault) : base(returnOnDefault)
-        {
-        }
+        protected ReportVisitor() : base(true) {}
     }
 }

@@ -178,7 +178,7 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitElement([NotNull] XElement element)
-            => new XElement(VisitName(element.Name), Visit(element.Nodes()));
+            => new XElement(VisitName(element.Name), Visit(element.Attributes()), Visit(element.Nodes()));
 
         /// <summary>
         /// Visits an <see cref="XName"/>.
@@ -395,7 +395,7 @@ namespace AD.OpenXml
 
             if (e.Attribute(Liftable) is null)
             {
-                yield return new XElement(e.Name, e.Attributes(), e.Nodes().Select(Lift));
+                yield return new XElement(e.Name, e.Attributes(), Lift(e.Nodes()));
 
                 yield break;
             }

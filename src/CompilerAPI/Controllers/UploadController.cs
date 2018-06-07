@@ -123,9 +123,10 @@ namespace CompilerAPI.Controllers
                 case "html":
                 {
                     string styles = stylesheet is null ? null : new StreamReader(stylesheet.OpenReadStream()).ReadToEnd();
-                    OpenXmlPackageVisitor visitor = new OpenXmlPackageVisitor(new ZipArchive(output));
-                    XObject html = HtmlVisitor.Visit(visitor.Document, visitor.Footnotes, title, stylesheetUrl, styles);
-                    return Content(html.ToString(), "text/html");
+                    OpenXmlPackageVisitor ooxml = new OpenXmlPackageVisitor(new ZipArchive(output));
+                    HtmlVisitor html = new HtmlVisitor(ooxml.Document.ChartReferences, ooxml.Document.ImageReferences);
+                    XObject result = html.Visit(ooxml.Document.Content, ooxml.Footnotes.Content, title, stylesheetUrl, styles);
+                    return Content(result.ToString(), "text/html");
                 }
                 case "xml":
                     return Content(new OpenXmlPackageVisitor(new ZipArchive(output)).Document.Content.ToString(), "application/xml");

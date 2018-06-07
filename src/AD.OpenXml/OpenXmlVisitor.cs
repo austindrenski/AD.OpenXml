@@ -14,6 +14,8 @@ namespace AD.OpenXml
     [PublicAPI]
     public abstract class OpenXmlVisitor : XmlVisitor
     {
+        #region Namespaces
+
         /// <summary>
         /// Represents the 'a:' prefix seen in the markup for chart[#].xml
         /// </summary>
@@ -63,10 +65,12 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull] protected static readonly XNamespace WPS = "http://schemas.microsoft.com/office/word/2010/wordprocessingShape";
 
+        #endregion
+
         /// <summary>
-        /// Return an element when handling the default dispatch case if true; otherwise, false.
+        /// True if the base method should be called when handling the default dispatch case.
         /// </summary>
-        private readonly bool _returnOnDefault;
+        private readonly bool _allowBaseMethod;
 
         /// <summary>
         /// The mapping of <see cref="XName"/> to visit method used by <see cref="VisitElement"/>.
@@ -76,12 +80,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Initializes an <see cref="OpenXmlVisitor"/>.
         /// </summary>
-        /// <param name="returnOnDefault">
-        /// True if an element should be returned when handling the default dispatch case.
-        /// </param>
-        protected OpenXmlVisitor(bool returnOnDefault)
+        /// <param name="allowBaseMethod">True if the base method should be called when handling the default dispatch case.</param>
+        protected OpenXmlVisitor(bool allowBaseMethod)
         {
-            _returnOnDefault = returnOnDefault;
+            _allowBaseMethod = allowBaseMethod;
 
             VisitLookup =
                 new Dictionary<XName, Func<XElement, XObject>>
@@ -115,6 +117,8 @@ namespace AD.OpenXml
                     // @formatter:on
                 };
         }
+
+        #region Visits
 
         /// <summary>
         ///
@@ -247,7 +251,7 @@ namespace AD.OpenXml
         protected override XObject VisitElement(XElement element)
             => VisitLookup.TryGetValue(element.Name, out Func<XElement, XObject> visit)
                 ? visit(element)
-                : _returnOnDefault
+                : _allowBaseMethod
                     ? base.VisitElement(element)
                     : null;
 
@@ -474,5 +478,7 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitTableRow([NotNull] XElement row) => base.VisitElement(row);
+
+        #endregion
     }
 }

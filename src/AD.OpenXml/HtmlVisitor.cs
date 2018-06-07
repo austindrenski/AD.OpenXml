@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using AD.OpenXml.Structures;
 using JetBrains.Annotations;
 
 // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
@@ -16,18 +15,20 @@ namespace AD.OpenXml
     [PublicAPI]
     public class HtmlVisitor : OpenXmlVisitor
     {
+        #region Fields
+
         /// <summary>
-        /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
+        /// The regex to detect heading styles of the case-insensitive form "heading(?[0-9])".
         /// </summary>
         [NotNull] private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
-        /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
+        /// The regex to detect sequence references of the case-insensitive form "SEQ (?[A-z]+) (?.*) (?\".+\"|[A-z]+ \\\\s [0-9])".
         /// </summary>
         [NotNull] private static readonly Regex SequenceRegex = new Regex("SEQ (?<type>[A-z]+) (?<switches>.*) (?<format>\".+\"|[A-z]+ \\\\s [0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
-        /// The regex to detect heading styles of the case-insensitive form 'heading[0-9]'.
+        /// The regex to detect style references of the case-insensitive form "STYLEREF (?\".+\"|[0-9] \\\\s)".
         /// </summary>
         [NotNull] private static readonly Regex StyleReferenceRegex = new Regex("STYLEREF (?<format>\".+\"|[0-9] \\\\s)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -100,8 +101,15 @@ namespace AD.OpenXml
         [NotNull]
         protected virtual string MetaContent => "width=device-width,minimum-scale=1,initial-scale=1";
 
+        #endregion
+
+        #region Constructors
+
         /// <inheritdoc />
-        protected HtmlVisitor(bool returnOnDefault) : base(returnOnDefault)
+        protected HtmlVisitor(bool allowBaseMethod) : base(allowBaseMethod) {}
+
+        /// <inheritdoc />
+        public HtmlVisitor() : this(false)
         {
             Charts = new Dictionary<string, XElement>();
             Images = new Dictionary<string, (string mime, string description, string base64)>();
@@ -111,10 +119,12 @@ namespace AD.OpenXml
         /// <summary>
         /// Initializes an <see cref="HtmlVisitor"/>.
         /// </summary>
-        /// <param name="returnOnDefault">True if an element should be returned when handling the default dispatch case.</param>
         /// <param name="charts">Chart data referenced in the content to be visited.</param>
         /// <param name="images">Image data referenced in the content to be visited.</param>
-        protected HtmlVisitor(bool returnOnDefault, [NotNull] IDictionary<string, XElement> charts, [NotNull] IDictionary<string, (string mime, string description, string base64)> images) : base(returnOnDefault)
+        public HtmlVisitor(
+            [NotNull] IDictionary<string, XElement> charts,
+            [NotNull] IDictionary<string, (string mime, string description, string base64)> images)
+            : base(false)
         {
             if (charts is null)
                 throw new ArgumentNullException(nameof(charts));
@@ -126,34 +136,10 @@ namespace AD.OpenXml
             Images = new Dictionary<string, (string mime, string description, string base64)>(images);
         }
 
-        /// <summary>
-        /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
-        /// </summary>
-        /// <param name="document">The w:document node.</param>
-        /// <param name="footnotes"></param>
-        /// <param name="title">The name of this HTML document.</param>
-        /// <param name="stylesheetUrl">The name, relative path, or absolute path to a CSS stylesheet.</param>
-        /// <param name="styles">The CSS styles to include in a style node.</param>        /// <returns>
-        /// An <see cref="XElement"/> "html
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        [NotNull]
-        public static XObject Visit([NotNull] Document document, [NotNull] Footnotes footnotes, [CanBeNull] string title, [CanBeNull] string stylesheetUrl, [CanBeNull] string styles)
-        {
-            if (document is null)
-                throw new ArgumentNullException(nameof(document));
-
-            if (footnotes is null)
-                throw new ArgumentNullException(nameof(footnotes));
-
-            return
-                new HtmlVisitor(false, document.ChartReferences, document.ImageReferences)
-                    .Visit(document.Content, footnotes.Content, title, stylesheetUrl, styles);
-        }
+        #endregion
 
         /// <summary>
-        /// Returns an <see cref="XElement"/> repesenting a well-formed HTML document from the supplied w:document node.
+        /// Returns an <see cref="XObject"/> repesenting a well-formed HTML document from the supplied w:document node.
         /// </summary>
         /// <param name="document">The w:document node.</param>
         /// <param name="footnotes"></param>
@@ -161,37 +147,29 @@ namespace AD.OpenXml
         /// <param name="stylesheetUrl">The name, relative path, or absolute path to a CSS stylesheet.</param>
         /// <param name="styles">The CSS styles to include in a style node.</param>
         /// <returns>
-        /// An <see cref="XElement"/> "html
+        /// An <see cref="XObject"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
-        public XObject Visit([NotNull] XElement document, [NotNull] XElement footnotes, [CanBeNull] string title, [CanBeNull] string stylesheetUrl, [CanBeNull] string styles)
-        {
-            if (document is null)
-                throw new ArgumentNullException(nameof(document));
-
-            if (footnotes is null)
-                throw new ArgumentNullException(nameof(footnotes));
-
-            return
-                new XDocument(
-                    DocumentTypeDeclaration,
-                    new XElement("html",
-                        new XAttribute("lang", Language),
-                        new XElement("head",
-                            new XElement("meta",
-                                new XAttribute("charset", CharacterSet)),
-                            new XElement("meta",
-                                new XAttribute("name", MetaName),
-                                new XAttribute("content", MetaContent)),
-                            new XElement("title", title ?? string.Empty),
-                            new XElement("script",
-                                new XAttribute("type", "text/javascript"),
-                                new XAttribute("src", "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"),
-                                new XText(string.Empty)),
-                            new XElement("style",
-                                @"
+        public XObject Visit([CanBeNull] XElement document, [CanBeNull] XElement footnotes, [CanBeNull] string title, [CanBeNull] string stylesheetUrl, [CanBeNull] string styles)
+            => new XDocument(
+                DocumentTypeDeclaration,
+                new XElement("html",
+                    new XAttribute("lang", Language),
+                    new XElement("head",
+                        new XElement("meta",
+                            new XAttribute("charset", CharacterSet)),
+                        new XElement("meta",
+                            new XAttribute("name", MetaName),
+                            new XAttribute("content", MetaContent)),
+                        new XElement("title", title ?? string.Empty),
+                        new XElement("script",
+                            new XAttribute("type", "text/javascript"),
+                            new XAttribute("src", "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"),
+                            new XText(string.Empty)),
+                        new XElement("style",
+                            @"
 body>article>h1 {
     counter-reset: footnote_counter;
 }
@@ -211,17 +189,18 @@ article a[aria-describedby='footnote-label'] {
 footer.footnotes a[aria-label='Return to content'] {
     text-decoration: none;
 }"
-                            ),
-                            new XElement("style", styles ?? string.Empty),
-                            new XElement("link",
-                                new XAttribute("type", "text/css"),
-                                new XAttribute("rel", "stylesheet"),
-                                new XAttribute("href", stylesheetUrl ?? string.Empty))),
-                        // TODO: dispatch sequences of nodes optionally (e.g. virtual) instead of each node to support section-encapsulation.
-                        Lift(Visit(document)),
-                        // TODO: handle this as a call at the end of an encapsulated section so that each section can be served as stand alone content.
-                        Visit(footnotes)));
-        }
+                        ),
+                        new XElement("style", styles ?? string.Empty),
+                        new XElement("link",
+                            new XAttribute("type", "text/css"),
+                            new XAttribute("rel", "stylesheet"),
+                            new XAttribute("href", stylesheetUrl ?? string.Empty))),
+                    // TODO: dispatch sequences of nodes optionally (e.g. virtual) instead of each node to support section-encapsulation.
+                    Lift(Visit(document)),
+                    // TODO: handle this as a call at the end of an encapsulated section so that each section can be served as stand alone content.
+                    Visit(footnotes)));
+
+        #region Visits
 
         /// <inheritdoc />
         [Pure]
@@ -246,9 +225,7 @@ footer.footnotes a[aria-label='Return to content'] {
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitBody(XElement body)
-            => new XElement(
-                VisitName(body.Name),
-                Visit(body.Elements()));
+            => new XElement(VisitName(body.Name), Visit(body.Attributes()), Visit(body.Nodes()));
 
         /// <inheritdoc />
         [Pure]
@@ -258,9 +235,7 @@ footer.footnotes a[aria-label='Return to content'] {
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitDocument(XElement document)
-            => new XElement(
-                VisitName(document.Name),
-                Visit(document.Elements()));
+            => new XElement(VisitName(document.Name), Visit(document.Attributes()), Visit(document.Nodes()));
 
         /// <inheritdoc />
         [Pure]
@@ -272,17 +247,12 @@ footer.footnotes a[aria-label='Return to content'] {
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitDrawing(XElement drawing)
-            => new XElement(
-                VisitName(drawing.Name),
-                Visit(drawing.Elements()));
+            => new XElement(VisitName(drawing.Name), Visit(drawing.Attributes()), Visit(drawing.Nodes()));
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitFootnote(XElement footnote)
         {
-            if (footnote is null)
-                throw new ArgumentNullException(nameof(footnote));
-
             string footnoteReference = (string) footnote.Attribute(W + "id");
 
             return
@@ -291,6 +261,7 @@ footer.footnotes a[aria-label='Return to content'] {
                     new XElement("a",
                         new XAttribute("href", $"#footnote_ref_{footnoteReference}"),
                         new XAttribute("aria-label", "Return to content"),
+                        Visit(footnote.Attributes()),
                         Visit(footnote.Nodes())));
         }
 
@@ -336,9 +307,6 @@ footer.footnotes a[aria-label='Return to content'] {
         [Pure]
         protected override XObject VisitParagraph(XElement paragraph)
         {
-            if (paragraph is null)
-                throw new ArgumentNullException(nameof(paragraph));
-
             XAttribute classAttribute = paragraph.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
 
             if (classAttribute != null && HeadingRegex.Match((string) classAttribute) is Match match && match.Success)
@@ -390,9 +358,6 @@ footer.footnotes a[aria-label='Return to content'] {
         [Pure]
         protected override XObject VisitPicture(XElement picture)
         {
-            if (picture is null)
-                throw new ArgumentNullException(nameof(picture));
-
             XAttribute imageId = picture.Element(PIC + "blipFill")?.Element(A + "blip")?.Attribute(R + "embed");
 
             return
@@ -417,9 +382,6 @@ footer.footnotes a[aria-label='Return to content'] {
         [Pure]
         protected override XObject VisitRun(XElement run)
         {
-            if (run is null)
-                throw new ArgumentNullException(nameof(run));
-
             if (run.Element(W + "drawing") is XElement drawing)
                 return Visit(drawing);
 
@@ -448,38 +410,22 @@ footer.footnotes a[aria-label='Return to content'] {
                         new XText(string.Empty));
             }
 
-            if ((string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") == "superscript" ||
-                (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "superscript" ||
-                (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "FootnoteReference")
-            {
-                return
-                    new XElement("sup",
-                        VisitString((string) run));
-            }
+            if ("superscript" == (string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") ||
+                "superscript" == (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") ||
+                "FootnoteReference" == (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val"))
+                return new XElement("sup", VisitString((string) run));
 
-            if ((string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") == "subscript" ||
-                (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "subscript")
-            {
-                return
-                    new XElement("sub",
-                        VisitString((string) run));
-            }
+            if ("subscript" == (string) run.Element(W + "rPr")?.Element(W + "vertAlign")?.Attribute(W + "val") ||
+                "subscript" == (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val"))
+                return new XElement("sub", VisitString((string) run));
 
-            if (run.Element(W + "rPr")?.Element(W + "b") != null ||
-                (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "Strong")
-            {
-                return
-                    new XElement("b",
-                        VisitString((string) run));
-            }
+            if (null != run.Element(W + "rPr")?.Element(W + "b") ||
+                "Strong" == (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val"))
+                return new XElement("b", VisitString((string) run));
 
-            if (run.Element(W + "rPr")?.Element(W + "i") != null ||
-                (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val") == "Emphasis")
-            {
-                return
-                    new XElement("i",
-                        VisitString((string) run));
-            }
+            if (null != run.Element(W + "rPr")?.Element(W + "i") ||
+                "Emphasis" == (string) run.Element(W + "rPr")?.Element(W + "rStyle")?.Attribute(W + "val"))
+                return new XElement("i", VisitString((string) run));
 
             return VisitString((string) run);
         }
@@ -488,9 +434,6 @@ footer.footnotes a[aria-label='Return to content'] {
         [Pure]
         protected override XObject VisitTable(XElement table)
         {
-            if (table is null)
-                throw new ArgumentNullException(nameof(table));
-
             IEnumerable<XObject> caption =
                 table.PreviousNode is XElement p && p.Name == W + "p" && (string) p.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "CaptionTable"
                     ? p.Nodes()
@@ -508,9 +451,7 @@ footer.footnotes a[aria-label='Return to content'] {
                               .Select(
                                   x => !(x is XElement e) || e.Name != "td"
                                       ? x
-                                      : new XElement("th",
-                                          e.Attributes(),
-                                          e.Nodes())));
+                                      : new XElement("th", e.Attributes(), e.Nodes())));
 
             IEnumerable<XObject> bodyRows =
                 tableNodes.SkipWhile(x => !(x is XElement e) || e.Name != "tr")
@@ -545,9 +486,6 @@ footer.footnotes a[aria-label='Return to content'] {
         [Pure]
         protected override XObject VisitTableCell(XElement cell)
         {
-            if (cell is null)
-                throw new ArgumentNullException(nameof(cell));
-
             XAttribute alignment = cell.Elements(W + "p").FirstOrDefault()?.Element(W + "pPr")?.Element(W + "jc")?.Attribute(W + "val");
 
             XAttribute style = cell.Element(W + "p")?.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
@@ -574,6 +512,10 @@ footer.footnotes a[aria-label='Return to content'] {
                StyleReferenceRegex.IsMatch(text.Value)
                 ? null
                 : text;
+
+        #endregion
+
+        #region Helpers
 
         /// <summary>
         ///
@@ -620,5 +562,7 @@ footer.footnotes a[aria-label='Return to content'] {
             => attributes.Any(x => x != null)
                 ? new XAttribute("class", string.Join(" ", attributes.Where(x => x != null).Select(x => (string) x)))
                 : null;
+
+        #endregion
     }
 }
