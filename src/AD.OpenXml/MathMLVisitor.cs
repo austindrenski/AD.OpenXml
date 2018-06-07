@@ -114,7 +114,9 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitArray([NotNull] XElement array) => new XElement("mtable", Visit(array.Nodes()));
+        protected virtual XObject VisitArray([NotNull] XElement array)
+            => new XElement("mtable",
+                Visit(array.Nodes()));
 
         /// <summary>
         ///
@@ -140,7 +142,8 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitBase([NotNull] XElement baseItem) => LiftableHelper(baseItem);
+        protected virtual XObject VisitBase([NotNull] XElement baseItem)
+            => new XElement("mrow", Visit(baseItem.Nodes()));
 
         /// <summary>
         ///
@@ -156,7 +159,8 @@ namespace AD.OpenXml
                 new XElement("mo",
                     new XAttribute("fence", true),
                     new XText(delimiter.Element(M + "dPr")?.Element(M + "begChr")?.Attribute(M + "val")?.Value ?? "(")),
-                Visit(delimiter.Nodes()),
+                new XElement("mrow",
+                    Visit(delimiter.Nodes())),
                 new XElement("mo",
                     new XAttribute("fence", true),
                     new XText(delimiter.Element(M + "dPr")?.Element(M + "endChr")?.Attribute(M + "val")?.Value ?? ")")));
@@ -254,12 +258,7 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitFraction([NotNull] XElement fraction)
-            => "noBar" == (string) fraction.Element(M + "fPr")?.Element(M + "type")?.Attribute(M + "val")
-                   ? new XElement("mtable",
-                       new XAttribute("maligngroup", "center"),
-                       Visit(fraction.Element(M + "num")),
-                       Visit(fraction.Element(M + "den")))
-                   : new XElement("mfrac", Visit(fraction.Nodes()));
+            => new XElement("mfrac", Visit(fraction.Nodes()));
 
         /// <summary>
         ///
@@ -281,7 +280,7 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitMathParagraph([NotNull] XElement mathParagraph) => LiftableHelper(mathParagraph);
+        protected virtual XObject VisitMathParagraph([NotNull] XElement mathParagraph) => MakeLiftable(mathParagraph);
 
         /// <summary>
         ///
@@ -296,15 +295,20 @@ namespace AD.OpenXml
         {
             string value = nary.Element(M + "naryPr")?.Element(M + "chr")?.Attribute(M + "val")?.Value;
 
-            string op = value == "∑" ? "&sum;" : value;
+            string op =
+                value == "∑"
+                    ? "&sum;"
+                    : value == "∏"
+                        ? "&prod;"
+                        : value;
 
             return
-                LiftableHelper(
+                new XElement("mrow",
                     new XElement("munderover",
                         new XElement("mo", op),
                         Visit(nary.Element(M + "sub")),
                         Visit(nary.Element(M + "sup"))),
-                    LiftableHelper(nary.Nodes()));
+                    Visit(nary.Nodes()));
         }
 
         /// <summary>
@@ -351,9 +355,9 @@ namespace AD.OpenXml
         protected virtual XObject VisitSubscript([NotNull] XElement subscript)
             => new XElement("msub",
                 new XElement("mrow",
-                    LiftableHelper(subscript.Element(M + "e"))),
+                    MakeLiftable(subscript.Element(M + "e"))),
                 new XElement("mrow",
-                    LiftableHelper(subscript.Element(M + "sub"))));
+                    MakeLiftable(subscript.Element(M + "sub"))));
 
         /// <summary>
         ///
@@ -365,7 +369,7 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitSubscriptItem([NotNull] XElement subscriptItem)
-            => new XElement("mrow", LiftableHelper(subscriptItem.Nodes()));
+            => new XElement("mrow", MakeLiftable(subscriptItem));
 
         /// <summary>
         ///
@@ -379,11 +383,11 @@ namespace AD.OpenXml
         protected virtual XObject VisitSubscriptSuperscript([NotNull] XElement subscriptSuperscript)
             => new XElement("msubsup",
                 new XElement("mrow",
-                    LiftableHelper(subscriptSuperscript.Element(M + "e"))),
+                    MakeLiftable(subscriptSuperscript.Element(M + "e"))),
                 new XElement("mrow",
-                    LiftableHelper(subscriptSuperscript.Element(M + "sub"))),
+                    MakeLiftable(subscriptSuperscript.Element(M + "sub"))),
                 new XElement("mrow",
-                    LiftableHelper(subscriptSuperscript.Element(M + "sup"))));
+                    MakeLiftable(subscriptSuperscript.Element(M + "sup"))));
 
         /// <summary>
         ///
@@ -397,9 +401,9 @@ namespace AD.OpenXml
         protected virtual XObject VisitSuperscript([NotNull] XElement superscript)
             => new XElement("msup",
                 new XElement("mrow",
-                    LiftableHelper(superscript.Element(M + "e"))),
+                    MakeLiftable(superscript.Element(M + "e"))),
                 new XElement("mrow",
-                    LiftableHelper(superscript.Element(M + "sup"))));
+                    MakeLiftable(superscript.Element(M + "sup"))));
 
         /// <summary>
         ///
@@ -411,7 +415,7 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitSuperscriptItem([NotNull] XElement superscriptItem)
-            => new XElement("mrow", LiftableHelper(superscriptItem.Nodes()));
+            => new XElement("mrow", MakeLiftable(superscriptItem));
 
         /// <inheritdoc />
         [Pure]

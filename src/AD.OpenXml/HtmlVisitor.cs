@@ -208,7 +208,7 @@ footer.footnotes a[aria-label='Return to content'] {
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitAnchor(XElement anchor) => LiftableHelper(anchor);
+        protected override XObject VisitAnchor(XElement anchor) => MakeLiftable(anchor);
 
         /// <inheritdoc />
         [Pure]
@@ -230,7 +230,7 @@ footer.footnotes a[aria-label='Return to content'] {
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitChart(XElement chart)
-            => LiftableHelper(Charts[(string) chart.Attribute(R + "id")].Element(C + "chart"));
+            => MakeLiftable(Charts[(string) chart.Attribute(R + "id")].Element(C + "chart"));
 
         /// <inheritdoc />
         [Pure]
@@ -267,15 +267,15 @@ footer.footnotes a[aria-label='Return to content'] {
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitGraphic(XElement graphic) => LiftableHelper(graphic);
+        protected override XObject VisitGraphic(XElement graphic) => MakeLiftable(graphic);
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitGraphicData(XElement graphicData) => LiftableHelper(graphicData);
+        protected override XObject VisitGraphicData(XElement graphicData) => MakeLiftable(graphicData);
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitInline(XElement inline) => LiftableHelper(inline);
+        protected override XObject VisitInline(XElement inline) => MakeLiftable(inline);
 
         /// <inheritdoc />
         [Pure]
@@ -380,7 +380,7 @@ footer.footnotes a[aria-label='Return to content'] {
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitPlotArea(XElement plotArea) => LiftableHelper(plotArea);
+        protected override XObject VisitPlotArea(XElement plotArea) => MakeLiftable(plotArea);
 
         /// <inheritdoc />
         [Pure]

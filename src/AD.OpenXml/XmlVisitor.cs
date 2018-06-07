@@ -17,7 +17,7 @@ namespace AD.OpenXml
         /// <summary>
         /// The "data-liftable" attribute.
         /// </summary>
-        [NotNull] private const string Liftable = "data-liftable";
+        [NotNull] private const string Liftable = "liftable";
 
         #region Main
 
@@ -35,7 +35,7 @@ namespace AD.OpenXml
 
         /// <summary>
         /// Visits an <see cref="XObject"/> collection.
-        /// This method can dispatch to <see cref="Visit"/>.
+        /// This method can dispatch to <see cref="Visit(XObject)"/>.
         /// </summary>
         /// <param name="source">The <see cref="XObject"/> collection to visit.</param>
         /// <param name="other">Additional <see cref="XObject"/> content to visit.</param>
@@ -323,41 +323,12 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
-        protected XObject LiftableHelper([CanBeNull] XElement element)
+        protected XObject MakeLiftable([CanBeNull] XElement element)
             => element is null
-                ? null
-                : new XElement("div",
-                    new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
-                    Visit(element.Nodes()));
-
-        /// <summary>
-        /// Constructs a liftable div element.
-        /// </summary>
-        /// <param name="nodes">The <see cref="XNode"/> collection from which nodes can be lifted.</param>
-        /// <returns>
-        /// An <see cref="XObject"/> representing the lift operation.
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        [CanBeNull]
-        protected XObject LiftableHelper([CanBeNull] IEnumerable<XObject> nodes)
-            => nodes is null
-                ? null
-                : new XElement("div",
-                    new XAttribute(Liftable, "from-nodes"),
-                    Visit(nodes));
-
-        /// <summary>
-        /// Constructs a liftable div element.
-        /// </summary>
-        /// <param name="nodes">The <see cref="XNode"/> collection from which nodes can be lifted.</param>
-        /// <returns>
-        /// An <see cref="XObject"/> representing the lift operation.
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        [Pure]
-        [CanBeNull]
-        protected XObject LiftableHelper([CanBeNull] params XObject[] nodes) => LiftableHelper((IEnumerable<XObject>) nodes);
+                   ? null
+                   : new XElement("div",
+                       new XAttribute(Liftable, $"from-{element.Name.LocalName}"),
+                       Visit(element.Nodes()));
 
         /// <summary>
         /// Yields the <see cref="XObject"/> or the children of the <see cref="XObject"/> if the "data-liftable" attribute is present.
@@ -379,12 +350,14 @@ namespace AD.OpenXml
             if (!(xObject is XElement e))
             {
                 yield return xObject;
+
                 yield break;
             }
 
             if (e.Attribute(Liftable) is null)
             {
                 yield return new XElement(e.Name, e.Attributes(), Lift(e.Nodes()));
+
                 yield break;
             }
 
@@ -429,30 +402,28 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected static XObject LiftSingleton([NotNull] XContainer container) => container.Nodes().Count() <= 1 ? container.FirstNode : container;
+        protected static XObject LiftSingleton([NotNull] XContainer container)
+            => container.Nodes().Count() <= 1 ? container.FirstNode : container;
 
         /// <summary>
-        ///
+        /// Yields nodes following <paramref name="current"/> while the <paramref name="predicate"/> is true.
         /// </summary>
-        /// <param name="current"></param>
-        /// <param name="predicates"></param>
+        /// <param name="current">The current node.</param>
+        /// <param name="predicate">The condition to test subsequent nodes.</param>
         /// <returns>
-        ///
+        /// Nodes following <paramref name="current"/> until a node is found that fails the <paramref name="predicate"/>.
         /// </returns>
         [Pure]
         [NotNull]
         [LinqTunnel]
         [ItemNotNull]
         [CollectionAccess(CollectionAccessType.Read)]
-        protected static IEnumerable<XNode> NextWhile([NotNull] XElement current, [NotNull] [ItemNotNull] params Func<XNode, bool>[] predicates)
+        protected static IEnumerable<XNode> NextWhile([NotNull] XElement current, [NotNull] Func<XNode, bool> predicate)
         {
             for (XNode n = current.NextNode; n != null; n = n.NextNode)
             {
-                for (int i = 0; i < predicates.Length; i++)
-                {
-                    if (!predicates[i](n))
-                        yield break;
-                }
+                if (!predicate(n))
+                    yield break;
 
                 yield return n;
             }
@@ -475,7 +446,9 @@ namespace AD.OpenXml
             /// <param name="callerName">The method that could not dispatch the type.</param>
             /// <inheritdoc />
             public VisitorException(Type type, [CallerMemberName] string callerName = default)
-                : base($"No dispatch was found in '${callerName}' for derived type '${type.Name}'.") {}
+                : base($"No dispatch was found in '${callerName}' for derived type '${type.Name}'.")
+            {
+            }
         }
 
         #endregion
