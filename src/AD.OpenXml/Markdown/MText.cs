@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Xml.Linq;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
-using AD.ApiExtensions.Primitives;
 
 namespace AD.OpenXml.Markdown
 {
@@ -19,50 +17,49 @@ namespace AD.OpenXml.Markdown
         /// <summary>
         /// The raw text of the node.
         /// </summary>
-        public readonly StringSegment Text;
+        public readonly ReadOnlyMemory<char> Text;
 
         /// <summary>
         /// Constructs an <see cref="MText"/>.
         /// </summary>
         /// <param name="text">The raw text of the node.</param>
-        public MText(in StringSegment text) => Text = text.HasValue ? Normalize(in text) : StringSegment.Empty;
+        public MText(in ReadOnlySpan<char> text) => Text = Normalize(in text).ToArray();
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="segment"></param>
+        /// <param name="span"></param>
         /// <returns>
         ///
         /// </returns>
         [Pure]
-        public static implicit operator MText(in StringSegment segment) => new MText(in segment);
+        [NotNull]
+        public static implicit operator MText(in ReadOnlySpan<char> span) => new MText(in span);
 
         /// <summary>
-        /// Normalizes the segment by trimming outer whitespace and reducing inner whitespace.
+        /// Normalizes the span by trimming outer whitespace and reducing inner whitespace.
         /// </summary>
-        /// <param name="segment">The segment to normalize.</param>
+        /// <param name="span">The span to normalize.</param>
         /// <returns>
         /// The normalized segment.
         /// </returns>
-        private static StringSegment Normalize(in StringSegment segment) => segment.Trim().NormalizeInner(' ');
+        private static ReadOnlySpan<char> Normalize(in ReadOnlySpan<char> span) => span.Trim();
 
         /// <inheritdoc />
         [Pure]
-        public override string ToString() => Text.Value;
+        public override string ToString() => Text.ToString();
 
         /// <inheritdoc />
         [Pure]
-        public override XNode ToHtml() => new XText(Text.Value);
+        public override XNode ToHtml() => new XText(Text.ToString());
 
         /// <inheritdoc />
         [Pure]
-        public override XNode ToOpenXml()
-            => new XElement(W + "t",
-                new XText(Text.Value));
+        public override XNode ToOpenXml() => new XElement(W + "t", new XText(Text.ToString()));
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(MText other) => !(other is null) && Text.Equals(other.Text);
+        public bool Equals(MText other) => !(other is null) && Text.Span.SequenceEqual(other.Text.Span);
 
         /// <inheritdoc />
         [Pure]
@@ -73,7 +70,7 @@ namespace AD.OpenXml.Markdown
         public override int GetHashCode() => Text.GetHashCode();
 
         /// <summary>
-        /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Markdown.MText" /> objects are equal.
+        /// Returns a value that indicates whether the values of two <see cref="MText" /> objects are equal.
         /// </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
@@ -85,7 +82,7 @@ namespace AD.OpenXml.Markdown
             => !(left is null) && !(right is null) && left.Equals(right);
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Markdown.MText" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="MText" /> objects have different values.
         /// </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>

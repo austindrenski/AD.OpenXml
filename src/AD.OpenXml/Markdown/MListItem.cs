@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Xml.Linq;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
-using AD.ApiExtensions.Primitives;
 
 namespace AD.OpenXml.Markdown
 {
@@ -33,45 +31,44 @@ namespace AD.OpenXml.Markdown
         /// Constructs an <see cref="MListItem"/>.
         /// </summary>
         /// <param name="text">The raw text of the item.</param>
-        public MListItem(in StringSegment text)
+        public MListItem(in ReadOnlySpan<char> text)
         {
             if (!Accept(in text))
-                throw new ArgumentException($"Heading must begin with 1-6 '#' characters followed by a ' ' character: '{text}'");
+                throw new ArgumentException($"Heading must begin with 1-6 '#' characters followed by a ' ' character: '{text.ToString()}'");
 
-            StringSegment normalized = Normalize(in text);
+            ReadOnlySpan<char> normalized = Normalize(in text);
             Level = normalized.IndexOf(' ');
-            Item = normalized.Subsegment(Level + 1).TrimStart();
+            Item = normalized.Slice(Level + 1).TrimStart();
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="segment"></param>
+        /// <param name="span"></param>
         /// <returns>
         ///
         /// </returns>
         [Pure]
-        public static implicit operator MListItem(in StringSegment segment) => new MListItem(in segment);
+        public static implicit operator MListItem(in ReadOnlySpan<char> span) => new MListItem(in span);
 
         /// <summary>
         /// Checks if the segment is a well-formed Markdown heading.
         /// </summary>
-        /// <param name="segment">The segment to test.</param>
+        /// <param name="span">The span to test.</param>
         /// <returns>
         /// True if the segment is a well-formed Markdown heading; otherwise false.
         /// </returns>
-        public static bool Accept(in StringSegment segment)
+        public static bool Accept(in ReadOnlySpan<char> span)
         {
-            StringSegment trimmed = segment.Trim();
+            ReadOnlySpan<char> trimmed = span.Trim();
 
-            return
-                trimmed.Length > 3 &&
-                trimmed.StartsWith("# ", StringComparison.OrdinalIgnoreCase) ||
-                trimmed.StartsWith("## ", StringComparison.OrdinalIgnoreCase) ||
-                trimmed.StartsWith("### ", StringComparison.OrdinalIgnoreCase) ||
-                trimmed.StartsWith("#### ", StringComparison.OrdinalIgnoreCase) ||
-                trimmed.StartsWith("##### ", StringComparison.OrdinalIgnoreCase) ||
-                trimmed.StartsWith("###### ", StringComparison.OrdinalIgnoreCase);
+            if (trimmed.Length < 1)
+                return false;
+
+            if (trimmed[0] == '-')
+                return true;
+
+            return char.IsDigit(trimmed[0]) && (trimmed[1] == '.' || trimmed[1] == ')') && trimmed[2] == ' ';
         }
 
         /// <summary>
@@ -82,13 +79,12 @@ namespace AD.OpenXml.Markdown
         ///   4) one ' ' from the end;
         ///   5) normalizing inner whitespace.
         /// </summary>
-        /// <param name="segment">The segment to normalize.</param>
+        /// <param name="span">The span to normalize.</param>
         /// <returns>
         /// The normalized segment.
         /// </returns>
         [Pure]
-        private static StringSegment Normalize(in StringSegment segment)
-            => segment.TrimStart(' ', 3).TrimEnd().TrimEnd('#').TrimEnd(' ', 1).NormalizeInner(' ');
+        private static ReadOnlySpan<char> Normalize(in ReadOnlySpan<char> span) => span;
 
         /// <inheritdoc />
         [Pure]

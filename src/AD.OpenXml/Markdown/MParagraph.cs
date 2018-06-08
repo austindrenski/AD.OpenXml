@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Xml.Linq;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
-using AD.ApiExtensions.Primitives;
 
 namespace AD.OpenXml.Markdown
 {
@@ -25,26 +23,26 @@ namespace AD.OpenXml.Markdown
         /// Constructs an <see cref="MParagraph"/>.
         /// </summary>
         /// <param name="text">The raw text of the node.</param>
-        public MParagraph(in StringSegment text) => Text = text.HasValue ? Normalize(in text) : StringSegment.Empty;
+        public MParagraph(in ReadOnlySpan<char> text) => Text = Normalize(in text);
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="segment"></param>
+        /// <param name="span"></param>
         /// <returns>
         ///
         /// </returns>
         [Pure]
-        public static implicit operator MParagraph(in StringSegment segment) => new MParagraph(in segment);
+        public static implicit operator MParagraph(in ReadOnlySpan<char> span) => new MParagraph(in span);
 
         /// <summary>
         /// Normalizes the segment by trimming outer whitespace and reducing inner whitespace.
         /// </summary>
-        /// <param name="segment">The segment to normalize.</param>
+        /// <param name="span">The span to normalize.</param>
         /// <returns>
         /// The normalized segment.
         /// </returns>
-        private static StringSegment Normalize(in StringSegment segment) => segment.Trim().NormalizeInner(' ');
+        private static ReadOnlySpan<char> Normalize(in ReadOnlySpan<char> span) => span.Trim();
 
         /// <inheritdoc />
         [Pure]

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Xml.Linq;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
-using AD.ApiExtensions.Primitives;
 
 namespace AD.OpenXml.Markdown
 {
@@ -33,52 +31,70 @@ namespace AD.OpenXml.Markdown
         /// Constructs an <see cref="MHeading"/>.
         /// </summary>
         /// <param name="text">The raw text of the heading.</param>
-        public MHeading(in StringSegment text)
+        public MHeading(in ReadOnlySpan<char> text)
         {
             if (!Accept(in text))
-                throw new ArgumentException($"Heading must begin with 1-6 '#' characters followed by a ' ' character: '{text}'");
+                throw new ArgumentException($"Heading must begin with 1-6 '#' characters followed by a ' ' character: '{text.ToString()}'");
 
-            StringSegment normalized = Normalize(in text);
+            ReadOnlySpan<char> normalized = Normalize(in text);
             Level = normalized.IndexOf(' ');
-            Heading = normalized.Subsegment(Level + 1);
+            Heading = normalized.Slice(Level + 1);
         }
 
         /// <summary>
-        /// Checks if the segment is a well-formed Markdown heading.
+        /// Checks if the span is a well-formed Markdown heading.
         /// </summary>
-        /// <param name="segment">The segment to test.</param>
+        /// <param name="span">The span to test.</param>
         /// <returns>
-        /// True if the segment is a well-formed Markdown heading; otherwise false.
+        /// True if the span is a well-formed Markdown heading; otherwise false.
         /// </returns>
-        public static bool Accept(in StringSegment segment)
+        public static bool Accept(in ReadOnlySpan<char> span)
         {
-            StringSegment trimmed = Normalize(in segment);
+            if (span.IsEmpty)
+                return false;
 
-            return
-                trimmed.Length > 2 &&
-                trimmed.StartsWith("# ", StringComparison.OrdinalIgnoreCase) ||
-                trimmed.StartsWith("## ", StringComparison.OrdinalIgnoreCase) ||
-                trimmed.StartsWith("### ", StringComparison.OrdinalIgnoreCase) ||
-                trimmed.StartsWith("#### ", StringComparison.OrdinalIgnoreCase) ||
-                trimmed.StartsWith("##### ", StringComparison.OrdinalIgnoreCase) ||
-                trimmed.StartsWith("###### ", StringComparison.OrdinalIgnoreCase);
+            int initial = span.IndexOf('#');
+
+            if (initial == -1 || initial > 3)
+                return false;
+
+            ReadOnlySpan<char> trimmed = Normalize(in span);
+
+            if (trimmed.Length < 2)
+                return false;
+
+            if (trimmed[0] != '#')
+                return false;
+
+            for (int i = 0; i < trimmed.Length; i++)
+            {
+                if (i == 7)
+                    return false;
+
+                if (trimmed[i] == '#')
+                    continue;
+
+                return trimmed[i] == ' ';
+            }
+
+            return false;
         }
 
         /// <summary>
-        /// Normalizes the segment by trimming (in order):
+        /// Normalizes the span by trimming (in order):
         ///   1) up to three ' ' characters from the start;
         ///   2) all ' ' from the end;
         ///   3) all '#' from the end;
         ///   4) one ' ' from the end;
         ///   5) normalizing inner whitespace.
         /// </summary>
-        /// <param name="segment">The segment to normalize.</param>
+        /// <param name="span">The span to normalize.</param>
         /// <returns>
-        /// The normalized segment.
+        /// The normalized span.
         /// </returns>
         [Pure]
-        private static StringSegment Normalize(in StringSegment segment)
-            => segment.TrimStart(' ', 3).TrimEnd().TrimEnd('#').TrimEnd(' ', 1).NormalizeInner(' ');
+        private static ReadOnlySpan<char> Normalize(in ReadOnlySpan<char> span)
+            => span.TrimStart().TrimEnd().TrimEnd('#').TrimEnd();
 
         /// <inheritdoc />
         [Pure]
@@ -110,7 +126,7 @@ namespace AD.OpenXml.Markdown
         public override int GetHashCode() => unchecked((397 * Heading.GetHashCode()) ^ Level.GetHashCode());
 
         /// <summary>
-        /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Markdown.MHeading" /> objects are equal.
+        /// Returns a value that indicates whether the values of two <see cref="MHeading" /> objects are equal.
         /// </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
@@ -122,7 +138,7 @@ namespace AD.OpenXml.Markdown
             => !(left is null) && !(right is null) && left.Equals(right);
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Markdown.MHeading" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="MHeading" /> objects have different values.
         /// </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>

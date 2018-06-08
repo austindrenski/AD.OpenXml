@@ -1,6 +1,6 @@
-﻿using AD.OpenXml.Markdown;
+﻿using System;
+using AD.OpenXml.Markdown;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
 using Xunit;
 
 namespace AD.OpenXml.Tests
@@ -22,14 +22,14 @@ namespace AD.OpenXml.Tests
         public void HeadingPass(string prefix, string value)
         {
             MarkdownVisitor visitor = new MarkdownVisitor();
-            StringSegment raw = prefix + value;
+            ReadOnlySpan<char> raw = prefix + value;
             string result = value.Trim().TrimEnd('#').TrimEnd();
             string markdown = $"{prefix.Trim()} {result}";
 
             MNode node = visitor.Visit(in raw);
 
-            Assert.Equal(markdown, node.ToString());
             Assert.IsType<MHeading>(node);
+            Assert.Equal(markdown, node.ToString());
             Assert.Equal(result, ((MHeading) node).Heading.ToString());
         }
 
@@ -42,10 +42,10 @@ namespace AD.OpenXml.Tests
         public void HeadingFail(string text)
         {
             MarkdownVisitor visitor = new MarkdownVisitor();
-            StringSegment segment = text;
+            ReadOnlySpan<char> span = text;
             string markdown = text.Trim();
 
-            MNode node = visitor.Visit(in segment);
+            MNode node = visitor.Visit(in span);
 
             Assert.IsNotType<MHeading>(node);
             Assert.Equal(markdown, node.ToString());
