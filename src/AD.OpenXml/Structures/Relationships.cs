@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
 
 namespace AD.OpenXml.Structures
 {
@@ -32,7 +30,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [NotNull]
-        public IImmutableSet<Entry> Entries { get; }
+        public IEnumerable<Entry> Entries { get; }
 
         /// <summary>
         ///
@@ -48,7 +46,7 @@ namespace AD.OpenXml.Structures
             => Entries =
                    entries.Where(x => x != null)
                           .SelectMany(x => x)
-                          .ToImmutableHashSet();
+                          .ToArray();
 
         /// <inheritdoc />
         [Pure]
@@ -95,27 +93,27 @@ namespace AD.OpenXml.Structures
             /// <summary>
             ///
             /// </summary>
-            public int NumericId => int.Parse(Id.Substring(3));
+            public readonly int NumericId;
 
             /// <summary>
             ///
             /// </summary>
-            public StringSegment Id { get; }
+            [NotNull] public readonly string Id;
 
             /// <summary>
             ///
             /// </summary>
-            public StringSegment Target { get; }
+            [NotNull] public readonly string Target;
 
             /// <summary>
             ///
             /// </summary>
-            public StringSegment Type { get; }
+            [NotNull] public readonly string Type;
 
             /// <summary>
             ///
             /// </summary>
-            public StringSegment TargetMode { get; }
+            [NotNull] public readonly string TargetMode;
 
             /// <summary>
             ///
@@ -124,12 +122,22 @@ namespace AD.OpenXml.Structures
             /// <param name="id"></param>
             /// <param name="target"></param>
             /// <param name="targetMode"></param>
-            public Entry(StringSegment id, StringSegment target, StringSegment type, StringSegment targetMode = default)
+            public Entry([NotNull] string id, [NotNull] string target, [NotNull] string type, [CanBeNull] string targetMode = default)
             {
+                if (id is null)
+                    throw new ArgumentNullException(nameof(id));
+
+                if (target is null)
+                    throw new ArgumentNullException(nameof(target));
+
+                if (type is null)
+                    throw new ArgumentNullException(nameof(type));
+
                 Id = id;
+                NumericId = int.Parse(((ReadOnlySpan<char>) id).Slice(3));
                 Target = target;
                 Type = type;
-                TargetMode = targetMode;
+                TargetMode = targetMode ?? string.Empty;
             }
 
             /// <summary>
@@ -156,7 +164,7 @@ namespace AD.OpenXml.Structures
                     new XAttribute("Id", Id),
                     new XAttribute("Type", Type),
                     new XAttribute("Target", Target),
-                    TargetMode.HasValue ? new XAttribute("TargetMode", TargetMode) : null);
+                    TargetMode.Length != 0 ? new XAttribute("TargetMode", TargetMode) : null);
 
             /// <inheritdoc />
             [Pure]

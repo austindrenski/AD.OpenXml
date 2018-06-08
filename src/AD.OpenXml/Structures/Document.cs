@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -41,19 +40,19 @@ namespace AD.OpenXml.Structures
         /// The XML files located in: /word/charts/.
         /// </summary>
         [NotNull]
-        public IImmutableSet<ChartInfo> Charts { get; }
+        public IEnumerable<ChartInfo> Charts { get; }
 
         /// <summary>
         /// The XML files located in: /word/media/.
         /// </summary>
         [NotNull]
-        public IImmutableSet<ImageInfo> Images { get; }
+        public IEnumerable<ImageInfo> Images { get; }
 
         /// <summary>
         /// The hyperlinks listed in: /word/_rels/document.xml.rels.
         /// </summary>
         [NotNull]
-        public IImmutableSet<HyperlinkInfo> Hyperlinks { get; }
+        public IEnumerable<HyperlinkInfo> Hyperlinks { get; }
 
         /// <summary>
         /// The number of relationships in the document.
@@ -79,15 +78,14 @@ namespace AD.OpenXml.Structures
         /// Maps chart reference id to chart node.
         /// </summary>
         [NotNull]
-        public IDictionary<string, XElement> ChartReferences =>
-            Charts.ToDictionary(x => x.RelationId.Value, x => x.Chart);
+        public IDictionary<string, XElement> ChartReferences => Charts.ToDictionary(x => x.RelationId, x => x.Chart);
 
         /// <summary>
         /// Maps image reference id to image node.
         /// </summary>
         [NotNull]
         public IDictionary<string, (string mime, string description, string base64)> ImageReferences =>
-            Images.ToDictionary(x => x.RelationId.Value, x => (x.Extension.Value, string.Empty, x.Base64String));
+            Images.ToDictionary(x => x.RelationId.ToString(), x => (x.Extension.ToString(), string.Empty, x.Base64String));
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
@@ -110,61 +108,56 @@ namespace AD.OpenXml.Structures
 //            Content.ChangeXAttributeValues("Id", "", "");
 
             Charts =
-                documentRelations.Elements()
-                                 .Select(
-                                     x =>
-                                         new
-                                         {
-                                             Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
-                                             Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
-                                         })
-                                 .Where(x => x.Target.StartsWith("charts/"))
-                                 .Select(x => new ChartInfo(x.Id, archive.ReadXml($"word/{x.Target}")))
-                                 .ToImmutableHashSet();
+                documentRelations
+                   .Elements()
+                   .Select(
+                        x =>
+                            new
+                            {
+                                Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
+                                Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
+                            })
+                   .Where(x => x.Target.StartsWith("charts/"))
+                   .Select(x => new ChartInfo(x.Id, archive.ReadXml($"word/{x.Target}")))
+                   .ToArray();
 
             Images =
-                documentRelations.Elements()
-                                 .Select(
-                                     x =>
-                                         new
-                                         {
-                                             Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
-                                             Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
-                                         })
-                                 .Where(x => x.Target.StartsWith("media/"))
-                                 .Select(x => ImageInfo.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
-                                 .ToImmutableHashSet();
+                documentRelations
+                   .Elements()
+                   .Select(
+                        x =>
+                            new
+                            {
+                                Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
+                                Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
+                            })
+                   .Where(x => x.Target.StartsWith("media/"))
+                   .Select(x => ImageInfo.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
+                   .ToArray();
 
             Hyperlinks =
-                documentRelations.Elements()
-                                 .Select(
-                                     x =>
-                                         new
-                                         {
-                                             Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
-                                             Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target),
-                                             TargetMode = (string) x.Attribute("TargetMode")
-                                         })
-                                 .Where(x => x.TargetMode != null)
-                                 .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
-                                 .ToImmutableHashSet();
+                documentRelations
+                   .Elements()
+                   .Select(
+                        x =>
+                            new
+                            {
+                                Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
+                                Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target),
+                                TargetMode = (string) x.Attribute("TargetMode")
+                            })
+                   .Where(x => x.TargetMode != null)
+                   .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
+                   .ToArray();
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="content">
-        ///
-        /// </param>
-        /// <param name="charts">
-        ///
-        /// </param>
-        /// <param name="images">
-        ///
-        /// </param>
-        /// <param name="hyperlinks">
-        ///
-        /// </param>
+        /// <param name="content"></param>
+        /// <param name="charts"></param>
+        /// <param name="images"> </param>
+        /// <param name="hyperlinks"></param>
         public Document(
             [NotNull] XElement content,
             [NotNull] IEnumerable<ChartInfo> charts,
@@ -183,10 +176,10 @@ namespace AD.OpenXml.Structures
             if (hyperlinks is null)
                 throw new ArgumentNullException(nameof(hyperlinks));
 
-            Content = content;
-            Charts = charts.ToImmutableHashSet();
-            Images = images.ToImmutableHashSet();
-            Hyperlinks = hyperlinks.ToImmutableHashSet();
+            Content = content.Clone();
+            Charts = charts.ToArray();
+            Images = images.ToArray();
+            Hyperlinks = hyperlinks.ToArray();
         }
 
         /// <summary>
@@ -202,14 +195,19 @@ namespace AD.OpenXml.Structures
             [CanBeNull] IEnumerable<ChartInfo> charts = default,
             [CanBeNull] IEnumerable<ImageInfo> images = default,
             [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
-            => new Document(content ?? Content, charts ?? Charts, images ?? Images, hyperlinks ?? Hyperlinks);
+            => new Document(
+                content ?? Content,
+                charts ?? Charts,
+                images ?? Images,
+                hyperlinks ?? Hyperlinks);
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public Document Concat([NotNull] Document other) => Concat(other.Content, other.Charts, other.Images, other.Hyperlinks);
+        public Document Concat([NotNull] Document other)
+            => Concat(other.Content, other.Charts, other.Images, other.Hyperlinks);
 
         /// <summary>
         ///
@@ -248,7 +246,8 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
-        public override string ToString() => $"Document: (Charts: {Charts.Count}, Images: {Images.Count}, Hyperlinks: {Hyperlinks.Count})";
+        public override string ToString()
+            => $"Document: (Charts: {Charts.Count()}, Images: {Images.Count()}, Hyperlinks: {Hyperlinks.Count()})";
 
         /// <summary>
         ///

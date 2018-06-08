@@ -1,8 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
 
-// ReSharper disable ImpureMethodCallOnReadonlyValueField
 namespace AD.OpenXml.Structures
 {
     /// <inheritdoc cref="IEquatable{T}" />
@@ -14,7 +12,8 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        private static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink";
+        [NotNull] private static readonly string SchemaType =
+            "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink";
 
         /// <summary>
         ///
@@ -24,22 +23,22 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        public readonly StringSegment RelationId;
+        [NotNull] public readonly string RelationId;
 
         /// <summary>
         ///
         /// </summary>
-        public readonly StringSegment Target;
+        [NotNull] public readonly string Target;
 
         /// <summary>
         ///
         /// </summary>
-        public readonly StringSegment TargetMode;
+        [NotNull] public readonly string TargetMode;
 
         /// <summary>
         ///
         /// </summary>
-        public int NumericId => int.Parse(RelationId.Substring(3));
+        public readonly int NumericId;
 
         /// <summary>
         ///
@@ -53,12 +52,22 @@ namespace AD.OpenXml.Structures
         /// <param name="target"></param>
         /// <param name="targetMode"></param>
         /// <exception cref="ArgumentNullException" />
-        public HyperlinkInfo(StringSegment rId, StringSegment target, StringSegment targetMode)
+        public HyperlinkInfo([NotNull] string rId, [NotNull] string target, [NotNull] string targetMode)
         {
+            if (rId is null)
+                throw new ArgumentNullException(nameof(rId));
+
+            if (target is null)
+                throw new ArgumentNullException(nameof(target));
+
+            if (targetMode is null)
+                throw new ArgumentNullException(nameof(targetMode));
+
             if (!rId.StartsWith("rId", StringComparison.Ordinal))
                 throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
 
             RelationId = rId;
+            NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
             Target = target;
             TargetMode = targetMode;
         }
@@ -81,7 +90,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </returns>
         [Pure]
-        public HyperlinkInfo WithRelationId(StringSegment rId) => new HyperlinkInfo(rId, Target, TargetMode);
+        public HyperlinkInfo WithRelationId([NotNull] string rId) => new HyperlinkInfo(rId, Target, TargetMode);
 
         /// <inheritdoc />
         [Pure]
@@ -106,10 +115,11 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(HyperlinkInfo other) => Equals(RelationId, other.RelationId) && Equals(Target, other.Target) && Equals(TargetMode, other.TargetMode);
+        public bool Equals(HyperlinkInfo other)
+            => Equals(RelationId, other.RelationId) && Equals(Target, other.Target) && Equals(TargetMode, other.TargetMode);
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.HyperlinkInfo" /> objects have the same values.
+        /// Returns a value that indicates whether two <see cref="HyperlinkInfo" /> objects have the same values.
         /// </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
@@ -120,7 +130,7 @@ namespace AD.OpenXml.Structures
         public static bool operator ==(HyperlinkInfo left, HyperlinkInfo right) => left.Equals(right);
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.HyperlinkInfo" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="HyperlinkInfo" /> objects have different values.
         /// </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -8,7 +7,6 @@ using System.Xml.Linq;
 using AD.IO;
 using AD.Xml;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
 
 namespace AD.OpenXml.Structures
 {
@@ -34,22 +32,22 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        private static readonly StringSegment MimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml";
+        [NotNull] private static readonly string MimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml";
 
         /// <summary>
         ///
         /// </summary>
-        private static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes";
+        [NotNull] private static readonly string SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes";
 
         /// <summary>
         ///
         /// </summary>
-        public readonly StringSegment RelationId;
+        [NotNull] public readonly string RelationId;
 
         /// <summary>
         ///
         /// </summary>
-        public readonly StringSegment Target = "footnotes.xml";
+        [NotNull] public static readonly string Target = "footnotes.xml";
 
         /// <summary>
         /// The XML file located at: /word/footnotes.xml.
@@ -61,12 +59,13 @@ namespace AD.OpenXml.Structures
         /// The hyperlinks listed in: /word/_rels/footnotes.xml.rels.
         /// </summary>
         [NotNull]
-        public IImmutableSet<HyperlinkInfo> Hyperlinks { get; }
+        public IEnumerable<HyperlinkInfo> Hyperlinks { get; }
 
         /// <summary>
         ///
         /// </summary>
-        public StringSegment PartName => $"/word/{Target}";
+        [NotNull]
+        public string PartName => $"/word/{Target}";
 
         /// <summary>
         ///
@@ -110,8 +109,11 @@ namespace AD.OpenXml.Structures
         /// <param name="rId"></param>
         /// <param name="content"></param>
         /// <param name="hyperlinks"></param>
-        public Footnotes(StringSegment rId, [NotNull] XElement content, [NotNull] IEnumerable<HyperlinkInfo> hyperlinks)
+        public Footnotes([NotNull] string rId, [NotNull] XElement content, [NotNull] IEnumerable<HyperlinkInfo> hyperlinks)
         {
+            if (rId is null)
+                throw new ArgumentNullException(nameof(rId));
+
             if (content is null)
                 throw new ArgumentNullException(nameof(content));
 
@@ -120,7 +122,7 @@ namespace AD.OpenXml.Structures
 
             RelationId = rId;
             Content = content;
-            Hyperlinks = hyperlinks.ToImmutableHashSet();
+            Hyperlinks = hyperlinks.ToArray();
         }
 
         /// <summary>
@@ -138,7 +140,7 @@ namespace AD.OpenXml.Structures
                        .Elements(DocumentRelsInfo.Elements.Relationship)
                        .Single(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) == SchemaType)
                        .Attribute(DocumentRelsInfo.Attributes.Id)?
-                       .Value;
+                       .Value ?? string.Empty;
 
             // TODO: hard-coding to rId1 until other package parts are migrated.
             RelationId = "rId1";
@@ -149,16 +151,16 @@ namespace AD.OpenXml.Structures
                 archive.ReadXml(FootnotesRelsInfo.Path, Relationships.Empty.ToXElement())
                        .Elements()
                        .Select(
-                           x =>
-                               new
-                               {
-                                   Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
-                                   Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target),
-                                   TargetMode = (string) x.Attribute(FootnotesRelsInfo.Attributes.TargetMode)
-                               })
+                            x =>
+                                new
+                                {
+                                    Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
+                                    Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target),
+                                    TargetMode = (string) x.Attribute(FootnotesRelsInfo.Attributes.TargetMode)
+                                })
                        .Where(x => x.TargetMode != null)
                        .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
-                       .ToImmutableHashSet();
+                       .ToArray();
         }
 
         /// <summary>

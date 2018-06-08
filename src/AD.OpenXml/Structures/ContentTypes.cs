@@ -6,7 +6,6 @@ using System.Linq;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
 
 namespace AD.OpenXml.Structures
 {
@@ -53,7 +52,7 @@ namespace AD.OpenXml.Structures
             if (overrides is null)
                 throw new ArgumentNullException(nameof(overrides));
 
-            Defaults = Default.StandardEntries;
+            Defaults = Default.StandardEntries.ToArray();
             Overrides = overrides.SelectMany(x => x).ToArray();
         }
 
@@ -105,8 +104,7 @@ namespace AD.OpenXml.Structures
             /// <summary>
             ///
             /// </summary>
-            [NotNull]
-            public static Default[] StandardEntries =>
+            public static ReadOnlyMemory<Default> StandardEntries =>
                 new[]
                 {
                     new Default("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"),
@@ -115,18 +113,19 @@ namespace AD.OpenXml.Structures
                     new Default("xml", "application/xml"),
                     new Default("jpeg", "image/jpeg"),
                     new Default("png", "image/png"),
-                    new Default("svg", "image/svg")
+                    new Default("svg", "image/svg"),
+                    new Default("emf", "image/x-emf")
                 };
 
             /// <summary>
             ///
             /// </summary>
-            public readonly StringSegment Extension;
+            [NotNull] public readonly string Extension;
 
             /// <summary>
             ///
             /// </summary>
-            public readonly StringSegment ContentType;
+            [NotNull] public readonly string ContentType;
 
             /// <summary>
             ///
@@ -134,12 +133,12 @@ namespace AD.OpenXml.Structures
             /// <param name="extension"></param>
             /// <param name="contentType"></param>
             /// <exception cref="ArgumentNullException" />
-            public Default(StringSegment extension, StringSegment contentType)
+            public Default([NotNull] string extension, [NotNull] string contentType)
             {
-                if (!extension.HasValue)
+                if (extension is null)
                     throw new ArgumentNullException(nameof(extension));
 
-                if (!contentType.HasValue)
+                if (contentType is null)
                     throw new ArgumentNullException(nameof(contentType));
 
                 Extension = extension;
@@ -163,7 +162,7 @@ namespace AD.OpenXml.Structures
 
             /// <inheritdoc />
             [Pure]
-            public int CompareTo(Default other) => StringComparer.Ordinal.Compare(Extension.Value, other.Extension.Value);
+            public int CompareTo(Default other) => StringComparer.Ordinal.Compare(Extension, other.Extension);
 
             /// <inheritdoc />
             [Pure]
@@ -180,13 +179,15 @@ namespace AD.OpenXml.Structures
             /// <summary>Returns a value that indicates whether two <see cref="Default" /> objects have equal values.</summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
-            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.</returns>            [Pure]
+            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, false.</returns>
+            [Pure]
             public static bool operator ==(Default left, Default right) => left.Equals(right);
 
             /// <summary>Returns a value that indicates whether two <see cref="Default" /> objects have different values.</summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
-            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.</returns>            [Pure]
+            /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.</returns>
+            [Pure]
             public static bool operator !=(Default left, Default right) => !left.Equals(right);
         }
 
@@ -200,12 +201,12 @@ namespace AD.OpenXml.Structures
             /// <summary>
             ///
             /// </summary>
-            public readonly StringSegment PartName;
+            [NotNull] public readonly string PartName;
 
             /// <summary>
             ///
             /// </summary>
-            public readonly StringSegment ContentType;
+            [NotNull] public readonly string ContentType;
 
             /// <summary>
             ///
@@ -213,12 +214,12 @@ namespace AD.OpenXml.Structures
             /// <param name="partName"></param>
             /// <param name="contentType"></param>
             /// <exception cref="ArgumentNullException" />
-            public Override(StringSegment partName, StringSegment contentType)
+            public Override([NotNull] string partName, [NotNull] string contentType)
             {
-                if (!partName.HasValue)
+                if (partName is null)
                     throw new ArgumentNullException(nameof(partName));
 
-                if (!contentType.HasValue)
+                if (contentType is null)
                     throw new ArgumentNullException(nameof(contentType));
 
                 PartName = partName;
@@ -244,7 +245,7 @@ namespace AD.OpenXml.Structures
 
             /// <inheritdoc />
             [Pure]
-            public int CompareTo(Override other) => StringComparer.Ordinal.Compare(PartName.Value, other.PartName.Value);
+            public int CompareTo(Override other) => StringComparer.Ordinal.Compare(PartName, other.PartName);
 
             /// <inheritdoc />
             [Pure]

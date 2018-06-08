@@ -101,6 +101,7 @@ namespace AD.OpenXml
                     [W   + "drawing"]     = VisitDrawing,
                     [W   + "footnote"]    = VisitFootnote,
                     [W   + "footnotes"]   = VisitFootnotes,
+                    [W   + "object"]      = VisitEmbedded,
                     [W   + "p"]           = VisitParagraph,
                     [W   + "r"]           = VisitRun,
                     [W   + "tbl"]         = VisitTable,
@@ -119,13 +120,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="anchor">
-        ///
-        /// </param>
+        /// <param name="anchor"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitAnchor([NotNull] XElement anchor) => base.VisitElement(anchor);
@@ -133,13 +131,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the area chart node.
         /// </summary>
-        /// <param name="areaChart">
-        /// The area chart to visit.
-        /// </param>
+        /// <param name="areaChart">The area chart to visit.</param>
         /// <returns>
         /// The reconstructed area chart.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitAreaChart([NotNull] XElement areaChart) => base.VisitElement(areaChart);
@@ -147,13 +142,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the bar chart node.
         /// </summary>
-        /// <param name="barChart">
-        /// The bar chart to visit.
-        /// </param>
+        /// <param name="barChart">The bar chart to visit.</param>
         /// <returns>
         /// The reconstructed bar chart.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitBarChart([NotNull] XElement barChart) => base.VisitElement(barChart);
@@ -161,13 +153,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the body node.
         /// </summary>
-        /// <param name="body">
-        /// The body to visit.
-        /// </param>
+        /// <param name="body">The body to visit.</param>
         /// <returns>
         /// The reconstructed attribute.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitBody([NotNull] XElement body) => base.VisitElement(body);
@@ -175,13 +164,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the chart node.
         /// </summary>
-        /// <param name="chart">
-        /// The chart to visit.
-        /// </param>
+        /// <param name="chart">The chart to visit.</param>
         /// <returns>
         /// The reconstructed chart.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitChart([NotNull] XElement chart) => base.VisitElement(chart);
@@ -189,13 +175,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the document node.
         /// </summary>
-        /// <param name="document">
-        /// The document node to visit.
-        /// </param>
+        /// <param name="document">The document node to visit.</param>
         /// <returns>
         /// The reconstructed document.
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitDocument([NotNull] XElement document) => base.VisitElement(document);
@@ -203,13 +186,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the document property node.
         /// </summary>
-        /// <param name="docPr">
-        /// The document property node.
-        /// </param>
+        /// <param name="docPr">The document property node.</param>
         /// <returns>
         /// The reconstructed document property.
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitDocumentProperty([NotNull] XElement docPr) => base.VisitElement(docPr);
@@ -217,13 +197,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="diagram">
-        ///
-        /// </param>
+        /// <param name="diagram"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitDiagram([NotNull] XElement diagram) => base.VisitElement(diagram);
@@ -231,13 +208,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the drawing node.
         /// </summary>
-        /// <param name="drawing">
-        /// The drawing node to visit.
-        /// </param>
+        /// <param name="drawing">The drawing node to visit.</param>
         /// <returns>
         /// The reconstructed drawing.
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitDrawing([NotNull] XElement drawing) => base.VisitElement(drawing);
@@ -254,13 +228,21 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="footnote">
-        ///
-        /// </param>
+        /// <param name="embedded"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitEmbedded([NotNull] XElement embedded) => base.VisitElement(embedded);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="footnote"></param>
+        /// <returns>
+        ///
+        /// </returns>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitFootnote([NotNull] XElement footnote) => base.VisitElement(footnote);
@@ -268,13 +250,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="footnotes">
-        ///
-        /// </param>
+        /// <param name="footnotes"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitFootnotes([NotNull] XElement footnotes) => base.VisitElement(footnotes);
@@ -282,13 +261,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="graphic">
-        ///
-        /// </param>
+        /// <param name="graphic"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitGraphic([NotNull] XElement graphic) => base.VisitElement(graphic);
@@ -296,13 +272,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="graphicData">
-        ///
-        /// </param>
+        /// <param name="graphicData"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitGraphicData([NotNull] XElement graphicData) => base.VisitElement(graphicData);
@@ -310,13 +283,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="inline">
-        ///
-        /// </param>
+        /// <param name="inline"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitInline([NotNull] XElement inline) => base.VisitElement(inline);
@@ -324,13 +294,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the line chart node.
         /// </summary>
-        /// <param name="lineChart">
-        /// The line chart to visit.
-        /// </param>
+        /// <param name="lineChart">The line chart to visit.</param>
         /// <returns>
         /// The visited line chart.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitLineChart([NotNull] XElement lineChart) => base.VisitElement(lineChart);
@@ -338,13 +305,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="paragraph">
-        ///
-        /// </param>
+        /// <param name="paragraph"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitParagraph([NotNull] XElement paragraph) => base.VisitElement(paragraph);
@@ -352,13 +316,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="math">
-        ///
-        /// </param>
+        /// <param name="math"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitMath([NotNull] XElement math) => base.VisitElement(math);
@@ -366,13 +327,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the picture node.
         /// </summary>
-        /// <param name="picture">
-        /// The picture to visit.
-        /// </param>
+        /// <param name="picture">The picture to visit.</param>
         /// <returns>
         /// The reconstructed picture.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitPicture([NotNull] XElement picture) => base.VisitElement(picture);
@@ -380,13 +338,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the pie chart node.
         /// </summary>
-        /// <param name="pieChart">
-        /// The pie chart to visit.
-        /// </param>
+        /// <param name="pieChart">The pie chart to visit.</param>
         /// <returns>
         /// The visited pie chart.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitPieChart([NotNull] XElement pieChart) => base.VisitElement(pieChart);
@@ -394,13 +349,10 @@ namespace AD.OpenXml
         /// <summary>
         /// Visits the plot area node.
         /// </summary>
-        /// <param name="plotArea">
-        /// The plot area to visit.
-        /// </param>
+        /// <param name="plotArea">The plot area to visit.</param>
         /// <returns>
         /// The visited plot area.
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitPlotArea([NotNull] XElement plotArea) => base.VisitElement(plotArea);
@@ -408,13 +360,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="run">
-        ///
-        /// </param>
+        /// <param name="run"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitRun([NotNull] XElement run) => base.VisitElement(run);
@@ -422,13 +371,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="shape">
-        ///
-        /// </param>
+        /// <param name="shape"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         private XObject VisitShape([NotNull] XElement shape) => base.VisitElement(shape);
@@ -436,13 +382,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="table">
-        ///
-        /// </param>
+        /// <param name="table"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitTable([NotNull] XElement table) => base.VisitElement(table);
@@ -450,13 +393,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="cell">
-        ///
-        /// </param>
+        /// <param name="cell"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitTableCell([NotNull] XElement cell) => base.VisitElement(cell);
@@ -464,13 +404,10 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
-        /// <param name="row">
-        ///
-        /// </param>
+        /// <param name="row"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitTableRow([NotNull] XElement row) => base.VisitElement(row);

@@ -16,7 +16,7 @@ namespace AD.OpenXml.Markdown
         /// <summary>
         /// Represents the 'w:' prefix seen in raw OpenXML documents.
         /// </summary>
-        protected static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] protected static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         ///

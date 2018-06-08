@@ -17,6 +17,12 @@ namespace AD.OpenXml
     {
         #region Fields
 
+        // TODO: move to AD.Xml
+        /// <summary>
+        /// Represents the prefix 'v:' on VML elements.
+        /// </summary>
+        [NotNull] private static readonly XNamespace V = "urn:schemas-microsoft-com:vml";
+
         /// <summary>
         /// The regex to detect heading styles of the case-insensitive form "heading(?[0-9])".
         /// </summary>
@@ -241,6 +247,31 @@ a[aria-label='Return to content'] {
 
         /// <inheritdoc />
         [Pure]
+        protected override XObject VisitEmbedded(XElement embedded)
+        {
+            if (!(embedded.Element(V + "shape") is XElement shape))
+                return null;
+
+            if (!(shape.Element(V + "imagedata") is XElement imageData))
+                return null;
+
+            string altText = (string) shape.Attribute("alt") ?? string.Empty;
+            string rId = (string) imageData.Attribute(R + "id");
+
+            return
+                new XElement("img",
+                    new XAttribute("scale", "0"),
+                    new XAttribute("alt", altText),
+                    new XAttribute("src", string.Empty),
+                    new XElement("span",
+                        new XAttribute("class", "error"),
+                        Images.TryGetValue(rId, out (string mime, string description, string base64) image)
+                            ? $"Images in '{image.mime}' format are not supported: {rId}."
+                            : $"An embedded image was detected but not found: {rId}."));
+        }
+
+        /// <inheritdoc />
+        [Pure]
         protected override XObject VisitFootnote(XElement footnote)
         {
             int footnoteReference = (int) footnote.Attribute(W + "id");
@@ -390,6 +421,9 @@ a[aria-label='Return to content'] {
         {
             if (run.Element(W + "drawing") is XElement drawing)
                 return Visit(drawing);
+
+            if (run.Element(W + "object") is XElement embedded)
+                return Visit(embedded);
 
             if (run.NextNode is XElement next && next.Element(W + "fldChar") is XElement fieldChar)
             {

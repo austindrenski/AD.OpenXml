@@ -12,20 +12,21 @@ namespace AD.OpenXml.Structures
     ///
     /// </summary>
     [PublicAPI]
-    public readonly struct ImageInfo : IEquatable<ImageInfo>
+    [Obsolete("This is for debugging purposes only. Do not use.", true)]
+    public readonly struct EmbeddingInfo : IEquatable<EmbeddingInfo>
     {
         [NotNull] private static readonly Regex RegexTarget =
-            new Regex("media/image(?<id>[0-9]+)\\.(?<extension>emf|png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            new Regex("embeddings/oleObject(?<id>[0-9]+)\\.(?<extension>bin)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull] private static readonly string SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
+        [NotNull] private static readonly string SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/oleObject";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]  public static readonly ImageInfo[] Empty = new ImageInfo[0];
+        [NotNull] public static readonly EmbeddingInfo[] Empty = new EmbeddingInfo[0];
 
         /// <summary>
         ///
@@ -51,7 +52,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [NotNull]
-        public string Target => $"media/image{NumericId}.{Extension}";
+        public string Target => $"embeddings/oleObject{NumericId}.{Extension}";
 
         /// <summary>
         ///
@@ -63,7 +64,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [NotNull]
-        public string Base64String => Convert.ToBase64String(Image.Span);
+        public string Base64String => Convert.ToBase64String(Image.Span.ToArray());
 
         /// <summary>
         ///
@@ -76,17 +77,10 @@ namespace AD.OpenXml.Structures
         ///  <param name="rId"></param>
         /// <param name="extension"></param>
         /// <param name="image"></param>
-        public ImageInfo([NotNull] string rId, [NotNull] string extension, in ReadOnlySpan<byte> image)
+        public EmbeddingInfo([NotNull] string rId, [NotNull] string extension, in ReadOnlySpan<byte> image)
         {
-            if (rId is null)
-                throw new ArgumentNullException(nameof(rId));
-
-            if (extension is null)
-                throw new ArgumentNullException(nameof(extension));
-
             if (!rId.StartsWith("rId", StringComparison.Ordinal))
                 throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
-
 
             RelationId = rId;
             NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
@@ -104,7 +98,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </returns>
         /// <exception cref="ArgumentNullException" />
-        public static ImageInfo Create([NotNull] string rId, [NotNull] string target, in ReadOnlySpan<byte> image)
+        public static EmbeddingInfo Create([NotNull] string rId, [NotNull] string target, in ReadOnlySpan<byte> image)
         {
             if (rId is null)
                 throw new ArgumentNullException(nameof(rId));
@@ -119,7 +113,7 @@ namespace AD.OpenXml.Structures
 
             string extension = m.Groups["extension"].Value;
 
-            return new ImageInfo(rId, extension, in image);
+            return new EmbeddingInfo(rId, extension, in image);
         }
 
         /// <summary>
@@ -130,7 +124,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </returns>
         [Pure]
-        public ImageInfo WithOffset(int offset) => new ImageInfo($"rId{NumericId + offset}", Extension, Image.Span);
+        public EmbeddingInfo WithOffset(int offset) => new EmbeddingInfo($"rId{NumericId + offset}", Extension, Image.Span);
 
         /// <summary>
         ///
@@ -158,14 +152,14 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
-        public override bool Equals(object obj) => obj is ImageInfo image && Equals(image);
+        public override bool Equals(object obj) => obj is EmbeddingInfo information && Equals(information);
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(ImageInfo other) => Equals(Target, other.Target) && Image.Span.SequenceEqual(other.Image.Span);
+        public bool Equals(EmbeddingInfo other) => Equals(Target, other.Target) && Image.Span.SequenceEqual(other.Image.Span);
 
         /// <summary>
-        /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Structures.ImageInfo" /> objects are equal.
+        /// Returns a value that indicates whether the values of two <see cref="EmbeddingInfo" /> objects are equal.
         /// </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
@@ -173,10 +167,10 @@ namespace AD.OpenXml.Structures
         /// True if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator ==(ImageInfo left, ImageInfo right) => left.Equals(right);
+        public static bool operator ==(EmbeddingInfo left, EmbeddingInfo right) => left.Equals(right);
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ImageInfo" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="EmbeddingInfo" /> objects have different values.
         /// </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
@@ -184,6 +178,6 @@ namespace AD.OpenXml.Structures
         /// True if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.
         /// </returns>
         [Pure]
-        public static bool operator !=(ImageInfo left, ImageInfo right) => !left.Equals(right);
+        public static bool operator !=(EmbeddingInfo left, EmbeddingInfo right) => !left.Equals(right);
     }
 }

@@ -210,6 +210,9 @@ namespace AD.OpenXml
                 case "f":
                     return VisitFraction(element);
 
+                case "rad":
+                    return VisitRoot(element);
+
                 case "num":
                     return VisitNumerator(element);
 
@@ -321,6 +324,23 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitNumerator([NotNull] XElement numerator) => new XElement("mrow", Visit(numerator.Nodes()));
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="root"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitRoot([NotNull] XElement root)
+            => root.Element(M + "deg") is XElement degree && degree.HasElements
+                   ? new XElement("mroot",
+                       Visit(root.Element(M + "e")),
+                       Visit(degree))
+                   : new XElement("msqrt",
+                       Visit(root.Element(M + "e")));
 
         /// <summary>
         ///

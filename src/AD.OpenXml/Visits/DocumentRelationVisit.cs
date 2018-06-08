@@ -36,22 +36,13 @@ namespace AD.OpenXml.Visits
                     document.Content.Attributes().Select(x => Update(x, documentRelationId)),
                     document.Content.Elements().Select(x => Update(x, documentRelationId)));
 
-            ChartInfo[] chartMapping =
-                document.Charts
-                        .Select(x => x.WithOffset(documentRelationId))
-                        .ToArray();
-
-            ImageInfo[] imageMapping =
-                document.Images
-                        .Select(x => x.WithOffset(documentRelationId))
-                        .ToArray();
-
-            HyperlinkInfo[] hyperlinkMapping =
-                document.Hyperlinks
-                        .Select(x => x.WithOffset(documentRelationId))
-                        .ToArray();
-
-            return subject.With(new Document(modifiedDocument, chartMapping, imageMapping, hyperlinkMapping));
+            return
+                subject.With(
+                    new Document(
+                        modifiedDocument,
+                        document.Charts.Select(x => x.WithOffset(documentRelationId)),
+                        document.Images.Select(x => x.WithOffset(documentRelationId)),
+                        document.Hyperlinks.Select(x => x.WithOffset(documentRelationId))));
         }
 
         private static XObject Update(XObject node, int offset)

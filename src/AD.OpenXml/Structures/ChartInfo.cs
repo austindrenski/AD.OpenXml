@@ -4,7 +4,6 @@ using System.IO.Compression;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Primitives;
 
 namespace AD.OpenXml.Structures
 {
@@ -22,12 +21,12 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        private static readonly StringSegment MimeType = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
+        [NotNull] private static readonly string MimeType = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
 
         /// <summary>
         ///
         /// </summary>
-        private static readonly StringSegment SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart";
+        [NotNull] private static readonly string SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart";
 
         /// <summary>
         ///
@@ -43,22 +42,24 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        public readonly StringSegment RelationId;
+        [NotNull] public readonly string RelationId;
 
         /// <summary>
         ///
         /// </summary>
-        public int NumericId => int.Parse(RelationId.Substring(3));
+        public readonly int NumericId;
 
         /// <summary>
         ///
         /// </summary>
-        public StringSegment Target => $"charts/chart{RelationId.Subsegment(3)}.xml";
+        [NotNull]
+        public string Target => $"charts/chart{NumericId}.xml";
 
         /// <summary>
         ///
         /// </summary>
-        public StringSegment PartName => $"/word/{Target}";
+        [NotNull]
+        public string PartName => $"/word/{Target}";
 
         /// <summary>
         ///
@@ -76,15 +77,19 @@ namespace AD.OpenXml.Structures
         /// <param name="rId"></param>
         /// <param name="chart"></param>
         /// <exception cref="ArgumentNullException" />
-        public ChartInfo(StringSegment rId, [NotNull] XElement chart)
+        public ChartInfo([NotNull] string rId, [NotNull] XElement chart)
         {
-            if (!rId.StartsWith("rId", StringComparison.Ordinal))
-                throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
+            if (rId is null)
+                throw new ArgumentNullException(nameof(rId));
 
             if (chart is null)
                 throw new ArgumentNullException(nameof(chart));
 
+            if (!rId.StartsWith("rId", StringComparison.Ordinal))
+                throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
+
             RelationId = rId;
+            NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
             Chart = chart.Clone().RemoveByAll(C + "externalData");
         }
 
@@ -106,7 +111,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </returns>
         [Pure]
-        public ChartInfo WithRelationId(StringSegment rId) => new ChartInfo(rId, Chart);
+        public ChartInfo WithRelationId([NotNull] string rId) => new ChartInfo(rId, Chart);
 
         /// <inheritdoc />
         [Pure]
@@ -124,7 +129,7 @@ namespace AD.OpenXml.Structures
             if (archive is null)
                 throw new ArgumentNullException(nameof(archive));
 
-            using (Stream stream = archive.CreateEntry(PartName.Subsegment(1).Value).Open())
+            using (Stream stream = archive.CreateEntry(PartName.Substring(1)).Open())
             {
                 Chart.Save(stream);
             }
@@ -143,7 +148,7 @@ namespace AD.OpenXml.Structures
         public override bool Equals(object obj) => obj is ChartInfo chart && Equals(chart);
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ChartInfo" /> objects have the same values.
+        /// Returns a value that indicates whether two <see cref="ChartInfo" /> objects have the same values.
         /// </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
@@ -154,7 +159,7 @@ namespace AD.OpenXml.Structures
         public static bool operator ==(ChartInfo left, ChartInfo right) => left.Equals(right);
 
         /// <summary>
-        /// Returns a value that indicates whether two <see cref="T:AD.OpenXml.Structures.ChartInfo" /> objects have different values.
+        /// Returns a value that indicates whether two <see cref="ChartInfo" /> objects have different values.
         /// </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
