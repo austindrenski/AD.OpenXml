@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
+using System.IO.Packaging;
 using System.Xml.Linq;
-using AD.IO;
 using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -30,210 +28,139 @@ namespace AD.OpenXml.Documents
         /// <summary>
         /// The content media type of an OpenXML header.
         /// </summary>
-        [NotNull] private static readonly string HeaderContentType =
+        [NotNull] private static readonly string MimeType =
             "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml";
 
         /// <summary>
         /// The schema type for an OpenXML header relationship.
         /// </summary>
-        [NotNull] private static readonly string HeaderRelationshipType =
+        [NotNull] private static readonly string RelationshipType =
             "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header";
-
-        /// <summary>
-        /// The XML declaration.
-        /// </summary>
-        [NotNull] private static readonly XDeclaration Declaration = new XDeclaration("1.0", "utf-8", "yes");
 
         /// <summary>
         /// Add headers to a Word document.
         /// </summary>
         [Pure]
         [NotNull]
-        public static ZipArchive AddHeaders([NotNull] this ZipArchive archive, [NotNull] string title)
+        public static Package AddHeaders([NotNull] this Package package, [NotNull] string title)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
             if (title is null)
                 throw new ArgumentNullException(nameof(title));
 
-            ZipArchive result =
-                archive.With(
-                    // Remove headers from [Content_Types].xml
-                    (
-                        ContentTypesInfo.Path,
-                        z => z.ReadXml(ContentTypesInfo.Path)
-                              .Recurse(x => (string) x.Attribute(ContentTypesInfo.Attributes.ContentType) != HeaderContentType)
-                    ),
-                    // Remove headers from document.xml.rels
-                    (
-                        DocumentRelsInfo.Path,
-                        z => z.ReadXml(DocumentRelsInfo.Path)
-                              .Recurse(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) != HeaderRelationshipType)
-                    ),
-                    // Remove headers from document.xml
-                    (
-                        "word/document.xml",
-                        z => z.ReadXml()
-                              .Recurse(x => x.Name != W + "headerReference")
-                    ));
+            foreach (PackagePart part in package.GetParts())
+            {
+                if (part.ContentType == MimeType)
+                    package.DeletePart(part.Uri);
 
-            // Store the current relationship id number
-            int currentRelationshipId =
-                result.ReadXml(DocumentRelsInfo.Path)
-                      .Elements()
-                      .Attributes("Id")
-                      .Select(x => int.Parse(x.Value.Substring(3)))
-                      .DefaultIfEmpty(0)
-                      .Max();
+                if (part.ContentType != Document.MimeType)
+                    continue;
 
-            // Add headers
-            AddOddPageHeader(result, $"rId{++currentRelationshipId}");
-            AddEvenPageHeader(result, $"rId{++currentRelationshipId}", title);
+                foreach (PackageRelationship relationship in part.GetRelationshipsByType(RelationshipType))
+                {
+                    part.DeleteRelationship(relationship.Id);
+                }
+            }
 
-            return result;
+            using (Stream stream = package.GetPart(Document.PartName).GetStream())
+            {
+                XElement document = XElement.Load(stream);
+                document.Descendants(W + "headerReference").Remove();
+                stream.SetLength(0);
+                document.Save(stream);
+            }
+
+            AddOddPageHeader(package);
+            AddEvenPageHeader(package, title);
+
+            return package;
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="archive"></param>
-        /// <param name="headerId"></param>
+        /// <param name="package"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        private static void AddOddPageHeader([NotNull] ZipArchive archive, [NotNull] string headerId)
+        private static void AddOddPageHeader([NotNull] Package package)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
-            if (headerId is null)
-                throw new ArgumentNullException(nameof(headerId));
+            Uri headerUri = new Uri("/word/header2.xml", UriKind.Relative);
+            PackagePart headerPart = package.CreatePart(headerUri, MimeType);
 
-            // Remove headers from document.xml
-            using (Stream stream = archive.GetEntry("word/header2.xml")?.Open() ??
-                                   archive.CreateEntry("word/header2.xml").Open())
+            using (Stream stream = headerPart.GetStream())
             {
-                stream.SetLength(0);
                 Header2().Save(stream);
             }
 
-            XElement documentRelation = archive.ReadXml(DocumentRelsInfo.Path);
+            PackageRelationship relationship =
+                package.GetPart(Document.PartName).CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
 
-            documentRelation.Add(
-                new XElement(
-                    DocumentRelsInfo.Elements.Relationship,
-                    new XAttribute(DocumentRelsInfo.Attributes.Id, headerId),
-                    new XAttribute(DocumentRelsInfo.Attributes.Type, HeaderRelationshipType),
-                    new XAttribute(DocumentRelsInfo.Attributes.Target, "header2.xml")));
-
-            using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path)?.Open() ?? throw new FileNotFoundException(DocumentRelsInfo.Path))
+            using (Stream stream = package.GetPart(Document.PartName).GetStream())
             {
+                XElement document = XElement.Load(stream);
+
+                foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
+                {
+                    sectionProperties.AddFirst(
+                        new XElement(
+                            W + "headerReference",
+                            new XAttribute(W + "type", "default"),
+                            new XAttribute(R + "id", relationship.Id)));
+                }
+
                 stream.SetLength(0);
-                documentRelation.Save(stream);
-            }
 
-            XElement document = archive.ReadXml();
-            foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
-            {
-                sectionProperties.AddFirst(
-                    new XElement(
-                        W + "headerReference",
-                        new XAttribute(W + "type", "default"),
-                        new XAttribute(R + "id", headerId)));
-            }
-
-            using (Stream stream = archive.GetEntry("word/document.xml")?.Open() ?? throw new FileNotFoundException("word/document.xml"))
-            {
-                stream.SetLength(0);
                 document.Save(stream);
-            }
-
-            XElement packageRelation = archive.ReadXml(ContentTypesInfo.Path);
-
-            packageRelation.Add(
-                new XElement(
-                    ContentTypesInfo.Elements.Override,
-                    new XAttribute(ContentTypesInfo.Attributes.PartName, "/word/header2.xml"),
-                    new XAttribute(ContentTypesInfo.Attributes.ContentType, HeaderContentType)));
-
-            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path)?.Open() ?? throw new FileNotFoundException(ContentTypesInfo.Path))
-            {
-                stream.SetLength(0);
-                packageRelation.Save(stream);
             }
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="archive"></param>
-        /// <param name="headerId"></param>
+        /// <param name="package"></param>
         /// <param name="title"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        private static void AddEvenPageHeader([NotNull] ZipArchive archive, [NotNull] string headerId, [NotNull] string title)
+        private static void AddEvenPageHeader([NotNull] Package package, [NotNull] string title)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
-
-            if (headerId is null)
-                throw new ArgumentNullException(nameof(headerId));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
             if (title is null)
                 throw new ArgumentNullException(nameof(title));
 
-            XDocument header1 = Header1(title);
+            Uri headerUri = new Uri("/word/header1.xml", UriKind.Relative);
+            PackagePart headerPart = package.CreatePart(headerUri, MimeType);
 
-            using (Stream stream = archive.GetEntry("word/header1.xml")?.Open() ??
-                                   archive.CreateEntry("word/header1.xml").Open())
+            using (Stream stream = headerPart.GetStream())
             {
-                stream.SetLength(0);
-                header1.Save(stream);
+                Header1(title).Save(stream);
             }
 
-            XElement documentRelation = archive.ReadXml(DocumentRelsInfo.Path);
+            PackageRelationship relationship =
+                package.GetPart(Document.PartName).CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
 
-            documentRelation.Add(
-                new XElement(
-                    DocumentRelsInfo.Elements.Relationship,
-                    new XAttribute(DocumentRelsInfo.Attributes.Id, headerId),
-                    new XAttribute(DocumentRelsInfo.Attributes.Type, HeaderRelationshipType),
-                    new XAttribute(DocumentRelsInfo.Attributes.Target, "header1.xml")));
-
-            using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path)?.Open() ?? throw new FileNotFoundException(DocumentRelsInfo.Path))
+            using (Stream stream = package.GetPart(Document.PartName).GetStream())
             {
+                XElement document = XElement.Load(stream);
+
+                foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
+                {
+                    sectionProperties.AddFirst(
+                        new XElement(
+                            W + "headerReference",
+                            new XAttribute(W + "type", "even"),
+                            new XAttribute(R + "id", relationship.Id)));
+                }
+
                 stream.SetLength(0);
-                documentRelation.Save(stream);
-            }
 
-            XElement document = archive.ReadXml();
-            foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
-            {
-                sectionProperties.AddFirst(
-                    new XElement(
-                        W + "headerReference",
-                        new XAttribute(W + "type", "even"),
-                        new XAttribute(R + "id", headerId)));
-            }
-
-            using (Stream stream = archive.GetEntry("word/document.xml")?.Open() ?? throw new FileNotFoundException("word/document.xml"))
-            {
-                stream.SetLength(0);
                 document.Save(stream);
-            }
-
-            XElement packageRelation = archive.ReadXml(ContentTypesInfo.Path);
-
-            packageRelation.Add(
-                new XElement(
-                    ContentTypesInfo.Elements.Override,
-                    new XAttribute(ContentTypesInfo.Attributes.PartName, "/word/header1.xml"),
-                    new XAttribute(ContentTypesInfo.Attributes.ContentType, HeaderContentType)));
-
-            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path)?.Open() ?? throw new FileNotFoundException(ContentTypesInfo.Path))
-            {
-                stream.SetLength(0);
-                packageRelation.Save(stream);
             }
         }
 
@@ -248,9 +175,10 @@ namespace AD.OpenXml.Documents
         [NotNull]
         private static XDocument Header1([NotNull] string title)
             => new XDocument(
-                Declaration,
+                new XDeclaration("1.0", "UTF-8", "yes"),
                 new XElement(
                     W + "hdr",
+                    new XAttribute(XNamespace.Xmlns + "w", W),
                     new XElement(
                         W + "p",
                         new XElement(
@@ -277,9 +205,10 @@ namespace AD.OpenXml.Documents
         [NotNull]
         private static XDocument Header2()
             => new XDocument(
-                Declaration,
+                new XDeclaration("1.0", "UTF-8", "yes"),
                 new XElement(
                     W + "hdr",
+                    new XAttribute(XNamespace.Xmlns + "w", W),
                     new XElement(
                         W + "p",
                         new XElement(

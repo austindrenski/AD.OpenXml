@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
+using System.IO.Packaging;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -18,16 +17,6 @@ namespace AD.OpenXml.Documents
     public static class AddFootersExtensions
     {
         /// <summary>
-        /// The namespace declared on the [Content_Types].xml
-        /// </summary>
-        [NotNull] private static readonly XNamespace T = XNamespaces.OpenXmlPackageContentTypes;
-
-        /// <summary>
-        /// Represents the 'r:' prefix seen in the markup of [Content_Types].xml
-        /// </summary>
-        [NotNull] private static readonly XNamespace P = XNamespaces.OpenXmlPackageRelationships;
-
-        /// <summary>
         /// Represents the 'r:' prefix seen in the markup of document.xml.
         /// </summary>
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
@@ -38,29 +27,24 @@ namespace AD.OpenXml.Documents
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
-        /// The XML declaration.
-        /// </summary>
-        [NotNull] private static readonly XDeclaration Declaration = new XDeclaration("1.0", "utf-8", "yes");
-
-        /// <summary>
         /// The content media type of an OpenXML footer.
         /// </summary>
-        [NotNull] private static readonly string FooterContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml";
+        [NotNull] private static readonly string MimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml";
 
         /// <summary>
         /// The schema type for an OpenXML footer relationship.
         /// </summary>
-        [NotNull] private static readonly string FooterRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer";
+        [NotNull] private static readonly string RelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer";
 
         /// <summary>
         /// Add footers to a Word document.
         /// </summary>
         [Pure]
         [NotNull]
-        public static ZipArchive AddFooters([NotNull] this ZipArchive archive, [NotNull] string publisher, [NotNull] string website)
+        public static Package AddFooters([NotNull] this Package package, [NotNull] string publisher, [NotNull] string website)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
             if (publisher is null)
                 throw new ArgumentNullException(nameof(publisher));
@@ -68,293 +52,205 @@ namespace AD.OpenXml.Documents
             if (website is null)
                 throw new ArgumentNullException(nameof(website));
 
-            ZipArchive result =
-                archive.With(
-                    // Remove footers from [Content_Types].xml
-                    (
-                        ContentTypesInfo.Path,
-                        z => z.ReadXml(ContentTypesInfo.Path)
-                              .Recurse(x => (string) x.Attribute(ContentTypesInfo.Attributes.ContentType) != FooterContentType)
-                    ),
-                    // Remove footers from document.xml.rels
-                    (
-                        DocumentRelsInfo.Path,
-                        z => z.ReadXml(DocumentRelsInfo.Path)
-                              .Recurse(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) != FooterRelationshipType)
-                    ),
-                    // Remove footers from document.xml
-                    (
-                        "word/document.xml",
-                        z => z.ReadXml()
-                              .Recurse(x => x.Name != W + "footerReference")
-                    ));
+            foreach (PackagePart part in package.GetParts())
+            {
+                if (part.ContentType == MimeType)
+                    package.DeletePart(part.Uri);
 
-            // Store the current relationship id number
-            int currentRelationshipId =
-                result.ReadXml(DocumentRelsInfo.Path)
-                      .Elements()
-                      .Attributes("Id")
-                      .Select(x => int.Parse(x.Value.Substring(3)))
-                      .DefaultIfEmpty(0)
-                      .Max();
+                if (part.ContentType != Document.MimeType)
+                    continue;
+
+                foreach (PackageRelationship relationship in part.GetRelationshipsByType(RelationshipType))
+                {
+                    part.DeleteRelationship(relationship.Id);
+                }
+            }
+
+            using (Stream stream = package.GetPart(Document.PartName).GetStream())
+            {
+                XElement document = XElement.Load(stream);
+                document.Descendants(W + "footerReference").Remove();
+                stream.SetLength(0);
+                document.Save(stream);
+            }
 
             // Add footers
-            AddEvenPageFooter(result, $"rId{++currentRelationshipId}", website);
-            AddOddPageFooter(result, $"rId{++currentRelationshipId}", publisher);
+            AddEvenPageFooter(package, website);
+            AddOddPageFooter(package, publisher);
 
-            return result;
+            return package;
         }
 
-        private static void AddOddPageFooter([NotNull] ZipArchive archive, [NotNull] string footerId, [NotNull] string publisher)
+        private static void AddOddPageFooter([NotNull] Package package, [NotNull] string publisher)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
-
-            if (footerId is null)
-                throw new ArgumentNullException(nameof(footerId));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
             if (publisher is null)
                 throw new ArgumentNullException(nameof(publisher));
 
-            XDocument footer1 = Footer1(publisher);
+            Uri headerUri = new Uri("/word/footer1.xml", UriKind.Relative);
+            PackagePart headerPart = package.CreatePart(headerUri, MimeType);
 
-            using (Stream stream = archive.GetEntry("word/footer1.xml")?.Open() ??
-                                   archive.CreateEntry("word/footer1.xml").Open())
+            using (Stream stream = headerPart.GetStream())
             {
-                stream.SetLength(0);
-                footer1.Save(stream);
+                Footer1(publisher).Save(stream);
             }
 
-            XElement documentRelation = archive.ReadXml(DocumentRelsInfo.Path);
+            PackageRelationship relationship =
+                package.GetPart(Document.PartName).CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
 
-            documentRelation.Add(
-                new XElement(
-                    P + "Relationship",
-                    new XAttribute("Id", footerId),
-                    new XAttribute("Type", FooterRelationshipType),
-                    new XAttribute("Target", "footer1.xml")));
-
-            using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path)?.Open() ??
-                                   archive.CreateEntry(DocumentRelsInfo.Path).Open())
+            using (Stream stream = package.GetPart(Document.PartName).GetStream())
             {
-                stream.SetLength(0);
-                documentRelation.Save(stream);
-            }
+                XElement document = XElement.Load(stream);
 
-            XElement document = archive.ReadXml();
-
-            foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
-            {
-                if (sectionProperties.Elements(W + "headerReference").Any())
+                foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
                 {
-                    sectionProperties.Elements(W + "headerReference")
-                                     .Last()
-                                     .AddAfterSelf(
-                                         new XElement(
-                                             W + "footerReference",
-                                             new XAttribute(W + "type", "default"),
-                                             new XAttribute(R + "id", footerId)));
+                    if (sectionProperties.Elements(W + "headerReference").Any())
+                    {
+                        sectionProperties.Elements(W + "headerReference")
+                                         .Last()
+                                         .AddAfterSelf(
+                                             new XElement(
+                                                 W + "footerReference",
+                                                 new XAttribute(W + "type", "default"),
+                                                 new XAttribute(R + "id", relationship.Id)));
+                    }
+                    else
+                    {
+                        sectionProperties.Add(
+                            new XElement(
+                                W + "footerReference",
+                                new XAttribute(W + "type", "default"),
+                                new XAttribute(R + "id", relationship.Id)));
+                    }
                 }
-                else
-                {
-                    sectionProperties.Add(
-                        new XElement(
-                            W + "footerReference",
-                            new XAttribute(W + "type", "default"),
-                            new XAttribute(R + "id", footerId)));
-                }
-            }
 
-            using (Stream stream = archive.GetEntry("word/document.xml")?.Open() ??
-                                   archive.CreateEntry("word/document.xml").Open())
-            {
                 stream.SetLength(0);
+
                 document.Save(stream);
-            }
-
-            XElement packageRelation = archive.ReadXml(ContentTypesInfo.Path);
-
-            packageRelation.Add(
-                new XElement(
-                    T + "Override",
-                    new XAttribute("PartName", "/word/footer1.xml"),
-                    new XAttribute("ContentType", FooterContentType)));
-
-            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path)?.Open() ??
-                                   archive.CreateEntry(ContentTypesInfo.Path).Open())
-            {
-                stream.SetLength(0);
-                packageRelation.Save(stream);
             }
         }
 
-        private static void AddEvenPageFooter([NotNull] ZipArchive archive, [NotNull] string footerId, [NotNull] string website)
+        private static void AddEvenPageFooter([NotNull] Package package, [NotNull] string website)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
-
-            if (footerId is null)
-                throw new ArgumentNullException(nameof(footerId));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
             if (website is null)
                 throw new ArgumentNullException(nameof(website));
 
-            XDocument footer2 = Footer2(website);
+            Uri headerUri = new Uri("/word/footer2.xml", UriKind.Relative);
+            PackagePart headerPart = package.CreatePart(headerUri, MimeType);
 
-            using (Stream stream = archive.GetEntry("word/footer2.xml")?.Open() ??
-                                   archive.CreateEntry("word/footer2.xml").Open())
+            using (Stream stream = headerPart.GetStream())
             {
-                stream.SetLength(0);
-                footer2.Save(stream);
+                Footer2(website).Save(stream);
             }
 
-            XElement documentRelation = archive.ReadXml(DocumentRelsInfo.Path);
+            PackageRelationship relationship =
+                package.GetPart(Document.PartName).CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
 
-            documentRelation.Add(
-                new XElement(
-                    P + "Relationship",
-                    new XAttribute("Id", footerId),
-                    new XAttribute("Type", FooterRelationshipType),
-                    new XAttribute("Target", "footer2.xml")));
-
-            using (Stream stream = archive.GetEntry(DocumentRelsInfo.Path)?.Open() ??
-                                   archive.CreateEntry(DocumentRelsInfo.Path).Open())
+            using (Stream stream = package.GetPart(Document.PartName).GetStream())
             {
-                stream.SetLength(0);
-                documentRelation.Save(stream);
-            }
+                XElement document = XElement.Load(stream);
 
-            XElement document = archive.ReadXml();
-
-            foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
-            {
-                if (sectionProperties.Elements(W + "headerReference").Any())
+                foreach (XElement sectionProperties in document.Descendants(W + "sectPr"))
                 {
-                    sectionProperties.Elements(W + "headerReference")
-                                     .Last()
-                                     .AddAfterSelf(
-                                         new XElement(
-                                             W + "footerReference",
-                                             new XAttribute(W + "type", "even"),
-                                             new XAttribute(R + "id", footerId)));
+                    if (sectionProperties.Elements(W + "headerReference").Any())
+                    {
+                        sectionProperties.Elements(W + "headerReference")
+                                         .Last()
+                                         .AddAfterSelf(
+                                             new XElement(
+                                                 W + "footerReference",
+                                                 new XAttribute(W + "type", "even"),
+                                                 new XAttribute(R + "id", relationship.Id)));
+                    }
+                    else
+                    {
+                        sectionProperties.Add(
+                            new XElement(
+                                W + "footerReference",
+                                new XAttribute(W + "type", "even"),
+                                new XAttribute(R + "id", relationship.Id)));
+                    }
                 }
-                else
-                {
-                    sectionProperties.Add(
-                        new XElement(
-                            W + "footerReference",
-                            new XAttribute(W + "type", "even"),
-                            new XAttribute(R + "id", footerId)));
-                }
-            }
 
-            using (Stream stream = archive.GetEntry("word/document.xml")?.Open() ??
-                                   archive.CreateEntry("word/document.xml").Open())
-            {
                 stream.SetLength(0);
+
                 document.Save(stream);
-            }
-
-            XElement packageRelation = archive.ReadXml(ContentTypesInfo.Path);
-
-            packageRelation.Add(
-                new XElement(
-                    T + "Override",
-                    new XAttribute("PartName", "/word/footer2.xml"),
-                    new XAttribute("ContentType", FooterContentType)));
-
-            using (Stream stream = archive.GetEntry(ContentTypesInfo.Path)?.Open() ??
-                                   archive.CreateEntry(ContentTypesInfo.Path).Open())
-            {
-                stream.SetLength(0);
-                packageRelation.Save(stream);
             }
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="publisher">
-        ///
-        /// </param>
+        /// <param name="publisher"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
         private static XDocument Footer1([NotNull] string publisher)
-        {
-            if (publisher is null)
-                throw new ArgumentNullException(nameof(publisher));
-
-            return
-                new XDocument(
-                    Declaration,
+            => new XDocument(
+                new XDeclaration("1.0", "UTF-8", "yes"),
+                new XElement(
+                    W + "ftr",
+                    new XAttribute(XNamespace.Xmlns + "w", W),
                     new XElement(
-                        W + "ftr",
+                        W + "p",
                         new XElement(
-                            W + "p",
+                            W + "pPr",
                             new XElement(
-                                W + "pPr",
-                                new XElement(
-                                    W + "jc",
-                                    new XAttribute(W + "val", "right"))),
+                                W + "jc",
+                                new XAttribute(W + "val", "right"))),
+                        new XElement(
+                            W + "r",
                             new XElement(
-                                W + "r",
-                                new XElement(
-                                    W + "t",
-                                    new XAttribute(XNamespace.Xml + "space", "preserve"),
-                                    new XText($"{publisher} | "))),
-                            new XElement(
-                                W + "fldSimple",
-                                new XAttribute(W + "instr", " PAGE   \\* MERGEFORMAT "),
-                                new XElement(W + "r",
-                                    new XElement(W + "t",
-                                        new XText(string.Empty)))))));
-        }
+                                W + "t",
+                                new XAttribute(XNamespace.Xml + "space", "preserve"),
+                                new XText($"{publisher} | "))),
+                        new XElement(
+                            W + "fldSimple",
+                            new XAttribute(W + "instr", " PAGE   \\* MERGEFORMAT "),
+                            new XElement(W + "r",
+                                new XElement(W + "t",
+                                    new XText(string.Empty)))))));
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="website">
-        ///
-        /// </param>
+        /// <param name="website"></param>
         /// <returns>
         ///
         /// </returns>
-        /// <exception cref="ArgumentNullException" />
         [Pure]
         [NotNull]
         private static XDocument Footer2([NotNull] string website)
-        {
-            if (website is null)
-                throw new ArgumentNullException(nameof(website));
-
-            return
-                new XDocument(
-                    Declaration,
+            => new XDocument(
+                new XDeclaration("1.0", "UTF-8", "yes"),
+                new XElement(
+                    W + "ftr",
+                    new XAttribute(XNamespace.Xmlns + "w", W),
                     new XElement(
-                        W + "ftr",
+                        W + "p",
                         new XElement(
-                            W + "p",
+                            W + "pPr",
                             new XElement(
-                                W + "pPr",
-                                new XElement(
-                                    W + "jc",
-                                    new XAttribute(W + "val", "left"))),
+                                W + "jc",
+                                new XAttribute(W + "val", "left"))),
+                        new XElement(
+                            W + "fldSimple",
+                            new XAttribute(W + "instr", " PAGE   \\* MERGEFORMAT "),
+                            new XElement(W + "r",
+                                new XElement(W + "t",
+                                    new XText(string.Empty)))),
+                        new XElement(
+                            W + "r",
                             new XElement(
-                                W + "fldSimple",
-                                new XAttribute(W + "instr", " PAGE   \\* MERGEFORMAT "),
-                                new XElement(W + "r",
-                                    new XElement(W + "t",
-                                        new XText(string.Empty)))),
-                            new XElement(
-                                W + "r",
-                                new XElement(
-                                    W + "t",
-                                    new XAttribute(XNamespace.Xml + "space", "preserve"),
-                                    new XText($" | {website}"))))));
-        }
+                                W + "t",
+                                new XAttribute(XNamespace.Xml + "space", "preserve"),
+                                new XText($" | {website}"))))));
     }
 }

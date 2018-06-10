@@ -1,14 +1,12 @@
 using System;
 using System.IO;
-using System.IO.Compression;
+using System.IO.Packaging;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Structures
 {
-    // ReSharper disable ImpureMethodCallOnReadonlyValueField
-
     /// <inheritdoc cref="IEquatable{T}" />
     /// <summary>
     ///
@@ -21,12 +19,12 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] private static readonly string MimeType = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
+        [NotNull] public static readonly string MimeType = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull] private static readonly string SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart";
+        [NotNull] public static readonly string Namespace = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart";
 
         /// <summary>
         ///
@@ -59,17 +57,12 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [NotNull]
-        public string PartName => $"/word/{Target}";
+        public Uri PartName => new Uri($"/word/{Target}", UriKind.Relative);
 
         /// <summary>
         ///
         /// </summary>
-        public ContentTypes.Override ContentTypeEntry => new ContentTypes.Override(PartName, MimeType);
-
-        /// <summary>
-        ///
-        /// </summary>
-        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, SchemaType);
+        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, Namespace);
 
         /// <summary>
         ///
@@ -120,16 +113,19 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="archive">
+        /// <param name="package">
         ///
         /// </param>
         /// <exception cref="ArgumentNullException" />
-        public void Save([NotNull] ZipArchive archive)
+        public void Save([NotNull] Package package)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
-            using (Stream stream = archive.CreateEntry(PartName.Substring(1)).Open())
+            using (Stream stream =
+                package.PartExists(PartName)
+                    ? package.GetPart(PartName).GetStream()
+                    : package.CreatePart(PartName, MimeType).GetStream())
             {
                 Chart.Save(stream);
             }

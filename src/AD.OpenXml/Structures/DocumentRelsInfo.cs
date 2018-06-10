@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System;
+using System.Xml.Linq;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Structures
@@ -13,7 +14,8 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public const string Path = "word/_rels/document.xml.rels";
+        [NotNull]
+        public static Uri PartName => new Uri("/word/_rels/document.xml.rels", UriKind.Relative);
 
         /// <summary>
         ///

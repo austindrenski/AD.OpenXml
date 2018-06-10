@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
+using System.IO.Packaging;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.OpenXml.Elements;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -29,6 +28,16 @@ namespace AD.OpenXml.Structures
                 W + "moveToRangeEnd",
                 W + "moveTo"
             };
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull] public static readonly Uri PartName = new Uri("/word/document.xml", UriKind.Relative);
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull] public static readonly string MimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml";
 
         /// <summary>
         /// The XML file located at: /word/document.xml.
@@ -90,18 +99,25 @@ namespace AD.OpenXml.Structures
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
         /// </summary>
-        /// <param name="archive">
-        /// The archive to which changes can be saved.
+        /// <param name="package">
+        /// The package to which changes can be saved.
         /// </param>
         /// <exception cref="ArgumentNullException"/>
-        public Document([NotNull] ZipArchive archive)
+        public Document([NotNull] Package package)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
-            Content = archive.ReadXml();
+            Content =
+                package.PartExists(PartName)
+                    ? XElement.Load(package.GetPart(PartName).GetStream())
+                    : new XElement(W + "document",
+                        new XElement(W + "body"));
 
-            XElement documentRelations = archive.ReadXml(DocumentRelsInfo.Path, Relationships.Empty.ToXElement());
+            XElement documentRelations =
+                package.PartExists(DocumentRelsInfo.PartName)
+                    ? XElement.Load(package.GetPart(DocumentRelsInfo.PartName).GetStream())
+                    : Relationships.Empty.ToXElement();
 
             // TODO: re-enumerate ids at this stage.
             // TODO: find charts and images by *starting* with the content refs.
@@ -118,7 +134,7 @@ namespace AD.OpenXml.Structures
                                 Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
                             })
                     .Where(x => x.Target.StartsWith("charts/"))
-                    .Select(x => new ChartInfo(x.Id, archive.ReadXml($"word/{x.Target}")))
+                    .Select(x => new ChartInfo(x.Id, XElement.Load(package.GetPart(new Uri($"/word/{x.Target}", UriKind.Relative)).GetStream())))
                     .ToArray();
 
             Images =
@@ -132,7 +148,14 @@ namespace AD.OpenXml.Structures
                                 Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
                             })
                     .Where(x => x.Target.StartsWith("media/"))
-                    .Select(x => ImageInfo.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
+                    .Select(x =>
+                    {
+                        MemoryStream ms = new MemoryStream();
+                        Stream s = package.GetPart(new Uri($"/word/{x.Target}", UriKind.Relative)).GetStream();
+                        s.CopyTo(ms);
+                        s.Close();
+                        return ImageInfo.Create(x.Id, x.Target, ms.ToArray());
+                    })
                     .ToArray();
 
             Hyperlinks =
@@ -223,16 +246,26 @@ namespace AD.OpenXml.Structures
             [CanBeNull] IEnumerable<ImageInfo> images = default,
             [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
+            HashSet<XAttribute> attributes =
+                new HashSet<XAttribute>(Content.Attributes());
+
+            if (content != null)
+            {
+                foreach (XAttribute attribute in content.Attributes())
+                {
+                    if (attributes.Any(x => x.Name == attribute.Name || x.Value == attribute.Value))
+                        continue;
+
+                    attributes.Add(attribute);
+                }
+            }
+
             XElement document =
                 content is null
                     ? Content
                     : new XElement(
                         Content.Name,
-                        Content.Attributes()
-                               .Concat(content.Attributes())
-                               .Select(x => (x.Name, x.Value))
-                               .Distinct()
-                               .Select(x => new XAttribute(x.Name, x.Value)),
+                        attributes,
                         new XElement(
                             W + "body",
                             Content.Element(W + "body")?.Elements(),
@@ -256,28 +289,31 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="archive">
+        /// <param name="package">
         ///
         /// </param>
         /// <exception cref="ArgumentNullException" />
-        public void Save([NotNull] ZipArchive archive)
+        public void Save([NotNull] Package package)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
-            using (Stream stream = archive.GetEntry("word/document.xml")?.Open())
+            using (Stream stream =
+                package.PartExists(PartName)
+                    ? package.GetPart(PartName).GetStream()
+                    : package.CreatePart(PartName, MimeType).GetStream())
             {
                 Content.Save(stream);
             }
 
             foreach (ChartInfo item in Charts)
             {
-                item.Save(archive);
+                item.Save(package);
             }
 
             foreach (ImageInfo item in Images)
             {
-                item.Save(archive);
+                item.Save(package);
             }
         }
     }

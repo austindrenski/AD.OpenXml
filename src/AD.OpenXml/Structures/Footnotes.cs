@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
+//using System.IO.Compression;
+using System.IO.Packaging;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -37,7 +37,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] private static readonly string SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes";
+        [NotNull] private static readonly string Namespace = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes";
 
         /// <summary>
         ///
@@ -65,17 +65,12 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [NotNull]
-        public string PartName => $"/word/{Target}";
+        public Uri PartName => new Uri($"/word/{Target}", UriKind.Relative);
 
         /// <summary>
         ///
         /// </summary>
-        public ContentTypes.Override ContentTypeEntry => new ContentTypes.Override(PartName, MimeType);
-
-        /// <summary>
-        ///
-        /// </summary>
-        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, SchemaType);
+        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, Namespace);
 
         /// <summary>
         /// The current footnote count.
@@ -128,39 +123,48 @@ namespace AD.OpenXml.Structures
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading Footnotes parts into memory.
         /// </summary>
-        /// <param name="archive">The archive to which changes can be saved.</param>
+        /// <param name="package">The package to which changes can be saved.</param>
         /// <exception cref="ArgumentNullException"/>
-        public Footnotes([NotNull] ZipArchive archive)
+        public Footnotes([NotNull] Package package)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
             RelationId =
-                archive.ReadXml(DocumentRelsInfo.Path, Relationships.Empty.ToXElement())
-                       .Elements(DocumentRelsInfo.Elements.Relationship)
-                       .SingleOrDefault(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) == SchemaType)?
-                       .Attribute(DocumentRelsInfo.Attributes.Id)?
-                       .Value ?? string.Empty;
+                package.PartExists(DocumentRelsInfo.PartName)
+                    ? XElement.Load(package.GetPart(DocumentRelsInfo.PartName).GetStream())
+                              .Elements(DocumentRelsInfo.Elements.Relationship)
+                              .SingleOrDefault(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) == Namespace)?
+                              .Attribute(DocumentRelsInfo.Attributes.Id)?
+                              .Value ?? string.Empty
+                    : string.Empty;
 
             // TODO: hard-coding to rId1 until other package parts are migrated.
             RelationId = "rId1";
 
-            Content = archive.ReadXml(PartName.Substring(1), new XElement(W + "footnotes"));
+            Content =
+                package.PartExists(PartName)
+                    ? XElement.Load(package.GetPart(PartName).GetStream())
+                    : new XElement(W + "footnotes");
+
+            XElement footnoteRels =
+                package.PartExists(FootnotesRelsInfo.PartName)
+                    ? XElement.Load(package.GetPart(FootnotesRelsInfo.PartName).GetStream())
+                    : Relationships.Empty.ToXElement();
 
             Hyperlinks =
-                archive.ReadXml(FootnotesRelsInfo.Path, Relationships.Empty.ToXElement())
-                       .Elements()
-                       .Select(
-                           x =>
-                               new
-                               {
-                                   Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
-                                   Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target),
-                                   TargetMode = (string) x.Attribute(FootnotesRelsInfo.Attributes.TargetMode)
-                               })
-                       .Where(x => x.TargetMode != null)
-                       .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
-                       .ToArray();
+                footnoteRels.Elements()
+                            .Select(
+                                x =>
+                                    new
+                                    {
+                                        Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
+                                        Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target),
+                                        TargetMode = (string) x.Attribute(FootnotesRelsInfo.Attributes.TargetMode)
+                                    })
+                            .Where(x => x.TargetMode != null)
+                            .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
+                            .ToArray();
         }
 
         /// <summary>
@@ -208,17 +212,17 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="archive"></param>
+        /// <param name="package"></param>
         /// <exception cref="ArgumentNullException" />
-        /// <exception cref="FileNotFoundException" />
-        public void Save([NotNull] ZipArchive archive)
+        public void Save([NotNull] Package package)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
             using (Stream stream =
-                archive.GetEntry(PartName.Substring(1))?.Open() ??
-                archive.CreateEntry(PartName.Substring(1)).Open())
+                package.PartExists(PartName)
+                    ? package.GetPart(PartName).GetStream()
+                    : package.CreatePart(PartName, MimeType).GetStream())
             {
                 Content.Save(stream);
             }

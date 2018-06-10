@@ -99,11 +99,11 @@ namespace AD.OpenXml
         [CanBeNull]
         protected virtual XObject VisitAccent([NotNull] XElement accent)
             => accent.Element(M + "accPr")?.Element(M + "chr")?.Attribute(M + "val")?.Value is string value
-                   ? new XElement("mover",
-                       new XAttribute("accent", true),
-                       Visit(accent.Nodes()),
-                       new XElement("mo", AccentLookup.TryGetValue(value, out string mapped) ? mapped : value))
-                   : null;
+                ? new XElement("mover",
+                    new XAttribute("accent", true),
+                    Visit(accent.Nodes()),
+                    new XElement("mo", AccentLookup.TryGetValue(value, out string mapped) ? mapped : value))
+                : null;
 
         /// <summary>
         ///
@@ -168,6 +168,17 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
+        /// <param name="degree"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitDegree([NotNull] XElement degree) => new XElement("mrow", Visit(degree.Nodes()));
+
+        /// <summary>
+        ///
+        /// </summary>
         /// <param name="denominator"></param>
         /// <returns>
         ///
@@ -197,6 +208,9 @@ namespace AD.OpenXml
 
                 case "d":
                     return VisitDelimiter(element);
+
+                case "deg":
+                    return VisitDegree(element);
 
                 case "den":
                     return VisitDenominator(element);
@@ -336,11 +350,11 @@ namespace AD.OpenXml
         [CanBeNull]
         protected virtual XObject VisitRoot([NotNull] XElement root)
             => root.Element(M + "deg") is XElement degree && degree.HasElements
-                   ? new XElement("mroot",
-                       Visit(root.Element(M + "e")),
-                       Visit(degree))
-                   : new XElement("msqrt",
-                       Visit(root.Element(M + "e")));
+                ? new XElement("mroot",
+                    Visit(root.Element(M + "e")),
+                    Visit(degree))
+                : new XElement("msqrt",
+                    Visit(root.Element(M + "e")));
 
         /// <summary>
         ///
@@ -441,9 +455,9 @@ namespace AD.OpenXml
         [Pure]
         protected override XObject VisitText(XText text)
             => string.IsNullOrWhiteSpace(text.Value)
-                   ? null
-                   : double.TryParse(text.Value, out double value)
-                       ? new XElement("mn", value)
-                       : new XElement("mi", text.Value);
+                ? null
+                : double.TryParse(text.Value, out double value)
+                    ? new XElement("mn", value)
+                    : new XElement("mi", text.Value);
     }
 }

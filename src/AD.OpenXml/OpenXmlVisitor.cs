@@ -95,6 +95,7 @@ namespace AD.OpenXml
                     [C   + "plotArea"]    = VisitPlotArea,
                     [DGM + "relIds"]      = VisitDiagram,
                     [M   + "oMath"]       = VisitMath,
+                    [M   + "oMathPara"]   = VisitMathParagraph,
                     [PIC + "pic"]         = VisitPicture,
                     [W   + "body"]        = VisitBody,
                     [W   + "document"]    = VisitDocument,
@@ -323,6 +324,17 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitMath([NotNull] XElement math) => base.VisitElement(math);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="mathParagraph"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitMathParagraph([NotNull] XElement mathParagraph) => base.VisitElement(mathParagraph);
 
         /// <summary>
         /// Visits the picture node.

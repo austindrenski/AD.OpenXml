@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
+using System.IO.Packaging;
 using System.Linq;
 using System.Xml.Linq;
 using AD.Xml;
@@ -25,6 +25,11 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [NotNull] public static readonly Relationships Empty = new Relationships();
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull] public static readonly string MimeType = "application/vnd.openxmlformats-package.relationships+xml";
 
         /// <summary>
         ///
@@ -67,17 +72,18 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="archive"></param>
-        /// <param name="path"></param>
+        /// <param name="package"></param>
+        /// <param name="partName"></param>
         /// <exception cref="ArgumentNullException" />
-        public void Save([NotNull] ZipArchive archive, string path)
+        public void Save([NotNull] Package package, Uri partName)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
             using (Stream stream =
-                archive.GetEntry(path)?.Open() ??
-                archive.CreateEntry(path).Open())
+                package.PartExists(partName)
+                    ? package.GetPart(partName).GetStream()
+                    : package.CreatePart(partName, MimeType).GetStream())
             {
                 ToXElement().Save(stream);
             }

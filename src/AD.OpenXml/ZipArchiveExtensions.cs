@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.IO.Packaging;
 using System.Xml.Linq;
+using AD.OpenXml.Structures;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml
@@ -100,6 +102,62 @@ namespace AD.OpenXml
                         using (Stream writeStream = writer.CreateEntry(entry.FullName).Open())
                         {
                             readStream.CopyTo(writeStream);
+                        }
+                    }
+                }
+            }
+
+            ms.Seek(0, SeekOrigin.Begin);
+
+            return ms;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="package">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [NotNull]
+        public static MemoryStream ToStream([NotNull] this Package package)
+        {
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
+
+            MemoryStream ms = new MemoryStream();
+
+            using (Package result = Package.Open(ms, FileMode.Create))
+            {
+                foreach (PackageRelationship relationship in package.GetRelationships())
+                {
+                    result.CreateRelationship(relationship.TargetUri, relationship.TargetMode, relationship.RelationshipType, relationship.Id);
+                }
+
+                foreach (PackagePart part in package.GetParts())
+                {
+                    if (part.ContentType == Relationships.MimeType)
+                        continue;
+
+                    PackagePart resultPart =
+                        result.PartExists(part.Uri)
+                            ? result.GetPart(part.Uri)
+                            : result.CreatePart(part.Uri, part.ContentType);
+
+                    foreach (PackageRelationship relationship in part.GetRelationships())
+                    {
+                        resultPart.CreateRelationship(relationship.TargetUri, relationship.TargetMode, relationship.RelationshipType, relationship.Id);
+                    }
+
+                    using (Stream partStream = part.GetStream())
+                    {
+                        using (Stream resultStream = resultPart.GetStream())
+                        {
+                            partStream.CopyTo(resultStream);
                         }
                     }
                 }

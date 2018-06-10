@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using AD.IO;
 using AD.IO.Streams;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -23,48 +23,34 @@ namespace AD.OpenXml.Documents
         /// <summary>
         /// Modifies line chart styling in the target stream.
         /// </summary>
-        /// <param name="stream">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
+        /// <param name="stream"></param>
         [Pure]
         [NotNull]
         [ItemNotNull]
-        public static async Task<MemoryStream> ModifyLineChartStyles([NotNull] [ItemNotNull] this Task<MemoryStream> stream)
+        public static async Task<MemoryStream> ModifyLineChartStyles([NotNull] this Task<MemoryStream> stream)
         {
             if (stream is null)
                 throw new ArgumentNullException(nameof(stream));
 
-            return await ModifyLineChartStyles(await stream);
-        }
+            MemoryStream ms = await (await stream).CopyPure();
+            Package package = Package.Open(ms);
 
-        /// <summary>
-        /// Modifies line chart styling in the target stream.
-        /// </summary>
-        /// <param name="stream">
-        ///
-        /// </param>
-        [Pure]
-        [NotNull]
-        [ItemNotNull]
-        public static async Task<MemoryStream> ModifyLineChartStyles([NotNull] this MemoryStream stream)
-        {
-            if (stream is null)
-                throw new ArgumentNullException(nameof(stream));
-
-            MemoryStream result = await stream.CopyPure();
-
-            foreach (string item in await result.EnumerateChartPartNames())
+            foreach (PackagePart part in package.EnumerateChartPartNames())
             {
-                result =
-                    await result.ReadXml(item)
+                using (Stream original = part.GetStream())
+                {
+                    using (Stream chart = part.GetStream(FileMode.Truncate))
+                    {
+                        XElement.Load(original)
                                 .ModifyLineChartStyles()
-                                .WriteIntoAsync(result, item);
+                                .Save(chart);
+                    }
+                }
             }
 
-            return result;
+            package.Close();
+
+            return ms;
         }
 
         /// <summary>

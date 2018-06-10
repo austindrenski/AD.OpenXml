@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
+using System.IO.Packaging;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
@@ -14,17 +14,17 @@ namespace AD.OpenXml.Structures
     public readonly struct ImageInfo : IEquatable<ImageInfo>
     {
         [NotNull] private static readonly Regex RegexTarget =
-            new Regex("media/image(?<id>[0-9]+)\\.(?<extension>emf|png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            new Regex("media/image(?<id>[0-9]+)\\.(?<extension>png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull] private static readonly string SchemaType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
+        [NotNull] public static readonly string Namespace = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]  public static readonly ImageInfo[] Empty = new ImageInfo[0];
+        [NotNull] public static readonly ImageInfo[] Empty = new ImageInfo[0];
 
         /// <summary>
         ///
@@ -56,7 +56,13 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [NotNull]
-        public string PartName => $"/word/{Target}";
+        public Uri PartName => new Uri($"/word/{Target}", UriKind.Relative);
+
+        /// <summary>
+        ///
+        /// </summary>
+        [NotNull]
+        public string MimeType => $"image/{Extension}";
 
         /// <summary>
         ///
@@ -67,7 +73,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, SchemaType);
+        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, Namespace);
 
         /// <summary>
         ///
@@ -85,7 +91,6 @@ namespace AD.OpenXml.Structures
 
             if (!rId.StartsWith("rId", StringComparison.Ordinal))
                 throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
-
 
             RelationId = rId;
             NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
@@ -134,14 +139,17 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="archive"> </param>
+        /// <param name="package"> </param>
         /// <exception cref="ArgumentNullException" />
-        public void Save([NotNull] ZipArchive archive)
+        public void Save([NotNull] Package package)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
-            using (Stream stream = archive.CreateEntry(PartName.Substring(1)).Open())
+            using (Stream stream =
+                package.PartExists(PartName)
+                    ? package.GetPart(PartName).GetStream()
+                    : package.CreatePart(PartName, MimeType).GetStream())
             {
                 stream.Write(Image.Span);
             }

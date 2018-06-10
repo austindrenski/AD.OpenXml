@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
+using System.IO.Packaging;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -78,12 +78,18 @@ namespace CompilerAPI.Controllers
                                        x.FileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase)))
                 return BadRequest("Invalid file format.");
 
-            Queue<ZipArchive> documentQueue = new Queue<ZipArchive>(uploadedFiles.Length);
+            Queue<Package> packagesQueue = new Queue<Package>(uploadedFiles.Length);
 
             foreach (IFormFile file in uploadedFiles)
             {
+                // TODO: if Package takes a copy of the stream, remove this.
+                MemoryStream ms = new MemoryStream();
+                Stream s = file.OpenReadStream();
+                await s.CopyToAsync(ms);
+                s.Dispose();
+
                 if (file.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
-                    documentQueue.Enqueue(new ZipArchive(file.OpenReadStream()));
+                    packagesQueue.Enqueue(Package.Open(ms));
 
 //                else
 //                {
@@ -103,14 +109,14 @@ namespace CompilerAPI.Controllers
 
             MemoryStream output =
                 await Process(
-                    documentQueue,
+                    packagesQueue,
                     title ?? "[REPORT TITLE]",
                     publisher ?? "[PUBLISHER]",
                     website ?? "[PUBLISHER WEBSITE]");
 
-            foreach (ZipArchive archive in documentQueue)
+            foreach (Package package in packagesQueue)
             {
-                archive.Dispose();
+                package.Close();
             }
 
             output.Seek(0, SeekOrigin.Begin);
@@ -123,13 +129,13 @@ namespace CompilerAPI.Controllers
                 case "html":
                 {
                     string styles = stylesheet is null ? null : new StreamReader(stylesheet.OpenReadStream()).ReadToEnd();
-                    OpenXmlPackageVisitor ooxml = new OpenXmlPackageVisitor(new ZipArchive(output));
+                    OpenXmlPackageVisitor ooxml = new OpenXmlPackageVisitor(Package.Open(output));
                     HtmlVisitor html = new HtmlVisitor(ooxml.Document.ChartReferences, ooxml.Document.ImageReferences);
                     XObject result = html.Visit(ooxml.Document.Content, ooxml.Footnotes.Content, title, stylesheetUrl, styles);
                     return Content(result.ToString(), "text/html");
                 }
                 case "xml":
-                    return Content(new OpenXmlPackageVisitor(new ZipArchive(output)).Document.Content.ToString(), "application/xml");
+                    return Content(new OpenXmlPackageVisitor(Package.Open(output)).Document.Content.ToString(), "application/xml");
 
                 default:
                     return BadRequest(ModelState);
@@ -140,13 +146,13 @@ namespace CompilerAPI.Controllers
         [NotNull]
         [ItemNotNull]
         private static async Task<MemoryStream> Process(
-            [NotNull] [ItemNotNull] IEnumerable<ZipArchive> files,
+            [NotNull] [ItemNotNull] IEnumerable<Package> packages,
             [NotNull] string title,
             [NotNull] string publisher,
             [NotNull] string website)
             => await OpenXmlPackageVisitor
-                     .VisitAndFold(files)
-                     .ToZipArchive()
+                     .VisitAndFold(packages)
+                     .ToPackage()
                      .AddHeaders(title)
                      .AddFooters(publisher, website)
                      .ToStream()

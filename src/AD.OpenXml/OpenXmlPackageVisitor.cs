@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
+using System.IO.Packaging;
 using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.IO.Paths;
 using AD.OpenXml.Structures;
 using AD.OpenXml.Visits;
@@ -29,8 +28,8 @@ namespace AD.OpenXml
     [PublicAPI]
     public sealed class OpenXmlPackageVisitor
     {
-        [NotNull] private static readonly ZipArchive DefaultOpenXml =
-            new ZipArchive(new MemoryStream(DocxFilePath.Create().ToArray()));
+        [NotNull] private static readonly Package DefaultOpenXmlPackage =
+            Package.Open(new MemoryStream(DocxFilePath.Create().ToArray()));
 
         [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
@@ -73,18 +72,34 @@ namespace AD.OpenXml
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
         /// </summary>
-        /// <param name="archive">The archive to which changes can be saved.</param>
+        /// <param name="package">The package to which changes can be saved.</param>
         /// <exception cref="ArgumentNullException"/>
-        public OpenXmlPackageVisitor([NotNull] ZipArchive archive)
+        public OpenXmlPackageVisitor([NotNull] Package package)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
-            Document = new Document(archive);
-            Footnotes = new Footnotes(archive);
-            Styles = archive.ReadXml("word/styles.xml", new XElement(W + "styles"));
-            Numbering = archive.ReadXml("word/numbering.xml", new XElement(W + "numbering"));
-            Theme1 = archive.ReadXml("word/theme/theme1.xml", new XElement(A + "theme"));
+            Document = new Document(package);
+            Footnotes = new Footnotes(package);
+
+            Uri stylesUri = new Uri("/word/styles.xml", UriKind.Relative);
+            Uri numberingUri = new Uri("/word/numbering.xml", UriKind.Relative);
+            Uri themeUri = new Uri("/word/theme/theme1.xml", UriKind.Relative);
+
+            Styles =
+                package.PartExists(stylesUri)
+                    ? XElement.Load(package.GetPart(stylesUri).GetStream())
+                    : new XElement(W + "styles");
+
+            Numbering =
+                package.PartExists(numberingUri)
+                    ? XElement.Load(package.GetPart(numberingUri).GetStream())
+                    : new XElement(W + "numbering");
+
+            Theme1 =
+                package.PartExists(themeUri)
+                    ? XElement.Load(package.GetPart(themeUri).GetStream())
+                    : new XElement(A + "theme");
         }
 
         /// <summary>
@@ -152,16 +167,16 @@ namespace AD.OpenXml
         /// <summary>
         /// Visit and join the component document into this <see cref="OpenXmlPackageVisitor"/>.
         /// </summary>
-        /// <param name="archive">The archive to visit.</param>
+        /// <param name="package">The package to visit.</param>
         [Pure]
         [NotNull]
-        public OpenXmlPackageVisitor Visit([NotNull] ZipArchive archive)
+        public OpenXmlPackageVisitor Visit([NotNull] Package package)
         {
-            if (archive is null)
-                throw new ArgumentNullException(nameof(archive));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
             return
-                new OpenXmlPackageVisitor(archive)
+                new OpenXmlPackageVisitor(package)
                     .VisitDoc(RevisionId)
                     .VisitFootnotes(Footnotes.Count, RevisionId)
                     .VisitDocRels(Document.RelationshipsMax)
@@ -173,15 +188,15 @@ namespace AD.OpenXml
         /// <summary>
         /// Visit and fold the component documents into this <see cref="OpenXmlPackageVisitor"/>.
         /// </summary>
-        /// <param name="archives">The archives to visit.</param>
+        /// <param name="packages">The packages to visit.</param>
         [Pure]
         [NotNull]
-        public static OpenXmlPackageVisitor VisitAndFold([NotNull] [ItemNotNull] IEnumerable<ZipArchive> archives)
+        public static OpenXmlPackageVisitor VisitAndFold([NotNull] [ItemNotNull] IEnumerable<Package> packages)
         {
-            if (archives is null)
-                throw new ArgumentNullException(nameof(archives));
+            if (packages is null)
+                throw new ArgumentNullException(nameof(packages));
 
-            return archives.Aggregate(new OpenXmlPackageVisitor(DefaultOpenXml), (current, next) => current.Fold(current.Visit(next)));
+            return packages.Aggregate(new OpenXmlPackageVisitor(DefaultOpenXmlPackage), (current, next) => current.Fold(current.Visit(next)));
         }
 
         /// <summary>
@@ -234,64 +249,55 @@ namespace AD.OpenXml
         }
 
         /// <summary>
-        /// Creates a <see cref="ZipArchive"/> from the <see cref="OpenXmlPackageVisitor"/>.
+        /// Creates a <see cref="Package"/> from the <see cref="OpenXmlPackageVisitor"/>.
         /// </summary>
         /// <returns>
-        /// A <see cref="ZipArchive"/> representing the OpenXML package.
+        /// A <see cref="Package"/> representing the OpenXML package.
         /// </returns>
         [Pure]
         [NotNull]
-        public ZipArchive ToZipArchive()
+        public Package ToPackage()
         {
-            ZipArchive archive = new ZipArchive(new MemoryStream(DocxFilePath.Create().ToArray()), ZipArchiveMode.Update);
+            MemoryStream ms = new MemoryStream();
+            ms.Write(DocxFilePath.Create().Span);
 
-            Document.Save(archive);
-            Footnotes.Save(archive);
+            Package package = Package.Open(ms, FileMode.Open);
 
-            BuildContentTypes().Save(archive);
-            BuildDocumentRelationships().Save(archive, DocumentRelsInfo.Path);
-            BuildFootnoteRelationships().Save(archive, FootnotesRelsInfo.Path);
+            Document.Save(package);
+            Footnotes.Save(package);
 
-            using (Stream stream = archive.GetEntry("word/styles.xml")?.Open() ??
-                                   archive.CreateEntry("word/styles.xml").Open())
+            BuildDocumentRelationships().Save(package, DocumentRelsInfo.PartName);
+            BuildFootnoteRelationships().Save(package, FootnotesRelsInfo.PartName);
+
+            Uri stylesUri = new Uri("/word/styles.xml", UriKind.Relative);
+            using (Stream stream =
+                package.PartExists(stylesUri)
+                    ? package.GetPart(stylesUri).GetStream()
+                    : package.CreatePart(stylesUri, "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml").GetStream())
             {
                 Styles.Save(stream);
             }
 
-            using (Stream stream = archive.GetEntry("word/numbering.xml")?.Open() ??
-                                   archive.CreateEntry("word/numbering.xml").Open())
+            Uri numberingUri = new Uri("/word/numbering.xml", UriKind.Relative);
+            using (Stream stream =
+                package.PartExists(numberingUri)
+                    ? package.GetPart(numberingUri).GetStream()
+                    : package.CreatePart(numberingUri, "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml").GetStream())
             {
                 Numbering.Save(stream);
             }
 
-            using (Stream stream = archive.GetEntry("word/theme/theme1.xml")?.Open() ??
-                                   archive.CreateEntry("word/theme/theme1.xml").Open())
+            Uri themeUri = new Uri("/word/theme/theme1.xml", UriKind.Relative);
+            using (Stream stream =
+                package.PartExists(themeUri)
+                    ? package.GetPart(themeUri).GetStream()
+                    : package.CreatePart(themeUri, "application/vnd.openxmlformats-officedocument.theme+xml").GetStream())
             {
                 Theme1.Save(stream);
             }
 
-            return archive;
+            return package;
         }
-
-        /// <summary>
-        /// [Content_Types].xml
-        /// </summary>
-        [Pure]
-        [NotNull]
-        private ContentTypes BuildContentTypes()
-            => new ContentTypes(
-                new[]
-                {
-                    new ContentTypes.Override("/docProps/app.xml", "application/vnd.openxmlformats-officedocument.extended-properties+xml"),
-                    new ContentTypes.Override("/docProps/core.xml", "application/vnd.openxmlformats-package.core-properties+xml"),
-                    new ContentTypes.Override("/word/document.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"),
-                    new ContentTypes.Override("/word/settings.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"),
-                    new ContentTypes.Override("/word/styles.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"),
-                    new ContentTypes.Override("/word/theme/theme1.xml", "application/vnd.openxmlformats-officedocument.theme+xml"),
-                    Footnotes.ContentTypeEntry,
-                    new ContentTypes.Override("/word/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml")
-                },
-                Document.Charts.Select(x => x.ContentTypeEntry));
 
         /// <summary>
         /// Cosntructs a <see cref="Relationships"/> instance for /word/_rels/document.xml.rels.
@@ -304,7 +310,6 @@ namespace AD.OpenXml
                 {
                     Footnotes.RelationshipEntry,
                     new Relationships.Entry("rId2", "numbering.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
-                    new Relationships.Entry("rId3", "settings.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings"),
                     new Relationships.Entry("rId4", "styles.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"),
                     new Relationships.Entry("rId5", "theme/theme1.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme")
                 },

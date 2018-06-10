@@ -112,9 +112,7 @@ namespace AD.OpenXml
         #region Constructors
 
         /// <inheritdoc />
-        protected HtmlVisitor(bool allowBaseMethod) : base(allowBaseMethod)
-        {
-        }
+        protected HtmlVisitor(bool allowBaseMethod) : base(allowBaseMethod) {}
 
         /// <inheritdoc />
         public HtmlVisitor() : this(false)
@@ -228,8 +226,8 @@ a[aria-label='Return to content'] {
             => VisitName(attribute.Name) is XName name &&
                SupportedAttributes.Contains(name) &&
                !string.IsNullOrWhiteSpace(attribute.Value)
-                   ? new XAttribute(name, attribute.Value)
-                   : null;
+                ? new XAttribute(name, attribute.Value)
+                : null;
 
         /// <inheritdoc />
         [Pure]
@@ -317,6 +315,10 @@ a[aria-label='Return to content'] {
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitMath(XElement math) => MathMLVisitor.Create(true).Visit(math);
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitMathParagraph(XElement mathParagraph) => MathMLVisitor.Create(true).Visit(mathParagraph);
 
         /// <inheritdoc />
         [Pure]
@@ -487,9 +489,9 @@ a[aria-label='Return to content'] {
                               .FirstOrDefault(x => x.Name == "tr")?
                               .Nodes()
                               .Select(
-                                   x => !(x is XElement e) || e.Name != "td"
-                                            ? x
-                                            : new XElement("th", e.Attributes(), e.Nodes())));
+                                  x => !(x is XElement e) || e.Name != "td"
+                                      ? x
+                                      : new XElement("th", e.Attributes(), e.Nodes())));
 
             IEnumerable<XObject> bodyRows =
                 tableNodes.SkipWhile(x => !(x is XElement e) || e.Name != "tr")
@@ -500,7 +502,7 @@ a[aria-label='Return to content'] {
                 NextWhile(
                         table,
                         x => x is XElement e && (string) e.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "FiguresTablesSourceNote")
-                   .OfType<XElement>();
+                    .OfType<XElement>();
 
             return
                 new XElement(
@@ -564,24 +566,24 @@ a[aria-label='Return to content'] {
             => new XElement("data",
                 chart.Elements(C + "ser")
                      .Select(
-                          x =>
-                              new XElement("series",
-                                  x.Element(C + "tx")?.Element(C + "strRef")?.Element(C + "strCache")?.Value is string name
-                                      ? new XAttribute("name", name)
-                                      : null,
-                                  (x.Element(C + "cat")?.Element(C + "strRef")?.Element(C + "strCache") ??
-                                   x.Element(C + "cat")?.Element(C + "numRef")?.Element(C + "numCache"))?
+                         x =>
+                             new XElement("series",
+                                 x.Element(C + "tx")?.Element(C + "strRef")?.Element(C + "strCache")?.Value is string name
+                                     ? new XAttribute("name", name)
+                                     : null,
+                                 (x.Element(C + "cat")?.Element(C + "strRef")?.Element(C + "strCache") ??
+                                  x.Element(C + "cat")?.Element(C + "numRef")?.Element(C + "numCache"))?
                                  .Elements(C + "pt")
                                  .Zip(
-                                      (x.Element(C + "val")?.Element(C + "strRef")?.Element(C + "strCache") ??
-                                       x.Element(C + "val")?.Element(C + "numRef")?.Element(C + "numCache"))?
+                                     (x.Element(C + "val")?.Element(C + "strRef")?.Element(C + "strCache") ??
+                                      x.Element(C + "val")?.Element(C + "numRef")?.Element(C + "numCache"))?
                                      .Elements(C + "pt")
-                                      ??
-                                      Enumerable.Empty<XElement>(),
-                                      (a, b) =>
-                                          new XElement("observation",
-                                              new XAttribute("label", a.Value),
-                                              new XAttribute("value", b.Value))))));
+                                     ??
+                                     Enumerable.Empty<XElement>(),
+                                     (a, b) =>
+                                         new XElement("observation",
+                                             new XAttribute("label", a.Value),
+                                             new XAttribute("value", b.Value))))));
 
         /// <summary>
         ///

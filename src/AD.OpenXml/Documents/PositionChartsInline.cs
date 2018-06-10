@@ -66,17 +66,22 @@ namespace AD.OpenXml.Documents
 
             foreach (XElement item in anchors)
             {
-                item.AddAfterSelf(
-                    new XElement(WP + "inline",
-                        new XAttribute("distT", "0"),
-                        new XAttribute("distB", "0"),
-                        new XAttribute("distL", "0"),
-                        new XAttribute("distR", "0"),
-                        item.Element(WP + "anchor")?
-                            .Elements()
-                            .RemoveAttributesBy(Wp2010 + "anchorId")
-                            .RemoveAttributesBy(Wp2010 + "editId")));
+                item.Element(WP + "anchor")?
+                    .AddAfterSelf(
+                        new XElement(WP + "inline",
+                            new XAttribute("distT", "0"),
+                            new XAttribute("distB", "0"),
+                            new XAttribute("distL", "0"),
+                            new XAttribute("distR", "0"),
+                            item.Element(WP + "anchor")?
+                                .Elements()
+                                .RemoveAttributesBy(Wp2010 + "anchorId")
+                                .RemoveAttributesBy(Wp2010 + "editId")));
 
+                item.Descendants(WP + "simplePos").Remove();
+                item.Descendants(WP + "positionH").Remove();
+                item.Descendants(WP + "positionV").Remove();
+                item.Descendants(WP + "wrapSquare").Remove();
                 item.Descendants(WP + "anchor").Remove();
             }
 
