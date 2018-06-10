@@ -22,7 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AD.ApiExtensions" Version="1.1.102" />
-    <PackageReference Include="AD.IO" Version="1.5.35" />
+    <PackageReference Include="AD.IO" Version="1.5.36" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.3.0" />

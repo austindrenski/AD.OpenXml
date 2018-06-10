@@ -136,9 +136,9 @@ namespace AD.OpenXml.Structures
                 throw new ArgumentNullException(nameof(archive));
 
             RelationId =
-                archive.ReadXml(DocumentRelsInfo.Path)
+                archive.ReadXml(DocumentRelsInfo.Path, Relationships.Empty.ToXElement())
                        .Elements(DocumentRelsInfo.Elements.Relationship)
-                       .Single(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) == SchemaType)
+                       .SingleOrDefault(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) == SchemaType)?
                        .Attribute(DocumentRelsInfo.Attributes.Id)?
                        .Value ?? string.Empty;
 
@@ -151,13 +151,13 @@ namespace AD.OpenXml.Structures
                 archive.ReadXml(FootnotesRelsInfo.Path, Relationships.Empty.ToXElement())
                        .Elements()
                        .Select(
-                            x =>
-                                new
-                                {
-                                    Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
-                                    Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target),
-                                    TargetMode = (string) x.Attribute(FootnotesRelsInfo.Attributes.TargetMode)
-                                })
+                           x =>
+                               new
+                               {
+                                   Id = (string) x.Attribute(FootnotesRelsInfo.Attributes.Id),
+                                   Target = (string) x.Attribute(FootnotesRelsInfo.Attributes.Target),
+                                   TargetMode = (string) x.Attribute(FootnotesRelsInfo.Attributes.TargetMode)
+                               })
                        .Where(x => x.TargetMode != null)
                        .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
                        .ToArray();
@@ -218,7 +218,7 @@ namespace AD.OpenXml.Structures
 
             using (Stream stream =
                 archive.GetEntry(PartName.Substring(1))?.Open() ??
-                throw new FileNotFoundException(PartName.Substring(1)))
+                archive.CreateEntry(PartName.Substring(1)).Open())
             {
                 Content.Save(stream);
             }

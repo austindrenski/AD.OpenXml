@@ -64,10 +64,12 @@ namespace AD.OpenXml.Structures
         /// </returns>
         [Pure]
         [NotNull]
-        public XElement ToXElement()
-            => new XElement(T + "Types",
-                Defaults.OrderBy(x => x).Select(x => x.ToXElement()),
-                Overrides.OrderBy(x => x).Select(x => x.ToXElement()));
+        public XContainer ToXElement()
+            => new XDocument(
+                new XDeclaration("1.0", "UTF-8", "yes"),
+                new XElement(T + "Types",
+                    Defaults.OrderBy(x => x).Select(x => x.ToXElement()),
+                    Overrides.OrderBy(x => x).Select(x => x.ToXElement())));
 
         /// <inheritdoc />
         [Pure]
@@ -88,9 +90,9 @@ namespace AD.OpenXml.Structures
             if (!(archive.GetEntry(ContentTypesInfo.Path) is ZipArchiveEntry entry))
                 throw new FileNotFoundException(ContentTypesInfo.Path);
 
-            using (Stream stream = entry.Open())
+            using (StreamWriter writer = new StreamWriter(entry.Open()))
             {
-                ToXElement().Save(stream);
+                writer.Write(ToXElement());
             }
         }
 

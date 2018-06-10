@@ -44,9 +44,9 @@ namespace AD.OpenXml.Structures
         /// <param name="entries"></param>
         public Relationships(params IEnumerable<Entry>[] entries)
             => Entries =
-                   entries.Where(x => x != null)
-                          .SelectMany(x => x)
-                          .ToArray();
+                entries.Where(x => x != null)
+                       .SelectMany(x => x)
+                       .ToArray();
 
         /// <inheritdoc />
         [Pure]
@@ -75,7 +75,9 @@ namespace AD.OpenXml.Structures
             if (archive is null)
                 throw new ArgumentNullException(nameof(archive));
 
-            using (Stream stream = archive.GetEntry(path)?.Open() ?? throw new FileNotFoundException(path))
+            using (Stream stream =
+                archive.GetEntry(path)?.Open() ??
+                archive.CreateEntry(path).Open())
             {
                 ToXElement().Save(stream);
             }

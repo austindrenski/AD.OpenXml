@@ -23,7 +23,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public static readonly XName Root = "Relationships";
+        [NotNull] public static readonly XName Root = Namespace + "Relationships";
 
         /// <summary>
         ///

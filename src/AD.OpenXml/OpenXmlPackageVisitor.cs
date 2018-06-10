@@ -29,8 +29,10 @@ namespace AD.OpenXml
     [PublicAPI]
     public sealed class OpenXmlPackageVisitor
     {
-        [NotNull] private static readonly ZipArchive DefaultOpenXml = new ZipArchive(DocxFilePath.Create());
+        [NotNull] private static readonly ZipArchive DefaultOpenXml =
+            new ZipArchive(new MemoryStream(DocxFilePath.Create().ToArray()));
 
+        [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
@@ -80,9 +82,9 @@ namespace AD.OpenXml
 
             Document = new Document(archive);
             Footnotes = new Footnotes(archive);
-            Styles = archive.ReadXml("word/styles.xml");
+            Styles = archive.ReadXml("word/styles.xml", new XElement(W + "styles"));
             Numbering = archive.ReadXml("word/numbering.xml", new XElement(W + "numbering"));
-            Theme1 = archive.ReadXml("word/theme/theme1.xml");
+            Theme1 = archive.ReadXml("word/theme/theme1.xml", new XElement(A + "theme"));
         }
 
         /// <summary>
@@ -241,7 +243,7 @@ namespace AD.OpenXml
         [NotNull]
         public ZipArchive ToZipArchive()
         {
-            ZipArchive archive = new ZipArchive(DocxFilePath.Create(), ZipArchiveMode.Update);
+            ZipArchive archive = new ZipArchive(new MemoryStream(DocxFilePath.Create().ToArray()), ZipArchiveMode.Update);
 
             Document.Save(archive);
             Footnotes.Save(archive);
@@ -250,7 +252,8 @@ namespace AD.OpenXml
             BuildDocumentRelationships().Save(archive, DocumentRelsInfo.Path);
             BuildFootnoteRelationships().Save(archive, FootnotesRelsInfo.Path);
 
-            using (Stream stream = archive.GetEntry("word/styles.xml")?.Open())
+            using (Stream stream = archive.GetEntry("word/styles.xml")?.Open() ??
+                                   archive.CreateEntry("word/styles.xml").Open())
             {
                 Styles.Save(stream);
             }

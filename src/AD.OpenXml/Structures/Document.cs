@@ -109,36 +109,36 @@ namespace AD.OpenXml.Structures
 
             Charts =
                 documentRelations
-                   .Elements()
-                   .Select(
+                    .Elements()
+                    .Select(
                         x =>
                             new
                             {
                                 Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
                                 Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
                             })
-                   .Where(x => x.Target.StartsWith("charts/"))
-                   .Select(x => new ChartInfo(x.Id, archive.ReadXml($"word/{x.Target}")))
-                   .ToArray();
+                    .Where(x => x.Target.StartsWith("charts/"))
+                    .Select(x => new ChartInfo(x.Id, archive.ReadXml($"word/{x.Target}")))
+                    .ToArray();
 
             Images =
                 documentRelations
-                   .Elements()
-                   .Select(
+                    .Elements()
+                    .Select(
                         x =>
                             new
                             {
                                 Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
                                 Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
                             })
-                   .Where(x => x.Target.StartsWith("media/"))
-                   .Select(x => ImageInfo.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
-                   .ToArray();
+                    .Where(x => x.Target.StartsWith("media/"))
+                    .Select(x => ImageInfo.Create(x.Id, x.Target, archive.ReadByteArray($"word/{x.Target}")))
+                    .ToArray();
 
             Hyperlinks =
                 documentRelations
-                   .Elements()
-                   .Select(
+                    .Elements()
+                    .Select(
                         x =>
                             new
                             {
@@ -146,9 +146,9 @@ namespace AD.OpenXml.Structures
                                 Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target),
                                 TargetMode = (string) x.Attribute("TargetMode")
                             })
-                   .Where(x => x.TargetMode != null)
-                   .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
-                   .ToArray();
+                    .Where(x => x.TargetMode != null)
+                    .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
+                    .ToArray();
         }
 
         /// <summary>
@@ -228,7 +228,11 @@ namespace AD.OpenXml.Structures
                     ? Content
                     : new XElement(
                         Content.Name,
-                        Content.Attributes(),
+                        Content.Attributes()
+                               .Concat(content.Attributes())
+                               .Select(x => (x.Name, x.Value))
+                               .Distinct()
+                               .Select(x => new XAttribute(x.Name, x.Value)),
                         new XElement(
                             W + "body",
                             Content.Element(W + "body")?.Elements(),
