@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
+using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using AD.OpenXml.Elements;
 using AD.Xml;
@@ -17,6 +19,25 @@ namespace AD.OpenXml.Structures
     public class Document
     {
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
+        private static readonly XmlWriterSettings XmlWriterSettings =
+            new XmlWriterSettings
+            {
+                Async = false,
+                DoNotEscapeUriAttributes = false,
+                CheckCharacters = true,
+                CloseOutput = false,
+                ConformanceLevel = ConformanceLevel.Document,
+                Encoding = Encoding.UTF8,
+                Indent = false,
+                IndentChars = "  ",
+                NamespaceHandling = NamespaceHandling.OmitDuplicates,
+                NewLineChars = Environment.NewLine,
+                NewLineHandling = NewLineHandling.None,
+                NewLineOnAttributes = false,
+                OmitXmlDeclaration = false,
+                WriteEndDocumentOnClose = true
+            };
 
         [NotNull] private static readonly IEnumerable<XName> Revisions =
             new XName[]
@@ -37,7 +58,8 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public static readonly string MimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml";
+        [NotNull] public static readonly string MimeType =
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml";
 
         /// <summary>
         /// The XML file located at: /word/document.xml.
@@ -117,7 +139,7 @@ namespace AD.OpenXml.Structures
             XElement documentRelations =
                 package.PartExists(DocumentRelsInfo.PartName)
                     ? XElement.Load(package.GetPart(DocumentRelsInfo.PartName).GetStream())
-                    : Relationships.Empty.ToXElement();
+                    : Relationships.Empty;
 
             // TODO: re-enumerate ids at this stage.
             // TODO: find charts and images by *starting* with the content refs.
@@ -170,6 +192,17 @@ namespace AD.OpenXml.Structures
                                 TargetMode = (string) x.Attribute("TargetMode")
                             })
                     .Where(x => x.TargetMode != null)
+                    .Select(
+                        x =>
+                            new
+                            {
+                                x.Id,
+                                x.Target,
+                                TargetMode =
+                                    Enum.TryParse(x.TargetMode, out TargetMode mode)
+                                        ? mode
+                                        : TargetMode.Internal
+                            })
                     .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
                     .ToArray();
         }
@@ -298,22 +331,58 @@ namespace AD.OpenXml.Structures
             if (package is null)
                 throw new ArgumentNullException(nameof(package));
 
-            using (Stream stream =
+            PackagePart document =
                 package.PartExists(PartName)
-                    ? package.GetPart(PartName).GetStream()
-                    : package.CreatePart(PartName, MimeType).GetStream())
+                    ? package.GetPart(PartName)
+                    : package.CreatePart(PartName, MimeType);
+
+            foreach (HyperlinkInfo hyperlink in Hyperlinks)
             {
-                Content.Save(stream);
+                if (!document.RelationshipExists(hyperlink.RelationId))
+                    document.CreateRelationship(hyperlink.Target, hyperlink.TargetMode, HyperlinkInfo.RelationshipType);
             }
 
-            foreach (ChartInfo item in Charts)
+            foreach (ImageInfo image in Images)
             {
-                item.Save(package);
+                if (!document.RelationshipExists(image.RelationId))
+                    document.CreateRelationship(image.Target, TargetMode.Internal, ImageInfo.RelationshipType, image.RelationId);
+
+                PackagePart imagePart =
+                    package.PartExists(PartName)
+                        ? package.GetPart(PartName)
+                        : package.CreatePart(PartName, MimeType);
+
+                using (Stream stream = imagePart.GetStream())
+                {
+                    stream.Write(image.Image.Span);
+                }
             }
 
-            foreach (ImageInfo item in Images)
+            foreach (ChartInfo chart in Charts)
             {
-                item.Save(package);
+                if (!document.RelationshipExists(chart.RelationId))
+                    document.CreateRelationship(chart.Target, TargetMode.Internal, ChartInfo.RelationshipType, chart.RelationId);
+
+                PackagePart chartPart =
+                    package.PartExists(chart.PartName)
+                        ? package.GetPart(chart.PartName)
+                        : package.CreatePart(chart.PartName, MimeType);
+
+                using (Stream stream = chartPart.GetStream())
+                {
+                    using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
+                    {
+                        chart.Chart.WriteTo(xml);
+                    }
+                }
+            }
+
+            using (Stream stream = document.GetStream())
+            {
+                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
+                {
+                    Content.WriteTo(xml);
+                }
             }
         }
     }

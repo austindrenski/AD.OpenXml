@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-//using System.IO.Compression;
 using System.IO.Packaging;
 using System.Linq;
 using System.Xml.Linq;
@@ -32,12 +31,12 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] private static readonly string MimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml";
+        [NotNull] public static readonly string MimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull] private static readonly string Namespace = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes";
+        [NotNull] public static readonly string RelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes";
 
         /// <summary>
         ///
@@ -66,11 +65,6 @@ namespace AD.OpenXml.Structures
         /// </summary>
         [NotNull]
         public Uri PartName => new Uri($"/word/{Target}", UriKind.Relative);
-
-        /// <summary>
-        ///
-        /// </summary>
-        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, Namespace);
 
         /// <summary>
         /// The current footnote count.
@@ -134,7 +128,7 @@ namespace AD.OpenXml.Structures
                 package.PartExists(DocumentRelsInfo.PartName)
                     ? XElement.Load(package.GetPart(DocumentRelsInfo.PartName).GetStream())
                               .Elements(DocumentRelsInfo.Elements.Relationship)
-                              .SingleOrDefault(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) == Namespace)?
+                              .SingleOrDefault(x => (string) x.Attribute(DocumentRelsInfo.Attributes.Type) == RelationshipType)?
                               .Attribute(DocumentRelsInfo.Attributes.Id)?
                               .Value ?? string.Empty
                     : string.Empty;
@@ -150,7 +144,7 @@ namespace AD.OpenXml.Structures
             XElement footnoteRels =
                 package.PartExists(FootnotesRelsInfo.PartName)
                     ? XElement.Load(package.GetPart(FootnotesRelsInfo.PartName).GetStream())
-                    : Relationships.Empty.ToXElement();
+                    : Relationships.Empty;
 
             Hyperlinks =
                 footnoteRels.Elements()
@@ -163,6 +157,17 @@ namespace AD.OpenXml.Structures
                                         TargetMode = (string) x.Attribute(FootnotesRelsInfo.Attributes.TargetMode)
                                     })
                             .Where(x => x.TargetMode != null)
+                            .Select(
+                                x =>
+                                    new
+                                    {
+                                        x.Id,
+                                        x.Target,
+                                        TargetMode =
+                                            Enum.TryParse(x.TargetMode, out TargetMode mode)
+                                                ? mode
+                                                : TargetMode.Internal
+                                    })
                             .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
                             .ToArray();
         }
@@ -219,10 +224,23 @@ namespace AD.OpenXml.Structures
             if (package is null)
                 throw new ArgumentNullException(nameof(package));
 
-            using (Stream stream =
+            PackagePart document = package.GetPart(Document.PartName);
+
+            if (!document.RelationshipExists(RelationId))
+                document.CreateRelationship(PartName, TargetMode.Internal, RelationshipType);
+
+            PackagePart footnotes =
                 package.PartExists(PartName)
-                    ? package.GetPart(PartName).GetStream()
-                    : package.CreatePart(PartName, MimeType).GetStream())
+                    ? package.GetPart(PartName)
+                    : package.CreatePart(PartName, MimeType);
+
+            foreach (HyperlinkInfo hyperlink in Hyperlinks)
+            {
+                if (!footnotes.RelationshipExists(hyperlink.RelationId))
+                    footnotes.CreateRelationship(hyperlink.Target, hyperlink.TargetMode, HyperlinkInfo.RelationshipType);
+            }
+
+            using (Stream stream = footnotes.GetStream())
             {
                 Content.Save(stream);
             }

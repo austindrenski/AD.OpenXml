@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
+using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using AD.IO.Paths;
 using AD.OpenXml.Structures;
@@ -33,6 +35,25 @@ namespace AD.OpenXml
 
         [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
+        private static readonly XmlWriterSettings XmlWriterSettings =
+            new XmlWriterSettings
+            {
+                Async = false,
+                DoNotEscapeUriAttributes = false,
+                CheckCharacters = true,
+                CloseOutput = false,
+                ConformanceLevel = ConformanceLevel.Document,
+                Encoding = Encoding.UTF8,
+                Indent = false,
+                IndentChars = "  ",
+                NamespaceHandling = NamespaceHandling.OmitDuplicates,
+                NewLineChars = Environment.NewLine,
+                NewLineHandling = NewLineHandling.None,
+                NewLineOnAttributes = false,
+                OmitXmlDeclaration = false,
+                WriteEndDocumentOnClose = true
+            };
 
         /// <summary>
         ///
@@ -236,13 +257,13 @@ namespace AD.OpenXml
                                  XNode.EqualityComparer));
 
             // TODO: write a ThemeVisit
-//            XElement theme1 =
+//            XElement theme =
 //                new XElement(
-//                    Theme1.Target,
-//                    Theme1.Attributes(),
-//                    Theme1.Elements()
+//                    Theme.Target,
+//                    Theme.Attributes(),
+//                    Theme.Elements()
 //                          .Union(
-//                              subject.Theme1.Elements(),
+//                              subject.Theme.Elements(),
 //                              XNode.EqualityComparer));
 
             return With(document, footnotes, styles, numbering, subject.Theme1);
@@ -266,62 +287,51 @@ namespace AD.OpenXml
             Document.Save(package);
             Footnotes.Save(package);
 
-            BuildDocumentRelationships().Save(package, DocumentRelsInfo.PartName);
-            BuildFootnoteRelationships().Save(package, FootnotesRelsInfo.PartName);
+            PackagePart document = package.GetPart(Document.PartName);
 
-            Uri stylesUri = new Uri("/word/styles.xml", UriKind.Relative);
-            using (Stream stream =
-                package.PartExists(stylesUri)
-                    ? package.GetPart(stylesUri).GetStream()
-                    : package.CreatePart(stylesUri, "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml").GetStream())
-            {
-                Styles.Save(stream);
-            }
+            SaveHelper(
+                package,
+                document,
+                new Uri("/word/styles.xml", UriKind.Relative),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+                Styles);
 
-            Uri numberingUri = new Uri("/word/numbering.xml", UriKind.Relative);
-            using (Stream stream =
-                package.PartExists(numberingUri)
-                    ? package.GetPart(numberingUri).GetStream()
-                    : package.CreatePart(numberingUri, "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml").GetStream())
-            {
-                Numbering.Save(stream);
-            }
+            SaveHelper(
+                package,
+                document,
+                new Uri("/word/numbering.xml", UriKind.Relative),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering",
+                Numbering);
 
-            Uri themeUri = new Uri("/word/theme/theme1.xml", UriKind.Relative);
-            using (Stream stream =
-                package.PartExists(themeUri)
-                    ? package.GetPart(themeUri).GetStream()
-                    : package.CreatePart(themeUri, "application/vnd.openxmlformats-officedocument.theme+xml").GetStream())
-            {
-                Theme1.Save(stream);
-            }
+            SaveHelper(
+                package,
+                document,
+                new Uri("/word/theme/theme1.xml", UriKind.Relative),
+                "application/vnd.openxmlformats-officedocument.theme+xml",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+                Theme1);
 
             return package;
         }
 
-        /// <summary>
-        /// Cosntructs a <see cref="Relationships"/> instance for /word/_rels/document.xml.rels.
-        /// </summary>
-        [Pure]
-        [NotNull]
-        private Relationships BuildDocumentRelationships()
-            => new Relationships(
-                new Relationships.Entry[]
-                {
-                    Footnotes.RelationshipEntry,
-                    new Relationships.Entry("rId2", "numbering.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"),
-                    new Relationships.Entry("rId4", "styles.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"),
-                    new Relationships.Entry("rId5", "theme/theme1.xml", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme")
-                },
-                Document.Charts.Select(x => x.RelationshipEntry),
-                Document.Images.Select(x => x.RelationshipEntry),
-                Document.Hyperlinks.Select(x => x.RelationshipEntry));
+        private static void SaveHelper(Package package, PackagePart owner, Uri uri, string contentType, string relationshipType, XElement element)
+        {
+            owner.CreateRelationship(uri, TargetMode.Internal, relationshipType);
 
-        /// <summary>
-        /// Cosntructs a <see cref="Relationships"/> instance for /word/_rels/footnote.xml.rels.
-        /// </summary>
-        [Pure]
-        [NotNull]
-        private Relationships BuildFootnoteRelationships() => new Relationships(Footnotes.Hyperlinks.Select(x => x.RelationshipEntry));
+            PackagePart part =
+                package.PartExists(uri)
+                    ? package.GetPart(uri)
+                    : package.CreatePart(uri, contentType);
+
+            using (StreamWriter writer = new StreamWriter(part.GetStream()))
+            {
+                using (XmlWriter xml = XmlWriter.Create(writer, XmlWriterSettings))
+                {
+                    element.WriteTo(xml);
+                }
+            }
+        }
     }
 }

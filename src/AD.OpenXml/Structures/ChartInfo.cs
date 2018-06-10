@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.IO.Packaging;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -19,17 +17,14 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public static readonly string MimeType = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
+        [NotNull] public const string MimeType =
+            "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public static readonly string Namespace = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart";
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull] public static readonly ChartInfo[] Empty = new ChartInfo[0];
+        [NotNull] public const string RelationshipType =
+            "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart";
 
         /// <summary>
         ///
@@ -51,18 +46,13 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [NotNull]
-        public string Target => $"charts/chart{NumericId}.xml";
+        public Uri Target => new Uri($"charts/chart{NumericId}.xml", UriKind.Relative);
 
         /// <summary>
         ///
         /// </summary>
         [NotNull]
         public Uri PartName => new Uri($"/word/{Target}", UriKind.Relative);
-
-        /// <summary>
-        ///
-        /// </summary>
-        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, Namespace);
 
         /// <summary>
         ///
@@ -77,9 +67,6 @@ namespace AD.OpenXml.Structures
 
             if (chart is null)
                 throw new ArgumentNullException(nameof(chart));
-
-            if (!rId.StartsWith("rId", StringComparison.Ordinal))
-                throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
 
             RelationId = rId;
             NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
@@ -109,27 +96,6 @@ namespace AD.OpenXml.Structures
         /// <inheritdoc />
         [Pure]
         public override string ToString() => $"(Id: {RelationId}, PartName: {PartName})";
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="package">
-        ///
-        /// </param>
-        /// <exception cref="ArgumentNullException" />
-        public void Save([NotNull] Package package)
-        {
-            if (package is null)
-                throw new ArgumentNullException(nameof(package));
-
-            using (Stream stream =
-                package.PartExists(PartName)
-                    ? package.GetPart(PartName).GetStream()
-                    : package.CreatePart(PartName, MimeType).GetStream())
-            {
-                Chart.Save(stream);
-            }
-        }
 
         /// <inheritdoc />
         [Pure]

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.IO.Packaging;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
@@ -19,12 +17,8 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public static readonly string Namespace = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull] public static readonly ImageInfo[] Empty = new ImageInfo[0];
+        [NotNull] public const string RelationshipType =
+            "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
 
         /// <summary>
         ///
@@ -50,7 +44,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [NotNull]
-        public string Target => $"media/image{NumericId}.{Extension}";
+        public Uri Target => new Uri($"media/image{NumericId}.{Extension}", UriKind.Relative);
 
         /// <summary>
         ///
@@ -73,11 +67,6 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, Namespace);
-
-        /// <summary>
-        ///
-        /// </summary>
         ///  <param name="rId"></param>
         /// <param name="extension"></param>
         /// <param name="image"></param>
@@ -88,9 +77,6 @@ namespace AD.OpenXml.Structures
 
             if (extension is null)
                 throw new ArgumentNullException(nameof(extension));
-
-            if (!rId.StartsWith("rId", StringComparison.Ordinal))
-                throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
 
             RelationId = rId;
             NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
@@ -135,25 +121,6 @@ namespace AD.OpenXml.Structures
         /// </returns>
         [Pure]
         public ImageInfo WithOffset(int offset) => new ImageInfo($"rId{NumericId + offset}", Extension, Image.Span);
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="package"> </param>
-        /// <exception cref="ArgumentNullException" />
-        public void Save([NotNull] Package package)
-        {
-            if (package is null)
-                throw new ArgumentNullException(nameof(package));
-
-            using (Stream stream =
-                package.PartExists(PartName)
-                    ? package.GetPart(PartName).GetStream()
-                    : package.CreatePart(PartName, MimeType).GetStream())
-            {
-                stream.Write(Image.Span);
-            }
-        }
 
         /// <inheritdoc />
         [Pure]

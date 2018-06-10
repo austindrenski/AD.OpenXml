@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO.Packaging;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Structures
@@ -12,13 +13,8 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] private static readonly string SchemaType =
+        [NotNull] public const string RelationshipType =
             "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink";
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull] public static readonly HyperlinkInfo[] Empty = new HyperlinkInfo[0];
 
         /// <summary>
         ///
@@ -28,12 +24,13 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public readonly string Target;
+        [NotNull]
+        public Uri Target { get; }
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public readonly string TargetMode;
+        public readonly TargetMode TargetMode;
 
         /// <summary>
         ///
@@ -43,16 +40,11 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        public Relationships.Entry RelationshipEntry => new Relationships.Entry(RelationId, Target, SchemaType, TargetMode);
-
-        /// <summary>
-        ///
-        /// </summary>
         /// <param name="rId"></param>
         /// <param name="target"></param>
         /// <param name="targetMode"></param>
         /// <exception cref="ArgumentNullException" />
-        public HyperlinkInfo([NotNull] string rId, [NotNull] string target, [NotNull] string targetMode)
+        public HyperlinkInfo([NotNull] string rId, [NotNull] string target, TargetMode targetMode)
         {
             if (rId is null)
                 throw new ArgumentNullException(nameof(rId));
@@ -60,15 +52,9 @@ namespace AD.OpenXml.Structures
             if (target is null)
                 throw new ArgumentNullException(nameof(target));
 
-            if (targetMode is null)
-                throw new ArgumentNullException(nameof(targetMode));
-
-            if (!rId.StartsWith("rId", StringComparison.Ordinal))
-                throw new ArgumentException($"{nameof(rId)} is not a relationship id.");
-
             RelationId = rId;
             NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
-            Target = target;
+            Target = new Uri(target, UriKind.RelativeOrAbsolute);
             TargetMode = targetMode;
         }
 
@@ -80,7 +66,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </returns>
         [Pure]
-        public HyperlinkInfo WithOffset(int offset) => new HyperlinkInfo($"rId{NumericId + offset}", Target, TargetMode);
+        public HyperlinkInfo WithOffset(int offset) => new HyperlinkInfo($"rId{NumericId + offset}", Target.ToString(), TargetMode);
 
         /// <summary>
         ///
@@ -90,7 +76,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </returns>
         [Pure]
-        public HyperlinkInfo WithRelationId([NotNull] string rId) => new HyperlinkInfo(rId, Target, TargetMode);
+        public HyperlinkInfo WithRelationId([NotNull] string rId) => new HyperlinkInfo(rId, Target.ToString(), TargetMode);
 
         /// <inheritdoc />
         [Pure]
