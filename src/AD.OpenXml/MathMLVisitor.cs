@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -51,7 +52,10 @@ namespace AD.OpenXml
                 "=",
                 "!",
                 "exp",
-                "log"
+                "log",
+                "sin",
+                "cos",
+                "acos"
             };
 
         /// <summary>
@@ -65,7 +69,9 @@ namespace AD.OpenXml
                 M + "dPr",
                 M + "eqArrPr",
                 M + "fPr",
+                M + "mPr",
                 M + "naryPr",
+                M + "rPr",
                 M + "sSubPr",
                 M + "sSubSupPr",
                 M + "sSupPr"
@@ -74,19 +80,21 @@ namespace AD.OpenXml
         /// <summary>
         /// Initializes an <see cref="MathMLVisitor"/>.
         /// </summary>
-        /// <param name="returnOnDefault">True if an element should be returned when handling the default dispatch case.</param>
-        protected MathMLVisitor(bool returnOnDefault) => _returnOnDefault = returnOnDefault;
+        /// <param name="returnOnDefault">True to return an element from the default dispatch case.</param>
+        protected MathMLVisitor(bool returnOnDefault)
+            => _returnOnDefault = returnOnDefault;
 
         /// <summary>
         /// Returns a new <see cref="MathMLVisitor"/>.
         /// </summary>
-        /// <param name="returnOnDefault">True if an element should be returned when handling the default dispatch case.</param>
+        /// <param name="returnOnDefault">True to return an element from the default dispatch case.</param>
         /// <returns>
         /// A <see cref="MathMLVisitor"/>.
         /// </returns>
         [Pure]
         [NotNull]
-        public static MathMLVisitor Create(bool returnOnDefault = false) => new MathMLVisitor(returnOnDefault);
+        public static MathMLVisitor Create(bool returnOnDefault = false)
+            => new MathMLVisitor(returnOnDefault);
 
         /// <summary>
         ///
@@ -99,11 +107,11 @@ namespace AD.OpenXml
         [CanBeNull]
         protected virtual XObject VisitAccent([NotNull] XElement accent)
             => accent.Element(M + "accPr")?.Element(M + "chr")?.Attribute(M + "val")?.Value is string value
-                ? new XElement("mover",
-                    new XAttribute("accent", true),
-                    Visit(accent.Nodes()),
-                    new XElement("mo", AccentLookup.TryGetValue(value, out string mapped) ? mapped : value))
-                : null;
+                   ? new XElement("mover",
+                       new XAttribute("accent", true),
+                       Visit(accent.Nodes()),
+                       new XElement("mo", AccentLookup.TryGetValue(value, out string mapped) ? mapped : value))
+                   : null;
 
         /// <summary>
         ///
@@ -174,7 +182,8 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitDegree([NotNull] XElement degree) => new XElement("mrow", Visit(degree.Nodes()));
+        protected virtual XObject VisitDegree([NotNull] XElement degree)
+            => new XElement("mrow", Visit(degree.Nodes()));
 
         /// <summary>
         ///
@@ -196,7 +205,7 @@ namespace AD.OpenXml
                 return element;
 
             if (element.Name.Namespace != M)
-                return base.VisitElement(element);
+                return null;
 
             switch (element.Name.LocalName)
             {
@@ -224,8 +233,20 @@ namespace AD.OpenXml
                 case "f":
                     return VisitFraction(element);
 
-                case "rad":
-                    return VisitRoot(element);
+                case "fName":
+                    return VisitFunctionName(element);
+
+                case "func":
+                    return VisitFunction(element);
+
+                case "lim":
+                    return VisitLimit(element);
+
+                case "m":
+                    return VisitMatrix(element);
+
+                case "mr":
+                    return VisitMatrixRow(element);
 
                 case "num":
                     return VisitNumerator(element);
@@ -242,6 +263,9 @@ namespace AD.OpenXml
                 case "r":
                     return VisitRun(element);
 
+                case "rad":
+                    return VisitRoot(element);
+
                 case "sSub":
                     return VisitSubscript(element);
 
@@ -257,12 +281,60 @@ namespace AD.OpenXml
                 case "sup":
                     return VisitSuperscriptItem(element);
 
+                case "t":
+                    return VisitText(new XText(element.Value));
+
                 default:
                     return
                         IgnoredNodes.Contains(element.Name) || !_returnOnDefault
                             ? null
                             : base.VisitElement(element);
             }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="function"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitFunction([NotNull] XElement function)
+            => new XElement("mrow",
+                Visit(function.Element(M + "fName")),
+                new XElement("mo", "&ApplyFunction;"),
+                Visit(function.Element(M + "e")));
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="functionName"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitFunctionName([NotNull] XElement functionName)
+        {
+            if (functionName.Element(M + "limLow") is XElement lowerLimit)
+            {
+                return
+                    new XElement("munder",
+                        Visit(lowerLimit.Element(M + "e")),
+                        Visit(lowerLimit.Element(M + "lim")));
+            }
+
+            if (functionName.Element(M + "limUpp") is XElement upperLimit)
+            {
+                return
+                    new XElement("mover",
+                        Visit(upperLimit.Element(M + "e")),
+                        Visit(upperLimit.Element(M + "lim")));
+            }
+
+            return new XElement("mi", functionName.Value);
         }
 
         /// <summary>
@@ -280,13 +352,26 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
+        /// <param name="limit"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitLimit([NotNull] XElement limit)
+            => MakeLiftable(limit);
+
+        /// <summary>
+        ///
+        /// </summary>
         /// <param name="math"></param>
         /// <returns>
         ///
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitMath([NotNull] XElement math) => new XElement("math", Visit(math.Nodes()));
+        protected virtual XObject VisitMath([NotNull] XElement math)
+            => new XElement("math", Visit(math.Nodes()));
 
         /// <summary>
         ///
@@ -297,7 +382,33 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitMathParagraph([NotNull] XElement mathParagraph) => MakeLiftable(mathParagraph);
+        protected virtual XObject VisitMathParagraph([NotNull] XElement mathParagraph)
+            => MakeLiftable(mathParagraph);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitMatrix([NotNull] XElement matrix)
+            => new XElement("mtable", Visit(matrix.Nodes()));
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="row"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitMatrixRow([NotNull] XElement row)
+            => new XElement("mtr",
+                Visit(row.Nodes()).Select(x => new XElement("mtd", x)));
 
         /// <summary>
         ///
@@ -309,24 +420,16 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitNary([NotNull] XElement nary)
-        {
-            string value = nary.Element(M + "naryPr")?.Element(M + "chr")?.Attribute(M + "val")?.Value;
-
-            string op =
-                value == "∑"
-                    ? "&sum;"
-                    : value == "∏"
-                        ? "&prod;"
-                        : value;
-
-            return
-                new XElement("mrow",
-                    new XElement("munderover",
-                        new XElement("mo", op),
-                        Visit(nary.Element(M + "sub")),
-                        Visit(nary.Element(M + "sup"))),
-                    Visit(nary.Nodes()));
-        }
+            => new XElement("mrow",
+                new XElement("munderover",
+                    new XElement("mo",
+                        nary.Element(M + "naryPr")?
+                           .Element(M + "chr")?
+                           .Attribute(M + "val")?
+                           .Value ?? "&Integral;"),
+                    Visit(nary.Element(M + "sub")),
+                    Visit(nary.Element(M + "sup"))),
+                Visit(nary.Element(M + "e")));
 
         /// <summary>
         ///
@@ -337,7 +440,8 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [CanBeNull]
-        protected virtual XObject VisitNumerator([NotNull] XElement numerator) => new XElement("mrow", Visit(numerator.Nodes()));
+        protected virtual XObject VisitNumerator([NotNull] XElement numerator)
+            => new XElement("mrow", Visit(numerator.Nodes()));
 
         /// <summary>
         ///
@@ -350,11 +454,11 @@ namespace AD.OpenXml
         [CanBeNull]
         protected virtual XObject VisitRoot([NotNull] XElement root)
             => root.Element(M + "deg") is XElement degree && degree.HasElements
-                ? new XElement("mroot",
-                    Visit(root.Element(M + "e")),
-                    Visit(degree))
-                : new XElement("msqrt",
-                    Visit(root.Element(M + "e")));
+                   ? new XElement("mroot",
+                       Visit(root.Element(M + "e")),
+                       Visit(degree))
+                   : new XElement("msqrt",
+                       Visit(root.Element(M + "e")));
 
         /// <summary>
         ///
@@ -366,16 +470,7 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitRun([NotNull] XElement run)
-        {
-            string value = run.Value.Trim();
-
-            return
-                SupportedOperators.Contains(value)
-                    ? new XElement("mo", value)
-                    : run.Parent?.Name == M + "oMath"
-                        ? new XElement("mi", value)
-                        : VisitString(value);
-        }
+            => MakeLiftable(run);
 
         /// <summary>
         ///
@@ -454,10 +549,19 @@ namespace AD.OpenXml
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitText(XText text)
-            => string.IsNullOrWhiteSpace(text.Value)
-                ? null
-                : double.TryParse(text.Value, out double value)
-                    ? new XElement("mn", value)
+        {
+            string value = text.Value.Trim();
+
+            if (string.IsNullOrWhiteSpace(value))
+                return null;
+
+            if (SupportedOperators.Contains(value))
+                return new XElement("mo", value);
+
+            return
+                double.TryParse(text.Value, out double d)
+                    ? new XElement("mn", d)
                     : new XElement("mi", text.Value);
+        }
     }
 }

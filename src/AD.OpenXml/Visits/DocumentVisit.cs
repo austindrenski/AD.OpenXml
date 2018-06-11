@@ -15,6 +15,7 @@ namespace AD.OpenXml.Visits
     [PublicAPI]
     public static class DocumentVisit
     {
+        [NotNull] private static readonly XNamespace M = XNamespaces.OpenXmlMath;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         [NotNull] private static readonly IEnumerable<XName> Revisions =
@@ -27,29 +28,6 @@ namespace AD.OpenXml.Visits
                 W + "moveToRangeEnd",
                 W + "moveTo"
             };
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="cell">
-        ///
-        /// </param>
-        /// <param name="revisionId">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [NotNull]
-        public static XElement ExecuteForTableRecursion([NotNull] XElement cell, int revisionId)
-        {
-            if (cell is null)
-                throw new ArgumentNullException(nameof(cell));
-
-            return Execute(cell, revisionId + 1);
-        }
 
         /// <summary>
         /// Marshals content from the source document to be added into the container.
@@ -85,76 +63,76 @@ namespace AD.OpenXml.Visits
                 document
 
                     // Remove editing attributes.
-                    .RemoveRsidAttributes()
+                   .RemoveRsidAttributes()
 
                     // Remove run properties from the paragraph scope.
-                    .RemoveRunPropertiesFromParagraphProperties()
+                   .RemoveRunPropertiesFromParagraphProperties()
 
                     // Remove elements that should never exist in-line.
-                    .RemoveByAll(W + "bCs")
-                    .RemoveByAll(W + "bookmarkEnd")
-                    .RemoveByAll(W + "bookmarkStart")
-                    .RemoveByAll(W + "color")
-                    .RemoveByAll(W + "hideMark")
-                    .RemoveByAll(W + "iCs")
-                    .RemoveByAll(W + "keepNext")
-                    .RemoveByAll(W + "lang")
-                    .RemoveByAll(W + "lastRenderedPageBreak")
-                    .RemoveByAll(W + "noProof")
-                    .RemoveByAll(W + "noWrap")
-                    .RemoveByAll(W + "numPr")
-                    .RemoveByAll(W + "proofErr")
-                    .RemoveByAll(W + "rFonts")
-                    .RemoveByAll(W + "shd")
-                    .RemoveByAll(W + "spacing")
-                    .RemoveByAll(W + "sz")
-                    .RemoveByAll(W + "szCs")
-                    .RemoveByAll(W + "lang")
-                    .RemoveByAll(W + "tblPrEx")
-                    .RemoveByAll(W + "commentRangeStart")
-                    .RemoveByAll(W + "commentRangeEnd")
-                    .RemoveByAll(W + "commentReference")
-                    .RemoveByAll(x => (string) x.Attribute(W + "val") == "CommentReference")
+                   .RemoveByAll(W + "bCs")
+                   .RemoveByAll(W + "bookmarkEnd")
+                   .RemoveByAll(W + "bookmarkStart")
+                   .RemoveByAll(W + "color")
+                   .RemoveByAll(W + "hideMark")
+                   .RemoveByAll(W + "iCs")
+                   .RemoveByAll(W + "keepNext")
+                   .RemoveByAll(W + "lang")
+                   .RemoveByAll(W + "lastRenderedPageBreak")
+                   .RemoveByAll(W + "noProof")
+                   .RemoveByAll(W + "noWrap")
+                   .RemoveByAll(W + "numPr")
+                   .RemoveByAll(W + "proofErr")
+                   .RemoveByAll(W + "rFonts")
+                   .RemoveByAll(W + "shd")
+                   .RemoveByAll(W + "spacing")
+                   .RemoveByAll(W + "sz")
+                   .RemoveByAll(W + "szCs")
+                   .RemoveByAll(W + "lang")
+                   .RemoveByAll(W + "tblPrEx")
+                   .RemoveByAll(W + "commentRangeStart")
+                   .RemoveByAll(W + "commentRangeEnd")
+                   .RemoveByAll(W + "commentReference")
+                   .RemoveByAll(x => (string) x.Attribute(W + "val") == "CommentReference")
 
                     // Remove elements that should almost never exist.
-                    .RemoveByAll(x => x.Name == W + "br" && (string) x.Attribute(W + "type") == "page")
-                    .RemoveByAll(x => x.Name == W + "pStyle" && (string) x.Attribute(W + "val") == "BodyTextSSFinal")
-                    .RemoveByAll(x => x.Name == W + "pStyle" && (string) x.Attribute(W + "val") == "Default")
-                    .RemoveByAll(x => x.Name == W + "jc" && !x.Ancestors(W + "tbl").Any())
+                   .RemoveByAll(x => x.Name == W + "br" && (string) x.Attribute(W + "type") == "page")
+                   .RemoveByAll(x => x.Name == W + "pStyle" && (string) x.Attribute(W + "val") == "BodyTextSSFinal")
+                   .RemoveByAll(x => x.Name == W + "pStyle" && (string) x.Attribute(W + "val") == "Default")
+                   .RemoveByAll(x => x.Name == W + "jc" && !x.Ancestors(W + "tbl").Any())
 
                     // Alter bold, italic, and underline elements.
-                    .ChangeBoldToStrong()
-                    .ChangeItalicToEmphasis()
-                    .ChangeUnderlineToTableCaption()
-                    .ChangeUnderlineToFigureCaption()
-                    .ChangeUnderlineToSourceNote()
-                    .ChangeSuperscriptToReference()
+                   .ChangeBoldToStrong()
+                   .ChangeItalicToEmphasis()
+                   .ChangeUnderlineToTableCaption()
+                   .ChangeUnderlineToFigureCaption()
+                   .ChangeUnderlineToSourceNote()
+                   .ChangeSuperscriptToReference()
 
                     // Mark insert requests for the production team.
-                    .MergeRuns()
-                    .HighlightInsertRequests()
+                   .MergeRuns()
+                   .HighlightInsertRequests()
 
                     // Set table styles.
-                    .SetTableStyles(revisionId)
+                   .SetTableStyles(revisionId)
 
                     // Remove elements used above, but not needed in the output.
-                    .RemoveByAll(W + "u")
-                    .RemoveByAllIfEmpty(W + "tcPr")
-                    .RemoveByAllIfEmpty(W + "rPr")
-                    .RemoveByAllIfEmpty(W + "pPr")
-                    .RemoveByAllIfEmpty(W + "t")
-                    .RemoveByAllIfEmpty(W + "r")
-                    .RemoveByAll(x => x.Name == W + "p" && !x.HasElements && x.Parent?.Name != W + "tc")
+                   .RemoveByAll(W + "u")
+                   .RemoveByAllIfEmpty(W + "tcPr")
+                   .RemoveByAllIfEmpty(W + "rPr")
+                   .RemoveByAllIfEmpty(W + "pPr")
+                   .RemoveByAllIfEmpty(W + "t")
+                   .RemoveByAllIfEmpty(W + "r")
+                   .RemoveByAll(x => x.Name == W + "p" && !x.HasElements && x.Parent?.Name != W + "tc")
 
                     // Remove for this stage
-                    .RemoveByAll(W + "footerReference")
-                    .RemoveByAll(W + "headerReference")
+                   .RemoveByAll(W + "footerReference")
+                   .RemoveByAll(W + "headerReference")
 
                     // Add soft breaks to headings
-                    .AddLineBreakToHeadings()
+                   .AddLineBreakToHeadings()
 
                     // Tidy up the XML for review.
-                    .MergeRuns();
+                   .MergeRuns();
 
             // There shouldn't be more than one paragraph style.
             foreach (XElement paragraphProperties in source.Descendants(W + "pPr").Where(x => x.Elements(W + "pStyle").Count() > 1))
@@ -177,6 +155,21 @@ namespace AD.OpenXml.Visits
 
                 runProperties.AddFirst(distinct);
             }
+
+            // There shouldn't be more than one run style.
+            foreach (XElement mathPara in source.Descendants(M + "oMathPara"))
+            {
+                mathPara.Descendants(W + "rPr").Remove();
+
+                foreach (XElement child in mathPara.Descendants(M + "r"))
+                {
+                    child.AddFirst(
+                        new XElement(W + "rPr",
+                            new XElement(W + "rFonts",
+                                new XAttribute(W + "ascii", "Cambria Math"))));
+                }
+            }
+
 
             (int oldId, int newId)[] revisionMapping =
                 source.Descendants()
@@ -239,7 +232,7 @@ namespace AD.OpenXml.Visits
                     item.AddFirst(new XElement(W + "pPr"));
 
                 item.Element(W + "pPr")?
-                    .AddFirst(
+                   .AddFirst(
                         new XElement(W + "pStyle",
                             new XAttribute(W + "val",
                                 "FiguresTablesSourceNote")));

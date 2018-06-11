@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Xml.Linq;
 using AD.IO;
-using AD.OpenXml.Visits;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -71,15 +70,6 @@ namespace AD.OpenXml.Elements
 
             foreach (XElement cell in source.Descendants(W + "tc"))
             {
-                // TODO: this is an ugly way to fix a problem. Too much state being managed. Also...weak heuristic.
-                // tc -> tr -> tbl -> tblGrid
-                if (cell.Parent?.Parent?.Element(W + "tblGrid")?.Elements(W + "gridCol").Count() == 1)
-                {
-                    XElement result = DocumentVisit.ExecuteForTableRecursion(cell, revisionId);
-                    cell.RemoveNodes();
-                    cell.Add(result.Elements());
-                }
-
                 if (!cell.Value.Contains("@>"))
                     continue;
 
