@@ -156,20 +156,9 @@ namespace AD.OpenXml.Visits
                 runProperties.AddFirst(distinct);
             }
 
-            // There shouldn't be more than one run style.
-            foreach (XElement mathPara in source.Descendants(M + "oMathPara"))
-            {
-                mathPara.Descendants(W + "rPr").Remove();
-
-                foreach (XElement child in mathPara.Descendants(M + "r"))
-                {
-                    child.AddFirst(
-                        new XElement(W + "rPr",
-                            new XElement(W + "rFonts",
-                                new XAttribute(W + "ascii", "Cambria Math"))));
-                }
-            }
-
+            // remove properties on non-interactive glyphs.
+            source.Descendants(M + "oMathPara").Descendants(M + "ctrlPr").Remove();
+            source.Descendants(M + "oMathPara").Descendants(W + "rPr").Remove();
 
             (int oldId, int newId)[] revisionMapping =
                 source.Descendants()

@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Compression;
 using System.IO.Packaging;
 using System.Xml.Linq;
-using AD.OpenXml.Structures;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml
@@ -140,7 +139,7 @@ namespace AD.OpenXml
 
                 foreach (PackagePart part in package.GetParts())
                 {
-                    if (part.ContentType == Relationships.MimeType)
+                    if (part.ContentType == "application/vnd.openxmlformats-package.relationships+xml")
                         continue;
 
                     PackagePart resultPart =

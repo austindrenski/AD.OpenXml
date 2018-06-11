@@ -34,6 +34,7 @@ namespace AD.OpenXml
             Package.Open(new MemoryStream(DocxFilePath.Create().ToArray()));
 
         [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
+        [NotNull] private static readonly XNamespace M = XNamespaces.OpenXmlMath;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         private static readonly XmlWriterSettings XmlWriterSettings =
@@ -195,8 +196,6 @@ namespace AD.OpenXml
                 new OpenXmlPackageVisitor(package)
                    .VisitDoc(RevisionId)
                    .VisitFootnotes(Footnotes.Count, RevisionId)
-//                    .VisitDocRels(Document.RelationshipsMax)
-                   .VisitFootnotesRels(Footnotes.RelationshipsMax)
                    .VisitStyles()
                    .VisitNumbering();
         }
@@ -279,7 +278,7 @@ namespace AD.OpenXml
             Package package = Package.Open(ms, FileMode.Open);
 
             Document.CopyTo(package);
-            Footnotes.Save(package);
+            Footnotes.CopyTo(package);
 
             PackagePart document = package.GetPart(Document.PartName);
 
@@ -290,6 +289,23 @@ namespace AD.OpenXml
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml",
                 "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
                 Styles);
+
+            SaveHelper(
+                package,
+                document,
+                new Uri("/word/settings.xml", UriKind.Relative),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+                new XElement(W + "settings",
+                    new XAttribute(XNamespace.Xmlns + "w", W),
+                    new XAttribute(XNamespace.Xmlns + "m", M),
+                    new XElement(M + "mathPr",
+                        new XElement(M + "mathFont",
+                            new XAttribute(M + "val", "Cambria Math")),
+                        new XElement(M + "intLim",
+                            new XAttribute(M + "val", "subSup")),
+                        new XElement(M + "naryLim",
+                            new XAttribute(M + "val", "subSup")))));
 
             SaveHelper(
                 package,

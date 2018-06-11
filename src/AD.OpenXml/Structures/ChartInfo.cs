@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -40,52 +41,29 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        public readonly int NumericId;
-
-        /// <summary>
-        ///
-        /// </summary>
         [NotNull]
-        public Uri TargetUri => new Uri($"charts/chart{NumericId}.xml", UriKind.Relative);
+        public Uri TargetUri { get; }
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="rId"></param>
+        /// <param name="targetUri"></param>
         /// <param name="chart"></param>
         /// <exception cref="ArgumentNullException" />
-        public ChartInfo([NotNull] string rId, [NotNull] XElement chart)
+        public ChartInfo([NotNull] string rId, [NotNull] Uri targetUri, [NotNull] XElement chart)
         {
             if (rId is null)
                 throw new ArgumentNullException(nameof(rId));
-
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
             if (chart is null)
                 throw new ArgumentNullException(nameof(chart));
 
             Id = rId;
-            NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
+            TargetUri = targetUri;
             Chart = chart.Clone().RemoveByAll(C + "externalData");
         }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="offset"></param>
-        /// <returns>
-        ///
-        /// </returns>
-        [Pure]
-        public ChartInfo WithOffset(int offset) => new ChartInfo($"rId{NumericId + offset}", Chart);
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="rId"></param>
-        /// <returns>
-        ///
-        /// </returns>
-        [Pure]
-        public ChartInfo WithRelationId([NotNull] string rId) => new ChartInfo(rId, Chart);
 
         /// <inheritdoc />
         [Pure]
