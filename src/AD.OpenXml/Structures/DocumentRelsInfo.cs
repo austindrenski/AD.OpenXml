@@ -46,7 +46,7 @@ namespace AD.OpenXml.Structures
             /// <summary>
             ///
             /// </summary>
-            [NotNull] public static readonly XName Target = "Target";
+            [NotNull] public static readonly XName Target = "TargetUri";
 
             /// <summary>
             ///

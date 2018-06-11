@@ -19,7 +19,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public readonly string RelationId;
+        [NotNull] public readonly string Id;
 
         /// <summary>
         ///
@@ -52,7 +52,7 @@ namespace AD.OpenXml.Structures
             if (target is null)
                 throw new ArgumentNullException(nameof(target));
 
-            RelationId = rId;
+            Id = rId;
             NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
             Target = target;
             TargetMode = targetMode;
@@ -80,7 +80,7 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
-        public override string ToString() => $"(Id: {RelationId}, Target: {Target}, TargetMode: {TargetMode})";
+        public override string ToString() => $"(Id: {Id}, TargetUri: {Target}, TargetMode: {TargetMode})";
 
         /// <inheritdoc />
         [Pure]
@@ -88,7 +88,7 @@ namespace AD.OpenXml.Structures
         {
             unchecked
             {
-                int hashCode = RelationId.GetHashCode();
+                int hashCode = Id.GetHashCode();
                 hashCode = (hashCode * 397) ^ Target.GetHashCode();
                 hashCode = (hashCode * 397) ^ TargetMode.GetHashCode();
                 return hashCode;
@@ -102,7 +102,7 @@ namespace AD.OpenXml.Structures
         /// <inheritdoc />
         [Pure]
         public bool Equals(HyperlinkInfo other)
-            => Equals(RelationId, other.RelationId) && Equals(Target, other.Target) && Equals(TargetMode, other.TargetMode);
+            => Equals(Id, other.Id) && Equals(Target, other.Target) && Equals(TargetMode, other.TargetMode);
 
         /// <summary>
         /// Returns a value that indicates whether two <see cref="HyperlinkInfo" /> objects have the same values.

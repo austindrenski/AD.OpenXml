@@ -81,7 +81,7 @@ namespace AD.OpenXml
         /// The mapping of image id to data.
         /// </summary>
         [NotNull]
-        protected virtual IDictionary<string, (string mime, string description, string base64)> Images { get; }
+        protected virtual IDictionary<string, (string contentType, string description, string base64)> Images { get; }
 
         /// <summary>
         /// The 'charset' tage value.
@@ -112,7 +112,9 @@ namespace AD.OpenXml
         #region Constructors
 
         /// <inheritdoc />
-        protected HtmlVisitor(bool allowBaseMethod) : base(allowBaseMethod) {}
+        protected HtmlVisitor(bool allowBaseMethod) : base(allowBaseMethod)
+        {
+        }
 
         /// <inheritdoc />
         public HtmlVisitor() : this(false)
@@ -139,7 +141,7 @@ namespace AD.OpenXml
                 throw new ArgumentNullException(nameof(images));
 
             Charts = new Dictionary<string, XElement>(charts);
-            Images = new Dictionary<string, (string mime, string description, string base64)>(images);
+            Images = new Dictionary<string, (string contentType, string description, string base64)>(images);
         }
 
         #endregion
@@ -226,8 +228,8 @@ a[aria-label='Return to content'] {
             => VisitName(attribute.Name) is XName name &&
                SupportedAttributes.Contains(name) &&
                !string.IsNullOrWhiteSpace(attribute.Value)
-                ? new XAttribute(name, attribute.Value)
-                : null;
+                   ? new XAttribute(name, attribute.Value)
+                   : null;
 
         /// <inheritdoc />
         [Pure]
@@ -263,8 +265,8 @@ a[aria-label='Return to content'] {
                     new XAttribute("src", string.Empty),
                     new XElement("span",
                         new XAttribute("class", "error"),
-                        Images.TryGetValue(rId, out (string mime, string description, string base64) image)
-                            ? $"Images in '{image.mime}' format are not supported: {rId}."
+                        Images.TryGetValue(rId, out (string contentType, string description, string base64) image)
+                            ? $"Images in '{image.contentType}' format are not supported: {rId}."
                             : $"An embedded image was detected but not found: {rId}."));
         }
 
@@ -404,8 +406,8 @@ a[aria-label='Return to content'] {
                     new XAttribute("scale", "0"),
                     new XAttribute("alt", (string) picture.Element(WP + "docPr")?.Attribute("descr") ?? string.Empty),
                     new XAttribute("src",
-                        Images.TryGetValue((string) imageId, out (string mime, string description, string base64) image)
-                            ? $"data:image/{image.mime};base64,{image.base64}"
+                        Images.TryGetValue((string) imageId, out (string contentType, string description, string base64) image)
+                            ? $"data:{image.contentType};base64,{image.base64}"
                             : $"[image: {(string) imageId}]"));
         }
 
@@ -489,9 +491,9 @@ a[aria-label='Return to content'] {
                               .FirstOrDefault(x => x.Name == "tr")?
                               .Nodes()
                               .Select(
-                                  x => !(x is XElement e) || e.Name != "td"
-                                      ? x
-                                      : new XElement("th", e.Attributes(), e.Nodes())));
+                                   x => !(x is XElement e) || e.Name != "td"
+                                            ? x
+                                            : new XElement("th", e.Attributes(), e.Nodes())));
 
             IEnumerable<XObject> bodyRows =
                 tableNodes.SkipWhile(x => !(x is XElement e) || e.Name != "tr")
@@ -502,7 +504,7 @@ a[aria-label='Return to content'] {
                 NextWhile(
                         table,
                         x => x is XElement e && (string) e.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val") == "FiguresTablesSourceNote")
-                    .OfType<XElement>();
+                   .OfType<XElement>();
 
             return
                 new XElement(
@@ -566,24 +568,24 @@ a[aria-label='Return to content'] {
             => new XElement("data",
                 chart.Elements(C + "ser")
                      .Select(
-                         x =>
-                             new XElement("series",
-                                 x.Element(C + "tx")?.Element(C + "strRef")?.Element(C + "strCache")?.Value is string name
-                                     ? new XAttribute("name", name)
-                                     : null,
-                                 (x.Element(C + "cat")?.Element(C + "strRef")?.Element(C + "strCache") ??
-                                  x.Element(C + "cat")?.Element(C + "numRef")?.Element(C + "numCache"))?
+                          x =>
+                              new XElement("series",
+                                  x.Element(C + "tx")?.Element(C + "strRef")?.Element(C + "strCache")?.Value is string name
+                                      ? new XAttribute("name", name)
+                                      : null,
+                                  (x.Element(C + "cat")?.Element(C + "strRef")?.Element(C + "strCache") ??
+                                   x.Element(C + "cat")?.Element(C + "numRef")?.Element(C + "numCache"))?
                                  .Elements(C + "pt")
                                  .Zip(
-                                     (x.Element(C + "val")?.Element(C + "strRef")?.Element(C + "strCache") ??
-                                      x.Element(C + "val")?.Element(C + "numRef")?.Element(C + "numCache"))?
+                                      (x.Element(C + "val")?.Element(C + "strRef")?.Element(C + "strCache") ??
+                                       x.Element(C + "val")?.Element(C + "numRef")?.Element(C + "numCache"))?
                                      .Elements(C + "pt")
-                                     ??
-                                     Enumerable.Empty<XElement>(),
-                                     (a, b) =>
-                                         new XElement("observation",
-                                             new XAttribute("label", a.Value),
-                                             new XAttribute("value", b.Value))))));
+                                      ??
+                                      Enumerable.Empty<XElement>(),
+                                      (a, b) =>
+                                          new XElement("observation",
+                                              new XAttribute("label", a.Value),
+                                              new XAttribute("value", b.Value))))));
 
         /// <summary>
         ///

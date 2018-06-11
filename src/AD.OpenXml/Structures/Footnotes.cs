@@ -221,10 +221,10 @@ namespace AD.OpenXml.Structures
                 Hyperlinks
                     .Select(
                         x =>
-                            (from: x.RelationId,
-                                to: footnotes.RelationshipExists(x.RelationId) &&
-                                    footnotes.GetRelationship(x.RelationId).TargetUri == x.Target
-                                    ? footnotes.GetRelationship(x.RelationId).Id
+                            (from: x.Id,
+                                to: footnotes.RelationshipExists(x.Id) &&
+                                    footnotes.GetRelationship(x.Id).TargetUri == x.Target
+                                    ? footnotes.GetRelationship(x.Id).Id
                                     : footnotes.CreateRelationship(x.Target, x.TargetMode, HyperlinkInfo.RelationshipType).Id))
                     .Select(x => (x.from, x.to))
                     .ToArray();

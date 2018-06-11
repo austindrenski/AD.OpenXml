@@ -17,7 +17,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public const string MimeType =
+        [NotNull] public const string ContentType =
             "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public readonly string RelationId;
+        [NotNull] public readonly string Id;
 
         /// <summary>
         ///
@@ -46,13 +46,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </summary>
         [NotNull]
-        public Uri Target => new Uri($"charts/chart{NumericId}.xml", UriKind.Relative);
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull]
-        public Uri PartName => new Uri($"/word/{Target}", UriKind.Relative);
+        public Uri TargetUri => new Uri($"charts/chart{NumericId}.xml", UriKind.Relative);
 
         /// <summary>
         ///
@@ -68,7 +62,7 @@ namespace AD.OpenXml.Structures
             if (chart is null)
                 throw new ArgumentNullException(nameof(chart));
 
-            RelationId = rId;
+            Id = rId;
             NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
             Chart = chart.Clone().RemoveByAll(C + "externalData");
         }
@@ -95,15 +89,15 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
-        public override string ToString() => $"(Id: {RelationId}, PartName: {PartName})";
+        public override string ToString() => $"(Id: {Id}, TargetUri: {TargetUri})";
 
         /// <inheritdoc />
         [Pure]
-        public override int GetHashCode() => unchecked((397 * RelationId.GetHashCode()) ^ Chart.GetHashCode());
+        public override int GetHashCode() => unchecked((397 * Id.GetHashCode()) ^ Chart.GetHashCode());
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(ChartInfo other) => Equals(RelationId, other.RelationId) && XNode.DeepEquals(Chart, other.Chart);
+        public bool Equals(ChartInfo other) => Equals(Id, other.Id) && XNode.DeepEquals(Chart, other.Chart);
 
         /// <inheritdoc />
         [Pure]

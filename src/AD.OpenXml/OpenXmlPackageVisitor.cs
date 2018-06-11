@@ -90,6 +90,8 @@ namespace AD.OpenXml
         /// </summary>
         public int RevisionId => Math.Max(Document.RevisionId, Footnotes.RevisionId);
 
+        [NotNull] private readonly Package _package;
+
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
         /// </summary>
@@ -99,6 +101,8 @@ namespace AD.OpenXml
         {
             if (package is null)
                 throw new ArgumentNullException(nameof(package));
+
+            _package = package;
 
             Document = new Document(package);
             Footnotes = new Footnotes(package);
@@ -128,6 +132,7 @@ namespace AD.OpenXml
         /// <summary>
         /// Initializes a new <see cref="OpenXmlPackageVisitor"/> from the supplied components.
         /// </summary>
+        /// <param name="package"></param>
         /// <param name="document"></param>
         /// <param name="footnotes"></param>
         /// <param name="styles"></param>
@@ -135,27 +140,14 @@ namespace AD.OpenXml
         /// <param name="theme1"></param>
         /// <exception cref="ArgumentNullException"></exception>
         private OpenXmlPackageVisitor(
+            [NotNull] Package package,
             [NotNull] Document document,
             [NotNull] Footnotes footnotes,
             [NotNull] XElement styles,
             [NotNull] XElement numbering,
             [NotNull] XElement theme1)
         {
-            if (document is null)
-                throw new ArgumentNullException(nameof(document));
-
-            if (footnotes is null)
-                throw new ArgumentNullException(nameof(footnotes));
-
-            if (styles is null)
-                throw new ArgumentNullException(nameof(styles));
-
-            if (numbering is null)
-                throw new ArgumentNullException(nameof(numbering));
-
-            if (theme1 is null)
-                throw new ArgumentNullException(nameof(theme1));
-
+            _package = package;
             Document = document;
             Footnotes = footnotes;
             Styles = styles;
@@ -181,6 +173,7 @@ namespace AD.OpenXml
             [CanBeNull] XElement numbering = default,
             [CanBeNull] XElement theme1 = default)
             => new OpenXmlPackageVisitor(
+                _package,
                 document ?? Document,
                 footnotes ?? Footnotes,
                 styles ?? Styles,
@@ -200,12 +193,12 @@ namespace AD.OpenXml
 
             return
                 new OpenXmlPackageVisitor(package)
-                    .VisitDoc(RevisionId)
-                    .VisitFootnotes(Footnotes.Count, RevisionId)
-                    .VisitDocRels(Document.RelationshipsMax)
-                    .VisitFootnotesRels(Footnotes.RelationshipsMax)
-                    .VisitStyles()
-                    .VisitNumbering();
+                   .VisitDoc(RevisionId)
+                   .VisitFootnotes(Footnotes.Count, RevisionId)
+//                    .VisitDocRels(Document.RelationshipsMax)
+                   .VisitFootnotesRels(Footnotes.RelationshipsMax)
+                   .VisitStyles()
+                   .VisitNumbering();
         }
 
         /// <summary>
@@ -243,11 +236,11 @@ namespace AD.OpenXml
                     Styles.Attributes(),
                     Styles.Elements()
                           .Union(
-                              subject.Styles
-                                     .Elements()
-                                     .Where(x => x.Name != W + "docDefaults")
-                                     .Where(x => (string) x.Attribute(W + "styleId") != "Normal"),
-                              XNode.EqualityComparer));
+                               subject.Styles
+                                      .Elements()
+                                      .Where(x => x.Name != W + "docDefaults")
+                                      .Where(x => (string) x.Attribute(W + "styleId") != "Normal"),
+                               XNode.EqualityComparer));
 
             XElement numbering =
                 new XElement(
@@ -255,13 +248,13 @@ namespace AD.OpenXml
                     Numbering.Attributes(),
                     Numbering.Elements()
                              .Union(
-                                 subject.Numbering.Elements(),
-                                 XNode.EqualityComparer));
+                                  subject.Numbering.Elements(),
+                                  XNode.EqualityComparer));
 
             // TODO: write a ThemeVisit
 //            XElement theme =
 //                new XElement(
-//                    Theme.Target,
+//                    Theme.TargetUri,
 //                    Theme.Attributes(),
 //                    Theme.Elements()
 //                          .Union(
@@ -283,10 +276,9 @@ namespace AD.OpenXml
         {
             MemoryStream ms = new MemoryStream();
             ms.Write(DocxFilePath.Create().Span);
-
             Package package = Package.Open(ms, FileMode.Open);
 
-            Document.Save(package);
+            Document.CopyTo(package);
             Footnotes.Save(package);
 
             PackagePart document = package.GetPart(Document.PartName);

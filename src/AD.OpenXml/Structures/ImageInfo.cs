@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Structures
@@ -11,9 +10,6 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public readonly struct ImageInfo : IEquatable<ImageInfo>
     {
-        [NotNull] private static readonly Regex RegexTarget =
-            new Regex("media/image(?<id>[0-9]+)\\.(?<extension>png|jpeg|svg)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
         /// <summary>
         ///
         /// </summary>
@@ -23,12 +19,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public readonly string Extension;
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull] public readonly string RelationId;
+        [NotNull] public readonly string Id;
 
         /// <summary>
         ///
@@ -38,97 +29,51 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        public readonly int NumericId;
+        [NotNull]
+        public Uri TargetUri { get; }
 
         /// <summary>
         ///
         /// </summary>
         [NotNull]
-        public Uri Target => new Uri($"media/image{NumericId}.{Extension}", UriKind.Relative);
+        public string ContentType { get; }
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull]
-        public Uri PartName => new Uri($"/word/{Target}", UriKind.Relative);
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull]
-        public string MimeType => $"image/{Extension}";
-
-        /// <summary>
-        ///
-        /// </summary>
-        [NotNull]
-        public string Base64String => Convert.ToBase64String(Image.Span);
-
-        /// <summary>
-        ///
-        /// </summary>
-        ///  <param name="rId"></param>
-        /// <param name="extension"></param>
+        /// <param name="id"></param>
+        /// <param name="targetUri"></param>
+        /// <param name="contentType"></param>
         /// <param name="image"></param>
-        public ImageInfo([NotNull] string rId, [NotNull] string extension, in ReadOnlySpan<byte> image)
+        public ImageInfo([NotNull] string id, [NotNull] Uri targetUri, [NotNull] string contentType, in ReadOnlySpan<byte> image)
         {
-            if (rId is null)
-                throw new ArgumentNullException(nameof(rId));
+            if (id is null)
+                throw new ArgumentNullException(nameof(id));
+            if (targetUri is null)
+                throw new ArgumentNullException(nameof(targetUri));
+            if (contentType is null)
+                throw new ArgumentNullException(nameof(contentType));
 
-            if (extension is null)
-                throw new ArgumentNullException(nameof(extension));
-
-            RelationId = rId;
-            NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
-            Extension = extension;
+            Id = id;
+            TargetUri = targetUri;
+            ContentType = contentType;
             Image = image.ToArray();
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="rId"></param>
-        /// <param name="target"></param>
-        /// <param name="image"></param>
-        /// <returns>
-        ///
-        /// </returns>
-        /// <exception cref="ArgumentNullException" />
-        public static ImageInfo Create([NotNull] string rId, [NotNull] string target, in ReadOnlySpan<byte> image)
-        {
-            if (rId is null)
-                throw new ArgumentNullException(nameof(rId));
-
-            if (target is null)
-                throw new ArgumentNullException(nameof(target));
-
-            if (!RegexTarget.IsMatch(target))
-                throw new ArgumentException(nameof(target));
-
-            Match m = RegexTarget.Match(target);
-
-            string extension = m.Groups["extension"].Value;
-
-            return new ImageInfo(rId, extension, in image);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="offset"></param>
-        /// <returns>
-        ///
-        /// </returns>
         [Pure]
-        public ImageInfo WithOffset(int offset) => new ImageInfo($"rId{NumericId + offset}", Extension, Image.Span);
+        [NotNull]
+        public string ToBase64String() => Convert.ToBase64String(Image.Span);
 
         /// <inheritdoc />
         [Pure]
-        public override string ToString() => $"(Id: {RelationId}, Target: {Target})";
+        public override string ToString() => $"(Id: {Id}, TargetUri: {TargetUri})";
 
         /// <inheritdoc />
         [Pure]
-        public override int GetHashCode() => unchecked((397 * Target.GetHashCode()) ^ Image.GetHashCode());
+        public override int GetHashCode() => unchecked((397 * TargetUri.GetHashCode()) ^ Image.GetHashCode());
 
         /// <inheritdoc />
         [Pure]
@@ -136,7 +81,7 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(ImageInfo other) => Equals(Target, other.Target) && Image.Span.SequenceEqual(other.Image.Span);
+        public bool Equals(ImageInfo other) => Equals(TargetUri, other.TargetUri) && Image.Span.SequenceEqual(other.Image.Span);
 
         /// <summary>
         /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Structures.ImageInfo" /> objects are equal.

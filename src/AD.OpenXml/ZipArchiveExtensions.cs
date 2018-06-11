@@ -167,5 +167,25 @@ namespace AD.OpenXml
 
             return ms;
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="package">
+        ///
+        /// </param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        [NotNull]
+        public static Package ToPackage([NotNull] this Package package)
+        {
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
+
+            return Package.Open(package.ToStream());
+        }
     }
 }

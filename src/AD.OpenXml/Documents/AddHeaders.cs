@@ -55,7 +55,7 @@ namespace AD.OpenXml.Documents
                 if (part.ContentType == MimeType)
                     package.DeletePart(part.Uri);
 
-                if (part.ContentType != Document.MimeType)
+                if (part.ContentType != Document.ContentType)
                     continue;
 
                 foreach (PackageRelationship relationship in part.GetRelationshipsByType(RelationshipType))
