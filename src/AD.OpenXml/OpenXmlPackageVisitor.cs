@@ -325,9 +325,9 @@ namespace AD.OpenXml
                     ? package.GetPart(uri)
                     : package.CreatePart(uri, contentType);
 
-            using (StreamWriter writer = new StreamWriter(part.GetStream()))
+            using (Stream stream = part.GetStream())
             {
-                using (XmlWriter xml = XmlWriter.Create(writer, XmlWriterSettings))
+                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
                 {
                     element.WriteTo(xml);
                 }

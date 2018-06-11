@@ -160,25 +160,42 @@ namespace AD.OpenXml.Structures
                     .ToArray();
 
             Images =
-                documentRelations
-                    .Elements()
-                    .Select(
-                        x =>
-                            new
-                            {
-                                Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
-                                Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
-                            })
-                    .Where(x => x.Target.StartsWith("media/"))
-                    .Select(x =>
-                    {
-                        MemoryStream ms = new MemoryStream();
-                        Stream s = package.GetPart(new Uri($"/word/{x.Target}", UriKind.Relative)).GetStream();
-                        s.CopyTo(ms);
-                        s.Close();
-                        return ImageInfo.Create(x.Id, x.Target, ms.ToArray());
-                    })
-                    .ToArray();
+                package.GetPart(PartName)
+                       .GetRelationshipsByType(ImageInfo.RelationshipType)
+                       .Select(
+                           x =>
+                           {
+                               Uri uri = new Uri("/word/" + x.TargetUri, UriKind.Relative);
+                               MemoryStream ms = new MemoryStream();
+                               using (Stream s = package.GetPart(uri).GetStream())
+                               {
+                                   s.CopyTo(ms);
+                                   s.Close();
+                                   return ImageInfo.Create(x.Id, uri.ToString(), ms.ToArray());
+                               }
+                           })
+                       .ToArray();
+
+//            Images =
+//                documentRelations
+//                    .Elements()
+//                    .Select(
+//                        x =>
+//                            new
+//                            {
+//                                Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
+//                                Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
+//                            })
+//                    .Where(x => x.Target.StartsWith("media/"))
+//                    .Select(x =>
+//                    {
+//                        MemoryStream ms = new MemoryStream();
+//                        Stream s = package.GetPart(new Uri($"/word/{x.Target}", UriKind.Relative)).GetStream();
+//                        s.CopyTo(ms);
+//                        s.Close();
+//                        return ImageInfo.Create(x.Id, x.Target, ms.ToArray());
+//                    })
+//                    .ToArray();
 
             Hyperlinks =
                 documentRelations
@@ -348,9 +365,9 @@ namespace AD.OpenXml.Structures
                     document.CreateRelationship(image.Target, TargetMode.Internal, ImageInfo.RelationshipType, image.RelationId);
 
                 PackagePart imagePart =
-                    package.PartExists(PartName)
-                        ? package.GetPart(PartName)
-                        : package.CreatePart(PartName, MimeType);
+                    package.PartExists(image.PartName)
+                        ? package.GetPart(image.PartName)
+                        : package.CreatePart(image.PartName, image.MimeType);
 
                 using (Stream stream = imagePart.GetStream())
                 {
