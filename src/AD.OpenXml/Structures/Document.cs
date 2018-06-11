@@ -18,9 +18,10 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Document
     {
+        [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        private static readonly XmlWriterSettings XmlWriterSettings =
+        [NotNull] private static readonly XmlWriterSettings XmlWriterSettings =
             new XmlWriterSettings
             {
                 Async = false,
@@ -53,13 +54,13 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public static readonly Uri PartName = new Uri("/word/document.xml", UriKind.Relative);
+        [NotNull] public static readonly string MimeType =
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml";
 
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public static readonly string MimeType =
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml";
+        [NotNull] public static readonly Uri PartName = new Uri("/word/document.xml", UriKind.Relative);
 
         /// <summary>
         /// The XML file located at: /word/document.xml.
@@ -134,30 +135,22 @@ namespace AD.OpenXml.Structures
                 package.PartExists(PartName)
                     ? XElement.Load(package.GetPart(PartName).GetStream())
                     : new XElement(W + "document",
+                        new XAttribute(XNamespace.Xmlns + "w", W),
                         new XElement(W + "body"));
 
-            XElement documentRelations =
-                package.PartExists(DocumentRelsInfo.PartName)
-                    ? XElement.Load(package.GetPart(DocumentRelsInfo.PartName).GetStream())
-                    : Relationships.Empty;
-
-            // TODO: re-enumerate ids at this stage.
-            // TODO: find charts and images by *starting* with the content refs.
-//            Content.ChangeXAttributeValues("Id", "", "");
-
             Charts =
-                documentRelations
-                    .Elements()
-                    .Select(
-                        x =>
-                            new
-                            {
-                                Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
-                                Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
-                            })
-                    .Where(x => x.Target.StartsWith("charts/"))
-                    .Select(x => new ChartInfo(x.Id, XElement.Load(package.GetPart(new Uri($"/word/{x.Target}", UriKind.Relative)).GetStream())))
-                    .ToArray();
+                package.GetPart(PartName)
+                       .GetRelationshipsByType(ChartInfo.RelationshipType)
+                       .Select(
+                           x =>
+                           {
+                               Uri uri = new Uri("/word/" + x.TargetUri, UriKind.Relative);
+                               using (Stream stream = package.GetPart(uri).GetStream())
+                               {
+                                   return new ChartInfo(x.Id, XElement.Load(stream));
+                               }
+                           })
+                       .ToArray();
 
             Images =
                 package.GetPart(PartName)
@@ -176,57 +169,16 @@ namespace AD.OpenXml.Structures
                            })
                        .ToArray();
 
-//            Images =
-//                documentRelations
-//                    .Elements()
-//                    .Select(
-//                        x =>
-//                            new
-//                            {
-//                                Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
-//                                Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target)
-//                            })
-//                    .Where(x => x.Target.StartsWith("media/"))
-//                    .Select(x =>
-//                    {
-//                        MemoryStream ms = new MemoryStream();
-//                        Stream s = package.GetPart(new Uri($"/word/{x.Target}", UriKind.Relative)).GetStream();
-//                        s.CopyTo(ms);
-//                        s.Close();
-//                        return ImageInfo.Create(x.Id, x.Target, ms.ToArray());
-//                    })
-//                    .ToArray();
-
             Hyperlinks =
-                documentRelations
-                    .Elements()
-                    .Select(
-                        x =>
-                            new
-                            {
-                                Id = (string) x.Attribute(DocumentRelsInfo.Attributes.Id),
-                                Target = (string) x.Attribute(DocumentRelsInfo.Attributes.Target),
-                                TargetMode = (string) x.Attribute("TargetMode")
-                            })
-                    .Where(x => x.TargetMode != null)
-                    .Select(
-                        x =>
-                            new
-                            {
-                                x.Id,
-                                x.Target,
-                                TargetMode =
-                                    Enum.TryParse(x.TargetMode, out TargetMode mode)
-                                        ? mode
-                                        : TargetMode.Internal
-                            })
-                    .Select(x => new HyperlinkInfo(x.Id, x.Target, x.TargetMode))
-                    .ToArray();
+                package.GetPart(PartName)
+                       .GetRelationshipsByType(HyperlinkInfo.RelationshipType)
+                       .Select(x => new HyperlinkInfo(x.Id, x.TargetUri, x.TargetMode))
+                       .ToArray();
         }
 
-        /// <summary>
+        ///  <summary>
         ///
-        /// </summary>
+        ///  </summary>
         /// <param name="content"></param>
         /// <param name="charts"></param>
         /// <param name="images"> </param>
@@ -239,13 +191,10 @@ namespace AD.OpenXml.Structures
         {
             if (content is null)
                 throw new ArgumentNullException(nameof(content));
-
             if (charts is null)
                 throw new ArgumentNullException(nameof(charts));
-
             if (images is null)
                 throw new ArgumentNullException(nameof(images));
-
             if (hyperlinks is null)
                 throw new ArgumentNullException(nameof(hyperlinks));
 
@@ -279,56 +228,46 @@ namespace AD.OpenXml.Structures
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
+        [Pure]
+        [NotNull]
         public Document Concat([NotNull] Document other)
-            => Concat(other.Content, other.Charts, other.Images, other.Hyperlinks);
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="content"></param>
-        /// <param name="charts"></param>
-        /// <param name="images"></param>
-        /// <param name="hyperlinks"></param>
-        /// <returns></returns>
-        public Document Concat(
-            [CanBeNull] XElement content = default,
-            [CanBeNull] IEnumerable<ChartInfo> charts = default,
-            [CanBeNull] IEnumerable<ImageInfo> images = default,
-            [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
+            if (other is null)
+                throw new ArgumentNullException(nameof(other));
+
+            XElement content = other.Content;
+            ChartInfo[] charts = other.Charts as ChartInfo[] ?? other.Charts.ToArray();
+            ImageInfo[] images = other.Images as ImageInfo[] ?? other.Images.ToArray();
+            HyperlinkInfo[] hyperlinks = other.Hyperlinks as HyperlinkInfo[] ?? other.Hyperlinks.ToArray();
+
             HashSet<XAttribute> attributes =
                 new HashSet<XAttribute>(Content.Attributes());
 
-            if (content != null)
+            foreach (XAttribute attribute in other.Content.Attributes())
             {
-                foreach (XAttribute attribute in content.Attributes())
-                {
-                    if (attributes.Any(x => x.Name == attribute.Name || x.Value == attribute.Value))
-                        continue;
+                if (attributes.Any(x => x.Name == attribute.Name || x.Value == attribute.Value))
+                    continue;
 
-                    attributes.Add(attribute);
-                }
+                attributes.Add(attribute);
             }
 
             XElement document =
-                content is null
-                    ? Content
-                    : new XElement(
-                        Content.Name,
-                        attributes,
-                        new XElement(
-                            W + "body",
-                            Content.Element(W + "body")?.Elements(),
-                            content.Element(W + "body")?.Elements()));
+                new XElement(
+                    Content.Name,
+                    attributes,
+                    new XElement(
+                        W + "body",
+                        Content.Element(W + "body")?.Elements(),
+                        content.Element(W + "body")?.Elements()));
 
             document.RemoveDuplicateSectionProperties();
 
             return
                 new Document(
                     document,
-                    charts is null ? Charts : Charts.Concat(charts),
-                    images is null ? Images : Images.Concat(images),
-                    hyperlinks is null ? Hyperlinks : Hyperlinks.Concat(hyperlinks));
+                    Charts.Concat(charts),
+                    Images.Concat(images),
+                    Hyperlinks.Concat(hyperlinks));
         }
 
         /// <inheritdoc />
@@ -353,11 +292,7 @@ namespace AD.OpenXml.Structures
                     ? package.GetPart(PartName)
                     : package.CreatePart(PartName, MimeType);
 
-            foreach (HyperlinkInfo hyperlink in Hyperlinks)
-            {
-                if (!document.RelationshipExists(hyperlink.RelationId))
-                    document.CreateRelationship(hyperlink.Target, hyperlink.TargetMode, HyperlinkInfo.RelationshipType);
-            }
+            SaveHyperlinks(Hyperlinks, document, Content);
 
             foreach (ImageInfo image in Images)
             {
@@ -383,7 +318,7 @@ namespace AD.OpenXml.Structures
                 PackagePart chartPart =
                     package.PartExists(chart.PartName)
                         ? package.GetPart(chart.PartName)
-                        : package.CreatePart(chart.PartName, MimeType);
+                        : package.CreatePart(chart.PartName, ChartInfo.MimeType);
 
                 using (Stream stream = chartPart.GetStream())
                 {
@@ -399,6 +334,43 @@ namespace AD.OpenXml.Structures
                 using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
                 {
                     Content.WriteTo(xml);
+                }
+            }
+        }
+
+        private static void SaveHyperlinks(IEnumerable<HyperlinkInfo> hyperlinks, PackagePart document, XElement content)
+        {
+            (string from, string to)[] updates =
+                hyperlinks
+                    .Select(
+                        x =>
+                            new
+                            {
+                                from = x.RelationId,
+                                to = document.RelationshipExists(x.RelationId) &&
+                                     document.GetRelationship(x.RelationId).TargetUri == x.Target
+                                    ? document.GetRelationship(x.RelationId)
+                                    : document.CreateRelationship(x.Target, x.TargetMode, HyperlinkInfo.RelationshipType)
+                            })
+                    .Select(x => (x.from, x.to.Id))
+                    .ToArray();
+
+            XAttribute[] attributes =
+                content.DescendantsAndSelf()
+                       .Attributes()
+                       .Where(x => x.Name == R + "id")
+                       .ToArray();
+
+            for (int i = 0; i < attributes.Length; i++)
+            {
+                XAttribute attribute = attributes[i];
+                foreach ((string from, string to) item in updates)
+                {
+                    if (attribute.Value != item.from)
+                        continue;
+
+                    attribute.SetValue(item.to);
+                    break;
                 }
             }
         }

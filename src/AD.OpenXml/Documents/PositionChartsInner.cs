@@ -28,41 +28,41 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(stream));
 
             MemoryStream ms = await (await stream).CopyPure();
-            Package package = Package.Open(ms);
 
-            foreach (PackagePart part in package.EnumerateChartPartNames())
+            using (Package package = Package.Open(ms))
             {
-                using (Stream chart = part.GetStream())
+                foreach (PackagePart part in package.EnumerateChartPartNames())
                 {
-                    XElement element = XElement.Load(chart);
+                    using (Stream chart = part.GetStream())
+                    {
+                        XElement element = XElement.Load(chart);
 
-                    XElement plotArea = element.Descendants(C + "plotArea").First();
+                        XElement plotArea = element.Descendants(C + "plotArea").First();
 
-                    plotArea.Elements(C + "layout").Remove();
+                        plotArea.Elements(C + "layout").Remove();
 
-                    plotArea.AddFirst(
-                        new XElement(C + "layout",
-                            new XElement(C + "manualLayout",
-                                new XElement(C + "layoutTarget",
-                                    new XAttribute("val", "inner")),
-                                new XElement(C + "xMode",
-                                    new XAttribute("val", "edge")),
-                                new XElement(C + "yMode",
-                                    new XAttribute("val", "edge")),
-                                new XElement(C + "x",
-                                    new XAttribute("val", "1")),
-                                new XElement(C + "y",
-                                    new XAttribute("val", "1")),
-                                new XElement(C + "w",
-                                    new XAttribute("val", "-0.9")),
-                                new XElement(C + "h",
-                                    new XAttribute("val", "-0.9")))));
+                        plotArea.AddFirst(
+                            new XElement(C + "layout",
+                                new XElement(C + "manualLayout",
+                                    new XElement(C + "layoutTarget",
+                                        new XAttribute("val", "inner")),
+                                    new XElement(C + "xMode",
+                                        new XAttribute("val", "edge")),
+                                    new XElement(C + "yMode",
+                                        new XAttribute("val", "edge")),
+                                    new XElement(C + "x",
+                                        new XAttribute("val", "1")),
+                                    new XElement(C + "y",
+                                        new XAttribute("val", "1")),
+                                    new XElement(C + "w",
+                                        new XAttribute("val", "-0.9")),
+                                    new XElement(C + "h",
+                                        new XAttribute("val", "-0.9")))));
 
-                    element.Save(chart);
+                        element.Save(chart);
+                    }
                 }
             }
-
-            package.Close();
 
             return ms;
         }

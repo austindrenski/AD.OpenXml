@@ -104,23 +104,25 @@ namespace AD.OpenXml
             Footnotes = new Footnotes(package);
 
             Uri stylesUri = new Uri("/word/styles.xml", UriKind.Relative);
-            Uri numberingUri = new Uri("/word/numbering.xml", UriKind.Relative);
-            Uri themeUri = new Uri("/word/theme/theme1.xml", UriKind.Relative);
-
             Styles =
                 package.PartExists(stylesUri)
                     ? XElement.Load(package.GetPart(stylesUri).GetStream())
-                    : new XElement(W + "styles");
+                    : new XElement(W + "styles",
+                        new XAttribute(XNamespace.Xmlns + "w", W));
 
+            Uri numberingUri = new Uri("/word/numbering.xml", UriKind.Relative);
             Numbering =
                 package.PartExists(numberingUri)
                     ? XElement.Load(package.GetPart(numberingUri).GetStream())
-                    : new XElement(W + "numbering");
+                    : new XElement(W + "numbering",
+                        new XAttribute(XNamespace.Xmlns + "w", W));
 
+            Uri themeUri = new Uri("/word/theme/theme1.xml", UriKind.Relative);
             Theme1 =
                 package.PartExists(themeUri)
                     ? XElement.Load(package.GetPart(themeUri).GetStream())
-                    : new XElement(A + "theme");
+                    : new XElement(A + "theme",
+                        new XAttribute(XNamespace.Xmlns + "a", A));
         }
 
         /// <summary>

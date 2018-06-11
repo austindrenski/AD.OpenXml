@@ -156,12 +156,13 @@ namespace CompilerAPI.Controllers
                      .AddHeaders(title)
                      .AddFooters(publisher, website)
                      .ToStream()
-                     .PositionChartsInline()
-                     .PositionChartsInner()
-                     .PositionChartsOuter()
-                     .ModifyBarChartStyles()
-                     .ModifyPieChartStyles()
-                     .ModifyLineChartStyles()
-                     .ModifyAreaChartStyles();
+                     .PositionChartsInline();
+
+//                     .PositionChartsInner()
+//                     .PositionChartsOuter()
+//                     .ModifyBarChartStyles()
+//                     .ModifyPieChartStyles()
+//                     .ModifyLineChartStyles()
+//                     .ModifyAreaChartStyles();
     }
 }

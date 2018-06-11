@@ -44,7 +44,7 @@ namespace AD.OpenXml.Structures
         /// <param name="target"></param>
         /// <param name="targetMode"></param>
         /// <exception cref="ArgumentNullException" />
-        public HyperlinkInfo([NotNull] string rId, [NotNull] string target, TargetMode targetMode)
+        public HyperlinkInfo([NotNull] string rId, [NotNull] Uri target, TargetMode targetMode)
         {
             if (rId is null)
                 throw new ArgumentNullException(nameof(rId));
@@ -54,7 +54,7 @@ namespace AD.OpenXml.Structures
 
             RelationId = rId;
             NumericId = int.Parse(((ReadOnlySpan<char>) rId).Slice(3));
-            Target = new Uri(target, UriKind.RelativeOrAbsolute);
+            Target = target;
             TargetMode = targetMode;
         }
 
@@ -66,7 +66,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </returns>
         [Pure]
-        public HyperlinkInfo WithOffset(int offset) => new HyperlinkInfo($"rId{NumericId + offset}", Target.ToString(), TargetMode);
+        public HyperlinkInfo WithOffset(int offset) => new HyperlinkInfo($"rId{NumericId + offset}", Target, TargetMode);
 
         /// <summary>
         ///
@@ -76,7 +76,7 @@ namespace AD.OpenXml.Structures
         ///
         /// </returns>
         [Pure]
-        public HyperlinkInfo WithRelationId([NotNull] string rId) => new HyperlinkInfo(rId, Target.ToString(), TargetMode);
+        public HyperlinkInfo WithRelationId([NotNull] string rId) => new HyperlinkInfo(rId, Target, TargetMode);
 
         /// <inheritdoc />
         [Pure]
