@@ -61,6 +61,27 @@ namespace AD.OpenXml.Structures
         }
 
         /// <summary>
+        /// Returns a new target URI.
+        /// </summary>
+        /// <param name="value">The value used to construct the new URI.</param>
+        /// <returns>
+        /// A new target URI.
+        /// </returns>
+        [Pure]
+        [NotNull]
+        public Uri MakeUri([NotNull] string value)
+        {
+            if (value is null)
+                throw new ArgumentNullException(nameof(value));
+
+            ReadOnlySpan<char> span = TargetUri.OriginalString;
+            ReadOnlySpan<char> left = span.Slice(default, span.LastIndexOf('/'));
+            ReadOnlySpan<char> right = span.Slice(span.LastIndexOf('.'));
+
+            return new Uri($"{left.ToString()}/image{value}{right.ToString()}", UriKind.Relative);
+        }
+
+        /// <summary>
         ///
         /// </summary>
         [Pure]

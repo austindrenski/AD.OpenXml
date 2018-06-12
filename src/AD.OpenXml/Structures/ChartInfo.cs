@@ -67,6 +67,26 @@ namespace AD.OpenXml.Structures
                      .RemoveByAll(C + "userShapes");
         }
 
+        /// <summary>
+        /// Returns a new target URI.
+        /// </summary>
+        /// <param name="value">The value used to construct the new URI.</param>
+        /// <returns>
+        /// A new target URI.
+        /// </returns>
+        [Pure]
+        [NotNull]
+        public Uri MakeUri([NotNull] string value)
+        {
+            if (value is null)
+                throw new ArgumentNullException(nameof(value));
+
+            ReadOnlySpan<char> span = TargetUri.OriginalString;
+            ReadOnlySpan<char> left = span.Slice(0, span.LastIndexOf('/'));
+
+            return new Uri($"{left.ToString()}/chart{value}.xml", UriKind.Relative);
+        }
+
         /// <inheritdoc />
         [Pure]
         public override string ToString() => $"(Id: {Id}, TargetUri: {TargetUri})";

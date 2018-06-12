@@ -18,7 +18,11 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Document
     {
-        [NotNull] private static readonly Sequence DocPrSequence = new Sequence();
+//        [NotNull] private readonly Sequence _idSequence = new Sequence("rId{0}");
+        [NotNull] private readonly Sequence _docPrSequence = new Sequence();
+        [NotNull] private readonly Sequence _chartSequence = new Sequence();
+        [NotNull] private readonly Sequence _imageSequence = new Sequence();
+
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
         [NotNull] private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
@@ -264,18 +268,42 @@ namespace AD.OpenXml.Structures
 
             Package result = _package.ToPackage(FileAccess.ReadWrite);
 
-            PackagePart documentPart = result.GetPart(PartUri);
+            PackagePart part = result.GetPart(PartUri);
+
+            Sequence idSequence = new Sequence("rId{0}");
+
+            PackageRelationship[] allRelationships =
+                part.GetRelationships()
+                    .ToArray();
+
+            // Remove all part relationships.
+            foreach (PackageRelationship rel in allRelationships)
+            {
+                part.DeleteRelationship(rel.Id);
+            }
 
             Dictionary<string, PackageRelationship> resources = new Dictionary<string, PackageRelationship>();
+            Dictionary<string, PackageRelationship> otherResources = new Dictionary<string, PackageRelationship>();
 
-            foreach (ChartInfo info in other.Charts)
+            // Re-number relationships we don't modify.
+            PackageRelationship[] defaultRelationships =
+                allRelationships.Where(x => x.RelationshipType != ChartInfo.RelationshipType)
+                                .Where(x => x.RelationshipType != ImageInfo.RelationshipType)
+                                .Where(x => x.RelationshipType != HyperlinkInfo.RelationshipType)
+                                .ToArray();
+
+            foreach (PackageRelationship rel in defaultRelationships)
             {
-                Uri uri =
-                    result.PartExists(MakePartUri(info.TargetUri))
-                        ? MakeUniqueUri(info.TargetUri)
-                        : info.TargetUri;
+                resources[rel.Id] =
+                    part.CreateRelationship(rel.TargetUri, rel.TargetMode, rel.RelationshipType, idSequence.NextValue());
+            }
 
-                resources[info.Id] = documentPart.CreateRelationship(uri, TargetMode.Internal, ChartInfo.RelationshipType);
+            // For existing charts: remove, replace, and recreate the relationship.
+            foreach (ChartInfo info in Charts)
+            {
+                result.DeletePart(MakePartUri(info.TargetUri));
+
+                Uri uri = info.MakeUri(_chartSequence.NextValue());
 
                 using (Stream stream = result.CreatePart(MakePartUri(uri), ChartInfo.ContentType).GetStream())
                 {
@@ -284,26 +312,70 @@ namespace AD.OpenXml.Structures
                         info.Chart.WriteTo(xml);
                     }
                 }
+
+                resources[info.Id] =
+                    part.CreateRelationship(uri, TargetMode.Internal, ChartInfo.RelationshipType, idSequence.NextValue());
             }
 
-            foreach (ImageInfo info in other.Images)
+            // For new charts: add then create the relationship.
+            foreach (ChartInfo info in other.Charts)
             {
-                Uri uri =
-                    result.PartExists(MakePartUri(info.TargetUri))
-                        ? MakeUniqueUri(info.TargetUri)
-                        : info.TargetUri;
+                Uri uri = info.MakeUri(_chartSequence.NextValue());
 
-                resources[info.Id] = documentPart.CreateRelationship(uri, TargetMode.Internal, ImageInfo.RelationshipType);
+                using (Stream stream = result.CreatePart(MakePartUri(uri), ChartInfo.ContentType).GetStream())
+                {
+                    using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
+                    {
+                        info.Chart.WriteTo(xml);
+                    }
+                }
+
+                otherResources[info.Id] =
+                    part.CreateRelationship(uri, TargetMode.Internal, ChartInfo.RelationshipType, idSequence.NextValue());
+            }
+
+            // For existing images: remove, replace, and recreate the relationship.
+            foreach (ImageInfo info in Images)
+            {
+                result.DeletePart(MakePartUri(info.TargetUri));
+
+                Uri uri = info.MakeUri(_imageSequence.NextValue());
 
                 using (Stream stream = result.CreatePart(MakePartUri(uri), info.ContentType).GetStream())
                 {
                     stream.Write(info.Image.Span);
                 }
+
+                resources[info.Id] =
+                    part.CreateRelationship(uri, TargetMode.Internal, ImageInfo.RelationshipType, idSequence.NextValue());
             }
 
+            // For new images: add then create the relationship.
+            foreach (ImageInfo info in other.Images)
+            {
+                Uri uri = info.MakeUri(_imageSequence.NextValue());
+
+                using (Stream stream = result.CreatePart(MakePartUri(uri), info.ContentType).GetStream())
+                {
+                    stream.Write(info.Image.Span);
+                }
+
+                otherResources[info.Id] =
+                    part.CreateRelationship(uri, TargetMode.Internal, ImageInfo.RelationshipType, idSequence.NextValue());
+            }
+
+            // For existing hyperlinks: recreate the relationship.
+            foreach (HyperlinkInfo info in Hyperlinks)
+            {
+                resources[info.Id] =
+                    part.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, idSequence.NextValue());
+            }
+
+            // For new hyperlinks: create the relationship.
             foreach (HyperlinkInfo info in other.Hyperlinks)
             {
-                resources[info.Id] = documentPart.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType);
+                otherResources[info.Id] =
+                    part.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, idSequence.NextValue());
             }
 
             XElement content =
@@ -312,12 +384,12 @@ namespace AD.OpenXml.Structures
                     Combine(Content.Attributes(), other.Content.Attributes()),
                     new XElement(
                         W + "body",
-                        Content.Element(W + "body")?.Elements(),
-                        other.Content.Element(W + "body")?.Elements().Select(x => Update(x, resources))));
+                        Content.Element(W + "body")?.Elements().Select(x => Update(x, resources)),
+                        other.Content.Element(W + "body")?.Elements().Select(x => Update(x, otherResources))));
 
             content.RemoveDuplicateSectionProperties();
 
-            using (Stream stream = documentPart.GetStream())
+            using (Stream stream = part.GetStream())
             {
                 using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
                 {
@@ -373,14 +445,9 @@ namespace AD.OpenXml.Structures
 
                 PackagePart part = _package.GetPart(MakePartUri(relationship.TargetUri));
 
-                Uri uri =
-                    target.PartExists(part.Uri)
-                        ? MakeUniqueUri(part.Uri)
-                        : part.Uri;
-
                 using (Stream from = part.GetStream())
                 {
-                    using (Stream to = target.CreatePart(uri, part.ContentType).GetStream())
+                    using (Stream to = target.CreatePart(part.Uri, part.ContentType).GetStream())
                     {
                         from.CopyTo(to);
                     }
@@ -395,7 +462,7 @@ namespace AD.OpenXml.Structures
 
         [Pure]
         [NotNull]
-        private static XObject Update([NotNull] XObject xObject, [NotNull] Dictionary<string, PackageRelationship> resources)
+        private XObject Update([NotNull] XObject xObject, [NotNull] Dictionary<string, PackageRelationship> resources)
         {
             switch (xObject)
             {
@@ -406,7 +473,7 @@ namespace AD.OpenXml.Structures
 
                 case XAttribute a
                     when a.Name == "id" && a.Parent?.Name == WP + "docPr":
-                    return new XAttribute(a.Name, DocPrSequence.NextValue());
+                    return new XAttribute(a.Name, _docPrSequence.NextValue());
 
                 case XAttribute a:
                     return new XAttribute(a.Name, a.Value);
@@ -436,18 +503,6 @@ namespace AD.OpenXml.Structures
         [Pure]
         [NotNull]
         private static Uri MakePartUri([NotNull] Uri targetUri) => new Uri($"/word/{targetUri}", UriKind.Relative);
-
-        [Pure]
-        [NotNull]
-        private static Uri MakeUniqueUri([NotNull] Uri uri)
-        {
-            ReadOnlySpan<char> original = uri.OriginalString;
-            int position = original.LastIndexOf('.');
-            ReadOnlySpan<char> left = original.Slice(0, position);
-            ReadOnlySpan<char> right = original.Slice(position);
-
-            return new Uri($"{left.ToString()}_{Guid.NewGuid():N}{right.ToString()}", UriKind.Relative);
-        }
 
         [Pure]
         [NotNull]

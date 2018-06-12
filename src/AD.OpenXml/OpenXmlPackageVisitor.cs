@@ -173,23 +173,6 @@ namespace AD.OpenXml
             SaveHelper(
                 package,
                 documentPart,
-                new Uri("/word/settings.xml", UriKind.Relative),
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
-                new XElement(W + "settings",
-                    new XAttribute(XNamespace.Xmlns + "w", W),
-                    new XAttribute(XNamespace.Xmlns + "m", M),
-                    new XElement(M + "mathPr",
-                        new XElement(M + "mathFont",
-                            new XAttribute(M + "val", "Cambria Math")),
-                        new XElement(M + "intLim",
-                            new XAttribute(M + "val", "subSup")),
-                        new XElement(M + "naryLim",
-                            new XAttribute(M + "val", "subSup")))));
-
-            SaveHelper(
-                package,
-                documentPart,
                 new Uri("/word/numbering.xml", UriKind.Relative),
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml",
                 "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering",
@@ -202,6 +185,26 @@ namespace AD.OpenXml
                 "application/vnd.openxmlformats-officedocument.theme+xml",
                 "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
                 theme1 ?? Theme1);
+
+            SaveHelper(
+                package,
+                documentPart,
+                new Uri("/word/settings.xml", UriKind.Relative),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+                new XElement(W + "settings",
+                    new XAttribute(XNamespace.Xmlns + "w", W),
+                    new XAttribute(XNamespace.Xmlns + "m", M),
+                    new XElement(M + "mathPr",
+                        new XElement(M + "mathFont",
+                            new XAttribute(M + "val", "Cambria Math")),
+                        new XElement(M + "intLim",
+                            new XAttribute(M + "val", "subSup")),
+                        new XElement(M + "naryLim",
+                            new XAttribute(M + "val", "subSup"))),
+                    new XElement(W + "rsids",
+                        new XElement(W + "rsidRoot",
+                            new XAttribute(W + "val", package.GetHashCode().ToString("X8"))))));
 
             return new OpenXmlPackageVisitor(package);
         }
