@@ -18,7 +18,6 @@ namespace AD.OpenXml.Structures
     public class Footnotes
     {
         [NotNull] private static readonly Sequence FootnoteSequence = new Sequence();
-
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -67,7 +66,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public static readonly Uri PartName = new Uri("/word/footnotes.xml", UriKind.Relative);
+        [NotNull] public static readonly Uri PartUri = new Uri("/word/footnotes.xml", UriKind.Relative);
 
         /// <summary>
         /// The package that initialized the <see cref="Footnotes"/>.
@@ -114,11 +113,14 @@ namespace AD.OpenXml.Structures
             if (package is null)
                 throw new ArgumentNullException(nameof(package));
 
-            _package = package;
+            _package =
+                package.FileOpenAccess.HasFlag(FileAccess.Write)
+                    ? package.ToPackage()
+                    : package;
 
-            if (package.PartExists(PartName))
+            if (package.PartExists(PartUri))
             {
-                using (Stream stream = package.GetPart(PartName).GetStream())
+                using (Stream stream = package.GetPart(PartUri).GetStream())
                 {
                     Content = XElement.Load(stream);
                 }
@@ -131,28 +133,12 @@ namespace AD.OpenXml.Structures
             }
 
             Hyperlinks =
-                package.PartExists(PartName)
-                    ? package.GetPart(PartName)
+                package.PartExists(PartUri)
+                    ? package.GetPart(PartUri)
                              .GetRelationshipsByType(HyperlinkInfo.RelationshipType)
                              .Select(x => new HyperlinkInfo(x.Id, x.TargetUri, x.TargetMode))
                              .ToArray()
                     : new HyperlinkInfo[0];
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="package"></param>
-        /// <param name="content"></param>
-        /// <param name="hyperlinks"></param>
-        private Footnotes(
-            [NotNull] Package package,
-            [NotNull] XElement content,
-            [NotNull] IEnumerable<HyperlinkInfo> hyperlinks)
-        {
-            _package = package;
-            Content = content;
-            Hyperlinks = hyperlinks.ToArray();
         }
 
         /// <summary>
@@ -163,13 +149,30 @@ namespace AD.OpenXml.Structures
         /// <returns>
         ///
         /// </returns>
-        public Footnotes With(
-            [CanBeNull] XElement content = default,
-            [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
-            => new Footnotes(
-                _package,
-                content ?? Content,
-                hyperlinks ?? Hyperlinks);
+        public Footnotes With([CanBeNull] XElement content = default, [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
+        {
+            Package package = _package.ToPackage(FileAccess.ReadWrite);
+
+            if (package.PartExists(PartUri))
+                package.DeletePart(PartUri);
+
+            PackagePart footnotesPart = package.CreatePart(PartUri, ContentType);
+
+            foreach (HyperlinkInfo info in hyperlinks ?? Hyperlinks)
+            {
+                footnotesPart.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, info.Id);
+            }
+
+            using (Stream stream = footnotesPart.GetStream())
+            {
+                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
+                {
+                    (content ?? Content).WriteTo(xml);
+                }
+            }
+
+            return new Footnotes(package);
+        }
 
         /// <summary>
         ///
@@ -183,12 +186,12 @@ namespace AD.OpenXml.Structures
             if (other is null)
                 throw new ArgumentNullException(nameof(other));
 
-            Package result = Package.Open(_package.ToStream(), FileMode.Open);
+            Package result = _package.ToPackage(FileAccess.ReadWrite);
 
             PackagePart footnotesPart =
-                result.PartExists(PartName)
-                    ? result.GetPart(PartName)
-                    : result.CreatePart(PartName, ContentType);
+                result.PartExists(PartUri)
+                    ? result.GetPart(PartUri)
+                    : result.CreatePart(PartUri, ContentType);
 
             Dictionary<string, PackageRelationship> resources = new Dictionary<string, PackageRelationship>();
 
@@ -207,7 +210,7 @@ namespace AD.OpenXml.Structures
             // TODO: Can footnote offsetting be done here?
             // TODO: This code doesn't work because the packages are out of date during concatenation.
 //            XElement document;
-//            using (Stream stream = result.GetPart(Document.PartName).GetStream())
+//            using (Stream stream = result.GetPart(Document.MakePartUri).GetStream())
 //            {
 //                document = XElement.Load(stream);
 //            }
@@ -235,7 +238,7 @@ namespace AD.OpenXml.Structures
 //                    reference.SetAttributeValue(W + "id", next);
 //            }
 //
-//            using (Stream stream = result.GetPart(Document.PartName).GetStream())
+//            using (Stream stream = result.GetPart(Document.MakePartUri).GetStream())
 //            {
 //                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
 //                {
@@ -266,14 +269,17 @@ namespace AD.OpenXml.Structures
             if (target is null)
                 throw new ArgumentNullException(nameof(target));
 
-            if (target.PartExists(PartName))
-                target.DeletePart(PartName);
+            if (!_package.PartExists(PartUri))
+                return;
 
-            target.GetPart(Document.PartName)
-                  .CreateRelationship(PartName, TargetMode.Internal, RelationshipType);
+            if (target.PartExists(PartUri))
+                target.DeletePart(PartUri);
 
-            PackagePart source = _package.GetPart(PartName);
-            PackagePart destination = target.CreatePart(PartName, ContentType);
+            target.GetPart(Document.PartUri)
+                  .CreateRelationship(PartUri, TargetMode.Internal, RelationshipType);
+
+            PackagePart source = _package.GetPart(PartUri);
+            PackagePart destination = target.CreatePart(PartUri, ContentType);
 
             using (Stream from = source.GetStream())
             {
@@ -285,16 +291,22 @@ namespace AD.OpenXml.Structures
 
             foreach (PackageRelationship relationship in source.GetRelationships())
             {
+                if (relationship.RelationshipType != ChartInfo.RelationshipType &&
+                    relationship.RelationshipType != ImageInfo.RelationshipType &&
+                    relationship.RelationshipType != HyperlinkInfo.RelationshipType)
+                    continue;
+
                 destination.CreateRelationship(
                     relationship.TargetUri,
                     relationship.TargetMode,
                     relationship.RelationshipType,
                     relationship.Id);
 
-                if (relationship.RelationshipType == HyperlinkInfo.RelationshipType)
+                if (relationship.RelationshipType != ChartInfo.RelationshipType &&
+                    relationship.RelationshipType != ImageInfo.RelationshipType)
                     continue;
 
-                PackagePart part = _package.GetPart(PartUri(relationship.TargetUri));
+                PackagePart part = _package.GetPart(MakePartUri(relationship.TargetUri));
 
                 using (Stream from = part.GetStream())
                 {
@@ -319,7 +331,7 @@ namespace AD.OpenXml.Structures
         /// </returns>
         [Pure]
         [NotNull]
-        private static Uri PartUri([NotNull] Uri targetUri) => new Uri($"/word/{targetUri}", UriKind.Relative);
+        private static Uri MakePartUri([NotNull] Uri targetUri) => new Uri($"/word/{targetUri}", UriKind.Relative);
 
         [Pure]
         [NotNull]
@@ -344,12 +356,18 @@ namespace AD.OpenXml.Structures
                          resources.TryGetValue(a.Value, out PackageRelationship rel):
                     return new XAttribute(a.Name, rel.Id);
 
+                case XAttribute a:
+                    return new XAttribute(a.Name, a.Value);
+
                 case XElement e:
                     return
                         new XElement(
                             e.Name,
                             e.Attributes().Select(x => UpdateResources(x, resources)),
                             e.Nodes().Select(x => UpdateResources(x, resources)));
+
+                case XText t:
+                    return new XText(t.Value);
 
                 default:
                     return xObject;

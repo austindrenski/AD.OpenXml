@@ -16,6 +16,8 @@ namespace AD.OpenXml.Visits
     public static class DocumentVisit
     {
         [NotNull] private static readonly XNamespace M = XNamespaces.OpenXmlMath;
+        // TODO: move to AD.Xml
+        [NotNull] private static readonly XNamespace O = "urn:schemas-microsoft-com:office:office";
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         [NotNull] private static readonly IEnumerable<XName> Revisions =
@@ -67,6 +69,9 @@ namespace AD.OpenXml.Visits
 
                     // Remove run properties from the paragraph scope.
                    .RemoveRunPropertiesFromParagraphProperties()
+
+                    // We never support binary objects.
+                   .RemoveByAll(O + "OLEObject")
 
                     // Remove elements that should never exist in-line.
                    .RemoveByAll(W + "bCs")

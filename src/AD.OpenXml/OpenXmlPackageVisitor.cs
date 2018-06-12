@@ -15,7 +15,7 @@ using JetBrains.Annotations;
 namespace AD.OpenXml
 {
     /// <summary>
-    /// Represents a visitor or rewriter for OpenXML documents.
+    /// Represents a visitor for OpenXML documents.
     /// </summary>
     /// <remarks>
     /// This class is modeled after the <see cref="T:System.Linq.Expressions.ExpressionVisitor" />.
@@ -31,7 +31,7 @@ namespace AD.OpenXml
     public sealed class OpenXmlPackageVisitor
     {
         [NotNull] private static readonly Package DefaultOpenXmlPackage =
-            Package.Open(new MemoryStream(DocxFilePath.Create().ToArray()));
+            Package.Open(new MemoryStream(DocxFilePath.Create().ToArray()), FileMode.Open, FileAccess.Read);
 
         [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
         [NotNull] private static readonly XNamespace M = XNamespaces.OpenXmlMath;
@@ -55,6 +55,12 @@ namespace AD.OpenXml
                 OmitXmlDeclaration = false,
                 WriteEndDocumentOnClose = true
             };
+
+        /// <summary>
+        /// The package that initialized the <see cref="OpenXmlPackageVisitor"/>.
+        /// </summary>
+        [NotNull]
+        public Package Package { get; }
 
         /// <summary>
         ///
@@ -91,8 +97,6 @@ namespace AD.OpenXml
         /// </summary>
         public int RevisionId => Math.Max(Document.RevisionId, Footnotes.RevisionId);
 
-        [NotNull] private readonly Package _package;
-
         /// <summary>
         /// Initializes an <see cref="OpenXmlPackageVisitor"/> by reading document parts into memory.
         /// </summary>
@@ -103,7 +107,10 @@ namespace AD.OpenXml
             if (package is null)
                 throw new ArgumentNullException(nameof(package));
 
-            _package = package;
+            Package =
+                package.FileOpenAccess.HasFlag(FileAccess.Write)
+                    ? package.ToPackage()
+                    : package;
 
             Document = new Document(package);
             Footnotes = new Footnotes(package);
@@ -131,32 +138,6 @@ namespace AD.OpenXml
         }
 
         /// <summary>
-        /// Initializes a new <see cref="OpenXmlPackageVisitor"/> from the supplied components.
-        /// </summary>
-        /// <param name="package"></param>
-        /// <param name="document"></param>
-        /// <param name="footnotes"></param>
-        /// <param name="styles"></param>
-        /// <param name="numbering"></param>
-        /// <param name="theme1"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        private OpenXmlPackageVisitor(
-            [NotNull] Package package,
-            Document document,
-            [NotNull] Footnotes footnotes,
-            [NotNull] XElement styles,
-            [NotNull] XElement numbering,
-            [NotNull] XElement theme1)
-        {
-            _package = package;
-            Document = document;
-            Footnotes = footnotes;
-            Styles = styles;
-            Numbering = numbering;
-            Theme1 = theme1;
-        }
-
-        /// <summary>
         ///
         /// </summary>
         /// <param name="document"></param>
@@ -173,13 +154,57 @@ namespace AD.OpenXml
             [CanBeNull] XElement styles = default,
             [CanBeNull] XElement numbering = default,
             [CanBeNull] XElement theme1 = default)
-            => new OpenXmlPackageVisitor(
-                _package,
-                document ?? Document,
-                footnotes ?? Footnotes,
-                styles ?? Styles,
-                numbering ?? Numbering,
+        {
+            Package package = DefaultOpenXmlPackage.ToPackage(FileAccess.ReadWrite);
+
+            (document ?? Document).CopyTo(package);
+            (footnotes ?? Footnotes).CopyTo(package);
+
+            PackagePart documentPart = package.GetPart(Document.PartUri);
+
+            SaveHelper(
+                package,
+                documentPart,
+                new Uri("/word/styles.xml", UriKind.Relative),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+                styles ?? Styles);
+
+            SaveHelper(
+                package,
+                documentPart,
+                new Uri("/word/settings.xml", UriKind.Relative),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
+                new XElement(W + "settings",
+                    new XAttribute(XNamespace.Xmlns + "w", W),
+                    new XAttribute(XNamespace.Xmlns + "m", M),
+                    new XElement(M + "mathPr",
+                        new XElement(M + "mathFont",
+                            new XAttribute(M + "val", "Cambria Math")),
+                        new XElement(M + "intLim",
+                            new XAttribute(M + "val", "subSup")),
+                        new XElement(M + "naryLim",
+                            new XAttribute(M + "val", "subSup")))));
+
+            SaveHelper(
+                package,
+                documentPart,
+                new Uri("/word/numbering.xml", UriKind.Relative),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering",
+                numbering ?? Numbering);
+
+            SaveHelper(
+                package,
+                documentPart,
+                new Uri("/word/theme/theme1.xml", UriKind.Relative),
+                "application/vnd.openxmlformats-officedocument.theme+xml",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
                 theme1 ?? Theme1);
+
+            return new OpenXmlPackageVisitor(package);
+        }
 
         /// <summary>
         /// Visit and join the component document into this <see cref="OpenXmlPackageVisitor"/>.
@@ -194,10 +219,10 @@ namespace AD.OpenXml
 
             return
                 new OpenXmlPackageVisitor(package)
-                    .VisitDoc(RevisionId)
-                    .VisitFootnotes(Footnotes.Count, RevisionId)
-                    .VisitStyles()
-                    .VisitNumbering();
+                   .VisitDoc(RevisionId)
+                   .VisitFootnotes(Footnotes.Count, RevisionId)
+                   .VisitStyles()
+                   .VisitNumbering();
         }
 
         /// <summary>
@@ -222,9 +247,6 @@ namespace AD.OpenXml
         [NotNull]
         private OpenXmlPackageVisitor Fold([NotNull] OpenXmlPackageVisitor subject)
         {
-            if (subject is null)
-                throw new ArgumentNullException(nameof(subject));
-
             Document document = Document.Concat(subject.Document);
 
             Footnotes footnotes = Footnotes.Concat(subject.Footnotes);
@@ -235,11 +257,11 @@ namespace AD.OpenXml
                     Styles.Attributes(),
                     Styles.Elements()
                           .Union(
-                              subject.Styles
-                                     .Elements()
-                                     .Where(x => x.Name != W + "docDefaults")
-                                     .Where(x => (string) x.Attribute(W + "styleId") != "Normal"),
-                              XNode.EqualityComparer));
+                               subject.Styles
+                                      .Elements()
+                                      .Where(x => x.Name != W + "docDefaults")
+                                      .Where(x => (string) x.Attribute(W + "styleId") != "Normal"),
+                               XNode.EqualityComparer));
 
             XElement numbering =
                 new XElement(
@@ -247,8 +269,8 @@ namespace AD.OpenXml
                     Numbering.Attributes(),
                     Numbering.Elements()
                              .Union(
-                                 subject.Numbering.Elements(),
-                                 XNode.EqualityComparer));
+                                  subject.Numbering.Elements(),
+                                  XNode.EqualityComparer));
 
             // TODO: write a ThemeVisit
 //            XElement theme =
@@ -263,77 +285,20 @@ namespace AD.OpenXml
             return With(document, footnotes, styles, numbering, subject.Theme1);
         }
 
-        /// <summary>
-        /// Creates a <see cref="Package"/> from the <see cref="OpenXmlPackageVisitor"/>.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="Package"/> representing the OpenXML package.
-        /// </returns>
-        [Pure]
-        [NotNull]
-        public Package ToPackage()
+        private static void SaveHelper(
+            [NotNull] Package package,
+            [NotNull] PackagePart owner,
+            [NotNull] Uri uri,
+            [NotNull] string contentType,
+            [NotNull] string relationshipType,
+            [NotNull] XElement element)
         {
-            MemoryStream ms = new MemoryStream();
-            ms.Write(DocxFilePath.Create().Span);
-            Package package = Package.Open(ms, FileMode.Open);
+            if (package.PartExists(uri))
+                package.DeletePart(uri);
 
-            Document.CopyTo(package);
-            Footnotes.CopyTo(package);
-
-            PackagePart document = package.GetPart(Document.PartName);
-
-            SaveHelper(
-                package,
-                document,
-                new Uri("/word/styles.xml", UriKind.Relative),
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
-                Styles);
-
-            SaveHelper(
-                package,
-                document,
-                new Uri("/word/settings.xml", UriKind.Relative),
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings",
-                new XElement(W + "settings",
-                    new XAttribute(XNamespace.Xmlns + "w", W),
-                    new XAttribute(XNamespace.Xmlns + "m", M),
-                    new XElement(M + "mathPr",
-                        new XElement(M + "mathFont",
-                            new XAttribute(M + "val", "Cambria Math")),
-                        new XElement(M + "intLim",
-                            new XAttribute(M + "val", "subSup")),
-                        new XElement(M + "naryLim",
-                            new XAttribute(M + "val", "subSup")))));
-
-            SaveHelper(
-                package,
-                document,
-                new Uri("/word/numbering.xml", UriKind.Relative),
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering",
-                Numbering);
-
-            SaveHelper(
-                package,
-                document,
-                new Uri("/word/theme/theme1.xml", UriKind.Relative),
-                "application/vnd.openxmlformats-officedocument.theme+xml",
-                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
-                Theme1);
-
-            return package;
-        }
-
-        private static void SaveHelper(Package package, PackagePart owner, Uri uri, string contentType, string relationshipType, XElement element)
-        {
             owner.CreateRelationship(uri, TargetMode.Internal, relationshipType);
 
-            PackagePart part =
-                package.PartExists(uri)
-                    ? package.GetPart(uri)
-                    : package.CreatePart(uri, contentType);
+            PackagePart part = package.CreatePart(uri, contentType);
 
             using (Stream stream = part.GetStream())
             {

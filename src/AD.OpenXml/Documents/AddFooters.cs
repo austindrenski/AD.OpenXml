@@ -29,7 +29,7 @@ namespace AD.OpenXml.Documents
         /// <summary>
         /// The content media type of an OpenXML footer.
         /// </summary>
-        [NotNull] private static readonly string MimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml";
+        [NotNull] private static readonly string ContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml";
 
         /// <summary>
         /// The schema type for an OpenXML footer relationship.
@@ -54,19 +54,11 @@ namespace AD.OpenXml.Documents
 
             foreach (PackagePart part in package.GetParts())
             {
-                if (part.ContentType == MimeType)
+                if (part.ContentType == ContentType)
                     package.DeletePart(part.Uri);
-
-                if (part.ContentType != Document.ContentType)
-                    continue;
-
-                foreach (PackageRelationship relationship in part.GetRelationshipsByType(RelationshipType))
-                {
-                    part.DeleteRelationship(relationship.Id);
-                }
             }
 
-            using (Stream stream = package.GetPart(Document.PartName).GetStream())
+            using (Stream stream = package.GetPart(Document.PartUri).GetStream())
             {
                 XElement document = XElement.Load(stream);
                 document.Descendants(W + "footerReference").Remove();
@@ -90,7 +82,7 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(publisher));
 
             Uri headerUri = new Uri("/word/footer1.xml", UriKind.Relative);
-            PackagePart headerPart = package.CreatePart(headerUri, MimeType);
+            PackagePart headerPart = package.CreatePart(headerUri, ContentType);
 
             using (Stream stream = headerPart.GetStream())
             {
@@ -98,9 +90,9 @@ namespace AD.OpenXml.Documents
             }
 
             PackageRelationship relationship =
-                package.GetPart(Document.PartName).CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
+                package.GetPart(Document.PartUri).CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
 
-            using (Stream stream = package.GetPart(Document.PartName).GetStream())
+            using (Stream stream = package.GetPart(Document.PartUri).GetStream())
             {
                 XElement document = XElement.Load(stream);
 
@@ -141,7 +133,7 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(website));
 
             Uri headerUri = new Uri("/word/footer2.xml", UriKind.Relative);
-            PackagePart headerPart = package.CreatePart(headerUri, MimeType);
+            PackagePart headerPart = package.CreatePart(headerUri, ContentType);
 
             using (Stream stream = headerPart.GetStream())
             {
@@ -149,9 +141,9 @@ namespace AD.OpenXml.Documents
             }
 
             PackageRelationship relationship =
-                package.GetPart(Document.PartName).CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
+                package.GetPart(Document.PartUri).CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
 
-            using (Stream stream = package.GetPart(Document.PartName).GetStream())
+            using (Stream stream = package.GetPart(Document.PartUri).GetStream())
             {
                 XElement document = XElement.Load(stream);
 

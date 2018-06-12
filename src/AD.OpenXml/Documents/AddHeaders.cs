@@ -28,7 +28,7 @@ namespace AD.OpenXml.Documents
         /// <summary>
         /// The content media type of an OpenXML header.
         /// </summary>
-        [NotNull] private static readonly string MimeType =
+        [NotNull] private static readonly string ContentType =
             "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml";
 
         /// <summary>
@@ -50,10 +50,12 @@ namespace AD.OpenXml.Documents
             if (title is null)
                 throw new ArgumentNullException(nameof(title));
 
-            foreach (PackagePart part in package.GetParts())
+            Package result = package.ToPackage(FileAccess.ReadWrite);
+
+            foreach (PackagePart part in result.GetParts())
             {
-                if (part.ContentType == MimeType)
-                    package.DeletePart(part.Uri);
+                if (part.ContentType == ContentType)
+                    result.DeletePart(part.Uri);
 
                 if (part.ContentType != Document.ContentType)
                     continue;
@@ -64,7 +66,7 @@ namespace AD.OpenXml.Documents
                 }
             }
 
-            using (Stream stream = package.GetPart(Document.PartName).GetStream())
+            using (Stream stream = result.GetPart(Document.PartUri).GetStream())
             {
                 XElement document = XElement.Load(stream);
                 document.Descendants(W + "headerReference").Remove();
@@ -72,10 +74,10 @@ namespace AD.OpenXml.Documents
                 document.Save(stream);
             }
 
-            AddOddPageHeader(package);
-            AddEvenPageHeader(package, title);
+            AddOddPageHeader(result);
+            AddEvenPageHeader(result, title);
 
-            return package;
+            return result;
         }
 
         /// <summary>
@@ -90,7 +92,7 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(package));
 
             Uri headerUri = new Uri("/word/header2.xml", UriKind.Relative);
-            PackagePart headerPart = package.CreatePart(headerUri, MimeType);
+            PackagePart headerPart = package.CreatePart(headerUri, ContentType);
 
             using (Stream stream = headerPart.GetStream())
             {
@@ -98,9 +100,10 @@ namespace AD.OpenXml.Documents
             }
 
             PackageRelationship relationship =
-                package.GetPart(Document.PartName).CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
+                package.GetPart(Document.PartUri)
+                       .CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
 
-            using (Stream stream = package.GetPart(Document.PartName).GetStream())
+            using (Stream stream = package.GetPart(Document.PartUri).GetStream())
             {
                 XElement document = XElement.Load(stream);
 
@@ -135,7 +138,7 @@ namespace AD.OpenXml.Documents
                 throw new ArgumentNullException(nameof(title));
 
             Uri headerUri = new Uri("/word/header1.xml", UriKind.Relative);
-            PackagePart headerPart = package.CreatePart(headerUri, MimeType);
+            PackagePart headerPart = package.CreatePart(headerUri, ContentType);
 
             using (Stream stream = headerPart.GetStream())
             {
@@ -143,9 +146,10 @@ namespace AD.OpenXml.Documents
             }
 
             PackageRelationship relationship =
-                package.GetPart(Document.PartName).CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
+                package.GetPart(Document.PartUri)
+                       .CreateRelationship(headerUri, TargetMode.Internal, RelationshipType);
 
-            using (Stream stream = package.GetPart(Document.PartName).GetStream())
+            using (Stream stream = package.GetPart(Document.PartUri).GetStream())
             {
                 XElement document = XElement.Load(stream);
 
