@@ -142,7 +142,7 @@ namespace AD.OpenXml
         /// <exception cref="ArgumentNullException"></exception>
         private OpenXmlPackageVisitor(
             [NotNull] Package package,
-            [NotNull] Document document,
+            Document document,
             [NotNull] Footnotes footnotes,
             [NotNull] XElement styles,
             [NotNull] XElement numbering,

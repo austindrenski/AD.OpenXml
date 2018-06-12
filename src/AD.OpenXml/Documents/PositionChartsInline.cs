@@ -18,11 +18,10 @@ namespace AD.OpenXml.Documents
     [PublicAPI]
     public static class PositionChartsInlineExtensions
     {
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-
-        private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
-
-        private static readonly XNamespace Wp2010 = "http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing";
+        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
+        // TODO: add to AD.Xml
+        [NotNull] private static readonly XNamespace WP14 = "http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing";
 
         /// <summary>
         ///
@@ -67,7 +66,7 @@ namespace AD.OpenXml.Documents
             foreach (XElement item in anchors)
             {
                 item.Element(WP + "anchor")?
-                    .AddAfterSelf(
+                   .AddAfterSelf(
                         new XElement(WP + "inline",
                             new XAttribute("distT", "0"),
                             new XAttribute("distB", "0"),
@@ -75,8 +74,8 @@ namespace AD.OpenXml.Documents
                             new XAttribute("distR", "0"),
                             item.Element(WP + "anchor")?
                                 .Elements()
-                                .RemoveAttributesBy(Wp2010 + "anchorId")
-                                .RemoveAttributesBy(Wp2010 + "editId")));
+                                .RemoveAttributesBy(WP14 + "anchorId")
+                                .RemoveAttributesBy(WP14 + "editId")));
 
                 item.Descendants(WP + "simplePos").Remove();
                 item.Descendants(WP + "positionH").Remove();
