@@ -194,10 +194,10 @@ namespace AD.OpenXml
 
             return
                 new OpenXmlPackageVisitor(package)
-                   .VisitDoc(RevisionId)
-                   .VisitFootnotes(Footnotes.Count, RevisionId)
-                   .VisitStyles()
-                   .VisitNumbering();
+                    .VisitDoc(RevisionId)
+                    .VisitFootnotes(Footnotes.Count, RevisionId)
+                    .VisitStyles()
+                    .VisitNumbering();
         }
 
         /// <summary>
@@ -235,11 +235,11 @@ namespace AD.OpenXml
                     Styles.Attributes(),
                     Styles.Elements()
                           .Union(
-                               subject.Styles
-                                      .Elements()
-                                      .Where(x => x.Name != W + "docDefaults")
-                                      .Where(x => (string) x.Attribute(W + "styleId") != "Normal"),
-                               XNode.EqualityComparer));
+                              subject.Styles
+                                     .Elements()
+                                     .Where(x => x.Name != W + "docDefaults")
+                                     .Where(x => (string) x.Attribute(W + "styleId") != "Normal"),
+                              XNode.EqualityComparer));
 
             XElement numbering =
                 new XElement(
@@ -247,8 +247,8 @@ namespace AD.OpenXml
                     Numbering.Attributes(),
                     Numbering.Elements()
                              .Union(
-                                  subject.Numbering.Elements(),
-                                  XNode.EqualityComparer));
+                                 subject.Numbering.Elements(),
+                                 XNode.EqualityComparer));
 
             // TODO: write a ThemeVisit
 //            XElement theme =

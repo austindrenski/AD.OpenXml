@@ -18,8 +18,11 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Document
     {
+        [NotNull] private static readonly Sequence DocPrSequence = new Sequence();
+
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
 
         [NotNull] private static readonly XmlWriterSettings XmlWriterSettings =
             new XmlWriterSettings
@@ -147,29 +150,29 @@ namespace AD.OpenXml.Structures
                 package.GetPart(PartName)
                        .GetRelationshipsByType(ChartInfo.RelationshipType)
                        .Select(
-                            x =>
-                            {
-                                using (Stream s = package.GetPart(PartUri(x.TargetUri)).GetStream())
-                                {
-                                    return new ChartInfo(x.Id, x.TargetUri, XElement.Load(s));
-                                }
-                            })
+                           x =>
+                           {
+                               using (Stream s = package.GetPart(PartUri(x.TargetUri)).GetStream())
+                               {
+                                   return new ChartInfo(x.Id, x.TargetUri, XElement.Load(s));
+                               }
+                           })
                        .ToArray();
 
             Images =
                 package.GetPart(PartName)
                        .GetRelationshipsByType(ImageInfo.RelationshipType)
                        .Select(
-                            x =>
-                            {
-                                PackagePart part = package.GetPart(PartUri(x.TargetUri));
-                                MemoryStream ms = new MemoryStream();
-                                using (Stream s = part.GetStream())
-                                {
-                                    s.CopyTo(ms);
-                                    return new ImageInfo(x.Id, x.TargetUri, part.ContentType, ms.ToArray());
-                                }
-                            })
+                           x =>
+                           {
+                               PackagePart part = package.GetPart(PartUri(x.TargetUri));
+                               MemoryStream ms = new MemoryStream();
+                               using (Stream s = part.GetStream())
+                               {
+                                   s.CopyTo(ms);
+                                   return new ImageInfo(x.Id, x.TargetUri, part.ContentType, ms.ToArray());
+                               }
+                           })
                        .ToArray();
 
             Hyperlinks =
@@ -358,6 +361,35 @@ namespace AD.OpenXml.Structures
         public override string ToString()
             => $"(Charts: {Charts.Count()}, Images: {Images.Count()}, Hyperlinks: {Hyperlinks.Count()})";
 
+        [Pure]
+        [NotNull]
+        private static XObject Update(XObject xObject, Dictionary<string, PackageRelationship> resources)
+        {
+            switch (xObject)
+            {
+                case XAttribute a
+                    when (a.Name == R + "id" || a.Name == R + "embed") &&
+                         resources.TryGetValue(a.Value, out PackageRelationship rel):
+                    return new XAttribute(a.Name, rel.Id);
+
+                case XElement e when e.Name == WP + "docPr":
+                {
+                    e.SetAttributeValue("id", DocPrSequence.NextValue());
+                    return e;
+                }
+
+                case XElement e:
+                    return
+                        new XElement(
+                            e.Name,
+                            e.Attributes().Select(x => Update(x, resources)),
+                            e.Nodes().Select(x => Update(x, resources)));
+
+                default:
+                    return xObject;
+            }
+        }
+
         /// <summary>
         /// Constructs the part URI from the target URI.
         /// </summary>
@@ -391,29 +423,6 @@ namespace AD.OpenXml.Structures
                 others.Where(x => !attributes.Any(y => y.Name == x.Name || y.Value == x.Value));
 
             return attributes.Concat(otherAttributes).ToArray();
-        }
-
-        [Pure]
-        [NotNull]
-        private static XObject Update(XObject xObject, Dictionary<string, PackageRelationship> resources)
-        {
-            switch (xObject)
-            {
-                case XAttribute a
-                    when (a.Name == R + "id" || a.Name == R + "embed" || a.Name == "id") &&
-                         resources.TryGetValue(a.Value, out PackageRelationship rel):
-                    return new XAttribute(a.Name, rel.Id);
-
-                case XElement e:
-                    return
-                        new XElement(
-                            e.Name,
-                            e.Attributes().Select(x => Update(x, resources)),
-                            e.Nodes().Select(x => Update(x, resources)));
-
-                default:
-                    return xObject;
-            }
         }
     }
 }

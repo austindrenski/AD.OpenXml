@@ -17,6 +17,8 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Footnotes
     {
+        [NotNull] private static readonly Sequence FootnoteSequence = new Sequence();
+
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -200,7 +202,46 @@ namespace AD.OpenXml.Structures
                     Content.Name,
                     Combine(Content.Attributes(), other.Content.Attributes()),
                     Content.Nodes(),
-                    other.Content.Nodes().Select(x => Update(x, resources)));
+                    other.Content.Nodes().Select(x => UpdateResources(x, resources)));
+
+            // TODO: Can footnote offsetting be done here?
+            // TODO: This code doesn't work because the packages are out of date during concatenation.
+//            XElement document;
+//            using (Stream stream = result.GetPart(Document.PartName).GetStream())
+//            {
+//                document = XElement.Load(stream);
+//            }
+//
+//            XElement[] footnotes =
+//                content.Descendants(W + "footnote")
+//                       .Where(x => x.Attribute(W + "type") is null || (string) x.Attribute(W + "type") == "normal")
+//                       .ToArray();
+//
+//            Dictionary<string, XElement> references =
+//                document.Descendants(W + "footnoteReference")
+//                        .ToDictionary(
+//                            x => (string) x.Attribute(W + "id"),
+//                            x => x);
+//
+//            foreach (XElement footnote in footnotes)
+//            {
+//                string value = (string) footnote.Attribute(W + "id");
+//
+//                uint next = FootnoteSequence.NextValue();
+//
+//                footnote.SetAttributeValue(W + "id", next);
+//
+//                if (references.TryGetValue(value, out XElement reference))
+//                    reference.SetAttributeValue(W + "id", next);
+//            }
+//
+//            using (Stream stream = result.GetPart(Document.PartName).GetStream())
+//            {
+//                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
+//                {
+//                    document.WriteTo(xml);
+//                }
+//            }
 
             using (Stream stream = footnotesPart.GetStream())
             {
@@ -233,7 +274,6 @@ namespace AD.OpenXml.Structures
 
             PackagePart source = _package.GetPart(PartName);
             PackagePart destination = target.CreatePart(PartName, ContentType);
-
 
             using (Stream from = source.GetStream())
             {
@@ -268,7 +308,7 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
-        public override string ToString() => $"(Footnotes: {Count}, Hyperlinks: {Hyperlinks.Count()})";
+        public override string ToString() => $"(Footnotes: {Content.Elements().Count()}, Hyperlinks: {Hyperlinks.Count()})";
 
         /// <summary>
         /// Constructs the part URI from the target URI.
@@ -295,7 +335,7 @@ namespace AD.OpenXml.Structures
 
         [Pure]
         [NotNull]
-        private static XObject Update(XObject xObject, Dictionary<string, PackageRelationship> resources)
+        private static XObject UpdateResources(XObject xObject, Dictionary<string, PackageRelationship> resources)
         {
             switch (xObject)
             {
@@ -308,8 +348,8 @@ namespace AD.OpenXml.Structures
                     return
                         new XElement(
                             e.Name,
-                            e.Attributes().Select(x => Update(x, resources)),
-                            e.Nodes().Select(x => Update(x, resources)));
+                            e.Attributes().Select(x => UpdateResources(x, resources)),
+                            e.Nodes().Select(x => UpdateResources(x, resources)));
 
                 default:
                     return xObject;
