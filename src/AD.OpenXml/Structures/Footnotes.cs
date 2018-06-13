@@ -17,7 +17,6 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Footnotes
     {
-        [NotNull] private static readonly Sequence FootnoteSequence = new Sequence();
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
@@ -27,7 +26,7 @@ namespace AD.OpenXml.Structures
                 Async = false,
                 DoNotEscapeUriAttributes = false,
                 CheckCharacters = true,
-                CloseOutput = false,
+                CloseOutput = true,
                 ConformanceLevel = ConformanceLevel.Document,
                 Encoding = Encoding.UTF8,
                 Indent = false,
@@ -163,12 +162,9 @@ namespace AD.OpenXml.Structures
                 footnotesPart.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, info.Id);
             }
 
-            using (Stream stream = footnotesPart.GetStream())
+            using (XmlWriter xml = XmlWriter.Create(footnotesPart.GetStream(), XmlWriterSettings))
             {
-                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
-                {
-                    (content ?? Content).WriteTo(xml);
-                }
+                (content ?? Content).WriteTo(xml);
             }
 
             return new Footnotes(package);
@@ -177,81 +173,80 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="other"></param>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
         /// <returns>
         ///
         /// </returns>
-        public Footnotes Concat([NotNull] Footnotes other)
+        public static Footnotes Concat([NotNull] Footnotes first, [NotNull] Footnotes second)
         {
-            if (other is null)
-                throw new ArgumentNullException(nameof(other));
+            if (first is null)
+                throw new ArgumentNullException(nameof(first));
+            if (second is null)
+                throw new ArgumentNullException(nameof(second));
 
-            Package result = _package.ToPackage(FileAccess.ReadWrite);
+            Sequence idSequence = new Sequence("rId{0}");
+            MappingSequence footnoteSequence = new MappingSequence();
 
-            PackagePart footnotesPart =
-                result.PartExists(PartUri)
-                    ? result.GetPart(PartUri)
-                    : result.CreatePart(PartUri, ContentType);
+            Package result = first._package.ToPackage(FileAccess.ReadWrite);
+
+            if (result.PartExists(PartUri))
+                result.DeletePart(PartUri);
+
+            PackagePart part = result.CreatePart(PartUri, ContentType);
 
             Dictionary<string, PackageRelationship> resources = new Dictionary<string, PackageRelationship>();
+            Dictionary<string, PackageRelationship> otherResources = new Dictionary<string, PackageRelationship>();
 
-            foreach (HyperlinkInfo info in other.Hyperlinks)
+            // For existing hyperlinks: recreate the relationship.
+            foreach (HyperlinkInfo info in first.Hyperlinks)
             {
-                resources[info.Id] = footnotesPart.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType);
+                resources[info.Id] =
+                    part.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, idSequence.NextValue());
+            }
+
+            // For new hyperlinks: create the relationship.
+            foreach (HyperlinkInfo info in second.Hyperlinks)
+            {
+                otherResources[info.Id] =
+                    part.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, idSequence.NextValue());
             }
 
             XElement content =
                 new XElement(
-                    Content.Name,
-                    Combine(Content.Attributes(), other.Content.Attributes()),
-                    Content.Nodes(),
-                    other.Content.Nodes().Select(x => UpdateResources(x, resources)));
+                    first.Content.Name,
+                    Combine(first.Content.Attributes(), second.Content.Attributes()),
+                    first.Content.Nodes()
+                           .Select(x => UpdateResources(x, resources))
+                           .Select(x => UpdateFootnotes(x, footnoteSequence)),
+                    second.Content
+                         .Nodes()
+                         .Select(x => UpdateResources(x, otherResources))
+                         .Select(x => UpdateFootnotes(x, footnoteSequence)));
 
-            // TODO: Can footnote offsetting be done here?
-            // TODO: This code doesn't work because the packages are out of date during concatenation.
-//            XElement document;
-//            using (Stream stream = result.GetPart(Document.MakePartUri).GetStream())
-//            {
-//                document = XElement.Load(stream);
-//            }
-//
-//            XElement[] footnotes =
-//                content.Descendants(W + "footnote")
-//                       .Where(x => x.Attribute(W + "type") is null || (string) x.Attribute(W + "type") == "normal")
-//                       .ToArray();
-//
-//            Dictionary<string, XElement> references =
-//                document.Descendants(W + "footnoteReference")
-//                        .ToDictionary(
-//                            x => (string) x.Attribute(W + "id"),
-//                            x => x);
-//
-//            foreach (XElement footnote in footnotes)
-//            {
-//                string value = (string) footnote.Attribute(W + "id");
-//
-//                uint next = FootnoteSequence.NextValue();
-//
-//                footnote.SetAttributeValue(W + "id", next);
-//
-//                if (references.TryGetValue(value, out XElement reference))
-//                    reference.SetAttributeValue(W + "id", next);
-//            }
-//
-//            using (Stream stream = result.GetPart(Document.MakePartUri).GetStream())
-//            {
-//                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
-//                {
-//                    document.WriteTo(xml);
-//                }
-//            }
-
-            using (Stream stream = footnotesPart.GetStream())
+            using (XmlWriter xml = XmlWriter.Create(part.GetStream(), XmlWriterSettings))
             {
-                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
-                {
-                    content.WriteTo(xml);
-                }
+                content.WriteTo(xml);
+            }
+
+            PackagePart documentPart = result.GetPart(Document.PartUri);
+
+            XElement document;
+
+            using (Stream stream = documentPart.GetStream())
+            {
+                document = XElement.Load(stream);
+            }
+
+            XElement updatedDocument =
+                new XElement(
+                    document.Name,
+                    document.Attributes(),
+                    document.Nodes().Select(x => UpdateReferences(x, footnoteSequence)));
+
+            using (XmlWriter xml = XmlWriter.Create(documentPart.GetStream(), XmlWriterSettings))
+            {
+                updatedDocument.WriteTo(xml);
             }
 
             return new Footnotes(result);
@@ -351,10 +346,8 @@ namespace AD.OpenXml.Structures
         {
             switch (xObject)
             {
-                case XAttribute a
-                    when (a.Name == R + "id" || a.Name == R + "embed") &&
-                         resources.TryGetValue(a.Value, out PackageRelationship rel):
-                    return new XAttribute(a.Name, rel.Id);
+                case XAttribute a when a.Name == R + "id" || a.Name == R + "embed":
+                    return new XAttribute(a.Name, resources.TryGetValue(a.Value, out PackageRelationship rel) ? rel.Id : a.Value);
 
                 case XAttribute a:
                     return new XAttribute(a.Name, a.Value);
@@ -365,6 +358,60 @@ namespace AD.OpenXml.Structures
                             e.Name,
                             e.Attributes().Select(x => UpdateResources(x, resources)),
                             e.Nodes().Select(x => UpdateResources(x, resources)));
+
+                case XText t:
+                    return new XText(t.Value);
+
+                default:
+                    return xObject;
+            }
+        }
+
+        [Pure]
+        [NotNull]
+        private static XObject UpdateFootnotes([NotNull] XObject xObject, MappingSequence footnoteSequence)
+        {
+            switch (xObject)
+            {
+                case XAttribute a when a.Name == W + "id" && a.Parent?.Name == W + "footnote":
+                    return new XAttribute(a.Name, footnoteSequence.NextValue(a.Value));
+
+                case XAttribute a:
+                    return new XAttribute(a.Name, a.Value);
+
+                case XElement e:
+                    return
+                        new XElement(
+                            e.Name,
+                            e.Attributes().Select(x => UpdateFootnotes(x, footnoteSequence)),
+                            e.Nodes().Select(x => UpdateFootnotes(x, footnoteSequence)));
+
+                case XText t:
+                    return new XText(t.Value);
+
+                default:
+                    return xObject;
+            }
+        }
+
+        [Pure]
+        [NotNull]
+        private static XObject UpdateReferences([NotNull] XObject xObject, MappingSequence footnoteSequence)
+        {
+            switch (xObject)
+            {
+                case XAttribute a when a.Name == W + "id" && a.Parent?.Name == W + "footnoteReference":
+                    return new XAttribute(a.Name, footnoteSequence.GetValue(a.Value));
+
+                case XAttribute a:
+                    return new XAttribute(a.Name, a.Value);
+
+                case XElement e:
+                    return
+                        new XElement(
+                            e.Name,
+                            e.Attributes().Select(x => UpdateReferences(x, footnoteSequence)),
+                            e.Nodes().Select(x => UpdateReferences(x, footnoteSequence)));
 
                 case XText t:
                     return new XText(t.Value);

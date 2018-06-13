@@ -18,11 +18,6 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Document
     {
-//        [NotNull] private readonly Sequence _idSequence = new Sequence("rId{0}");
-        [NotNull] private readonly Sequence _docPrSequence = new Sequence();
-        [NotNull] private readonly Sequence _chartSequence = new Sequence();
-        [NotNull] private readonly Sequence _imageSequence = new Sequence();
-
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
         [NotNull] private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
@@ -33,7 +28,7 @@ namespace AD.OpenXml.Structures
                 Async = false,
                 DoNotEscapeUriAttributes = false,
                 CheckCharacters = true,
-                CloseOutput = false,
+                CloseOutput = true,
                 ConformanceLevel = ConformanceLevel.Document,
                 Encoding = Encoding.UTF8,
                 Indent = false,
@@ -60,7 +55,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        [NotNull] public static readonly string ContentType =
+        [NotNull] public const string ContentType =
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml";
 
         /// <summary>
@@ -216,12 +211,9 @@ namespace AD.OpenXml.Structures
 
                 documentPart.CreateRelationship(info.TargetUri, TargetMode.Internal, ChartInfo.RelationshipType, info.Id);
 
-                using (Stream stream = package.CreatePart(MakePartUri(info.TargetUri), ChartInfo.ContentType).GetStream())
+                using (XmlWriter xml = XmlWriter.Create(package.CreatePart(MakePartUri(info.TargetUri), ChartInfo.ContentType).GetStream(), XmlWriterSettings))
                 {
-                    using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
-                    {
-                        info.Chart.WriteTo(xml);
-                    }
+                    info.Chart.WriteTo(xml);
                 }
             }
 
@@ -243,12 +235,9 @@ namespace AD.OpenXml.Structures
                 documentPart.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, info.Id);
             }
 
-            using (Stream stream = documentPart.GetStream())
+            using (XmlWriter xml = XmlWriter.Create(documentPart.GetStream(), XmlWriterSettings))
             {
-                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
-                {
-                    (content ?? Content).WriteTo(xml);
-                }
+                (content ?? Content).WriteTo(xml);
             }
 
             return new Document(package);
@@ -257,20 +246,23 @@ namespace AD.OpenXml.Structures
         /// <summary>
         ///
         /// </summary>
-        /// <param name="other"></param>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
         /// <returns></returns>
         [Pure]
         [NotNull]
-        public Document Concat([NotNull] Document other)
+        public static Document Concat([NotNull] Document first, [NotNull] Document second)
         {
-            if (other is null)
-                throw new ArgumentNullException(nameof(other));
+            if (second is null)
+                throw new ArgumentNullException(nameof(second));
 
-            Package result = _package.ToPackage(FileAccess.ReadWrite);
+            Package result = first._package.ToPackage(FileAccess.ReadWrite);
 
             PackagePart part = result.GetPart(PartUri);
 
             Sequence idSequence = new Sequence("rId{0}");
+            Sequence chartSequence = new Sequence();
+            Sequence imageSequence = new Sequence();
 
             PackageRelationship[] allRelationships =
                 part.GetRelationships()
@@ -299,18 +291,15 @@ namespace AD.OpenXml.Structures
             }
 
             // For existing charts: remove, replace, and recreate the relationship.
-            foreach (ChartInfo info in Charts)
+            foreach (ChartInfo info in first.Charts)
             {
                 result.DeletePart(MakePartUri(info.TargetUri));
 
-                Uri uri = info.MakeUri(_chartSequence.NextValue());
+                Uri uri = info.MakeUri(chartSequence.NextValue());
 
-                using (Stream stream = result.CreatePart(MakePartUri(uri), ChartInfo.ContentType).GetStream())
+                using (XmlWriter xml = XmlWriter.Create(result.CreatePart(MakePartUri(uri), ChartInfo.ContentType).GetStream(), XmlWriterSettings))
                 {
-                    using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
-                    {
-                        info.Chart.WriteTo(xml);
-                    }
+                    info.Chart.WriteTo(xml);
                 }
 
                 resources[info.Id] =
@@ -318,16 +307,13 @@ namespace AD.OpenXml.Structures
             }
 
             // For new charts: add then create the relationship.
-            foreach (ChartInfo info in other.Charts)
+            foreach (ChartInfo info in second.Charts)
             {
-                Uri uri = info.MakeUri(_chartSequence.NextValue());
+                Uri uri = info.MakeUri(chartSequence.NextValue());
 
-                using (Stream stream = result.CreatePart(MakePartUri(uri), ChartInfo.ContentType).GetStream())
+                using (XmlWriter xml = XmlWriter.Create(result.CreatePart(MakePartUri(uri), ChartInfo.ContentType).GetStream(), XmlWriterSettings))
                 {
-                    using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
-                    {
-                        info.Chart.WriteTo(xml);
-                    }
+                    info.Chart.WriteTo(xml);
                 }
 
                 otherResources[info.Id] =
@@ -335,11 +321,11 @@ namespace AD.OpenXml.Structures
             }
 
             // For existing images: remove, replace, and recreate the relationship.
-            foreach (ImageInfo info in Images)
+            foreach (ImageInfo info in first.Images)
             {
                 result.DeletePart(MakePartUri(info.TargetUri));
 
-                Uri uri = info.MakeUri(_imageSequence.NextValue());
+                Uri uri = info.MakeUri(imageSequence.NextValue());
 
                 using (Stream stream = result.CreatePart(MakePartUri(uri), info.ContentType).GetStream())
                 {
@@ -351,9 +337,9 @@ namespace AD.OpenXml.Structures
             }
 
             // For new images: add then create the relationship.
-            foreach (ImageInfo info in other.Images)
+            foreach (ImageInfo info in second.Images)
             {
-                Uri uri = info.MakeUri(_imageSequence.NextValue());
+                Uri uri = info.MakeUri(imageSequence.NextValue());
 
                 using (Stream stream = result.CreatePart(MakePartUri(uri), info.ContentType).GetStream())
                 {
@@ -365,14 +351,14 @@ namespace AD.OpenXml.Structures
             }
 
             // For existing hyperlinks: recreate the relationship.
-            foreach (HyperlinkInfo info in Hyperlinks)
+            foreach (HyperlinkInfo info in first.Hyperlinks)
             {
                 resources[info.Id] =
                     part.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, idSequence.NextValue());
             }
 
             // For new hyperlinks: create the relationship.
-            foreach (HyperlinkInfo info in other.Hyperlinks)
+            foreach (HyperlinkInfo info in second.Hyperlinks)
             {
                 otherResources[info.Id] =
                     part.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, idSequence.NextValue());
@@ -380,21 +366,20 @@ namespace AD.OpenXml.Structures
 
             XElement content =
                 new XElement(
-                    Content.Name,
-                    Combine(Content.Attributes(), other.Content.Attributes()),
-                    new XElement(
-                        W + "body",
-                        Content.Element(W + "body")?.Elements().Select(x => Update(x, resources)),
-                        other.Content.Element(W + "body")?.Elements().Select(x => Update(x, otherResources))));
+                    first.Content.Name,
+                    Combine(first.Content.Attributes(), second.Content.Attributes()),
+                    Update(
+                        new XElement(
+                            W + "body",
+                            first.Content.Element(W + "body")?.Elements().Select(x => Update(x, resources)),
+                            second.Content.Element(W + "body")?.Elements().Select(x => Update(x, otherResources))),
+                        new Sequence()));
 
             content.RemoveDuplicateSectionProperties();
 
-            using (Stream stream = part.GetStream())
+            using (XmlWriter xml = XmlWriter.Create(part.GetStream(), XmlWriterSettings))
             {
-                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
-                {
-                    content.WriteTo(xml);
-                }
+                content.WriteTo(xml);
             }
 
             return new Document(result);
@@ -462,7 +447,7 @@ namespace AD.OpenXml.Structures
 
         [Pure]
         [NotNull]
-        private XObject Update([NotNull] XObject xObject, [NotNull] Dictionary<string, PackageRelationship> resources)
+        private static XObject Update([NotNull] XObject xObject, [NotNull] Dictionary<string, PackageRelationship> resources)
         {
             switch (xObject)
             {
@@ -470,10 +455,6 @@ namespace AD.OpenXml.Structures
                     when (a.Name == R + "id" || a.Name == R + "embed") &&
                          resources.TryGetValue(a.Value, out PackageRelationship rel):
                     return new XAttribute(a.Name, rel.Id);
-
-                case XAttribute a
-                    when a.Name == "id" && a.Parent?.Name == WP + "docPr":
-                    return new XAttribute(a.Name, _docPrSequence.NextValue());
 
                 case XAttribute a:
                     return new XAttribute(a.Name, a.Value);
@@ -484,6 +465,34 @@ namespace AD.OpenXml.Structures
                             e.Name,
                             e.Attributes().Select(x => Update(x, resources)),
                             e.Nodes().Select(x => Update(x, resources)));
+
+                case XText t:
+                    return new XText(t.Value);
+
+                default:
+                    return xObject;
+            }
+        }
+
+        [Pure]
+        [NotNull]
+        private static XObject Update([NotNull] XObject xObject, Sequence docPrSequence)
+        {
+            switch (xObject)
+            {
+                case XAttribute a
+                    when a.Name == "id" && a.Parent?.Name == WP + "docPr":
+                    return new XAttribute(a.Name, docPrSequence.NextValue());
+
+                case XAttribute a:
+                    return new XAttribute(a.Name, a.Value);
+
+                case XElement e:
+                    return
+                        new XElement(
+                            e.Name,
+                            e.Attributes().Select(x => Update(x, docPrSequence)),
+                            e.Nodes().Select(x => Update(x, docPrSequence)));
 
                 case XText t:
                     return new XText(t.Value);

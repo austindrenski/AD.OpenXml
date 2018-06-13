@@ -1,28 +1,35 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Structures
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="IEnumerable{T}" />
+    /// <inheritdoc cref="IEnumerator{T}" />
     /// <summary>
     /// Represents a thread-safe sequence of unsigned integers beginning with 1.
     /// </summary>
     [PublicAPI]
-    public class Sequence : IEnumerable<string>
+    public class Sequence : IEnumerable<string>, IEnumerator<string>
     {
-        /// <summary>
-        /// The current enumerator.
-        /// </summary>
-        [NotNull] private readonly Enumerator _enumerator;
+        [NotNull] private readonly object _lock = new object();
+        [NotNull] private readonly string _template;
+        private uint _counter;
+
+        /// <inheritdoc />
+        [NotNull]
+        public string Current => string.Format(_template, _counter);
+
+        /// <inheritdoc />
+        [NotNull]
+        object IEnumerator.Current => Current;
 
         /// <summary>
         /// Initializes a new sequence with the specified format template.
         /// </summary>
         /// <param name="template">The string format template.</param>
-        public Sequence([NotNull] string template = "{0}") => _enumerator = new Enumerator(template);
+        public Sequence([CanBeNull] string template = "{0}") => _template = template ?? "{0}";
 
         /// <summary>
         /// Returns the next value of the sequence.
@@ -32,55 +39,35 @@ namespace AD.OpenXml.Structures
         /// </returns>
         [NotNull]
         [MustUseReturnValue]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string NextValue()
         {
-            bool _ = _enumerator.MoveNext();
-            return _enumerator.Current;
+            bool _ = MoveNext();
+            return Current;
         }
 
         /// <inheritdoc />
-        IEnumerator<string> IEnumerable<string>.GetEnumerator() => _enumerator;
-
-        /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator() => _enumerator;
-
-        /// <inheritdoc />
-        public override string ToString() => $"(Current: {_enumerator.Current})";
-
-        /// <inheritdoc />
-        private class Enumerator : IEnumerator<string>
+        [MustUseReturnValue]
+        public bool MoveNext()
         {
-            [NotNull] private readonly object _lock = new object();
-            [NotNull] private readonly string _template;
-            private uint _counter;
-
-            /// <inheritdoc />
-            public string Current => string.Format(_template, _counter);
-
-            /// <inheritdoc />
-            object IEnumerator.Current => Current;
-
-            /// <summary>
-            /// Initializes a new sequence with the specified format template.
-            /// </summary>
-            /// <param name="template">The string format template.</param>
-            public Enumerator([NotNull] string template) => _template = template;
-
-            /// <inheritdoc />
-            public bool MoveNext()
+            lock (_lock)
             {
-                lock (_lock)
-                {
-                    return ++_counter != 0;
-                }
+                return ++_counter != 0;
             }
-
-            /// <inheritdoc />
-            void IEnumerator.Reset() => _counter = default;
-
-            /// <inheritdoc />
-            void IDisposable.Dispose() => _counter = default;
         }
+
+        /// <inheritdoc />
+        IEnumerator<string> IEnumerable<string>.GetEnumerator() => this;
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => this;
+
+        /// <inheritdoc />
+        void IEnumerator.Reset() => _counter = default;
+
+        /// <inheritdoc />
+        void IDisposable.Dispose() => _counter = default;
+
+        /// <inheritdoc />
+        public override string ToString() => $"(Current: {Current})";
     }
 }
