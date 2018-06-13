@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 using AD.OpenXml.Elements;
 using AD.Xml;
@@ -21,25 +19,6 @@ namespace AD.OpenXml.Structures
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
         [NotNull] private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
-
-        [NotNull] private static readonly XmlWriterSettings XmlWriterSettings =
-            new XmlWriterSettings
-            {
-                Async = false,
-                DoNotEscapeUriAttributes = false,
-                CheckCharacters = true,
-                CloseOutput = true,
-                ConformanceLevel = ConformanceLevel.Document,
-                Encoding = Encoding.UTF8,
-                Indent = false,
-                IndentChars = "  ",
-                NamespaceHandling = NamespaceHandling.OmitDuplicates,
-                NewLineChars = Environment.NewLine,
-                NewLineHandling = NewLineHandling.None,
-                NewLineOnAttributes = false,
-                OmitXmlDeclaration = false,
-                WriteEndDocumentOnClose = true
-            };
 
         [NotNull] private static readonly IEnumerable<XName> Revisions =
             new XName[]
@@ -134,10 +113,7 @@ namespace AD.OpenXml.Structures
 
             if (_package.PartExists(PartUri))
             {
-                using (Stream stream = _package.GetPart(PartUri).GetStream())
-                {
-                    Content = XElement.Load(stream);
-                }
+                Content = _package.GetPart(PartUri).ReadXml();
             }
             else
             {
@@ -150,30 +126,13 @@ namespace AD.OpenXml.Structures
             Charts =
                 _package.GetPart(PartUri)
                         .GetRelationshipsByType(ChartInfo.RelationshipType)
-                        .Select(
-                             x =>
-                             {
-                                 using (Stream s = _package.GetPart(MakePartUri(x.TargetUri)).GetStream())
-                                 {
-                                     return new ChartInfo(x.Id, x.TargetUri, XElement.Load(s));
-                                 }
-                             })
+                        .Select(x => ChartInfo.Read(_package.GetPart(MakePartUri(x.TargetUri)), x))
                         .ToArray();
 
             Images =
                 _package.GetPart(PartUri)
                         .GetRelationshipsByType(ImageInfo.RelationshipType)
-                        .Select(
-                             x =>
-                             {
-                                 PackagePart part = _package.GetPart(MakePartUri(x.TargetUri));
-                                 MemoryStream ms = new MemoryStream();
-                                 using (Stream s = part.GetStream())
-                                 {
-                                     s.CopyTo(ms);
-                                     return new ImageInfo(x.Id, x.TargetUri, part.ContentType, ms.ToArray());
-                                 }
-                             })
+                        .Select(x => ImageInfo.Read(_package.GetPart(MakePartUri(x.TargetUri)), x))
                         .ToArray();
 
             Hyperlinks =
@@ -213,10 +172,7 @@ namespace AD.OpenXml.Structures
 
                 documentPart.CreateRelationship(info.TargetUri, TargetMode.Internal, ChartInfo.RelationshipType, info.Id);
 
-                using (XmlWriter xml = XmlWriter.Create(package.CreatePart(MakePartUri(info.TargetUri), ChartInfo.ContentType).GetStream(), XmlWriterSettings))
-                {
-                    info.Chart.WriteTo(xml);
-                }
+                info.Chart.WriteTo(package.CreatePart(MakePartUri(info.TargetUri), ChartInfo.ContentType));
             }
 
             foreach (ImageInfo info in images ?? Images)
@@ -226,10 +182,7 @@ namespace AD.OpenXml.Structures
 
                 documentPart.CreateRelationship(info.TargetUri, TargetMode.Internal, ImageInfo.RelationshipType, info.Id);
 
-                using (Stream stream = package.CreatePart(MakePartUri(info.TargetUri), info.ContentType).GetStream())
-                {
-                    stream.Write(info.Image.Span);
-                }
+                info.WriteTo(package.CreatePart(MakePartUri(info.TargetUri), info.ContentType));
             }
 
             foreach (HyperlinkInfo info in hyperlinks ?? Hyperlinks)
@@ -237,10 +190,7 @@ namespace AD.OpenXml.Structures
                 documentPart.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, info.Id);
             }
 
-            using (XmlWriter xml = XmlWriter.Create(documentPart.GetStream(), XmlWriterSettings))
-            {
-                (content ?? Content).WriteTo(xml);
-            }
+            (content ?? Content).WriteTo(documentPart);
 
             return new Document(package);
         }
@@ -310,10 +260,7 @@ namespace AD.OpenXml.Structures
 
                 Uri uri = info.MakeUri(chartSequence.NextValue());
 
-                using (XmlWriter xml = XmlWriter.Create(result.CreatePart(MakePartUri(uri), ChartInfo.ContentType).GetStream(), XmlWriterSettings))
-                {
-                    info.Chart.WriteTo(xml);
-                }
+                info.Chart.WriteTo(result.CreatePart(MakePartUri(uri), ChartInfo.ContentType));
 
                 resources[info.Id] =
                     part.CreateRelationship(uri, TargetMode.Internal, ChartInfo.RelationshipType, idSequence.NextValue());
@@ -324,10 +271,7 @@ namespace AD.OpenXml.Structures
             {
                 Uri uri = info.MakeUri(chartSequence.NextValue());
 
-                using (XmlWriter xml = XmlWriter.Create(result.CreatePart(MakePartUri(uri), ChartInfo.ContentType).GetStream(), XmlWriterSettings))
-                {
-                    info.Chart.WriteTo(xml);
-                }
+                info.Chart.WriteTo(result.CreatePart(MakePartUri(uri), ChartInfo.ContentType));
 
                 otherResources[info.Id] =
                     part.CreateRelationship(uri, TargetMode.Internal, ChartInfo.RelationshipType, idSequence.NextValue());
@@ -340,10 +284,7 @@ namespace AD.OpenXml.Structures
 
                 Uri uri = info.MakeUri(imageSequence.NextValue());
 
-                using (Stream stream = result.CreatePart(MakePartUri(uri), info.ContentType).GetStream())
-                {
-                    stream.Write(info.Image.Span);
-                }
+                info.WriteTo(result.CreatePart(MakePartUri(uri), info.ContentType));
 
                 resources[info.Id] =
                     part.CreateRelationship(uri, TargetMode.Internal, ImageInfo.RelationshipType, idSequence.NextValue());
@@ -354,10 +295,7 @@ namespace AD.OpenXml.Structures
             {
                 Uri uri = info.MakeUri(imageSequence.NextValue());
 
-                using (Stream stream = result.CreatePart(MakePartUri(uri), info.ContentType).GetStream())
-                {
-                    stream.Write(info.Image.Span);
-                }
+                info.WriteTo(result.CreatePart(MakePartUri(uri), info.ContentType));
 
                 otherResources[info.Id] =
                     part.CreateRelationship(uri, TargetMode.Internal, ImageInfo.RelationshipType, idSequence.NextValue());
@@ -390,10 +328,7 @@ namespace AD.OpenXml.Structures
 
             content.RemoveDuplicateSectionProperties();
 
-            using (XmlWriter xml = XmlWriter.Create(part.GetStream(), XmlWriterSettings))
-            {
-                content.WriteTo(xml);
-            }
+            content.WriteTo(part);
 
             return new Document(result);
         }

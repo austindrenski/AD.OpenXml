@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.IO.Packaging;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -125,5 +127,26 @@ namespace AD.OpenXml.Structures
         /// </returns>
         [Pure]
         public static bool operator !=(ChartInfo left, ChartInfo right) => !left.Equals(right);
+
+        /// <summary>
+        /// Reads the <see cref="XElement"/> from the <paramref name="part" />.
+        /// </summary>
+        /// <param name="part">The part from which the element is read.</param>
+        /// <param name="relationship">The relationship details of the <paramref name="part"/>.</param>
+        /// <returns>
+        /// The <see cref="XElement"/> of the specified part and relationship.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        public static ChartInfo Read([NotNull] PackagePart part, [NotNull] PackageRelationship relationship)
+        {
+            if (part is null)
+                throw new ArgumentNullException(nameof(part));
+
+            using (Stream stream = part.GetStream())
+            {
+                return new ChartInfo(relationship.Id, relationship.TargetUri, XElement.Load(stream));
+            }
+        }
     }
 }

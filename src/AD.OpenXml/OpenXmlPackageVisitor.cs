@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 using AD.IO.Paths;
 using AD.OpenXml.Structures;
@@ -36,25 +34,6 @@ namespace AD.OpenXml
         [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
         [NotNull] private static readonly XNamespace M = XNamespaces.OpenXmlMath;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-
-        private static readonly XmlWriterSettings XmlWriterSettings =
-            new XmlWriterSettings
-            {
-                Async = false,
-                DoNotEscapeUriAttributes = false,
-                CheckCharacters = true,
-                CloseOutput = false,
-                ConformanceLevel = ConformanceLevel.Document,
-                Encoding = Encoding.UTF8,
-                Indent = false,
-                IndentChars = "  ",
-                NamespaceHandling = NamespaceHandling.OmitDuplicates,
-                NewLineChars = Environment.NewLine,
-                NewLineHandling = NewLineHandling.None,
-                NewLineOnAttributes = false,
-                OmitXmlDeclaration = false,
-                WriteEndDocumentOnClose = true
-            };
 
         /// <summary>
         /// The package that initialized the <see cref="OpenXmlPackageVisitor"/>.
@@ -303,13 +282,7 @@ namespace AD.OpenXml
 
             PackagePart part = package.CreatePart(uri, contentType);
 
-            using (Stream stream = part.GetStream())
-            {
-                using (XmlWriter xml = XmlWriter.Create(stream, XmlWriterSettings))
-                {
-                    element.WriteTo(xml);
-                }
-            }
+            element.WriteTo(part);
         }
     }
 }

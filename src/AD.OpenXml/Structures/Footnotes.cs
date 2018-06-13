@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
@@ -19,25 +17,6 @@ namespace AD.OpenXml.Structures
     {
         [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-
-        [NotNull] private static readonly XmlWriterSettings XmlWriterSettings =
-            new XmlWriterSettings
-            {
-                Async = false,
-                DoNotEscapeUriAttributes = false,
-                CheckCharacters = true,
-                CloseOutput = true,
-                ConformanceLevel = ConformanceLevel.Document,
-                Encoding = Encoding.UTF8,
-                Indent = false,
-                IndentChars = "  ",
-                NamespaceHandling = NamespaceHandling.OmitDuplicates,
-                NewLineChars = Environment.NewLine,
-                NewLineHandling = NewLineHandling.None,
-                NewLineOnAttributes = false,
-                OmitXmlDeclaration = false,
-                WriteEndDocumentOnClose = true
-            };
 
         [NotNull] private static readonly IEnumerable<XName> Revisions =
             new XName[]
@@ -164,10 +143,7 @@ namespace AD.OpenXml.Structures
                 footnotesPart.CreateRelationship(info.Target, info.TargetMode, HyperlinkInfo.RelationshipType, info.Id);
             }
 
-            using (XmlWriter xml = XmlWriter.Create(footnotesPart.GetStream(), XmlWriterSettings))
-            {
-                (content ?? Content).WriteTo(xml);
-            }
+            (content ?? Content).WriteTo(footnotesPart);
 
             return new Footnotes(package);
         }
@@ -237,10 +213,7 @@ namespace AD.OpenXml.Structures
                           .Select(x => UpdateResources(x, otherResources))
                           .Select(x => UpdateFootnotes(x, footnoteSequence)));
 
-            using (XmlWriter xml = XmlWriter.Create(part.GetStream(), XmlWriterSettings))
-            {
-                content.WriteTo(xml);
-            }
+            content.WriteTo(part);
 
             PackagePart documentPart = result.GetPart(Document.PartUri);
 
@@ -257,10 +230,7 @@ namespace AD.OpenXml.Structures
                     document.Attributes(),
                     document.Nodes().Select(x => UpdateReferences(x, footnoteSequence)));
 
-            using (XmlWriter xml = XmlWriter.Create(documentPart.GetStream(), XmlWriterSettings))
-            {
-                updatedDocument.WriteTo(xml);
-            }
+            updatedDocument.WriteTo(documentPart);
 
             return new Footnotes(result);
         }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.IO.Packaging;
 using JetBrains.Annotations;
 
 namespace AD.OpenXml.Structures
@@ -125,5 +127,49 @@ namespace AD.OpenXml.Structures
         /// </returns>
         [Pure]
         public static bool operator !=(ImageInfo left, ImageInfo right) => !left.Equals(right);
+
+        /// <summary>
+        /// Reads the <see cref="ImageInfo"/> from the <paramref name="part" />.
+        /// </summary>
+        /// <param name="part">The part from which the image is read.</param>
+        /// <param name="relationship">The relationship details of the <paramref name="part"/>.</param>
+        /// <returns>
+        /// The <see cref="ImageInfo"/> of the specified part and relationship.
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
+        [Pure]
+        public static ImageInfo Read([NotNull] PackagePart part, [NotNull] PackageRelationship relationship)
+        {
+            if (part is null)
+                throw new ArgumentNullException(nameof(part));
+            if (relationship is null)
+                throw new ArgumentNullException(nameof(relationship));
+
+            using (Stream s = part.GetStream())
+            {
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    s.CopyTo(ms);
+                    ReadOnlySpan<byte> image = ms.ToArray();
+                    return new ImageInfo(relationship.Id, relationship.TargetUri, part.ContentType, image);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes the image data to the <paramref name="part" />.
+        /// </summary>
+        /// <param name="part">The part to which the element is written.</param>
+        /// <exception cref="ArgumentNullException" />
+        public void WriteTo([NotNull] PackagePart part)
+        {
+            if (part is null)
+                throw new ArgumentNullException(nameof(part));
+
+            using (Stream stream = part.GetStream())
+            {
+                stream.Write(Image.Span);
+            }
+        }
     }
 }
