@@ -1,21 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DefineConstants>JETBRAINS_ANNOTATIONS</DefineConstants>
+    <DocumentationFile>bin/Release/$(TargetFramework)/CompilerApi.xml</DocumentationFile>
     <RuntimeIdentifiers>win81-x64;win10-x64;rhel.7-x64</RuntimeIdentifiers>
-    <OutputType>Exe</OutputType>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+  <PropertyGroup>
     <Authors>Austin Drenski</Authors>
     <Company>Austin Drenski</Company>
     <Description>CompilerAPI is a lightweight ASP.NET Core API designed for document formatting.</Description>
     <Copyright>Copyright (c) 2017 Austin Drenski</Copyright>
+    <PackageIconUrl />
     <PackageLicenseUrl>https://github.com/austindrenski/AD.OpenXml/raw/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/austindrenski/AD.OpenXml</PackageProjectUrl>
-    <PackageIconUrl />
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <RepositoryUrl>https://github.com/austindrenski/AD.OpenXml</RepositoryUrl>
-    <RootNamespace>CompilerAPI</RootNamespace>
-    <UserSecretsId>a09aa823-5be9-41bc-a565-0083049d68a4</UserSecretsId>
-    <DocumentationFile>bin\Release\netcoreapp2.0\CompilerApi.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\AD.OpenXml\AD.OpenXml.csproj" />

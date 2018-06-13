@@ -1,37 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <AssemblyName>AD.OpenXml</AssemblyName>
-    <RootNamespace>AD.OpenXml</RootNamespace>
-    <DefineConstants>JETBRAINS_ANNOTATIONS</DefineConstants>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
+
   <PropertyGroup>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <DefineConstants>JETBRAINS_ANNOTATIONS</DefineConstants>
+    <DocumentationFile>bin/Release/$(TargetFramework)/AD.OpenXml.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyVersion />
+    <FileVersion />
+    <Version />
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Austin Drenski</Authors>
+    <Company>Austin Drenski</Company>
+    <Copyright>Copyright (c) 2017 Austin Drenski</Copyright>
+    <Description>C# library for OpenXML manipulation.</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageLicenseUrl>https://github.com/austindrenski/AD.OpenXml/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/austindrenski/AD.OpenXml</PackageProjectUrl>
-    <Copyright>Copyright (c) 2017 Austin Drenski</Copyright>
-    <Description>C# extension library for OpenXML manipulation.</Description>
-    <RepositoryUrl>https://github.com/austindrenski/AD.OpenXml</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageTags>xml open-xml docx xlsx read-xml write-xml write-docx create-docx</PackageTags>
-    <AssemblyVersion>1.4.1</AssemblyVersion>
-    <FileVersion>1.4.1</FileVersion>
-    <Version>1.4.1</Version>
-    <Authors>Austin Drenski</Authors>
-    <Company>Austin Drenski</Company>
-    <DocumentationFile>bin\Release\netstandard2.0\AD.OpenXml.xml</DocumentationFile>
+    <RepositoryUrl>https://github.com/austindrenski/AD.OpenXml</RepositoryUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AD.ApiExtensions" Version="1.1.102"/>
+    <PackageReference Include="AD.IO" Version="1.5.36"/>
+    <PackageReference Include="AD.Xml" Version="1.4.18"/>
+    <PackageReference Include="JetBrains.Annotations" Version="11.1.0"/>
+  </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="Styles\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="AD.ApiExtensions" Version="1.1.102" />
-    <PackageReference Include="AD.IO" Version="1.5.36" />
-    <PackageReference Include="AD.Xml" Version="1.4.18" />
-    <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
-  </ItemGroup>
+
 </Project>
