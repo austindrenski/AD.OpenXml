@@ -25,6 +25,7 @@
     <Company>Austin Drenski</Company>
     <Copyright>Copyright (c) 2017 Austin Drenski</Copyright>
     <Description>C# library for OpenXML manipulation.</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseUrl>https://github.com/austindrenski/AD.OpenXml/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/austindrenski/AD.OpenXml</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
