@@ -86,6 +86,9 @@ namespace AD.OpenXml
             if (package is null)
                 throw new ArgumentNullException(nameof(package));
 
+            if (!package.FileOpenAccess.HasFlag(FileAccess.Read))
+                throw new IOException("The package is write-only.");
+
             Package =
                 package.FileOpenAccess.HasFlag(FileAccess.Write)
                     ? package.ToPackage()
@@ -213,12 +216,15 @@ namespace AD.OpenXml
         /// <param name="packages">The packages to visit.</param>
         [Pure]
         [NotNull]
-        public static OpenXmlPackageVisitor VisitAndFold([NotNull] [ItemNotNull] IEnumerable<Package> packages)
+        public static OpenXmlPackageVisitor Visit([NotNull] [ItemCanBeNull] IEnumerable<Package> packages)
         {
             if (packages is null)
                 throw new ArgumentNullException(nameof(packages));
 
-            return packages.Aggregate(new OpenXmlPackageVisitor(DefaultOpenXmlPackage), (current, next) => current.Fold(current.Visit(next)));
+            return packages.Where(x => x != null)
+                           .Aggregate(
+                                new OpenXmlPackageVisitor(DefaultOpenXmlPackage),
+                                (current, next) => current.Fold(current.Visit(next)));
         }
 
         /// <summary>

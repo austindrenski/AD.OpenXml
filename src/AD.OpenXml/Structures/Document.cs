@@ -106,6 +106,9 @@ namespace AD.OpenXml.Structures
             if (package is null)
                 throw new ArgumentNullException(nameof(package));
 
+            if (!package.FileOpenAccess.HasFlag(FileAccess.Read))
+                throw new IOException("The package is write-only.");
+
             _package =
                 package.FileOpenAccess.HasFlag(FileAccess.Write)
                     ? package.ToPackage()
@@ -340,10 +343,14 @@ namespace AD.OpenXml.Structures
         ///
         /// </param>
         /// <exception cref="ArgumentNullException" />
+        /// <exception cref="IOException" />
         public void CopyTo([NotNull] Package target)
         {
             if (target is null)
                 throw new ArgumentNullException(nameof(target));
+
+            if (!target.FileOpenAccess.HasFlag(FileAccess.Write))
+                throw new IOException("The package is read-only.");
 
             if (target.PartExists(PartUri))
                 target.DeletePart(PartUri);

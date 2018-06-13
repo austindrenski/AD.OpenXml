@@ -148,7 +148,7 @@ namespace CompilerAPI.Controllers
             [NotNull] string publisher,
             [NotNull] string website)
             => await OpenXmlPackageVisitor
-                    .VisitAndFold(packages)
+                    .Visit(packages)
                     .Package
                     .AddHeaders(title)
                     .AddFooters(publisher, website)

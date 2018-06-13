@@ -91,6 +91,9 @@ namespace AD.OpenXml.Structures
             if (package is null)
                 throw new ArgumentNullException(nameof(package));
 
+            if (!package.FileOpenAccess.HasFlag(FileAccess.Read))
+                throw new IOException("The package is write-only.");
+
             _package =
                 package.FileOpenAccess.HasFlag(FileAccess.Write)
                     ? package.ToPackage()
@@ -246,6 +249,9 @@ namespace AD.OpenXml.Structures
         {
             if (target is null)
                 throw new ArgumentNullException(nameof(target));
+
+            if (!target.FileOpenAccess.HasFlag(FileAccess.Read))
+                throw new IOException("The package is write-only.");
 
             if (!_package.PartExists(PartUri))
                 return;
