@@ -6,7 +6,8 @@ namespace AD.OpenXml.Structures
 {
     /// <inheritdoc />
     /// <summary>
-    ///
+    /// Represents a sequence of unsigned integers beginning with 1 and formatted to a specified template.
+    /// Values can be mapped to keys for later retrieval.
     /// </summary>
     public class MappingSequence : Sequence
     {

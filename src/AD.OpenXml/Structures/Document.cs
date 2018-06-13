@@ -132,9 +132,9 @@ namespace AD.OpenXml.Structures
                     ? package.ToPackage()
                     : package;
 
-            if (package.PartExists(PartUri))
+            if (_package.PartExists(PartUri))
             {
-                using (Stream stream = package.GetPart(PartUri).GetStream())
+                using (Stream stream = _package.GetPart(PartUri).GetStream())
                 {
                     Content = XElement.Load(stream);
                 }
@@ -148,39 +148,39 @@ namespace AD.OpenXml.Structures
             }
 
             Charts =
-                package.GetPart(PartUri)
-                       .GetRelationshipsByType(ChartInfo.RelationshipType)
-                       .Select(
-                            x =>
-                            {
-                                using (Stream s = package.GetPart(MakePartUri(x.TargetUri)).GetStream())
-                                {
-                                    return new ChartInfo(x.Id, x.TargetUri, XElement.Load(s));
-                                }
-                            })
-                       .ToArray();
+                _package.GetPart(PartUri)
+                        .GetRelationshipsByType(ChartInfo.RelationshipType)
+                        .Select(
+                             x =>
+                             {
+                                 using (Stream s = _package.GetPart(MakePartUri(x.TargetUri)).GetStream())
+                                 {
+                                     return new ChartInfo(x.Id, x.TargetUri, XElement.Load(s));
+                                 }
+                             })
+                        .ToArray();
 
             Images =
-                package.GetPart(PartUri)
-                       .GetRelationshipsByType(ImageInfo.RelationshipType)
-                       .Select(
-                            x =>
-                            {
-                                PackagePart part = package.GetPart(MakePartUri(x.TargetUri));
-                                MemoryStream ms = new MemoryStream();
-                                using (Stream s = part.GetStream())
-                                {
-                                    s.CopyTo(ms);
-                                    return new ImageInfo(x.Id, x.TargetUri, part.ContentType, ms.ToArray());
-                                }
-                            })
-                       .ToArray();
+                _package.GetPart(PartUri)
+                        .GetRelationshipsByType(ImageInfo.RelationshipType)
+                        .Select(
+                             x =>
+                             {
+                                 PackagePart part = _package.GetPart(MakePartUri(x.TargetUri));
+                                 MemoryStream ms = new MemoryStream();
+                                 using (Stream s = part.GetStream())
+                                 {
+                                     s.CopyTo(ms);
+                                     return new ImageInfo(x.Id, x.TargetUri, part.ContentType, ms.ToArray());
+                                 }
+                             })
+                        .ToArray();
 
             Hyperlinks =
-                package.GetPart(PartUri)
-                       .GetRelationshipsByType(HyperlinkInfo.RelationshipType)
-                       .Select(x => new HyperlinkInfo(x.Id, x.TargetUri, x.TargetMode))
-                       .ToArray();
+                _package.GetPart(PartUri)
+                        .GetRelationshipsByType(HyperlinkInfo.RelationshipType)
+                        .Select(x => new HyperlinkInfo(x.Id, x.TargetUri, x.TargetMode))
+                        .ToArray();
         }
 
         /// <summary>
@@ -191,6 +191,8 @@ namespace AD.OpenXml.Structures
         /// <param name="images"></param>
         /// <param name="hyperlinks"></param>
         /// <returns></returns>
+        [Pure]
+        [NotNull]
         public Document With(
             [CanBeNull] XElement content = default,
             [CanBeNull] IEnumerable<ChartInfo> charts = default,
@@ -242,6 +244,17 @@ namespace AD.OpenXml.Structures
 
             return new Document(package);
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [NotNull]
+        public Document Concat([NotNull] Document other) => Concat(this, other);
 
         /// <summary>
         ///

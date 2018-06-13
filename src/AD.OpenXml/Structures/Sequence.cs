@@ -8,7 +8,7 @@ namespace AD.OpenXml.Structures
     /// <inheritdoc cref="IEnumerable{T}" />
     /// <inheritdoc cref="IEnumerator{T}" />
     /// <summary>
-    /// Represents a thread-safe sequence of unsigned integers beginning with 1.
+    /// Represents a sequence of unsigned integers beginning with 1 and formatted to a specified template.
     /// </summary>
     [PublicAPI]
     public class Sequence : IEnumerable<string>, IEnumerator<string>

@@ -250,9 +250,9 @@ namespace AD.OpenXml
         [NotNull]
         private OpenXmlPackageVisitor Fold([NotNull] OpenXmlPackageVisitor subject)
         {
-            Document document = Document.Concat(Document, subject.Document);
+            Document document = Document.Concat(subject.Document);
 
-            Footnotes footnotes = Footnotes.Concat(Footnotes, subject.Footnotes);
+            Footnotes footnotes = Footnotes.Concat(subject.Footnotes);
 
             XElement styles =
                 new XElement(

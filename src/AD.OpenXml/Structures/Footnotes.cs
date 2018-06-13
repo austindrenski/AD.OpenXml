@@ -148,6 +148,8 @@ namespace AD.OpenXml.Structures
         /// <returns>
         ///
         /// </returns>
+        [Pure]
+        [NotNull]
         public Footnotes With([CanBeNull] XElement content = default, [CanBeNull] IEnumerable<HyperlinkInfo> hyperlinks = default)
         {
             Package package = _package.ToPackage(FileAccess.ReadWrite);
@@ -169,6 +171,17 @@ namespace AD.OpenXml.Structures
 
             return new Footnotes(package);
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [NotNull]
+        public Footnotes Concat([NotNull] Footnotes other) => Concat(this, other);
 
         /// <summary>
         ///
@@ -217,12 +230,12 @@ namespace AD.OpenXml.Structures
                     first.Content.Name,
                     Combine(first.Content.Attributes(), second.Content.Attributes()),
                     first.Content.Nodes()
-                           .Select(x => UpdateResources(x, resources))
-                           .Select(x => UpdateFootnotes(x, footnoteSequence)),
+                         .Select(x => UpdateResources(x, resources))
+                         .Select(x => UpdateFootnotes(x, footnoteSequence)),
                     second.Content
-                         .Nodes()
-                         .Select(x => UpdateResources(x, otherResources))
-                         .Select(x => UpdateFootnotes(x, footnoteSequence)));
+                          .Nodes()
+                          .Select(x => UpdateResources(x, otherResources))
+                          .Select(x => UpdateFootnotes(x, footnoteSequence)));
 
             using (XmlWriter xml = XmlWriter.Create(part.GetStream(), XmlWriterSettings))
             {
