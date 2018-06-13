@@ -78,18 +78,15 @@ namespace CompilerAPI.Controllers
                                        x.FileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase)))
                 return BadRequest("Invalid file format.");
 
+            if (stylesheet is IFormFile s && !s.FileName.EndsWith(".css"))
+                return BadRequest($"Invalid stylesheet:{stylesheet.FileName}.");
+
             Queue<Package> packagesQueue = new Queue<Package>(uploadedFiles.Length);
 
             foreach (IFormFile file in uploadedFiles)
             {
-                // TODO: if Package takes a copy of the stream, remove this.
-                MemoryStream ms = new MemoryStream();
-                Stream s = file.OpenReadStream();
-                await s.CopyToAsync(ms);
-                s.Dispose();
-
                 if (file.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
-                    packagesQueue.Enqueue(Package.Open(ms));
+                    packagesQueue.Enqueue(Package.Open(file.OpenReadStream()));
 
 //                else
 //                {
@@ -151,12 +148,12 @@ namespace CompilerAPI.Controllers
             [NotNull] string publisher,
             [NotNull] string website)
             => await OpenXmlPackageVisitor
-                     .VisitAndFold(packages)
-                     .Package
-                     .AddHeaders(title)
-                     .AddFooters(publisher, website)
-                     .ToStream()
-                     .PositionChartsInline();
+                    .VisitAndFold(packages)
+                    .Package
+                    .AddHeaders(title)
+                    .AddFooters(publisher, website)
+                    .ToStream()
+                    .PositionChartsInline();
 
 //                     .PositionChartsInner()
 //                     .PositionChartsOuter()

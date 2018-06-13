@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefaultItemExcludes>$(DefaultItemExcludes);wwwroot/css/**;wwwroot/js/**;</DefaultItemExcludes>
+    <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -28,7 +28,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AD.OpenXml\AD.OpenXml.csproj" />
+    <ProjectReference Include="../AD.OpenXml/AD.OpenXml.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,5 +42,12 @@
 
   <ItemGroup>
     <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.6.362" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot/assets/**/*" CopyToOutputDirectory="true" CopyToPublishDirectory="Always" />
+    <Content Update="wwwroot/min/**/*" CopyToOutputDirectory="true" CopyToPublishDirectory="Always" />
+    <Content Update="wwwroot/css/**/*" CopyToOutputDirectory="false" CopyToPublishDirectory="Never" />
+    <Content Update="wwwroot/js/**/*" CopyToOutputDirectory="false" CopyToPublishDirectory="Never" />
   </ItemGroup>
 </Project>
