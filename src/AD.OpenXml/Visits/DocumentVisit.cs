@@ -16,6 +16,7 @@ namespace AD.OpenXml.Visits
     public static class DocumentVisit
     {
         [NotNull] private static readonly XNamespace M = XNamespaces.OpenXmlMath;
+
         // TODO: move to AD.Xml
         [NotNull] private static readonly XNamespace O = "urn:schemas-microsoft-com:office:office";
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
@@ -161,9 +162,9 @@ namespace AD.OpenXml.Visits
                 runProperties.AddFirst(distinct);
             }
 
-            // remove properties on non-interactive glyphs.
-            source.Descendants(M + "oMathPara").Descendants(M + "ctrlPr").Remove();
-            source.Descendants(M + "oMathPara").Descendants(W + "rPr").Remove();
+//            // remove properties on non-interactive glyphs.
+//            source.Descendants(M + "oMathPara").Descendants(M + "ctrlPr").Remove();
+//            source.Descendants(M + "oMathPara").Descendants(W + "rPr").Remove();
 
             (int oldId, int newId)[] revisionMapping =
                 source.Descendants()

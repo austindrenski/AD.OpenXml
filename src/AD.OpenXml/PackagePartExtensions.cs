@@ -46,7 +46,7 @@ namespace AD.OpenXml
             if (part is null)
                 throw new ArgumentNullException(nameof(part));
 
-            using (XmlWriter xml = XmlWriter.Create(part.GetStream(), XmlWriterSettings))
+            using (XmlWriter xml = XmlWriter.Create(part.GetStream(FileMode.Create), XmlWriterSettings))
             {
                 element.WriteTo(xml);
             }

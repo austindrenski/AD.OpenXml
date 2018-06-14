@@ -2,9 +2,7 @@
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using AD.IO.Streams;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -23,34 +21,30 @@ namespace AD.OpenXml.Documents
         /// <summary>
         /// Modifies line chart styling in the target stream.
         /// </summary>
-        /// <param name="stream"></param>
-        [Pure]
+        /// <param name="package"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        /// <exception cref="ArgumentNullException" />
         [NotNull]
-        [ItemNotNull]
-        public static async Task<MemoryStream> ModifyLineChartStyles([NotNull] this Task<MemoryStream> stream)
+        public static Package ModifyLineChartStyles([NotNull] this Package package)
         {
-            if (stream is null)
-                throw new ArgumentNullException(nameof(stream));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
-            MemoryStream ms = await (await stream).CopyPure();
-            Package package = Package.Open(ms);
+            Package result =
+                package.FileOpenAccess.HasFlag(FileAccess.Write)
+                    ? package
+                    : package.ToPackage(FileAccess.ReadWrite);
 
-            foreach (PackagePart part in package.EnumerateChartPartNames())
+            foreach (PackagePart chart in package.EnumerateChartPartNames())
             {
-                using (Stream original = part.GetStream())
-                {
-                    using (Stream chart = part.GetStream(FileMode.Truncate))
-                    {
-                        XElement.Load(original)
-                                .ModifyLineChartStyles()
-                                .Save(chart);
-                    }
-                }
+                chart.ReadXml()
+                     .ModifyLineChartStyles()
+                     .WriteTo(chart);
             }
 
-            package.Close();
-
-            return ms;
+            return result;
         }
 
         /// <summary>

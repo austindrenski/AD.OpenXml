@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using AD.IO;
-using AD.IO.Streams;
+using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -25,55 +24,42 @@ namespace AD.OpenXml.Documents
         /// <summary>
         ///
         /// </summary>
-        /// <param name="stream">
-        ///
-        /// </param>
+        /// <param name="package"></param>
         /// <returns>
         ///
         /// </returns>
-        [Pure]
+        /// <exception cref="ArgumentNullException" />
         [NotNull]
-        [ItemNotNull]
-        public static async Task<MemoryStream> PositionChartsOuter([NotNull] this Task<MemoryStream> stream)
+        public static Package PositionChartsOuter([NotNull] this Package package)
         {
-            if (stream is null)
-                throw new ArgumentNullException(nameof(stream));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
-            return await PositionChartsOuter(await stream);
-        }
+            Package result =
+                package.FileOpenAccess.HasFlag(FileAccess.Write)
+                    ? package
+                    : package.ToPackage(FileAccess.ReadWrite);
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="stream">
-        ///
-        /// </param>
-        [Pure]
-        [NotNull]
-        [ItemNotNull]
-        public static async Task<MemoryStream> PositionChartsOuter([NotNull] this MemoryStream stream)
-        {
-            if (stream is null)
-                throw new ArgumentNullException(nameof(stream));
+            PackagePart part = result.GetPart(Document.PartUri);
 
-            MemoryStream result = await stream.CopyPure();
+            XElement document = part.ReadXml();
 
-            XElement element = result.ReadXml();
-
-            foreach (XElement item in element.Descendants(W + "drawing").Where(x => x.Descendants(C + "chart").Any()))
+            foreach (XElement item in document.Descendants(W + "drawing").Where(x => x.Descendants(C + "chart").Any()))
             {
                 item.Element(WP + "inline")?
-                    .Element(WP + "extent")?
-                    .Remove();
+                   .Element(WP + "extent")?
+                   .Remove();
 
                 item.Element(WP + "inline")?
-                    .AddFirst(
+                   .AddFirst(
                         new XElement(WP + "extent",
                             new XAttribute("cx", 914400 * 6.5),
                             new XAttribute("cy", 914400 * 3.5)));
             }
 
-            return await element.WriteIntoAsync(result, "word/document.xml");
+            document.WriteTo(part);
+
+            return result;
         }
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using AD.OpenXml;
 using AD.OpenXml.Documents;
@@ -50,10 +49,10 @@ namespace CompilerAPI.Controllers
         /// The combined and formatted document.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
+        [Pure]
         [NotNull]
         [HttpPost]
-        [ItemNotNull]
-        public async Task<IActionResult> Index(
+        public IActionResult Index(
             [NotNull] [ItemNotNull] IEnumerable<IFormFile> files,
             [CanBeNull] string format,
             [CanBeNull] string title,
@@ -104,8 +103,8 @@ namespace CompilerAPI.Controllers
 //                }
             }
 
-            MemoryStream output =
-                await Process(
+            Package output =
+                Process(
                     packagesQueue,
                     title ?? "[REPORT TITLE]",
                     publisher ?? "[PUBLISHER]",
@@ -116,23 +115,21 @@ namespace CompilerAPI.Controllers
                 package.Close();
             }
 
-            output.Seek(0, SeekOrigin.Begin);
-
             switch (format)
             {
                 case "docx":
-                    return new FileStreamResult(output, _microsoftWordDocument);
+                    return new FileStreamResult(output.ToStream(), _microsoftWordDocument);
 
                 case "html":
                 {
                     string styles = stylesheet is null ? null : new StreamReader(stylesheet.OpenReadStream()).ReadToEnd();
-                    OpenXmlPackageVisitor ooxml = new OpenXmlPackageVisitor(Package.Open(output));
+                    OpenXmlPackageVisitor ooxml = new OpenXmlPackageVisitor(output);
                     HtmlVisitor html = new HtmlVisitor(ooxml.Document.ChartReferences, ooxml.Document.ImageReferences);
                     XObject result = html.Visit(ooxml.Document.Content, ooxml.Footnotes.Content, title, stylesheetUrl, styles);
                     return Content(result.ToString(), "text/html");
                 }
                 case "xml":
-                    return Content(new OpenXmlPackageVisitor(Package.Open(output)).Document.Content.ToString(), "application/xml");
+                    return Content(new OpenXmlPackageVisitor(output).Document.Content.ToString(), "application/xml");
 
                 default:
                     return BadRequest(ModelState);
@@ -141,25 +138,22 @@ namespace CompilerAPI.Controllers
 
         [Pure]
         [NotNull]
-        [ItemNotNull]
-        private static async Task<MemoryStream> Process(
+        private static Package Process(
             [NotNull] [ItemNotNull] IEnumerable<Package> packages,
             [NotNull] string title,
             [NotNull] string publisher,
             [NotNull] string website)
-            => await OpenXmlPackageVisitor
-                    .Visit(packages)
-                    .Package
-                    .AddHeaders(title)
-                    .AddFooters(publisher, website)
-                    .ToStream()
-                    .PositionChartsInline();
-
-//                     .PositionChartsInner()
-//                     .PositionChartsOuter()
-//                     .ModifyBarChartStyles()
-//                     .ModifyPieChartStyles()
-//                     .ModifyLineChartStyles()
-//                     .ModifyAreaChartStyles();
+            => OpenXmlPackageVisitor
+              .Visit(packages)
+              .Package
+              .AddHeaders(title)
+              .AddFooters(publisher, website)
+              .PositionChartsInline()
+              .PositionChartsInner()
+              .PositionChartsOuter()
+              .ModifyBarChartStyles()
+              .ModifyPieChartStyles()
+              .ModifyLineChartStyles()
+              .ModifyAreaChartStyles();
     }
 }

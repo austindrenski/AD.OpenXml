@@ -166,7 +166,7 @@ namespace AD.OpenXml.Structures
             if (part is null)
                 throw new ArgumentNullException(nameof(part));
 
-            using (Stream stream = part.GetStream())
+            using (Stream stream = part.GetStream(FileMode.Create))
             {
                 stream.Write(Image.Span);
             }

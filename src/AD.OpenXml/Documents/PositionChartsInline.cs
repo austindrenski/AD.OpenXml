@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using AD.IO;
-using AD.IO.Streams;
+using AD.OpenXml.Structures;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -19,44 +18,33 @@ namespace AD.OpenXml.Documents
     public static class PositionChartsInlineExtensions
     {
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+
         [NotNull] private static readonly XNamespace WP = XNamespaces.OpenXmlDrawingmlWordprocessingDrawing;
+
         // TODO: add to AD.Xml
         [NotNull] private static readonly XNamespace WP14 = "http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing";
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="stream">
-        ///
-        /// </param>
+        /// <param name="package"></param>
         /// <returns>
         ///
         /// </returns>
-        public static async Task<MemoryStream> PositionChartsInline(this Task<MemoryStream> stream)
+        [NotNull]
+        public static Package PositionChartsInline([NotNull] this Package package)
         {
-            if (stream is null)
-                throw new ArgumentNullException(nameof(stream));
+            if (package is null)
+                throw new ArgumentNullException(nameof(package));
 
-            return await PositionChartsInline(await stream);
-        }
+            Package result =
+                package.FileOpenAccess.HasFlag(FileAccess.Write)
+                    ? package
+                    : package.ToPackage(FileAccess.ReadWrite);
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="stream">
-        ///
-        /// </param>
-        /// <returns>
-        ///
-        /// </returns>
-        public static async Task<MemoryStream> PositionChartsInline(this MemoryStream stream)
-        {
-            if (stream is null)
-                throw new ArgumentNullException(nameof(stream));
+            PackagePart part = result.GetPart(Document.PartUri);
 
-            MemoryStream result = await stream.CopyPure();
-
-            XElement document = result.ReadXml();
+            XElement document = part.ReadXml();
 
             IEnumerable<XElement> anchors =
                 document.Descendants(W + "drawing")
@@ -84,7 +72,9 @@ namespace AD.OpenXml.Documents
                 item.Descendants(WP + "anchor").Remove();
             }
 
-            return await document.WriteIntoAsync(result, "word/document.xml");
+            document.WriteTo(part);
+
+            return result;
         }
     }
 }
