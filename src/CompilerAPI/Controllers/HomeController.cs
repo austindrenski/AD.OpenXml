@@ -9,18 +9,17 @@ namespace CompilerAPI.Controllers
     /// </summary>
     [PublicAPI]
     [ApiVersion("1.0")]
-    [Route("[controller]/[action]")]
-    public class Home : Controller
+    public class HomeController : Controller
     {
         /// <summary>
         ///
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
         [NotNull]
         [HttpGet]
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index() => RedirectToAction("Index", "Upload");
     }
 }

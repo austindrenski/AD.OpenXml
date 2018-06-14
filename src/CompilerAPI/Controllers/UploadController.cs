@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 using AD.OpenXml;
 using AD.OpenXml.Documents;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 
 namespace CompilerAPI.Controllers
 {
@@ -22,8 +22,7 @@ namespace CompilerAPI.Controllers
     [ApiVersion("1.0")]
     public class UploadController : Controller
     {
-        private static MediaTypeHeaderValue _microsoftWordDocument =
-            new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        private const string MicrosoftWordDocument = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
         /// <summary>
         /// Returns the webpage with an upload form for documents.
@@ -72,7 +71,7 @@ namespace CompilerAPI.Controllers
             if (uploadedFiles.Any(x => x.Length <= 0))
                 return BadRequest("Invalid file length.");
 
-            if (uploadedFiles.Any(x => x.ContentType != _microsoftWordDocument.ToString() &&
+            if (uploadedFiles.Any(x => x.ContentType != MicrosoftWordDocument.ToString() &&
                                        x.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase) &&
                                        x.FileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase)))
                 return BadRequest("Invalid file format.");
@@ -118,21 +117,27 @@ namespace CompilerAPI.Controllers
             switch (format)
             {
                 case "docx":
-                    return new FileStreamResult(output.ToStream(), _microsoftWordDocument);
-
+                {
+                    return File(output.ToStream(), MicrosoftWordDocument, "result.docx");
+                }
                 case "html":
                 {
                     string styles = stylesheet is null ? null : new StreamReader(stylesheet.OpenReadStream()).ReadToEnd();
                     OpenXmlPackageVisitor ooxml = new OpenXmlPackageVisitor(output);
                     HtmlVisitor html = new HtmlVisitor(ooxml.Document.ChartReferences, ooxml.Document.ImageReferences);
-                    XObject result = html.Visit(ooxml.Document.Content, ooxml.Footnotes.Content, title, stylesheetUrl, styles);
-                    return Content(result.ToString(), "text/html");
+                    XObject htmlResult = html.Visit(ooxml.Document.Content, ooxml.Footnotes.Content, title, stylesheetUrl, styles);
+                    return File(Encoding.UTF8.GetBytes(htmlResult.ToString()), "text/html", "result.html");
                 }
                 case "xml":
-                    return Content(new OpenXmlPackageVisitor(output).Document.Content.ToString(), "application/xml");
-
+                {
+                    OpenXmlPackageVisitor xml = new OpenXmlPackageVisitor(output);
+                    XElement xmlResult = xml.Document.Content;
+                    return File(Encoding.UTF8.GetBytes(xmlResult.ToString()), "application/xml", "result.xml");
+                }
                 default:
+                {
                     return BadRequest(ModelState);
+                }
             }
         }
 
@@ -143,17 +148,16 @@ namespace CompilerAPI.Controllers
             [NotNull] string title,
             [NotNull] string publisher,
             [NotNull] string website)
-            => OpenXmlPackageVisitor
-              .Visit(packages)
-              .Package
-              .AddHeaders(title)
-              .AddFooters(publisher, website)
-              .PositionChartsInline()
-              .PositionChartsInner()
-              .PositionChartsOuter()
-              .ModifyBarChartStyles()
-              .ModifyPieChartStyles()
-              .ModifyLineChartStyles()
-              .ModifyAreaChartStyles();
+            => OpenXmlPackageVisitor.Visit(packages)
+                                    .Package
+                                    .AddHeaders(title)
+                                    .AddFooters(publisher, website)
+                                    .PositionChartsInline()
+                                    .PositionChartsInner()
+                                    .PositionChartsOuter()
+                                    .ModifyBarChartStyles()
+                                    .ModifyPieChartStyles()
+                                    .ModifyLineChartStyles()
+                                    .ModifyAreaChartStyles();
     }
 }

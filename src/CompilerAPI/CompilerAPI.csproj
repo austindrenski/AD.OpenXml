@@ -1,20 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-
   <PropertyGroup>
     <DefineConstants>JETBRAINS_ANNOTATIONS</DefineConstants>
     <DocumentationFile>bin/Release/$(TargetFramework)/CompilerApi.xml</DocumentationFile>
     <RuntimeIdentifiers>win81-x64;win10-x64;rhel.7-x64</RuntimeIdentifiers>
   </PropertyGroup>
-
   <PropertyGroup>
     <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
   </PropertyGroup>
-
   <PropertyGroup>
     <Authors>Austin Drenski</Authors>
     <Company>Austin Drenski</Company>
@@ -26,11 +22,9 @@
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <RepositoryUrl>https://github.com/austindrenski/AD.OpenXml</RepositoryUrl>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="../AD.OpenXml/AD.OpenXml.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="AD.ApiExtensions" Version="1.1.102" />
     <PackageReference Include="AD.IO" Version="1.5.36" />
@@ -39,15 +33,16 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="2.5.0" />
   </ItemGroup>
-
   <ItemGroup>
     <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.6.362" />
   </ItemGroup>
-
   <ItemGroup>
     <Content Update="wwwroot/assets/**/*" CopyToOutputDirectory="true" CopyToPublishDirectory="Always" />
     <Content Update="wwwroot/min/**/*" CopyToOutputDirectory="true" CopyToPublishDirectory="Always" />
     <Content Update="wwwroot/css/**/*" CopyToOutputDirectory="false" CopyToPublishDirectory="Never" />
     <Content Update="wwwroot/js/**/*" CopyToOutputDirectory="false" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
   </ItemGroup>
 </Project>

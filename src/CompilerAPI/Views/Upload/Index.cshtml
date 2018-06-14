@@ -37,7 +37,7 @@
         </div>
         <div class="custom-file">
             <input id="stylesheet" name="stylesheet" type="file" class="custom-file-input" accept=".css">
-            <label class="custom-file-label" for="stylesheet">Choose stylesheet (optional)</label>
+            <label class="custom-file-label" for="stylesheet" placeholder="Choose stylesheet (optional)">Choose stylesheet (optional)</label>
         </div>
     </div>
 
@@ -56,10 +56,10 @@
         </label>
     </div>
 
-    <div class="input-group mb-3 mt-3">
+    <div id="file-upload" class="input-group mb-3 mt-3">
         <div class="custom-file">
             <input id="files" name="files" type="file" class="custom-file-input" accept=".docx,.md" multiple required>
-            <label class="custom-file-label" for="files">Choose files</label>
+            <label class="custom-file-label" for="files" placeholder="Choose files to upload">Choose files to upload</label>
         </div>
         <div class="input-group-append">
             <button class="btn btn-outline-primary" type="submit">Upload</button>
@@ -67,4 +67,5 @@
     </div>
 
     <ul id="file-names"></ul>
+
 </form>
