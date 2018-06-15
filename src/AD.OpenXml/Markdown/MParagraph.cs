@@ -26,16 +26,6 @@ namespace AD.OpenXml.Markdown
         public MParagraph(in ReadOnlySpan<char> text) => Text = Normalize(text);
 
         /// <summary>
-        ///
-        /// </summary>
-        /// <param name="span"></param>
-        /// <returns>
-        ///
-        /// </returns>
-        [Pure]
-        public static implicit operator MParagraph(in ReadOnlySpan<char> span) => new MParagraph(span);
-
-        /// <summary>
         /// Normalizes the segment by trimming outer whitespace and reducing inner whitespace.
         /// </summary>
         /// <param name="span">The span to normalize.</param>
@@ -50,13 +40,16 @@ namespace AD.OpenXml.Markdown
 
         /// <inheritdoc />
         [Pure]
-        public override XNode ToHtml() => Text.ToHtml();
+        public override XNode ToHtml()
+            => new XElement("p",
+                Text.ToHtml());
 
         /// <inheritdoc />
         [Pure]
         public override XNode ToOpenXml()
             => new XElement(W + "p",
-                new XElement(W + "r", Text.ToOpenXml()));
+                new XElement(W + "r",
+                    Text.ToOpenXml()));
 
         /// <inheritdoc />
         [Pure]

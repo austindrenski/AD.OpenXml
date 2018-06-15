@@ -16,7 +16,7 @@ namespace AD.OpenXml.Markdown
     [PublicAPI]
     public class MDocument : MNode
     {
-        private readonly List<MNode> _nodes;
+        private readonly List<MNode> _nodes = new List<MNode>();
 
         /// <summary>
         ///

@@ -7,49 +7,29 @@ namespace AD.OpenXml.Markdown
     /// <inheritdoc cref="MNode"/>
     /// <inheritdoc cref="IEquatable{T}"/>
     /// <summary>
-    /// Represents a Markdown header node.
+    /// Represents a Markdown list item node.
     /// </summary>
     /// <remarks>
-    /// Note: closing sequences are not supported.
-    /// See: http://spec.commonmark.org/0.28/#atx-headings
+    /// See: https://spec.commonmark.org/0.28/#lists
     /// </remarks>
     [PublicAPI]
-    public class MListItem : MNode, IEquatable<MListItem>
+    public abstract class MListItem : MNode, IEquatable<MListItem>
     {
         /// <summary>
-        /// The text of the heading.
+        /// The text of the list item.
         /// </summary>
         [NotNull]
-        public MText Item { get; }
+        public abstract MText Item { get; }
 
         /// <summary>
-        /// The level of the header.
+        /// The level of the list item.
         /// </summary>
-        public int Level { get; }
+        public abstract int Level { get; }
 
         /// <summary>
-        /// Constructs an <see cref="MListItem"/>.
+        /// The list marker character.
         /// </summary>
-        /// <param name="text">The raw text of the item.</param>
-        public MListItem(in ReadOnlySpan<char> text)
-        {
-            if (!Accept(text))
-                throw new ArgumentException($"Heading must begin with 1-6 '#' characters followed by a ' ' character: '{text.ToString()}'");
-
-            ReadOnlySpan<char> normalized = Normalize(text);
-            Level = normalized.IndexOf(' ');
-            Item = normalized.Slice(Level + 1).TrimStart();
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="span"></param>
-        /// <returns>
-        ///
-        /// </returns>
-        [Pure]
-        public static implicit operator MListItem(in ReadOnlySpan<char> span) => new MListItem(span);
+        public abstract char Marker { get; }
 
         /// <summary>
         /// Checks if the segment is a well-formed Markdown heading.
@@ -58,41 +38,45 @@ namespace AD.OpenXml.Markdown
         /// <returns>
         /// True if the segment is a well-formed Markdown heading; otherwise false.
         /// </returns>
+        [Pure]
         public static bool Accept(in ReadOnlySpan<char> span)
         {
             ReadOnlySpan<char> trimmed = span.Trim();
 
-            if (trimmed.Length < 1)
+            // List item must be at least '- '.
+            if (trimmed.Length < 2)
                 return false;
 
-            if (trimmed[0] == '-')
+            if (trimmed.StartsWith("- ") ||
+                trimmed.StartsWith("* ") ||
+                trimmed.StartsWith("+ "))
                 return true;
 
-            return char.IsDigit(trimmed[0]) && (trimmed[1] == '.' || trimmed[1] == ')') && trimmed[2] == ' ';
+            // Numbered items must be at least '1) ' or '1. '.
+            if (trimmed.Length < 3)
+                return false;
+
+            // How many digits in the number?
+            int index = 0;
+            while (char.IsDigit(trimmed[index]))
+            {
+                if (++index == trimmed.Length)
+                    return false;
+            }
+
+            ReadOnlySpan<char> afterDigit = trimmed.Slice(index);
+
+            return afterDigit.StartsWith(") ") ||
+                   afterDigit.StartsWith(". ");
         }
 
-        /// <summary>
-        /// Normalizes the segment by trimming (in order):
-        ///   1) up to three ' ' characters from the start;
-        ///   2) all ' ' from the end;
-        ///   3) all '#' from the end;
-        ///   4) one ' ' from the end;
-        ///   5) normalizing inner whitespace.
-        /// </summary>
-        /// <param name="span">The span to normalize.</param>
-        /// <returns>
-        /// The normalized segment.
-        /// </returns>
+        /// <inheritdoc />
         [Pure]
-        private static ReadOnlySpan<char> Normalize(in ReadOnlySpan<char> span) => span;
+        public abstract override string ToString();
 
         /// <inheritdoc />
         [Pure]
-        public override string ToString() => Item.ToString();
-
-        /// <inheritdoc />
-        [Pure]
-        public override XNode ToHtml() => new XElement($"h{Level}", Item.ToHtml());
+        public override XNode ToHtml() => new XElement("li", Item.ToHtml());
 
         /// <inheritdoc />
         [Pure]
@@ -100,12 +84,13 @@ namespace AD.OpenXml.Markdown
             => new XElement(W + "p",
                 new XElement(W + "pPr",
                     new XElement(W + "pStyle",
-                        new XAttribute(W + "val", $"Heading{Level}"))),
+                        new XAttribute(W + "val", "ListParagraph"))),
                 new XElement(W + "r", Item.ToOpenXml()));
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(MListItem other) => !(other is null) && Item.Equals(other.Item) && Level == other.Level;
+        public bool Equals(MListItem other)
+            => !(other is null) && Marker == other.Marker && Level == other.Level && Item.Equals(other.Item);
 
         /// <inheritdoc />
         [Pure]
@@ -113,7 +98,7 @@ namespace AD.OpenXml.Markdown
 
         /// <inheritdoc />
         [Pure]
-        public override int GetHashCode() => unchecked((397 * Item.GetHashCode()) ^ Level.GetHashCode());
+        public override int GetHashCode() => unchecked((397 * Item.GetHashCode()) ^ (397 * Marker.GetHashCode()) ^ Level.GetHashCode());
 
         /// <summary>
         /// Returns a value that indicates whether the values of two <see cref="T:AD.OpenXml.Markdown.MListItem" /> objects are equal.

@@ -22,8 +22,8 @@ namespace AD.OpenXml.Markdown
             if (MHeading.Accept(span))
                 return new MHeading(span);
 
-            if (MListItem.Accept(span))
-                return new MListItem(span);
+            if (MBulletListItem.Accept(span))
+                return new MBulletListItem(span);
 
             return new MParagraph(span);
         }
