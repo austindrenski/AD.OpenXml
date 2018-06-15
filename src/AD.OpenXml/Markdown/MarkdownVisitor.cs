@@ -1,6 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
+// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
 namespace AD.OpenXml.Markdown
 {
     /// <summary>
@@ -20,6 +21,9 @@ namespace AD.OpenXml.Markdown
         {
             if (MHeading.Accept(in span))
                 return new MHeading(in span);
+
+            if (MListItem.Accept(in span))
+                return new MListItem(in span);
 
             return new MParagraph(in span);
         }

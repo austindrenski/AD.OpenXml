@@ -34,21 +34,21 @@ namespace AD.OpenXml
             };
 
         /// <summary>
-        /// Writes the <paramref name="element"/> to the <paramref name="part" />.
+        /// Writes the <paramref name="node"/> to the <paramref name="part" />.
         /// </summary>
-        /// <param name="element">The element to write.</param>
+        /// <param name="node">The node to write.</param>
         /// <param name="part">The part to which the element is written.</param>
         /// <exception cref="ArgumentNullException" />
-        public static void WriteTo([NotNull] this XElement element, [NotNull] PackagePart part)
+        public static void WriteTo([NotNull] this XNode node, [NotNull] PackagePart part)
         {
-            if (element is null)
-                throw new ArgumentNullException(nameof(element));
+            if (node is null)
+                throw new ArgumentNullException(nameof(node));
             if (part is null)
                 throw new ArgumentNullException(nameof(part));
 
             using (XmlWriter xml = XmlWriter.Create(part.GetStream(FileMode.Create), XmlWriterSettings))
             {
-                element.WriteTo(xml);
+                node.WriteTo(xml);
             }
         }
 

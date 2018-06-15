@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 
@@ -22,26 +21,6 @@ namespace AD.OpenXml
         /// Represents the prefix 'v:' on VML elements.
         /// </summary>
         [NotNull] private static readonly XNamespace V = "urn:schemas-microsoft-com:vml";
-
-        /// <summary>
-        /// The regex to detect heading styles of the case-insensitive form "heading(?[0-9])".
-        /// </summary>
-        [NotNull] private static readonly Regex HeadingRegex = new Regex("heading(?<level>[0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        /// <summary>
-        /// The regex to detect sequence references of the case-insensitive form "SEQ (?[A-z]+) (?.*) (?\".+\"|[A-z]+ \\\\s [0-9])".
-        /// </summary>
-        [NotNull] private static readonly Regex SequenceRegex = new Regex("SEQ (?<type>[A-z]+) (?<switches>.*) (?<format>\".+\"|[A-z]+ \\\\s [0-9])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        /// <summary>
-        /// The regex to detect style references of the case-insensitive form "STYLEREF (?\".+\"|[0-9] \\\\s)".
-        /// </summary>
-        [NotNull] private static readonly Regex StyleReferenceRegex = new Regex("STYLEREF (?<format>\".+\"|[0-9] \\\\s)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        /// <summary>
-        /// The !DOCTYPE declaration.
-        /// </summary>
-        [NotNull] private static readonly XDocumentType DocumentTypeDeclaration = new XDocumentType("html", null, null, null);
 
         /// <summary>
         /// The HTML attributes that may be returned.
@@ -82,30 +61,6 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull]
         protected virtual IDictionary<string, (string contentType, string description, string base64)> Images { get; }
-
-        /// <summary>
-        /// The 'charset' tage value.
-        /// </summary>
-        [NotNull]
-        protected virtual string CharacterSet => "utf-8";
-
-        /// <summary>
-        /// The 'lang' tage value.
-        /// </summary>
-        [NotNull]
-        protected virtual string Language => "en";
-
-        /// <summary>
-        /// The value for the 'name' attribute on the 'meta' tag.
-        /// </summary>
-        [NotNull]
-        protected virtual string MetaName => "viewport";
-
-        /// <summary>
-        /// The value for the 'content' attribute on the 'meta' tag.
-        /// </summary>
-        [NotNull]
-        protected virtual string MetaContent => "width=device-width,minimum-scale=1,initial-scale=1";
 
         #endregion
 
@@ -164,15 +119,15 @@ namespace AD.OpenXml
         [NotNull]
         public XObject Visit([CanBeNull] XElement document, [CanBeNull] XElement footnotes, [CanBeNull] string title, [CanBeNull] string stylesheetUrl, [CanBeNull] string styles)
             => new XDocument(
-                DocumentTypeDeclaration,
+                new XDocumentType("html", null, null, null),
                 new XElement("html",
-                    new XAttribute("lang", Language),
+                    new XAttribute("lang", "en"),
                     new XElement("head",
                         new XElement("meta",
-                            new XAttribute("charset", CharacterSet)),
+                            new XAttribute("charset", "utf-8")),
                         new XElement("meta",
-                            new XAttribute("name", MetaName),
-                            new XAttribute("content", MetaContent)),
+                            new XAttribute("name", "viewport"),
+                            new XAttribute("content", "width=device-width,minimum-scale=1,initial-scale=1")),
                         new XElement("title", title ?? string.Empty),
                         new XElement("script",
                             new XAttribute("type", "text/javascript"),
@@ -357,12 +312,14 @@ a[aria-label='Return to content'] {
 //                        Visit(NextWhile(paragraph, x => x is XElement e && "ListParagraph" == (string) ParagraphStyle(e))));
 //            }
 
-            if (HeadingRegex.Match((string) classAttribute) is Match match && match.Success)
+            ReadOnlySpan<char> classSpan = classAttribute.Value;
+            if (classSpan.StartsWith("heading", StringComparison.OrdinalIgnoreCase) &&
+                int.TryParse(classSpan.Slice(7), out int levelValue))
             {
                 return
-                    new XElement($"h{match.Groups["level"].Value}",
+                    new XElement($"h{levelValue}",
                         Visit(paragraph.Attributes()),
-                        VisitString((string) paragraph));
+                        Visit(paragraph.Nodes()));
             }
 
             // Not handled. Greedily subsumed by table nodes.
@@ -455,19 +412,25 @@ a[aria-label='Return to content'] {
             if ("superscript" == (string) rPr?.Element(W + "vertAlign")?.Attribute(W + "val") ||
                 "superscript" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val") ||
                 "FootnoteReference" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
-                return new XElement("sup", VisitString((string) run));
+                return new XElement("sup", MakeLiftable(run));
 
             if ("subscript" == (string) rPr?.Element(W + "vertAlign")?.Attribute(W + "val") ||
                 "subscript" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
-                return new XElement("sub", VisitString((string) run));
+                return new XElement("sub", MakeLiftable(run));
 
             if (null != rPr?.Element(W + "b") || "Strong" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
-                return new XElement("b", VisitString((string) run));
+            {
+                XElement strong = new XElement("strong", Visit(MakeLiftable(run)));
+                return strong.HasElements ? strong : null;
+            }
 
             if (null != rPr?.Element(W + "i") || "Emphasis" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
-                return new XElement("i", VisitString((string) run));
+            {
+                XElement emphasis = new XElement("em", Visit(MakeLiftable(run)));
+                return emphasis.HasElements ? emphasis : null;
+            }
 
-            return VisitString((string) run);
+            return MakeLiftable(run);
         }
 
         /// <inheritdoc />
@@ -548,8 +511,15 @@ a[aria-label='Return to content'] {
 
         /// <inheritdoc />
         [Pure]
+        protected override XObject VisitText(XElement text) => MakeLiftable(text);
+
+        /// <inheritdoc />
+        [Pure]
         protected override XObject VisitText(XText text)
-            => SequenceRegex.IsMatch(text.Value) || StyleReferenceRegex.IsMatch(text.Value) ? null : text;
+        {
+            ReadOnlySpan<char> t = text.Value;
+            return t.StartsWith("SEQ") || t.StartsWith("STYLEREF") ? null : new XText(text.Value);
+        }
 
         #endregion
 
@@ -580,7 +550,7 @@ a[aria-label='Return to content'] {
                                       (x.Element(C + "val")?.Element(C + "strRef")?.Element(C + "strCache") ??
                                        x.Element(C + "val")?.Element(C + "numRef")?.Element(C + "numCache"))?
                                      .Elements(C + "pt")
-                                      ??
+                                    ??
                                       Enumerable.Empty<XElement>(),
                                       (a, b) =>
                                           new XElement("observation",

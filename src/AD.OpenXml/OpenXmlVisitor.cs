@@ -105,6 +105,7 @@ namespace AD.OpenXml
                     [W   + "object"]      = VisitEmbedded,
                     [W   + "p"]           = VisitParagraph,
                     [W   + "r"]           = VisitRun,
+                    [W   + "t"]           = VisitText,
                     [W   + "tbl"]         = VisitTable,
                     [W   + "tc"]          = VisitTableCell,
                     [W   + "tr"]          = VisitTableRow,
@@ -423,6 +424,17 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitTableRow([NotNull] XElement row) => base.VisitElement(row);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitText([NotNull] XElement text) => base.VisitElement(text);
 
         #endregion
     }

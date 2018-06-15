@@ -28,9 +28,7 @@ namespace AD.OpenXml
     [PublicAPI]
     public sealed class OpenXmlPackageVisitor
     {
-        [NotNull] private static readonly Package DefaultOpenXmlPackage =
-            Package.Open(new MemoryStream(DocxFilePath.Create().ToArray()), FileMode.Open, FileAccess.Read);
-
+        [NotNull] private static readonly Package DefaultOpenXmlPackage = DocxFilePath.Create().ToPackage();
         [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
         [NotNull] private static readonly XNamespace M = XNamespaces.OpenXmlMath;
         [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;

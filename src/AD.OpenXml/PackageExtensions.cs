@@ -15,6 +15,39 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
+        /// <param name="bytes"></param>
+        /// <param name="access"></param>
+        /// <param name="mode"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [NotNull]
+        public static Package ToPackage(this ReadOnlySpan<byte> bytes, FileAccess access = FileAccess.Read, FileMode mode = FileMode.Open)
+        {
+            MemoryStream ms = new MemoryStream();
+            ms.Write(bytes);
+
+            return Package.Open(ms, mode, access);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <param name="access"></param>
+        /// <param name="mode"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [NotNull]
+        public static Package ToPackage(this ReadOnlyMemory<byte> bytes, FileAccess access = FileAccess.Read, FileMode mode = FileMode.Open)
+            => bytes.Span.ToPackage(access, mode);
+
+        /// <summary>
+        ///
+        /// </summary>
         /// <param name="package"></param>
         /// <returns>
         ///

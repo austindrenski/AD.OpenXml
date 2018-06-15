@@ -5,8 +5,11 @@ using System.IO.Packaging;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using AD.IO.Paths;
 using AD.OpenXml;
 using AD.OpenXml.Documents;
+using AD.OpenXml.Markdown;
+using AD.OpenXml.Structures;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +25,8 @@ namespace CompilerAPI.Controllers
     [ApiVersion("1.0")]
     public class UploadController : Controller
     {
-        private const string MicrosoftWordDocument = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        [NotNull] private const string MicrosoftWordDocument =
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
         /// <summary>
         /// Returns the webpage with an upload form for documents.
@@ -84,22 +88,28 @@ namespace CompilerAPI.Controllers
             foreach (IFormFile file in uploadedFiles)
             {
                 if (file.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
+                {
                     packagesQueue.Enqueue(Package.Open(file.OpenReadStream()));
+                }
+                else if (file.FileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
+                {
+                    MDocument mDocument = new MDocument();
+                    using (StreamReader reader = new StreamReader(file.OpenReadStream()))
+                    {
+                        MarkdownVisitor visitor = new MarkdownVisitor();
+                        ReadOnlySpan<char> span;
+                        while ((span = reader.ReadLine()) != null)
+                        {
+                            mDocument.Append(visitor.Visit(in span));
+                        }
+                    }
 
-//                else
-//                {
-//                    StringSegment markdown = new StreamReader(file.OpenReadStream()).ReadToEnd();
-//                    MNode result = new MarkdownVisitor().Visit(in markdown);
-//
-//                    ZipArchive archive = new ZipArchive(DocxFilePath.Create(), ZipArchiveMode.Update);
-//
-//                    using (Stream stream = archive.GetEntry("word/document.xml")?.Open())
-//                    {
-//                        (result.ToOpenXml() as XElement)?.Save(stream);
-//                    }
-//
-//                    documentQueue.Enqueue(archive);
-//                }
+                    Package package = DocxFilePath.Create().ToPackage(FileAccess.ReadWrite);
+
+                    mDocument.ToOpenXml().WriteTo(package.GetPart(Document.PartUri));
+
+                    packagesQueue.Enqueue(package);
+                }
             }
 
             Package output =
