@@ -19,13 +19,13 @@ namespace AD.OpenXml.Markdown
         /// </returns>
         public MNode Visit(in ReadOnlySpan<char> span)
         {
-            if (MHeading.Accept(in span))
-                return new MHeading(in span);
+            if (MHeading.Accept(span))
+                return new MHeading(span);
 
-            if (MListItem.Accept(in span))
-                return new MListItem(in span);
+            if (MListItem.Accept(span))
+                return new MListItem(span);
 
-            return new MParagraph(in span);
+            return new MParagraph(span);
         }
     }
 }

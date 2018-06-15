@@ -33,10 +33,10 @@ namespace AD.OpenXml.Markdown
         /// <param name="text">The raw text of the heading.</param>
         public MHeading(in ReadOnlySpan<char> text)
         {
-            if (!Accept(in text))
+            if (!Accept(text))
                 throw new ArgumentException($"Heading must begin with 1-6 '#' characters followed by a ' ' character: '{text.ToString()}'");
 
-            ReadOnlySpan<char> normalized = Normalize(in text);
+            ReadOnlySpan<char> normalized = Normalize(text);
             Level = normalized.IndexOf(' ');
             Heading = normalized.Slice(Level + 1);
         }
@@ -58,7 +58,7 @@ namespace AD.OpenXml.Markdown
             if (initial == -1 || initial > 3)
                 return false;
 
-            ReadOnlySpan<char> trimmed = Normalize(in span);
+            ReadOnlySpan<char> trimmed = Normalize(span);
 
             if (trimmed.Length < 2)
                 return false;

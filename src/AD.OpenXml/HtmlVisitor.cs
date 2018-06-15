@@ -412,7 +412,10 @@ a[aria-label='Return to content'] {
             if ("superscript" == (string) rPr?.Element(W + "vertAlign")?.Attribute(W + "val") ||
                 "superscript" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val") ||
                 "FootnoteReference" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
-                return new XElement("sup", MakeLiftable(run));
+            {
+                XElement superscript = new XElement("sup", Visit(MakeLiftable(run)));
+                return superscript.HasElements ? superscript : null;
+            }
 
             if ("subscript" == (string) rPr?.Element(W + "vertAlign")?.Attribute(W + "val") ||
                 "subscript" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))

@@ -23,7 +23,7 @@ namespace AD.OpenXml.Markdown
         /// Constructs an <see cref="MParagraph"/>.
         /// </summary>
         /// <param name="text">The raw text of the node.</param>
-        public MParagraph(in ReadOnlySpan<char> text) => Text = Normalize(in text);
+        public MParagraph(in ReadOnlySpan<char> text) => Text = Normalize(text);
 
         /// <summary>
         ///
@@ -33,7 +33,7 @@ namespace AD.OpenXml.Markdown
         ///
         /// </returns>
         [Pure]
-        public static implicit operator MParagraph(in ReadOnlySpan<char> span) => new MParagraph(in span);
+        public static implicit operator MParagraph(in ReadOnlySpan<char> span) => new MParagraph(span);
 
         /// <summary>
         /// Normalizes the segment by trimming outer whitespace and reducing inner whitespace.

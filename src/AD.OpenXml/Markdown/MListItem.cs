@@ -33,10 +33,10 @@ namespace AD.OpenXml.Markdown
         /// <param name="text">The raw text of the item.</param>
         public MListItem(in ReadOnlySpan<char> text)
         {
-            if (!Accept(in text))
+            if (!Accept(text))
                 throw new ArgumentException($"Heading must begin with 1-6 '#' characters followed by a ' ' character: '{text.ToString()}'");
 
-            ReadOnlySpan<char> normalized = Normalize(in text);
+            ReadOnlySpan<char> normalized = Normalize(text);
             Level = normalized.IndexOf(' ');
             Item = normalized.Slice(Level + 1).TrimStart();
         }
@@ -49,7 +49,7 @@ namespace AD.OpenXml.Markdown
         ///
         /// </returns>
         [Pure]
-        public static implicit operator MListItem(in ReadOnlySpan<char> span) => new MListItem(in span);
+        public static implicit operator MListItem(in ReadOnlySpan<char> span) => new MListItem(span);
 
         /// <summary>
         /// Checks if the segment is a well-formed Markdown heading.

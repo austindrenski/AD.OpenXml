@@ -23,7 +23,7 @@ namespace AD.OpenXml.Markdown
         /// Constructs an <see cref="MText"/>.
         /// </summary>
         /// <param name="text">The raw text of the node.</param>
-        public MText(in ReadOnlySpan<char> text) => Text = Normalize(in text).ToArray();
+        public MText(in ReadOnlySpan<char> text) => Text = Normalize(text).ToArray();
 
         /// <summary>
         ///
@@ -34,7 +34,7 @@ namespace AD.OpenXml.Markdown
         /// </returns>
         [Pure]
         [NotNull]
-        public static implicit operator MText(in ReadOnlySpan<char> span) => new MText(in span);
+        public static implicit operator MText(in ReadOnlySpan<char> span) => new MText(span);
 
         /// <summary>
         /// Normalizes the span by trimming outer whitespace and reducing inner whitespace.
