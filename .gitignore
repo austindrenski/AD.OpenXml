@@ -3,4 +3,6 @@ obj/
 .idea/
 .vscode/
 wwwroot/
+node_modules/
 *.user
+package-lock.json

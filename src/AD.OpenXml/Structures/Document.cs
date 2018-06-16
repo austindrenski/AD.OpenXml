@@ -115,9 +115,7 @@ namespace AD.OpenXml.Structures
                     : package;
 
             if (_package.PartExists(PartUri))
-            {
                 Content = _package.GetPart(PartUri).ReadXml();
-            }
             else
             {
                 Content =

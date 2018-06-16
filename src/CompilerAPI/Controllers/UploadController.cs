@@ -88,9 +88,7 @@ namespace CompilerAPI.Controllers
             foreach (IFormFile file in uploadedFiles)
             {
                 if (file.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
-                {
                     packagesQueue.Enqueue(Package.Open(file.OpenReadStream()));
-                }
                 else if (file.FileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
                 {
                     MDocument mDocument = new MDocument();
