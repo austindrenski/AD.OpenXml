@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using AD.OpenXml.Markdown;
+﻿using AD.OpenXml.Markdown;
 using JetBrains.Annotations;
 using Xunit;
 
