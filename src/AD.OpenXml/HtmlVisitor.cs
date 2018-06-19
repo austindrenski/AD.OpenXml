@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using AD.OpenXml.Css;
 using JetBrains.Annotations;
 
 // ReSharper disable ClassWithVirtualMembersNeverInherited.Global
@@ -134,27 +135,23 @@ namespace AD.OpenXml
                             new XAttribute("src", "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML"),
                             new XText(string.Empty)),
                         new XElement("style",
-                            @"
-h1 {
-    counter-reset: footnote_counter;
-}
-
-
-a[aria-describedby='footnote-label'] {
-    font-size: 0.5em;
-    margin-left: 1px;
-    text-decoration: none;
-    vertical-align: super;
-}
-
-a[aria-describedby='footnote-label']::before {
-    content: '[' counter(footnote_counter) ']';
-    counter-increment: footnote_counter;
-}
-
-a[aria-label='Return to content'] {
-    text-decoration: none;
-}",
+                            new CStylesheet("default-footnotes.css",
+                                new CRuleset(
+                                    new CSelector("h1"),
+                                    new CDeclaration("counter-reset", "footnote_counter")),
+                                new CRuleset(
+                                    new CSelector("a[aria-describedby='footnote-label']"),
+                                    new CDeclaration("font-size", "0.5em"),
+                                    new CDeclaration("margin-left", "1px"),
+                                    new CDeclaration("text-decoration", "none"),
+                                    new CDeclaration("vertical-align", "super")),
+                                new CRuleset(
+                                    new CSelector("a[aria-describedby='footnote-label']::before"),
+                                    new CDeclaration("content", "'[' counter(footnote_counter) ']'"),
+                                    new CDeclaration("counter-increment", "footnote_counter")),
+                                new CRuleset(
+                                    new CSelector("a[aria-label='Return to content']"),
+                                    new CDeclaration("text-decoration", "none"))),
                             styles),
                         new XElement("link",
                             new XAttribute("type", "text/css"),

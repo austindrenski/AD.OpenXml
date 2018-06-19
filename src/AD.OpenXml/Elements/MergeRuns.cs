@@ -85,7 +85,17 @@ namespace AD.OpenXml.Elements
 
                 RemoveDuplicateSpacing(currentText);
 
-                if ((string) run.Element(W + "rPr") != (string) run.Next()?.Element(W + "rPr"))
+                XElement currentRpr = run.Element(W + "rPr");
+                XElement nextRpr = run.Next()?.Element(W + "rPr");
+
+                // TODO: This is a weak heuristic. Handle child node comparison explicitly.
+                if (currentRpr?.Elements().Count() != nextRpr?.Elements().Count())
+                    continue;
+
+                XElement currentRStyle = currentRpr?.Element(W + "rStyle");
+                XElement nextRStyle = nextRpr?.Element(W + "rStyle");
+
+                if ((string) currentRStyle?.Attribute(W + "val") != (string) nextRStyle?.Attribute(W + "val"))
                     continue;
 
                 if (run.Next()?.Name != W + "r")

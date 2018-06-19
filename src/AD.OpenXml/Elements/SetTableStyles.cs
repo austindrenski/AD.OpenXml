@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Xml.Linq;
-using AD.IO;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -70,45 +68,35 @@ namespace AD.OpenXml.Elements
 
             foreach (XElement cell in source.Descendants(W + "tc"))
             {
-                if (!cell.Value.Contains("@>"))
+                int old =
+                    cell.Element(W + "tcPr")?.Element(W + "tcMar")?.Element(W + "start")?.Attribute(W + "w") is XAttribute oldStart
+                        ? (int) oldStart
+                        : 0;
+
+                cell.Element(W + "tcPr")?.Remove();
+
+                int count =
+                    cell.Value.StartsWith("@>")
+                        ? cell.Value.Skip(1).TakeWhile(x => x == '>').Count()
+                        : 0;
+
+                if (old + count == 0)
                     continue;
 
-                foreach (XElement paragraphWithSymbol in cell.Elements(W + "p").Where(x => x.Value.Contains("@>")))
+                cell.AddFirst(
+                    new XElement(W + "tcPr",
+                        new XElement(W + "tcMar",
+                            new XElement(W + "start",
+                                new XAttribute(W + "w", old + count * 144)))));
+
+                foreach (XElement t in cell.Descendants(W + "t"))
                 {
-                    if (paragraphWithSymbol.Element(W + "pPr") is null)
-                        paragraphWithSymbol.AddFirst(new XElement(W + "pPr"));
-
-                    foreach (XElement textToIndent in paragraphWithSymbol.Descendants(W + "t").Where(x => x.Value.Contains("@>")))
-                    {
-                        if (textToIndent.Ancestors(W + "p").First().Element(W + "pPr")?.Element(W + "ind") is null)
-                            textToIndent.Ancestors(W + "p").First().Element(W + "pPr")?.Add(new XElement(W + "ind"));
-
-                        XElement indent = textToIndent.Ancestors(W + "p").First().Element(W + "pPr")?.Element(W + "ind");
-
-                        int count = textToIndent.Parent?.Parent?.Value.SkipWhile(x => x != '@').Skip(1).TakeWhile(x => x == '>').Count() ?? 0;
-
-                        if (indent is null)
-                            throw new ArgumentException("Indentation symbol code error.");
-
-                        int left = indent.Attribute(W + "left")?.Value.ParseInt() ?? 0;
-
-                        indent.SetAttributeValue(W + "left", left + count * 144);
-
-                        textToIndent.Value = textToIndent.Value.TrimStart('@', '>');
-                    }
+                    if (t.Value.StartsWith("@>"))
+                        t.Value = new string(t.Value.Skip(1).SkipWhile(x => x == '>').ToArray());
                 }
             }
 
-            //source.Descendants(W + "tcPr").Descendants().Where(x => x.TargetUri != W + "vAlign").Remove();
             source.Descendants(W + "trPr").Remove();
-            //source.Descendants(W + "gridCol").Attributes(W + "w").Remove();
-
-            XElement[] tables = source.Element(W + "body")?.Elements(W + "tbl").ToArray() ?? new XElement[0];
-
-            for (int i = 0; i < tables.Length; i++)
-            {
-                tables[i].Descendants(W + "pPr").Remove();
-            }
 
             return source;
         }

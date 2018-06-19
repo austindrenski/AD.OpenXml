@@ -162,9 +162,6 @@ namespace AD.OpenXml.Visits
                 runProperties.AddFirst(distinct);
             }
 
-//            // remove properties on non-interactive glyphs.
-//            source.Descendants(M + "oMathPara").Descendants(M + "ctrlPr").Remove();
-//            source.Descendants(M + "oMathPara").Descendants(W + "rPr").Remove();
 
             (int oldId, int newId)[] revisionMapping =
                 source.Descendants()

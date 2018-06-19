@@ -24,10 +24,11 @@ namespace AD.OpenXml.Elements
         /// <exception cref="System.ArgumentNullException"/>
         public static XElement ChangeSuperscriptToReference(this XElement element)
         {
-            IEnumerable<XElement> superscriptItems = 
+            IEnumerable<XElement> superscriptItems =
                 element.Descendants(W + "vertAlign")
                        .Where(x => x.Attribute(W + "val")?.Value == "superscript")
                        .ToArray();
+
             foreach (XElement item in superscriptItems)
             {
                 item.AddAfterSelf(new XElement(W + "rStyle", new XAttribute(W + "val", "FootnoteReference")));
