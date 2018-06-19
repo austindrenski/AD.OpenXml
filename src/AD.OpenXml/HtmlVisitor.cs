@@ -163,7 +163,7 @@ a[aria-label='Return to content'] {
                     // TODO: dispatch sequences of nodes optionally (e.g. virtual) instead of each node to support section-encapsulation.
                     Lift(Visit(document)),
                     // TODO: handle this as a call at the end of an encapsulated section so that each section can be served as stand alone content.
-                    Visit(footnotes)));
+                    Lift(Visit(footnotes))));
 
         #endregion
 
