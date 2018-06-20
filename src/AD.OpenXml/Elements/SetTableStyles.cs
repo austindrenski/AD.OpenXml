@@ -68,26 +68,44 @@ namespace AD.OpenXml.Elements
 
             foreach (XElement cell in source.Descendants(W + "tc"))
             {
+                XElement oldTcPr = cell.Element(W + "tcPr");
+                XElement newTcPr = new XElement(W + "tcPr");
+
+                // Preserve the cell width, if set explicitly.
+                if (oldTcPr?.Element(W + "tcW") is XElement width)
+                {
+                    newTcPr.Add(
+                        new XElement(
+                            width.Name,
+                            width.Attributes(),
+                            width.Nodes()));
+                }
+
                 int old =
-                    cell.Element(W + "tcPr")?.Element(W + "tcMar")?.Element(W + "start")?.Attribute(W + "w") is XAttribute oldStart
+                    oldTcPr?.Element(W + "tcMar")?.Element(W + "start")?.Attribute(W + "w") is XAttribute oldStart
                         ? (int) oldStart
                         : 0;
 
-                cell.Element(W + "tcPr")?.Remove();
 
                 int count =
                     cell.Value.StartsWith("@>")
                         ? cell.Value.Skip(1).TakeWhile(x => x == '>').Count()
                         : 0;
 
-                if (old + count == 0)
-                    continue;
-
-                cell.AddFirst(
-                    new XElement(W + "tcPr",
+                if (old + count > 0)
+                {
+                    newTcPr.Add(
                         new XElement(W + "tcMar",
                             new XElement(W + "start",
-                                new XAttribute(W + "w", old + count * 144)))));
+                                new XAttribute(W + "w", old + count * 144))));
+                }
+
+                oldTcPr?.Remove();
+
+                if (!newTcPr.HasElements)
+                    continue;
+
+                cell.AddFirst(newTcPr);
 
                 foreach (XElement t in cell.Descendants(W + "t"))
                 {
