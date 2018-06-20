@@ -36,6 +36,12 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull] protected static readonly XNamespace M = XNamespaces.OpenXmlMath;
 
+        // TODO: move to AD.Xml
+        /// <summary>
+        /// Represents the 'o:' prefix seen in the markup for OLE elements.
+        /// </summary>
+        [NotNull] protected static readonly XNamespace O = "urn:schemas-microsoft-com:office:office";
+
         /// <summary>
         /// Represents the 'pic:' prefix seen in the markup for 'drawing' elements.
         /// </summary>
@@ -96,6 +102,7 @@ namespace AD.OpenXml
                     [DGM + "relIds"]      = VisitDiagram,
                     [M   + "oMath"]       = VisitMath,
                     [M   + "oMathPara"]   = VisitMathParagraph,
+                    [O   + "OLEObject"]   = VisitOLEObject,
                     [PIC + "pic"]         = VisitPicture,
                     [W   + "body"]        = VisitBody,
                     [W   + "document"]    = VisitDocument,
@@ -104,6 +111,7 @@ namespace AD.OpenXml
                     [W   + "footnotes"]   = VisitFootnotes,
                     [W   + "object"]      = VisitEmbedded,
                     [W   + "p"]           = VisitParagraph,
+                    [W   + "pPr"]         = VisitParagraphProperties,
                     [W   + "r"]           = VisitRun,
                     [W   + "t"]           = VisitText,
                     [W   + "tbl"]         = VisitTable,
@@ -318,6 +326,17 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
+        /// <param name="properties"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitParagraphProperties([NotNull] XElement properties) => base.VisitElement(properties);
+
+        /// <summary>
+        ///
+        /// </summary>
         /// <param name="math"></param>
         /// <returns>
         ///
@@ -336,6 +355,17 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitMathParagraph([NotNull] XElement mathParagraph) => base.VisitElement(mathParagraph);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="oleObject"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitOLEObject([NotNull] XElement oleObject) => base.VisitElement(oleObject);
 
         /// <summary>
         /// Visits the picture node.

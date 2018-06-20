@@ -12,15 +12,23 @@ namespace AD.OpenXml.Css
     [PublicAPI]
     public class CDeclaration
     {
+        /// <summary>
+        /// The CSS property name.
+        /// </summary>
         [NotNull] private readonly string _property;
+
+        /// <summary>
+        /// The CSS property value.
+        /// </summary>
         [NotNull] private readonly string _value;
 
         /// <summary>
-        /// Initializes a <see cref="CDeclaration"/> from the
+        /// Initializes a <see cref="CDeclaration"/> from the property and value.
         /// </summary>
-        /// <param name="property"></param>
-        /// <param name="value"></param>
-        /// <exception cref="ArgumentException"></exception>
+        /// <param name="property">The CSS property name.</param>
+        /// <param name="value">The CSS property value.</param>
+        /// <exception cref="ArgumentException">Invalid CSS property name.</exception>
+        /// <exception cref="ArgumentException">Invalid CSS property value.</exception>
         public CDeclaration(ReadOnlySpan<char> property, ReadOnlySpan<char> value)
         {
             ReadOnlySpan<char> p = property.Trim();

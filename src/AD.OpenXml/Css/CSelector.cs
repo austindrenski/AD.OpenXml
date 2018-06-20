@@ -3,16 +3,31 @@ using JetBrains.Annotations;
 
 namespace AD.OpenXml.Css
 {
+    /// <summary>
+    /// Represents a selector for a CSS ruleset.
+    /// </summary>
+    /// <remarks>
+    /// See: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
+    /// </remarks>
+    [PublicAPI]
     public class CSelector
     {
+        /// <summary>
+        /// The CSS selector.
+        /// </summary>
         [NotNull] private readonly string _selector;
 
-        public CSelector([NotNull] string selector)
+        /// <summary>
+        /// Initializes a <see cref="CSelector"/> from the selector.
+        /// </summary>
+        /// <param name="selector">The CSS selector.</param>
+        /// <exception cref="ArgumentException">Invalid CSS selector.</exception>
+        public CSelector(ReadOnlySpan<char> selector)
         {
-            if (selector is null)
-                throw new ArgumentNullException(nameof(selector));
+            if (selector.IsEmpty)
+                throw new ArgumentException($"Invalid CSS selector: {selector.ToString()}");
 
-            _selector = selector;
+            _selector = selector.ToString();
         }
 
         /// <inheritdoc />
