@@ -70,28 +70,7 @@ namespace AD.OpenXml.Visits
 
             XElement modifiedFootnotes =
                 visited
-                    // Remove editing attributes.
-                   .RemoveRsidAttributes()
 
-                    // Remove elements that should never exist in-line.
-                   .RemoveByAll(W + "bCs")
-                   .RemoveByAll(W + "bookmarkEnd")
-                   .RemoveByAll(W + "bookmarkStart")
-                   .RemoveByAll(W + "color")
-                   .RemoveByAll(W + "hideMark")
-                   .RemoveByAll(W + "iCs")
-                   .RemoveByAll(W + "keepNext")
-                   .RemoveByAll(W + "lang")
-                   .RemoveByAll(W + "lastRenderedPageBreak")
-                   .RemoveByAll(W + "noProof")
-                   .RemoveByAll(W + "noWrap")
-                   .RemoveByAll(W + "numPr")
-                   .RemoveByAll(W + "proofErr")
-                   .RemoveByAll(W + "rFonts")
-                   .RemoveByAll(W + "spacing")
-                   .RemoveByAll(W + "sz")
-                   .RemoveByAll(W + "szCs")
-                   .RemoveByAll(W + "tblPrEx")
                    .RemoveByAll(W + "commentRangeStart")
                    .RemoveByAll(W + "commentRangeEnd")
                    .RemoveByAll(W + "commentReference")
@@ -113,7 +92,6 @@ namespace AD.OpenXml.Visits
 
                     // Mark insert requests for the production team.
                    .MergeRuns()
-                   .HighlightInsertRequests()
 
                     // Set table styles.
                    .SetTableStyles(revisionId)

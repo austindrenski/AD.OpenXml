@@ -12,20 +12,83 @@ namespace AD.OpenXml
     [PublicAPI]
     public class ReportVisitor : OpenXmlVisitor
     {
-        /// <summary>
-        /// The attributes that may be returned.
-        /// </summary>
-        protected ISet<XName> SupportedAttributes { get; }
+        #region Fields
 
         /// <summary>
-        /// The elements that may be returned.
+        /// The attributes that are supported.
         /// </summary>
-        protected ISet<XName> SupportedElements { get; }
+        protected ISet<XName> SupportedAttributes =
+            new HashSet<XName>
+            {
+                W + "id",
+                W + "type",
+                W + "val"
+            };
+
+        /// <summary>
+        /// The attributes that are not supported.
+        /// </summary>
+        protected ISet<XName> UnsupportedAttributes =
+            new HashSet<XName>
+            {
+                W + "rsid",
+                W + "rsidDel",
+                W + "rsidP",
+                W + "rsidR",
+                W + "rsidRDefault",
+                W + "rsidRPr",
+                W + "rsidSect",
+                W + "rsidTr"
+            };
+
+        /// <summary>
+        /// The elements that are supported.
+        /// </summary>
+        protected ISet<XName> UnsupportedElements =
+            new HashSet<XName>
+            {
+                W + "bCs",
+                W + "bookmarkEnd",
+                W + "bookmarkStart",
+                W + "color",
+                W + "hideMark",
+                W + "iCs",
+                W + "keepNext",
+                W + "lang",
+                W + "lastRenderedPageBreak",
+                W + "noProof",
+                W + "noWrap",
+                W + "numPr",
+                W + "proofErr",
+                W + "rFonts",
+                W + "spacing",
+                W + "sz",
+                W + "szCs",
+                W + "tblPrEx",
+            };
+
+        #endregion
+
+        #region Constructors
 
         /// <inheritdoc />
         public ReportVisitor() : base(true)
         {
         }
+
+        #endregion
+
+        #region Visits
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitAttribute(XAttribute attribute)
+            => UnsupportedAttributes.Contains(attribute.Name) ? null : base.VisitAttribute(attribute);
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitElement(XElement element)
+            => UnsupportedElements.Contains(element.Name) ? null : base.VisitElement(element);
 
         /// <inheritdoc />
         [Pure]
@@ -39,29 +102,6 @@ namespace AD.OpenXml
         [Pure]
         protected override XObject VisitOLEObject(XElement oleObject) => null;
 
-
-
-//// Remove editing attributes.
-//.RemoveRsidAttributes()
-//
-//// Remove elements that should never exist in-line.
-//.RemoveByAll(W + "bCs")
-//.RemoveByAll(W + "bookmarkEnd")
-//.RemoveByAll(W + "bookmarkStart")
-//.RemoveByAll(W + "color")
-//.RemoveByAll(W + "hideMark")
-//.RemoveByAll(W + "iCs")
-//.RemoveByAll(W + "keepNext")
-//.RemoveByAll(W + "lang")
-//.RemoveByAll(W + "lastRenderedPageBreak")
-//.RemoveByAll(W + "noProof")
-//.RemoveByAll(W + "noWrap")
-//.RemoveByAll(W + "numPr")
-//.RemoveByAll(W + "proofErr")
-//.RemoveByAll(W + "rFonts")
-//.RemoveByAll(W + "spacing")
-//.RemoveByAll(W + "sz")
-//.RemoveByAll(W + "szCs")
-//.RemoveByAll(W + "tblPrEx")
+        #endregion
     }
 }
