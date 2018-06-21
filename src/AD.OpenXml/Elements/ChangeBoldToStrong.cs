@@ -10,7 +10,7 @@ namespace AD.OpenXml.Elements
     [PublicAPI]
     public static class ChangeBoldToStrongExtensions
     {
-        private static XNamespace _w = XNamespaces.OpenXmlWordprocessingmlMain;
+        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// Replaces &lt;b [val=...]/&gt; descendant elements with &lt;rStyle val="Strong"/&gt; elements.
@@ -21,8 +21,9 @@ namespace AD.OpenXml.Elements
         /// <exception cref="System.ArgumentException"/>
         /// <exception cref="System.ArgumentNullException"/>
         public static XElement ChangeBoldToStrong(this XElement element)
-        {
-            return element.Replace(_w + "b", _w + "rStyle", new XAttribute(_w + "val", "Strong"));
-        }
+            => element.Replace(
+                W + "b",
+                W + "rStyle",
+                new XAttribute(W + "val", "Strong"));
     }
 }

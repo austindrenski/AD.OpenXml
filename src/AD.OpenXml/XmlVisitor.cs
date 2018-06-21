@@ -19,6 +19,11 @@ namespace AD.OpenXml
         /// </summary>
         [NotNull] private const string Liftable = "liftable";
 
+        /// <summary>
+        /// Represents the 'xml:' prefix.
+        /// </summary>
+        [NotNull] protected static readonly XNamespace Xml = XNamespace.Xml;
+
         #region Main
 
         /// <summary>

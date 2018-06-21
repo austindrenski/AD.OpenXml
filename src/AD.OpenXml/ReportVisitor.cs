@@ -20,25 +20,40 @@ namespace AD.OpenXml
         protected ISet<XName> SupportedAttributes =
             new HashSet<XName>
             {
+                // TODO: These are found inside of w:drawing. Handle explicitly there.
+                "cx",
+                "cy",
+                "distT",
+                "distB",
+                "distL",
+                "distR",
+                "t",
+                "b",
+                "l",
+                "r",
+                "id",
+                "name",
+                "uri",
+                "x",
+                "y",
+                "prst",
+                R + "embed",
+                R + "id",
+                W + "firstColumn",
+                W + "firstRow",
+                W + "fldCharType",
                 W + "id",
+                W + "lastColumn",
+                W + "lastRow",
+                W + "left",
+                W + "noHBand",
+                W + "noVBand",
+                W + "pos",
+                W + "right",
                 W + "type",
-                W + "val"
-            };
-
-        /// <summary>
-        /// The attributes that are not supported.
-        /// </summary>
-        protected ISet<XName> UnsupportedAttributes =
-            new HashSet<XName>
-            {
-                W + "rsid",
-                W + "rsidDel",
-                W + "rsidP",
-                W + "rsidR",
-                W + "rsidRDefault",
-                W + "rsidRPr",
-                W + "rsidSect",
-                W + "rsidTr"
+                W + "val",
+                W + "w",
+                Xml + "space"
             };
 
         /// <summary>
@@ -67,6 +82,32 @@ namespace AD.OpenXml
                 W + "tblPrEx",
             };
 
+        /// <summary>
+        /// The attributes that are supported.
+        /// </summary>
+        protected ISet<string> SupportedStyles =
+            new HashSet<string>
+            {
+                "Caption",
+                "CaptionFigure",
+                "CaptionTable",
+                "CommentReference",
+                "Emphasis",
+                "FiguresTablesSourceNote",
+                "FootnoteReference",
+                "Heading1",
+                "Heading2",
+                "Heading3",
+                "Heading4",
+                "Heading5",
+                "Heading6",
+                "Heading7",
+                "Heading8",
+                "Heading9",
+                "ListParagraph",
+                "Strong"
+            };
+
         #endregion
 
         #region Constructors
@@ -83,12 +124,30 @@ namespace AD.OpenXml
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitAttribute(XAttribute attribute)
-            => UnsupportedAttributes.Contains(attribute.Name) ? null : base.VisitAttribute(attribute);
+            => attribute.IsNamespaceDeclaration || SupportedAttributes.Contains(attribute.Name)
+                   ? base.VisitAttribute(attribute)
+                   : null;
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitBreak(XElement br)
+            => "page" == (string) br.Attribute(W + "type") ? null : base.VisitBreak(br);
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitElement(XElement element)
-            => UnsupportedElements.Contains(element.Name) ? null : base.VisitElement(element);
+            => UnsupportedElements.Contains(element.Name)
+                   ? null
+                   : base.VisitElement(element);
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitSectionProperties(XElement section)
+            => new XElement(W + "sectPr",
+                section.Element(W + "cols"),
+                section.Element(W + "docGrid"),
+                section.Element(W + "pgMar"),
+                section.Element(W + "pgSz"));
 
         /// <inheritdoc />
         [Pure]
@@ -96,7 +155,16 @@ namespace AD.OpenXml
             => new XElement(
                 properties.Name,
                 properties.Attributes(),
-                properties.Nodes().Where(x => !(x is XElement e && e.Name == W + "rPr")));
+                properties.Nodes()
+                          .Where(x => !(x is XElement e && e.Name == W + "rPr"))
+                          .Where(x => !(x is XElement e && e.Name == W + "rStyle")));
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitParagraphStyle(XElement style)
+            => SupportedStyles.Contains((string) style.Attribute(W + "val"))
+                   ? base.VisitParagraphStyle(style)
+                   : null;
 
         /// <inheritdoc />
         [Pure]

@@ -77,9 +77,6 @@ namespace AD.OpenXml.Visits
                    .RemoveByAll(x => (string) x.Attribute(W + "val") == "CommentReference")
 
                     // Remove elements that should almost never exist.
-                   .RemoveByAll(x => x.Name == W + "br" && (string) x.Attribute(W + "type") == "page")
-                   .RemoveByAll(x => x.Name == W + "pStyle" && (string) x.Attribute(W + "val") == "BodyTextSSFinal")
-                   .RemoveByAll(x => x.Name == W + "pStyle" && (string) x.Attribute(W + "val") == "Default")
                    .RemoveByAll(x => x.Name == W + "jc" && !x.Ancestors(W + "tbl").Any())
 
                     // Alter bold, italic, and underline elements.

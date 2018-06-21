@@ -105,6 +105,7 @@ namespace AD.OpenXml
                     [O   + "OLEObject"]   = VisitOLEObject,
                     [PIC + "pic"]         = VisitPicture,
                     [W   + "body"]        = VisitBody,
+                    [W   + "br"]          = VisitBreak,
                     [W   + "document"]    = VisitDocument,
                     [W   + "drawing"]     = VisitDrawing,
                     [W   + "footnote"]    = VisitFootnote,
@@ -112,6 +113,7 @@ namespace AD.OpenXml
                     [W   + "object"]      = VisitEmbedded,
                     [W   + "p"]           = VisitParagraph,
                     [W   + "pPr"]         = VisitParagraphProperties,
+                    [W   + "pStyle"]      = VisitParagraphStyle,
                     [W   + "r"]           = VisitRun,
                     [W   + "t"]           = VisitText,
                     [W   + "tbl"]         = VisitTable,
@@ -159,6 +161,17 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitBarChart([NotNull] XElement barChart) => base.VisitElement(barChart);
+
+        /// <summary>
+        /// Visits the break node.
+        /// </summary>
+        /// <param name="br">The break to visit.</param>
+        /// <returns>
+        /// The reconstructed break.
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitBreak([NotNull] XElement br) => base.VisitElement(br);
 
         /// <summary>
         /// Visits the body node.
@@ -337,6 +350,17 @@ namespace AD.OpenXml
         /// <summary>
         ///
         /// </summary>
+        /// <param name="style"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitParagraphStyle([NotNull] XElement style) => base.VisitElement(style);
+
+        /// <summary>
+        ///
+        /// </summary>
         /// <param name="math"></param>
         /// <returns>
         ///
@@ -410,6 +434,17 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitRun([NotNull] XElement run) => base.VisitElement(run);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="section"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitSectionProperties([NotNull] XElement section) => base.VisitElement(section);
 
         /// <summary>
         ///
