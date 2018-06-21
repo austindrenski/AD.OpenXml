@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Linq;
+using System.Xml.Linq;
 using AD.Xml;
 using JetBrains.Annotations;
 
@@ -21,9 +22,19 @@ namespace AD.OpenXml.Elements
         /// <exception cref="System.ArgumentException"/>
         /// <exception cref="System.ArgumentNullException"/>
         public static XElement ChangeItalicToEmphasis(this XElement element)
-            => element.Replace(
-                W + "i",
-                W + "rStyle",
-                new XAttribute(W + "val", "Emphasis"));
+        {
+            XElement[] array1 = element.Descendants(W + "i").Where(x => !x.Ancestors(W + "hyperlink").Any()).ToArray();
+            XElement[] array2 = array1.Select(x => x.Parent).ToArray();
+            array1.Remove();
+
+            foreach (XElement item in array2)
+            {
+                item.Add(
+                    new XElement(W + "rStyle",
+                        new XAttribute(W + "val", "Emphasis")));
+            }
+
+            return element;
+        }
     }
 }

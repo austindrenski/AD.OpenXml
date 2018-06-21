@@ -165,7 +165,11 @@ namespace AD.OpenXml
                 new XElement(W + "r",
                     new XElement(W + "rPr",
                         new XElement(W + "rStyle",
-                            new XAttribute(W + "val", "Hyperlink"))),
+                            new XAttribute(W + "val", "Hyperlink")),
+                        hyperlink.Descendants(W + "i").Any() ||
+                        hyperlink.Descendants().Attributes(W + "val").Any(x => (string) x == "Emphasis")
+                            ? new XElement(W + "i")
+                            : null),
                     new XElement(W + "t", hyperlink.Value)));
 
         /// <inheritdoc />

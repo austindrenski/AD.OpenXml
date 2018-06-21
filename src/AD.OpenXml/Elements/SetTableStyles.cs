@@ -81,6 +81,16 @@ namespace AD.OpenXml.Elements
                             width.Nodes()));
                 }
 
+                // Preserve the cell span, if set explicitly.
+                if (oldTcPr?.Element(W + "gridSpan") is XElement span)
+                {
+                    newTcPr.Add(
+                        new XElement(
+                            span.Name,
+                            span.Attributes(),
+                            span.Nodes()));
+                }
+
                 // Preserve the cell alignment, if set explicitly.
                 if (oldTcPr?.Element(W + "vAlign") is XElement align)
                 {
