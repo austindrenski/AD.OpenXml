@@ -81,6 +81,16 @@ namespace AD.OpenXml.Elements
                             width.Nodes()));
                 }
 
+                // Preserve the cell alignment, if set explicitly.
+                if (oldTcPr?.Element(W + "vAlign") is XElement align)
+                {
+                    newTcPr.Add(
+                        new XElement(
+                            align.Name,
+                            align.Attributes(),
+                            align.Nodes()));
+                }
+
                 int old =
                     oldTcPr?.Element(W + "tcMar")?.Element(W + "start")?.Attribute(W + "w") is XAttribute oldStart
                         ? (int) oldStart
