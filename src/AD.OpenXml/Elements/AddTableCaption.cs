@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace AD.OpenXml.Elements
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     [PublicAPI]
     public static class AddTableCaptionExtensions
@@ -15,12 +15,12 @@ namespace AD.OpenXml.Elements
         private static readonly XNamespace Xml = XNamespace.Xml;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="element"></param>
         public static void AddTableCaption(this XElement element)
         {
-            string style = element.Value.Contains("[APPENDIX]") ? "\"Heading 9\"" : "1";
+            string style = element.Value.Contains("[APPENDIX]") ? "9" : "1";
 
             XElement runProperies =
                 new XElement(W + "rPr",
