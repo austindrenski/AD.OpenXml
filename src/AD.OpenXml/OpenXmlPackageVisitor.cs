@@ -175,6 +175,7 @@ namespace AD.OpenXml
                 new XElement(W + "settings",
                     new XAttribute(XNamespace.Xmlns + "w", W),
                     new XAttribute(XNamespace.Xmlns + "m", M),
+                    new XElement(W + "evenAndOddHeaders"),
                     new XElement(M + "mathPr",
                         new XElement(M + "mathFont",
                             new XAttribute(M + "val", "Cambria Math")),
