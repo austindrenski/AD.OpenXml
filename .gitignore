@@ -5,4 +5,5 @@ obj/
 wwwroot/
 node_modules/
 *.user
+*.Dotsettings
 package-lock.json

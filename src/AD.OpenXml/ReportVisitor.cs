@@ -123,6 +123,21 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        protected override XObject VisitAlternateContent(XElement alternate)
+        {
+            XElement contentControl =
+                alternate.Element(MC + "Choice")?
+                         .Descendants(W + "sdt")
+                         .FirstOrDefault();
+
+            return
+                contentControl != null
+                    ? Visit(contentControl)
+                    : MakeLiftable(alternate.Element(MC + "Choice"));
+        }
+
+        /// <inheritdoc />
+        [Pure]
         protected override XObject VisitAttribute(XAttribute attribute)
             => attribute.IsNamespaceDeclaration || SupportedAttributes.Contains(attribute.Name)
                    ? base.VisitAttribute(attribute)
@@ -131,7 +146,9 @@ namespace AD.OpenXml
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitBreak(XElement br)
-            => "page" == (string) br.Attribute(W + "type") ? null : base.VisitBreak(br);
+            => "page" == (string) br.Attribute(W + "type")
+                   ? null
+                   : base.VisitBreak(br);
 
         /// <inheritdoc />
         [Pure]
@@ -142,22 +159,35 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitSectionProperties(XElement section)
-            => new XElement(W + "sectPr",
-                section.Element(W + "cols"),
-                section.Element(W + "docGrid"),
-                section.Element(W + "pgMar"),
-                section.Element(W + "pgSz"));
+        protected override XObject VisitHyperlink(XElement hyperlink)
+            => new XElement(W + "hyperlink",
+                hyperlink.Attribute(R + "id"),
+                new XElement(W + "r",
+                    new XElement(W + "rPr",
+                        new XElement(W + "rStyle",
+                            new XAttribute(W + "val", "Hyperlink"))),
+                    new XElement(W + "t", hyperlink.Value)));
+
+        /// <inheritdoc />
+        [Pure]
+        protected override XObject VisitOLEObject(XElement oleObject) => null;
 
         /// <inheritdoc />
         [Pure]
         protected override XObject VisitParagraphProperties(XElement properties)
-            => new XElement(
-                properties.Name,
-                properties.Attributes(),
+        {
+            XNode[] nodes =
                 properties.Nodes()
                           .Where(x => !(x is XElement e && e.Name == W + "rPr"))
-                          .Where(x => !(x is XElement e && e.Name == W + "rStyle")));
+                          .Where(x => !(x is XElement e && e.Name == W + "rStyle"))
+                          .ToArray();
+
+            return
+                new XElement(
+                    properties.Name,
+                    properties.Attributes(),
+                    nodes);
+        }
 
         /// <inheritdoc />
         [Pure]
@@ -168,7 +198,12 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
-        protected override XObject VisitOLEObject(XElement oleObject) => null;
+        protected override XObject VisitSectionProperties(XElement section)
+            => new XElement(W + "sectPr",
+                section.Element(W + "cols"),
+                section.Element(W + "docGrid"),
+                section.Element(W + "pgMar"),
+                section.Element(W + "pgSz"));
 
         #endregion
     }

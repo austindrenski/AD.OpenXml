@@ -38,6 +38,12 @@ namespace AD.OpenXml
 
         // TODO: move to AD.Xml
         /// <summary>
+        /// Represents the 'mc:' prefix seen in the markup for compatibility blocks.
+        /// </summary>
+        [NotNull] protected static readonly XNamespace MC = "http://schemas.openxmlformats.org/markup-compatibility/2006";
+
+        // TODO: move to AD.Xml
+        /// <summary>
         /// Represents the 'o:' prefix seen in the markup for OLE elements.
         /// </summary>
         [NotNull] protected static readonly XNamespace O = "urn:schemas-microsoft-com:office:office";
@@ -69,6 +75,8 @@ namespace AD.OpenXml
 
         #endregion
 
+        #region Fields
+
         /// <summary>
         /// True if the base method should be called when handling the default dispatch case.
         /// </summary>
@@ -78,6 +86,10 @@ namespace AD.OpenXml
         /// The mapping of <see cref="XName"/> to visit method used by <see cref="VisitElement"/>.
         /// </summary>
         protected readonly IDictionary<XName, Func<XElement, XObject>> VisitLookup;
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// Initializes an <see cref="OpenXmlVisitor"/>.
@@ -91,43 +103,58 @@ namespace AD.OpenXml
                 new Dictionary<XName, Func<XElement, XObject>>
                 {
                     // @formatter:off
-                    [A   + "graphic"]     = VisitGraphic,
-                    [A   + "graphicData"] = VisitGraphicData,
-                    [C   + "areaChart"]   = VisitAreaChart,
-                    [C   + "barChart"]    = VisitBarChart,
-                    [C   + "chart"]       = VisitChart,
-                    [C   + "lineChart"]   = VisitLineChart,
-                    [C   + "pieChart"]    = VisitPieChart,
-                    [C   + "plotArea"]    = VisitPlotArea,
-                    [DGM + "relIds"]      = VisitDiagram,
-                    [M   + "oMath"]       = VisitMath,
-                    [M   + "oMathPara"]   = VisitMathParagraph,
-                    [O   + "OLEObject"]   = VisitOLEObject,
-                    [PIC + "pic"]         = VisitPicture,
-                    [W   + "body"]        = VisitBody,
-                    [W   + "br"]          = VisitBreak,
-                    [W   + "document"]    = VisitDocument,
-                    [W   + "drawing"]     = VisitDrawing,
-                    [W   + "footnote"]    = VisitFootnote,
-                    [W   + "footnotes"]   = VisitFootnotes,
-                    [W   + "object"]      = VisitEmbedded,
-                    [W   + "p"]           = VisitParagraph,
-                    [W   + "pPr"]         = VisitParagraphProperties,
-                    [W   + "pStyle"]      = VisitParagraphStyle,
-                    [W   + "r"]           = VisitRun,
-                    [W   + "t"]           = VisitText,
-                    [W   + "tbl"]         = VisitTable,
-                    [W   + "tc"]          = VisitTableCell,
-                    [W   + "tr"]          = VisitTableRow,
-                    [WP  + "anchor"]      = VisitAnchor,
-                    [WP  + "docPr"]       = VisitDocumentProperty,
-                    [WP  + "inline"]      = VisitInline,
-                    [WPS + "wsp"]         = VisitShape
+                    [A   + "graphic"]          = VisitGraphic,
+                    [A   + "graphicData"]      = VisitGraphicData,
+                    [C   + "areaChart"]        = VisitAreaChart,
+                    [C   + "barChart"]         = VisitBarChart,
+                    [C   + "chart"]            = VisitChart,
+                    [C   + "lineChart"]        = VisitLineChart,
+                    [C   + "pieChart"]         = VisitPieChart,
+                    [C   + "plotArea"]         = VisitPlotArea,
+                    [DGM + "relIds"]           = VisitDiagram,
+                    [M   + "oMath"]            = VisitMath,
+                    [M   + "oMathPara"]        = VisitMathParagraph,
+                    [O   + "OLEObject"]        = VisitOLEObject,
+                    [PIC + "pic"]              = VisitPicture,
+                    [MC  + "AlternateContent"] = VisitAlternateContent,
+                    [W   + "body"]             = VisitBody,
+                    [W   + "br"]               = VisitBreak,
+                    [W   + "document"]         = VisitDocument,
+                    [W   + "drawing"]          = VisitDrawing,
+                    [W   + "footnote"]         = VisitFootnote,
+                    [W   + "footnotes"]        = VisitFootnotes,
+                    [W   + "hyperlink"]        = VisitHyperlink,
+                    [W   + "object"]           = VisitEmbedded,
+                    [W   + "p"]                = VisitParagraph,
+                    [W   + "pPr"]              = VisitParagraphProperties,
+                    [W   + "pStyle"]           = VisitParagraphStyle,
+                    [W   + "r"]                = VisitRun,
+                    [W   + "t"]                = VisitText,
+                    [W   + "tbl"]              = VisitTable,
+                    [W   + "tc"]               = VisitTableCell,
+                    [W   + "tr"]               = VisitTableRow,
+                    [WP  + "anchor"]           = VisitAnchor,
+                    [WP  + "docPr"]            = VisitDocumentProperty,
+                    [WP  + "inline"]           = VisitInline,
+                    [WPS + "wsp"]              = VisitShape
                     // @formatter:on
                 };
         }
 
+        #endregion
+
         #region Visits
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="alternate"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitAlternateContent([NotNull] XElement alternate) => base.VisitElement(alternate);
 
         /// <summary>
         ///
@@ -302,6 +329,17 @@ namespace AD.OpenXml
         [Pure]
         [CanBeNull]
         protected virtual XObject VisitGraphicData([NotNull] XElement graphicData) => base.VisitElement(graphicData);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="hyperlink"></param>
+        /// <returns>
+        ///
+        /// </returns>
+        [Pure]
+        [CanBeNull]
+        protected virtual XObject VisitHyperlink([NotNull] XElement hyperlink) => base.VisitElement(hyperlink);
 
         /// <summary>
         ///
