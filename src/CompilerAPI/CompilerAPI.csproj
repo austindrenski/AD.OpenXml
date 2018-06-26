@@ -22,6 +22,11 @@
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <RepositoryUrl>https://github.com/austindrenski/AD.OpenXml</RepositoryUrl>
   </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyVersion>2.0.0</AssemblyVersion>
+    <FileVersion>2.0.0</FileVersion>
+    <Version>2.0.0</Version>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../AD.OpenXml/AD.OpenXml.csproj" />
   </ItemGroup>
