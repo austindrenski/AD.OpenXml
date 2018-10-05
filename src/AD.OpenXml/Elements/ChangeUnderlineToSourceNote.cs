@@ -12,7 +12,7 @@ namespace AD.OpenXml.Elements
     [PublicAPI]
     public static class ChangeUnderlineToSourceNoteExtensions
     {
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// Removes all &lt;u [val=...]/&gt; descendant elements from the &lt;rPr [...]/&gt; elements
@@ -24,7 +24,8 @@ namespace AD.OpenXml.Elements
         /// <returns>A reference to the existing <see cref="XElement"/>. This is returned for use with fluent syntax calls.</returns>
         /// <exception cref="System.ArgumentException"/>
         /// <exception cref="System.ArgumentNullException"/>
-        public static XElement ChangeUnderlineToSourceNote(this XElement element)
+        [NotNull]
+        public static XElement ChangeUnderlineToSourceNote([NotNull] this XElement element)
         {
             IEnumerable<XElement> paragraphs =
                 element.Descendants(W + "u")

@@ -13,14 +13,15 @@ namespace AD.OpenXml.Elements
     [PublicAPI]
     public static class AddLineBreakToHeadingsExtensions
     {
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
-        public static XElement AddLineBreakToHeadings(this XElement element)
+        [NotNull]
+        public static XElement AddLineBreakToHeadings([NotNull] this XElement element)
         {
             IEnumerable<XElement> headingParagraphFirstRun =
                 element.Descendants(W + "p")

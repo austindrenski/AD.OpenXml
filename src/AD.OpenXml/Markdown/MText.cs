@@ -59,7 +59,7 @@ namespace AD.OpenXml.Markdown
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(MText other) => !(other is null) && Text.Span.SequenceEqual(other.Text.Span);
+        public bool Equals([CanBeNull] MText other) => other != null && Text.Span.SequenceEqual(other.Text.Span);
 
         /// <inheritdoc />
         [Pure]

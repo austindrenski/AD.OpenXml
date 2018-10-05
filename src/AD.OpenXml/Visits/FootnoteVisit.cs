@@ -14,9 +14,9 @@ namespace AD.OpenXml.Visits
     [PublicAPI]
     public static class FootnoteVisit
     {
-        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        [NotNull] private static readonly IEnumerable<XName> Revisions =
+        [NotNull] static readonly IEnumerable<XName> Revisions =
             new XName[]
             {
                 W + "ins",
@@ -42,6 +42,7 @@ namespace AD.OpenXml.Visits
         /// <returns>
         /// The updated document node of the source file.
         /// </returns>
+        [NotNull]
         public static OpenXmlPackageVisitor VisitFootnotes([NotNull] this OpenXmlPackageVisitor subject, int footnoteId, int revisionId)
         {
             if (subject is null)
@@ -61,7 +62,7 @@ namespace AD.OpenXml.Visits
         }
 
         [Pure]
-        private static (XElement Document, XElement Footnotes) Execute([NotNull] XElement footnotes, [NotNull] XElement document, int footnoteId, int revisionId)
+        static (XElement Document, XElement Footnotes) Execute([NotNull] XElement footnotes, [NotNull] XElement document, int footnoteId, int revisionId)
         {
             ReportVisitor visitor = new ReportVisitor();
 

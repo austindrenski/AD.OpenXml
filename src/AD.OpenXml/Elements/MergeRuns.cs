@@ -14,16 +14,17 @@ namespace AD.OpenXml.Elements
     [PublicAPI]
     public static class MergeRunsExtensions
     {
-        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        [NotNull] private static readonly Regex Spaces = new Regex(@"(\s{2,})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        [NotNull] static readonly Regex Spaces = new Regex(@"(\s{2,})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
-        public static XElement MergeRuns(this XElement element)
+        [NotNull]
+        public static XElement MergeRuns([NotNull] this XElement element)
         {
             IEnumerable<XElement> paragraphs = element.Descendants(W + "p").ToArray();
             foreach (XElement paragraph in paragraphs)
@@ -73,7 +74,7 @@ namespace AD.OpenXml.Elements
                 text.SetAttributeValue(XNamespace.Xml + "space", "preserve");
         }
 
-        private static void ProcessRuns(XElement paragraph)
+        static void ProcessRuns([NotNull] XElement paragraph)
         {
             IEnumerable<XElement> runs = paragraph.Elements(W + "r").ToArray();
             foreach (XElement run in runs)

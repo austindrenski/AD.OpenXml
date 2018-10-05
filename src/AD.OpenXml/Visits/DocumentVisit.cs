@@ -15,9 +15,9 @@ namespace AD.OpenXml.Visits
     [PublicAPI]
     public static class DocumentVisit
     {
-        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        [NotNull] private static readonly IEnumerable<XName> Revisions =
+        [NotNull] static readonly IEnumerable<XName> Revisions =
             new XName[]
             {
                 W + "ins",
@@ -53,7 +53,7 @@ namespace AD.OpenXml.Visits
 
         [Pure]
         [NotNull]
-        private static XElement Execute([NotNull] XElement document, int revisionId)
+        static XElement Execute([NotNull] XElement document, int revisionId)
         {
             ReportVisitor visitor = new ReportVisitor();
 

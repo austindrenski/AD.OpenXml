@@ -15,12 +15,12 @@ namespace AD.OpenXml.Css
         /// <summary>
         /// The CSS property name.
         /// </summary>
-        [NotNull] private readonly string _property;
+        [NotNull] readonly string _property;
 
         /// <summary>
         /// The CSS property value.
         /// </summary>
-        [NotNull] private readonly string _value;
+        [NotNull] readonly string _value;
 
         /// <summary>
         /// Initializes a <see cref="CDeclaration"/> from the property and value.
@@ -29,16 +29,16 @@ namespace AD.OpenXml.Css
         /// <param name="value">The CSS property value.</param>
         /// <exception cref="ArgumentException">Invalid CSS property name.</exception>
         /// <exception cref="ArgumentException">Invalid CSS property value.</exception>
-        public CDeclaration(ReadOnlySpan<char> property, ReadOnlySpan<char> value)
+        public CDeclaration(in ReadOnlySpan<char> property, in ReadOnlySpan<char> value)
         {
             ReadOnlySpan<char> p = property.Trim();
             ReadOnlySpan<char> v = value.Trim();
 
-            if (!ValidateProperty(p))
+            if (!ValidateProperty(in p))
                 throw new ArgumentException($"Invalid CSS property name: {p.ToString()}");
+
             if (v.IsEmpty)
                 throw new ArgumentException($"Invalid CSS property value: {v.ToString()}");
-
 
             _property = p.ToString();
             _value = v.ToString();
@@ -46,6 +46,7 @@ namespace AD.OpenXml.Css
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         public override string ToString() => $"{_property}: {_value};";
 
         /// <summary>
@@ -59,7 +60,7 @@ namespace AD.OpenXml.Css
         /// See: https://drafts.csswg.org/css-syntax/#syntax-description
         /// </remarks>
         [Pure]
-        private static bool ValidateProperty(ReadOnlySpan<char> span)
+        static bool ValidateProperty(in ReadOnlySpan<char> span)
         {
             if (span.IsEmpty)
                 return false;

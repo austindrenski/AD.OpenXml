@@ -172,6 +172,7 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitAreaChart(XElement areaChart) => ChartHelper(areaChart);
 
         /// <inheritdoc />
@@ -185,6 +186,7 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitBarChart(XElement barChart) => ChartHelper(barChart);
 
         /// <inheritdoc />
@@ -194,6 +196,7 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitDocumentProperty(XElement docPr)
             => new XElement(VisitName(docPr.Name), VisitString((string) docPr.Attribute("title")));
 
@@ -241,6 +244,7 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitFootnotes(XElement footnotes)
             => new XElement("footer",
                 new XAttribute("class", "footnotes"),
@@ -264,6 +268,7 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitLineChart(XElement lineChart) => ChartHelper(lineChart);
 
         /// <inheritdoc />
@@ -351,6 +356,7 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitPicture(XElement picture)
         {
             XAttribute imageId = picture.Element(PIC + "blipFill")?.Element(A + "blip")?.Attribute(R + "embed");
@@ -367,6 +373,7 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitPieChart(XElement pieChart) => ChartHelper(pieChart);
 
         /// <inheritdoc />
@@ -424,17 +431,17 @@ namespace AD.OpenXml
                 return strong.HasElements ? strong : null;
             }
 
-            if (null != rPr?.Element(W + "i") || "Emphasis" == (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
-            {
-                XElement emphasis = new XElement("em", Visit(MakeLiftable(run)));
-                return emphasis.HasElements ? emphasis : null;
-            }
+            if (null == rPr?.Element(W + "i") && "Emphasis" != (string) rPr?.Element(W + "rStyle")?.Attribute(W + "val"))
+                return MakeLiftable(run);
 
-            return MakeLiftable(run);
+            XElement emphasis = new XElement("em", Visit(MakeLiftable(run)));
+            return emphasis.HasElements ? emphasis : null;
+
         }
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitTable(XElement table)
         {
             IEnumerable<XNode> caption =
@@ -489,12 +496,13 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitTableCell(XElement cell)
         {
             XAttribute alignment = cell.Elements(W + "p").FirstOrDefault()?.Element(W + "pPr")?.Element(W + "jc")?.Attribute(W + "val");
             XAttribute style = cell.Element(W + "p")?.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
 
-            // Lift attributes and content to the cell when the parapgraph is a singleton.
+            // Lift attributes and content to the cell when the paragraph is a singleton.
             return
                 cell.Elements(W + "p").Count() == 1
                     ? new XElement(
@@ -534,7 +542,7 @@ namespace AD.OpenXml
         /// </returns>
         [Pure]
         [NotNull]
-        private static XObject ChartHelper([NotNull] XElement chart)
+        static XObject ChartHelper([NotNull] XElement chart)
             => new XElement("data",
                 chart.Elements(C + "ser")
                      .Select(
@@ -565,7 +573,8 @@ namespace AD.OpenXml
         ///
         /// </returns>
         [Pure]
-        private static XAttribute ParagraphStyle([CanBeNull] XElement paragraph)
+        [CanBeNull]
+        static XAttribute ParagraphStyle([CanBeNull] XElement paragraph)
             => paragraph?.Element(W + "pPr")?.Element(W + "pStyle")?.Attribute(W + "val");
 
         /// <summary>
@@ -577,7 +586,7 @@ namespace AD.OpenXml
         ///
         /// </returns>
         [Pure]
-        private static bool NextParagraphStyleEquals([CanBeNull] XElement paragraph, [CanBeNull] string style)
+        static bool NextParagraphStyleEquals([CanBeNull] XElement paragraph, [CanBeNull] string style)
             => paragraph?.NextNode is XElement e && W + "p" == e.Name && style == (string) ParagraphStyle(e);
 
         /// <summary>
@@ -589,7 +598,7 @@ namespace AD.OpenXml
         ///
         /// </returns>
         [Pure]
-        private static bool PreviousParagraphStyleEquals([CanBeNull] XElement paragraph, [CanBeNull] string style)
+        static bool PreviousParagraphStyleEquals([CanBeNull] XElement paragraph, [CanBeNull] string style)
             => paragraph?.PreviousNode is XElement e && W + "p" == e.Name && style == (string) ParagraphStyle(e);
 
         #endregion

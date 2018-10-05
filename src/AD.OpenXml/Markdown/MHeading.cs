@@ -93,11 +93,12 @@ namespace AD.OpenXml.Markdown
         /// The normalized span.
         /// </returns>
         [Pure]
-        private static ReadOnlySpan<char> Normalize(in ReadOnlySpan<char> span)
+        static ReadOnlySpan<char> Normalize(in ReadOnlySpan<char> span)
             => span.TrimStart().TrimEnd().TrimEnd('#').TrimEnd();
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         public override string ToString() => $"{new string('#', Level)} {Heading}";
 
         /// <inheritdoc />
@@ -115,7 +116,7 @@ namespace AD.OpenXml.Markdown
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(MHeading other) => !(other is null) && Heading.Equals(other.Heading) && Level == other.Level;
+        public bool Equals([CanBeNull] MHeading other) => other != null && Heading.Equals(other.Heading) && Level == other.Level;
 
         /// <inheritdoc />
         [Pure]

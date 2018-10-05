@@ -11,17 +11,16 @@ namespace AD.OpenXml.Elements
     [PublicAPI]
     public static class SetTableStylesExtensions
     {
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// Set table styles to BlueTableBasic and perform basic cleaning.
         /// </summary>
         /// <param name="source">The source content element. This should be the document-node of document.xml.</param>
-        /// <param name="revisionId">
-        ///
-        /// </param>
+        /// <param name="revisionId"></param>
         /// <returns></returns>
-        public static XElement SetTableStyles(this XElement source, int revisionId)
+        [NotNull]
+        public static XElement SetTableStyles([NotNull] this XElement source, int revisionId)
         {
             if (source.Name != W + "document")
                 return source;
@@ -105,7 +104,6 @@ namespace AD.OpenXml.Elements
                     oldTcPr?.Element(W + "tcMar")?.Element(W + "start")?.Attribute(W + "w") is XAttribute oldStart
                         ? (int) oldStart
                         : 0;
-
 
                 int count =
                     cell.Value.StartsWith("@>")

@@ -11,8 +11,8 @@ namespace AD.OpenXml.Elements
     [PublicAPI]
     public static class ChangeUnderlineToTableCaptionExtensions
     {
-        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
-        [NotNull] private static readonly XNamespace Xml = XNamespace.Xml;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace Xml = XNamespace.Xml;
 
         /// <summary>
         /// Removes all &lt;u [val=...]/&gt; descendant elements from the &lt;rPr [...]/&gt; elements
@@ -24,11 +24,12 @@ namespace AD.OpenXml.Elements
         /// <returns>A reference to the existing <see cref="XElement"/>. This is returned for use with fluent syntax calls.</returns>
         /// <exception cref="System.ArgumentException"/>
         /// <exception cref="System.ArgumentNullException"/>
-        public static XElement ChangeUnderlineToTableCaption(this XElement element)
+        [NotNull]
+        public static XElement ChangeUnderlineToTableCaption([NotNull] this XElement element)
             => new XElement(element.Name, element.Attributes(), element.Nodes().Select(Triage));
 
         [NotNull]
-        private static XNode Triage(XNode node)
+        static XNode Triage(XNode node)
         {
             if (!(node is XElement e))
                 return node;
@@ -57,7 +58,7 @@ namespace AD.OpenXml.Elements
         /// <param name="element"></param>
         [Pure]
         [NotNull]
-        private static XElement AddTableCaption(this XElement element)
+        static XElement AddTableCaption([NotNull] this XElement element)
         {
             string style = element.Value.Contains("[APPENDIX]") ? "9" : "1";
 
@@ -152,7 +153,7 @@ namespace AD.OpenXml.Elements
         }
 
         [CanBeNull]
-        private static XNode RemoveAppendixIdentifier(XNode node)
+        static XNode RemoveAppendixIdentifier(XNode node)
         {
             if (!(node is XElement e))
                 return node;

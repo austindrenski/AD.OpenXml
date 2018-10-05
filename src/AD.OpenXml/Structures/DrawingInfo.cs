@@ -12,12 +12,12 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public readonly struct DrawingInfo : IEquatable<DrawingInfo>
     {
-        [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
+        [NotNull] static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
 
-        [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
+        [NotNull] static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
         // TODO: move to AD.Xml
-        [NotNull] private static readonly XNamespace CDR = "http://schemas.openxmlformats.org/drawingml/2006/chartDrawing";
+        [NotNull] static readonly XNamespace CDR = "http://schemas.openxmlformats.org/drawingml/2006/chartDrawing";
 
         /// <summary>
         ///
@@ -71,6 +71,7 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         public override string ToString() => $"(Id: {Id}, TargetUri: {TargetUri})";
 
         /// <inheritdoc />

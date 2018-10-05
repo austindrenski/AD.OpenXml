@@ -14,9 +14,9 @@ namespace AD.OpenXml.Documents
     [PublicAPI]
     public static class ModifyAreaChartStylesExtensions
     {
-        [NotNull] private static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
+        [NotNull] static readonly XNamespace A = XNamespaces.OpenXmlDrawingmlMain;
 
-        [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
+        [NotNull] static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
         /// <summary>
         /// Modifies area chart styling in the target stream.
@@ -55,7 +55,7 @@ namespace AD.OpenXml.Documents
         /// <exception cref="ArgumentNullException"></exception>
         [Pure]
         [NotNull]
-        private static XElement ModifyAreaChartStyles([NotNull] this XElement element)
+        static XElement ModifyAreaChartStyles([NotNull] this XElement element)
         {
             if (element is null)
                 throw new ArgumentNullException(nameof(element));

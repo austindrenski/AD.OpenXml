@@ -11,7 +11,7 @@ namespace AD.OpenXml.Elements
     [PublicAPI]
     public static class ChangeItalicToEmphasisExtensions
     {
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// Replaces &lt;i [val=...] /&gt; descendant elements with &lt;rStyle val="Emphasis"/&gt; elements.
@@ -21,7 +21,8 @@ namespace AD.OpenXml.Elements
         /// <returns>A reference to the existing <see cref="XElement"/>. This is returned for use with fluent syntax calls.</returns>
         /// <exception cref="System.ArgumentException"/>
         /// <exception cref="System.ArgumentNullException"/>
-        public static XElement ChangeItalicToEmphasis(this XElement element)
+        [NotNull]
+        public static XElement ChangeItalicToEmphasis([NotNull] this XElement element)
         {
             XElement[] array1 = element.Descendants(W + "i").Where(x => !x.Ancestors(W + "hyperlink").Any()).ToArray();
             XElement[] array2 = array1.Select(x => x.Parent).ToArray();

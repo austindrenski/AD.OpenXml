@@ -7,7 +7,7 @@ namespace AD.OpenXml.Markdown
     /// <inheritdoc cref="MListItem"/>
     /// <inheritdoc cref="IEquatable{T}"/>
     /// <summary>
-    /// Represents a bulleted Markdown list item node.
+    /// Represents a Markdown list item node.
     /// </summary>
     /// <remarks>
     /// See: https://spec.commonmark.org/0.28/#lists
@@ -86,6 +86,7 @@ namespace AD.OpenXml.Markdown
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         public override string ToString() => $"{new string(' ', 2 * Level)}{Marker} {Item}";
 
         /// <inheritdoc />

@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 
-// ReSharper disable VirtualMemberNeverOverridden.Global
 namespace AD.OpenXml
 {
     /// <summary>
@@ -17,7 +16,7 @@ namespace AD.OpenXml
         /// <summary>
         /// The "data-liftable" attribute.
         /// </summary>
-        [NotNull] private const string Liftable = "liftable";
+        [NotNull] const string Liftable = "liftable";
 
         /// <summary>
         /// Represents the 'xml:' prefix.
@@ -450,10 +449,8 @@ namespace AD.OpenXml
             /// <param name="type">The type that could not be dispatched.</param>
             /// <param name="callerName">The method that could not dispatch the type.</param>
             /// <inheritdoc />
-            public VisitorException(Type type, [CallerMemberName] string callerName = default)
-                : base($"No dispatch was found in '${callerName}' for derived type '${type.Name}'.")
-            {
-            }
+            public VisitorException([NotNull] Type type, [CanBeNull] [CallerMemberName] string callerName = default)
+                : base($"No dispatch was found in '${callerName}' for derived type '${type.Name}'.") {}
         }
 
         #endregion

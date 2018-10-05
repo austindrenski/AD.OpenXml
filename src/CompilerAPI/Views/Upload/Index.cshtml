@@ -1,75 +1,117 @@
 @{
     ViewData["Title"] = "Upload Reports";
 }
+<br/>
 <form asp-controller="Upload" asp-action="Index" method="post" enctype="multipart/form-data">
-
-    <div class="input-group mb-3 mt-3">
-        <div class="input-group-prepend">
-            <span class="input-group-text">Report title:</span>
-        </div>
-        <input type="text" name="title" class="form-control" aria-label="Title of the report being created" placeholder="[REPORT TITLE]">
+    <div class="form-group">
+        <label for="publisher">Report title</label>
+        <input type="text"
+               name="title"
+               class="form-control"
+               aria-label="Title of the report being created"
+               placeholder="Report title">
     </div>
-
-    <div class="input-group mb-3 mt-3">
-        <div class="input-group-prepend">
-            <span class="input-group-text">Publisher:</span>
+    <div class="form-row">
+        <div class="form-group col-md">
+            <label for="publisher">Publisher name</label>
+            <input type="text"
+                   id="publisher"
+                   name="publisher"
+                   class="form-control"
+                   aria-label="Name of the publishing agency"
+                   placeholder="Publisher name">
         </div>
-        <input type="text" name="publisher" class="form-control" aria-label="Name of the publishing agency" placeholder="[PUBLISHER]">
+        <div class="form-group col-md">
+            <label for="website">Publisher website</label>
+            <input type="text"
+                   id="website"
+                   name="website"
+                   class="form-control"
+                   aria-label="URL to the publisher's website"
+                   placeholder="Publisher website">
+        </div>
     </div>
-
-    <div class="input-group mb-3 mt-3">
-        <div class="input-group-prepend">
-            <span class="input-group-text">Publisher website:</span>
+    <div class="form-row" id="stylesheet-row" hidden>
+        <div class="form-group col-md">
+            <label for="stylesheetUrl">Stylesheet URL</label>
+            <input type="text"
+                   id="stylesheetUrl"
+                   name="stylesheetUrl"
+                   class="form-control"
+                   aria-label="The URL to a CSS file to apply when HTML is selected."
+                   placeholder="Stylesheet URL">
         </div>
-        <input type="text" name="website" class="form-control" aria-label="URL to the publisher's website" placeholder="[PUBLISHER WEBSITE]">
+        <div class="form-group col-md">
+            <label for="stylesheet">Stylesheet</label>
+            <div class="custom-file">
+                <input id="stylesheet"
+                       name="stylesheet"
+                       type="file"
+                       class="custom-file-input"
+                       accept=".css">
+                <label class="custom-file-label"
+                       for="stylesheet"
+                       placeholder="Choose stylesheet (optional)">
+                    Choose stylesheet (optional)
+                </label>
+            </div>
+        </div>
     </div>
-
-    <div class="input-group mb-3 mt-3">
-        <div class="input-group-prepend">
-            <span class="input-group-text">Stylesheet URL:</span>
-        </div>
-        <input type="text" name="stylesheetUrl" class="form-control" aria-label="The URL to a CSS file to apply when HTML is selected." placeholder="[STYLESHEET URL]">
-    </div>
-
-    <div class="input-group mb-3 mt-3">
-        <div class="input-group-prepend">
-            <span class="input-group-text">Stylesheet:</span>
-        </div>
+    <div class="form-group">
+        <label for="files">Documents</label>
         <div class="custom-file">
-            <input id="stylesheet" name="stylesheet" type="file" class="custom-file-input" accept=".css">
-            <label class="custom-file-label" for="stylesheet" placeholder="Choose stylesheet (optional)">Choose stylesheet (optional)</label>
+            <input id="files"
+                   name="files"
+                   type="file"
+                   class="custom-file-input"
+                   accept=".docx,.md"
+                   multiple
+                   required>
+            <label class="custom-file-label"
+                   for="files"
+                   placeholder="Choose files to upload">
+                Choose files to upload
+            </label>
         </div>
     </div>
-
-    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-outline-secondary active">
-            <input type="radio" id="docx" name="format" value="docx" checked>
-            DOCX
-        </label>
-        <label class="btn btn-outline-secondary">
-            <input type="radio" id="xml" name="format" value="xml">
-            XML
-        </label>
-        <label class="btn btn-outline-secondary">
-            <input type="radio" id="html" name="format" value="html">
-            HTML
-        </label>
-        <label class="btn btn-outline-secondary">
-            <input type="radio" id="md" name="format" value="md">
-            Markdown
-        </label>
-    </div>
-
-    <div id="file-upload" class="input-group mb-3 mt-3">
-        <div class="custom-file">
-            <input id="files" name="files" type="file" class="custom-file-input" accept=".docx,.md" multiple required>
-            <label class="custom-file-label" for="files" placeholder="Choose files to upload">Choose files to upload</label>
+    <div class="form-group">
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-outline-secondary active">
+                <input type="radio"
+                       id="docx"
+                       name="format"
+                       value="docx"
+                       onchange="stylesheetRowCheck()"
+                       checked>
+                DOCX
+            </label>
+            <label class="btn btn-outline-secondary">
+                <input type="radio"
+                       id="xml"
+                       name="format"
+                       onchange="stylesheetRowCheck()"
+                       value="xml">
+                XML
+            </label>
+            <label class="btn btn-outline-secondary">
+                <input type="radio"
+                       id="html"
+                       name="format"
+                       onchange="stylesheetRowCheck()"
+                       value="html">
+                HTML
+            </label>
+            <label class="btn btn-outline-secondary">
+                <input type="radio"
+                       id="md"
+                       name="format"
+                       onchange="stylesheetRowCheck()"
+                       value="md">
+                Markdown
+            </label>
         </div>
-        <div class="input-group-append">
-            <button class="btn btn-outline-primary" type="submit">Upload</button>
-        </div>
+        <button class="btn btn-outline-primary float-right" type="submit">Upload</button>
     </div>
-
-    <ul id="file-names"></ul>
-
 </form>
+
+<ul id="file-names"></ul>
