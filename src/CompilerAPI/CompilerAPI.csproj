@@ -9,7 +9,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>wwwroot/assets/favicon.ico</ApplicationIcon>
-    <DocumentationFile>bin/Release/$(TargetFramework)/CompilerApi.xml</DocumentationFile>
+    <DocumentationFile>bin/Release/$(TargetFramework)/CompilerAPI.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <Authors>Austin Drenski</Authors>
@@ -36,21 +36,15 @@
     <ProjectReference Include="../AD.OpenXml/AD.OpenXml.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="wwwroot\assets">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </Folder>
-    <Folder Include="wwwroot\css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </Folder>
-    <Folder Include="wwwroot\js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </Folder>
-    <Folder Include="wwwroot\min">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </Folder>
+    <!-- Exclude these folders from output and publish -->
+    <Content Update="wwwroot/css/**/*" CopyToOutputDirectory="false" CopyToPublishDirectory="false" />
+    <Content Update="wwwroot/js/**/*" CopyToOutputDirectory="false" CopyToPublishDirectory="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Track these folders for the IDE -->
+    <Folder Include="wwwroot/assets" />
+    <Folder Include="wwwroot/css" />
+    <Folder Include="wwwroot/js" />
+    <Folder Include="wwwroot/min" />
   </ItemGroup>
 </Project>
