@@ -14,28 +14,19 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"/>
         <title>@(ViewData["Title"] ?? "Reports API")</title>
-        <link rel="icon" type="image/x-icon" href="~/assets/favicon.ico" sizes="32x32">
-        <environment include="Development">
-            <link rel="stylesheet"
-                  type="text/css"
-                  href="~/css/bootstrap-4.0.0.css"
-                  asp-append-version="true"/>
-            <link rel="stylesheet"
-                  type="text/css"
-                  href="~/css/site.css"
-                  asp-append-version="true"/>
-        </environment>
-        <environment include="Production">
-            <link rel="stylesheet"
-                  href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-                  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-                  crossorigin="anonymous"
-                  asp-append-version="true"/>
-            <link rel="stylesheet"
-                  type="text/css"
-                  href="~/min/site.min.css"
-                  asp-append-version="true"/>
-        </environment>
+        <link rel="icon"
+              type="image/x-icon"
+              href="~/assets/favicon.ico"
+              sizes="32x32">
+        <link rel="stylesheet"
+              href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+              integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+              crossorigin="anonymous"
+              asp-append-version="true"/>
+        <link rel="stylesheet"
+              href="~/min/site.min.css"
+              crossorigin="anonymous"
+              asp-append-version="true"/>
     </head>
     <body>
         <header>
@@ -47,41 +38,24 @@
         <footer>
             <hr/>
         </footer>
-        <environment include="Development">
-            <script src="~/js/jquery-3.3.1.slim.js"
-                    asp-append-version="true">
-            </script>
-            <script src="~/js/popper-1.12.9.js"
-                    asp-append-version="true">
-            </script>
-            <script src="~/js/bootstrap-4.0.0.js"
-                    asp-append-version="true">
-            </script>
-            <script src="~/js/site.js"
-                    asp-append-version="true">
-            </script>
-        </environment>
-        <environment include="Production">
-            @* ReSharper disable MarkupAttributeTypo *@
-            <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-                    integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
-                    crossorigin="anonymous"
-                    asp-append-version="true">
-            </script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-                    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-                    crossorigin="anonymous"
-                    asp-append-version="true">
-            </script>
-            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-                    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-                    crossorigin="anonymous"
-                    asp-append-version="true">
-            </script>
-            @* ReSharper enable MarkupAttributeTypo *@
-            <script src="~/min/site.min.js"
-                    asp-append-version="true">
-            </script>
-        </environment>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+                integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+                crossorigin="anonymous"
+                asp-append-version="true">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+                integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+                crossorigin="anonymous"
+                asp-append-version="true">
+        </script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+                integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+                crossorigin="anonymous"
+                asp-append-version="true">
+        </script>
+        <script src="~/min/site.min.js"
+                crossorigin="anonymous"
+                asp-append-version="true">
+        </script>
     </body>
 </html>
