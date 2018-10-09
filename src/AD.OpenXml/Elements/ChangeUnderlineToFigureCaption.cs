@@ -12,7 +12,7 @@ namespace AD.OpenXml.Elements
     [PublicAPI]
     public static class ChangeUnderlineToFigureCaptionExtensions
     {
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// Removes all &lt;u [val=...]/&gt; descendant elements from the &lt;rPr [...]/&gt; elements
@@ -24,7 +24,8 @@ namespace AD.OpenXml.Elements
         /// <returns>A reference to the existing <see cref="XElement"/>. This is returned for use with fluent syntax calls.</returns>
         /// <exception cref="System.ArgumentException"/>
         /// <exception cref="System.ArgumentNullException"/>
-        public static XElement ChangeUnderlineToFigureCaption(this XElement element)
+        [NotNull]
+        public static XElement ChangeUnderlineToFigureCaption([NotNull] this XElement element)
         {
             IEnumerable<XElement> paragraphs =
                 element.Descendants(W + "u")
@@ -35,7 +36,7 @@ namespace AD.OpenXml.Elements
                        .Select(x => x.Parent)
                        .Where(x => x?.Name == W + "p")
                        .Where(x => (x.Next()?.DescendantsAndSelf().Any(y => y.Name == W + "drawing") ?? false)
-                                   || (x.Next()?.Value.Contains('{') ?? false))
+                                || (x.Next()?.Value.Contains('{') ?? false))
                        .Distinct()
                        .ToArray();
 

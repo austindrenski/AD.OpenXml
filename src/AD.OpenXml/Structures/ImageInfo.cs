@@ -92,6 +92,7 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         public override string ToString() => $"(Id: {Id}, TargetUri: {TargetUri})";
 
         /// <inheritdoc />

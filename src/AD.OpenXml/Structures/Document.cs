@@ -395,12 +395,13 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         public override string ToString()
             => $"(Charts: {Charts.Count()}, Images: {Images.Count()}, Hyperlinks: {Hyperlinks.Count()})";
 
         [Pure]
         [NotNull]
-        private static XObject Update([NotNull] XObject xObject, [NotNull] Dictionary<string, PackageRelationship> resources)
+        static XObject Update([NotNull] XObject xObject, [NotNull] Dictionary<string, PackageRelationship> resources)
         {
             switch (xObject)
             {
@@ -429,7 +430,7 @@ namespace AD.OpenXml.Structures
 
         [Pure]
         [NotNull]
-        private static XObject Update([NotNull] XObject xObject, Sequence docPrSequence)
+        static XObject Update([NotNull] XObject xObject, Sequence docPrSequence)
         {
             switch (xObject)
             {
@@ -464,11 +465,11 @@ namespace AD.OpenXml.Structures
         /// </returns>
         [Pure]
         [NotNull]
-        private static Uri MakePartUri([NotNull] Uri targetUri) => new Uri($"/word/{targetUri}", UriKind.Relative);
+        static Uri MakePartUri([NotNull] Uri targetUri) => new Uri($"/word/{targetUri}", UriKind.Relative);
 
         [Pure]
         [NotNull]
-        private static XAttribute[] Combine([NotNull] IEnumerable<XAttribute> source, [NotNull] IEnumerable<XAttribute> others)
+        static XAttribute[] Combine([NotNull] IEnumerable<XAttribute> source, [NotNull] IEnumerable<XAttribute> others)
         {
             XAttribute[] attributes = source as XAttribute[] ?? source.ToArray();
 

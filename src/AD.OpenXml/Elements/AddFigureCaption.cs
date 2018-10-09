@@ -10,19 +10,19 @@ namespace AD.OpenXml.Elements
     [PublicAPI]
     public static class AddFigureCaptionExtensions
     {
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        private static readonly XNamespace Xml = XNamespace.Xml;
+        [NotNull] static readonly XNamespace Xml = XNamespace.Xml;
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="element"></param>
-        public static void AddFigureCaption(this XElement element)
+        public static void AddFigureCaption([NotNull] this XElement element)
         {
             string style = element.Value.Contains("[APPENDIX]") ? "\"Heading 9\"" : "1";
 
-            XElement runProperies =
+            XElement runProperties =
                 new XElement(W + "rPr",
                     new XElement(W + "rStyle",
                         new XAttribute(W + "val", "Strong")));
@@ -39,55 +39,55 @@ namespace AD.OpenXml.Elements
 
             XElement label0 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     new XElement(W + "t", preserve, "Figure "));
             XElement label1 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     fieldCharBegin);
             XElement label2 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     new XElement(W + "instrText", preserve, $" STYLEREF {style} \\s "));
             XElement label3 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     fieldCharSeparate);
             XElement label4 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     new XElement(W + "t", "0"));
             XElement label5 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     fieldCharEnd);
             XElement label6 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     new XElement(W + "t", "."));
             XElement label7 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     fieldCharBegin);
             XElement label8 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     new XElement(W + "instrText", preserve, $" SEQ Figure \\* ARABIC \\s {style} "));
             XElement label9 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     fieldCharSeparate);
             XElement label10 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     new XElement(W + "t", "0"));
             XElement label11 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     fieldCharEnd);
             XElement label12 =
                 new XElement(W + "r",
-                    runProperies,
+                    runProperties,
                     new XElement(W + "t", preserve, " "));
             element.AddFirst(
                 label0,

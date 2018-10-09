@@ -18,14 +18,16 @@ namespace CompilerAPI.Controllers
 {
     /// <inheritdoc />
     /// <summary>
-    /// Provides HTTP endpoints to submit and format Word documents.
+    /// Provides endpoints to format and normalize Word documents.
     /// </summary>
     [PublicAPI]
     [FormatFilter]
-    [ApiVersion("1.0")]
+    [Route("[controller]")]
+    [ApiVersion("2.0")]
+    [ApiVersion("1.0", Deprecated = true)]
     public class UploadController : Controller
     {
-        [NotNull] private const string MicrosoftWordDocument =
+        [NotNull] const string MicrosoftWordDocument =
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
         /// <summary>
@@ -34,9 +36,9 @@ namespace CompilerAPI.Controllers
         /// <returns>
         /// The index razor view.
         /// </returns>
-        [NotNull]
-        [HttpGet]
-        public IActionResult Index() => View();
+        [HttpGet("")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ViewResult Index() => View();
 
         /// <summary>
         /// Receives file uploads from the user.
@@ -51,10 +53,10 @@ namespace CompilerAPI.Controllers
         /// <returns>
         /// The combined and formatted document.
         /// </returns>
-        /// <exception cref="ArgumentNullException"/>
-        [Pure]
-        [NotNull]
-        [HttpPost]
+        /// <exception cref="ArgumentNullException"><paramref name="files"/></exception>
+        [HttpPost("")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult Index(
             [NotNull] [ItemNotNull] IEnumerable<IFormFile> files,
             [CanBeNull] string format,
@@ -88,7 +90,9 @@ namespace CompilerAPI.Controllers
             foreach (IFormFile file in uploadedFiles)
             {
                 if (file.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
+                {
                     packagesQueue.Enqueue(Package.Open(file.OpenReadStream()));
+                }
                 else if (file.FileName.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
                 {
                     MDocument mDocument = new MDocument();
@@ -126,7 +130,7 @@ namespace CompilerAPI.Controllers
             {
                 case "docx":
                 {
-                    return File(output.ToStream(), MicrosoftWordDocument, "result.docx");
+                    return File(output.ToStream(), MicrosoftWordDocument, $"{title ?? "result"}.docx");
                 }
                 case "html":
                 {
@@ -134,13 +138,13 @@ namespace CompilerAPI.Controllers
                     OpenXmlPackageVisitor ooxml = new OpenXmlPackageVisitor(output);
                     HtmlVisitor html = new HtmlVisitor(ooxml.Document.ChartReferences, ooxml.Document.ImageReferences);
                     XObject htmlResult = html.Visit(ooxml.Document.Content, ooxml.Footnotes.Content, title, stylesheetUrl, styles);
-                    return File(Encoding.UTF8.GetBytes(htmlResult.ToString()), "text/html", "result.html");
+                    return File(Encoding.UTF8.GetBytes(htmlResult.ToString()), "text/html", $"{title ?? "result"}.html");
                 }
                 case "xml":
                 {
                     OpenXmlPackageVisitor xml = new OpenXmlPackageVisitor(output);
                     XElement xmlResult = xml.Document.Content;
-                    return File(Encoding.UTF8.GetBytes(xmlResult.ToString()), "application/xml", "result.xml");
+                    return File(Encoding.UTF8.GetBytes(xmlResult.ToString()), "application/xml", $"{title ?? "result"}.xml");
                 }
                 default:
                 {
@@ -151,7 +155,7 @@ namespace CompilerAPI.Controllers
 
         [Pure]
         [NotNull]
-        private static Package Process(
+        static Package Process(
             [NotNull] [ItemNotNull] IEnumerable<Package> packages,
             [NotNull] string title,
             [NotNull] string publisher,

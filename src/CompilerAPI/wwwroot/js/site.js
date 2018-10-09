@@ -31,3 +31,9 @@ function fileUploadList() {
         names.append(`<li>${files[i].name}</li>`);
     }
 }
+
+function stylesheetRowCheck() {
+    document.getElementById('stylesheet-row').hidden =
+        !(document.getElementById('html').checked || document.getElementById('md').checked);
+
+}

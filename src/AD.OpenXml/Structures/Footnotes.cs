@@ -15,10 +15,10 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Footnotes
     {
-        [NotNull] private static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
-        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace R = XNamespaces.OpenXmlOfficeDocumentRelationships;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        [NotNull] private static readonly IEnumerable<XName> Revisions =
+        [NotNull] static readonly IEnumerable<XName> Revisions =
             new XName[]
             {
                 W + "ins",
@@ -49,7 +49,7 @@ namespace AD.OpenXml.Structures
         /// <summary>
         /// The package that initialized the <see cref="Footnotes"/>.
         /// </summary>
-        [NotNull] private readonly Package _package;
+        [NotNull] readonly Package _package;
 
         /// <summary>
         /// The XML file located at: /word/footnotes.xml.
@@ -170,6 +170,7 @@ namespace AD.OpenXml.Structures
         /// <returns>
         ///
         /// </returns>
+        [NotNull]
         public static Footnotes Concat([NotNull] Footnotes first, [NotNull] Footnotes second)
         {
             if (first is null)
@@ -304,6 +305,7 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         public override string ToString() => $"(Footnotes: {Content.Elements().Count()}, Hyperlinks: {Hyperlinks.Count()})";
 
         /// <summary>
@@ -315,11 +317,11 @@ namespace AD.OpenXml.Structures
         /// </returns>
         [Pure]
         [NotNull]
-        private static Uri MakePartUri([NotNull] Uri targetUri) => new Uri($"/word/{targetUri}", UriKind.Relative);
+        static Uri MakePartUri([NotNull] Uri targetUri) => new Uri($"/word/{targetUri}", UriKind.Relative);
 
         [Pure]
         [NotNull]
-        private static XAttribute[] Combine([NotNull] IEnumerable<XAttribute> source, [NotNull] IEnumerable<XAttribute> others)
+        static XAttribute[] Combine([NotNull] IEnumerable<XAttribute> source, [NotNull] IEnumerable<XAttribute> others)
         {
             XAttribute[] attributes = source as XAttribute[] ?? source.ToArray();
 
@@ -331,7 +333,7 @@ namespace AD.OpenXml.Structures
 
         [Pure]
         [NotNull]
-        private static XObject UpdateResources(XObject xObject, Dictionary<string, PackageRelationship> resources)
+        static XObject UpdateResources(XObject xObject, Dictionary<string, PackageRelationship> resources)
         {
             switch (xObject)
             {
@@ -358,7 +360,7 @@ namespace AD.OpenXml.Structures
 
         [Pure]
         [NotNull]
-        private static XObject UpdateFootnotes([NotNull] XObject xObject, MappingSequence footnoteSequence)
+        static XObject UpdateFootnotes([NotNull] XObject xObject, MappingSequence footnoteSequence)
         {
             switch (xObject)
             {
@@ -385,7 +387,7 @@ namespace AD.OpenXml.Structures
 
         [Pure]
         [NotNull]
-        private static XObject UpdateReferences([NotNull] XObject xObject, MappingSequence footnoteSequence)
+        static XObject UpdateReferences([NotNull] XObject xObject, MappingSequence footnoteSequence)
         {
             switch (xObject)
             {

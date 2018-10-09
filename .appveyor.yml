@@ -1,15 +1,13 @@
-image: Visual Studio 2017
+image:
+- Visual Studio 2017
+- Ubuntu
 
-version: 2.0.{build}
-
-branches:
-  only:
-    - master
+version: 2.1.0.{build}
 
 environment:
-  push: https://www.nuget.org/api/v2/package
-  nuget:
-    secure: lAOgXBlidUDKDMFlDJInIUO7K9vZc4FHLP715QyBp1gP9KFNQjntN70Jo6gi4+bA
+  global:
+    DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
 dotnet_csproj:
   patch: true
@@ -19,10 +17,22 @@ dotnet_csproj:
   assembly_version: '{version}'
 
 build_script:
-  - pwsh: dotnet build -c Release
+- pwsh: |
+    $ErrorActionPreference = "Stop";
+    dotnet build src/AD.OpenXML -c Release
+    dotnet pack src/AD.OpenXML -c Release
 
 test_script:
-  - pwsh: dotnet test test/AD.OpenXML.Tests -c Release
+- pwsh: |
+    $ErrorActionPreference = "Stop";
+    dotnet test test/AD.OpenXML.Tests -c Release
 
-deploy_script:
-  - pwsh: dotnet nuget push src/AD.OpenXml/bin/release/AD.OpenXml.${env:appveyor_build_version}.nupkg -s ${env:push} -k ${env:nuget}
+artifacts:
+- path: 'src\**\*.nupkg'
+
+deploy:
+- provider: NuGet
+  api_key:
+    secure: lAOgXBlidUDKDMFlDJInIUO7K9vZc4FHLP715QyBp1gP9KFNQjntN70Jo6gi4+bA
+  on:
+    CI_WINDOWS: true

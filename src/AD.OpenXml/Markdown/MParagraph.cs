@@ -32,7 +32,7 @@ namespace AD.OpenXml.Markdown
         /// <returns>
         /// The normalized segment.
         /// </returns>
-        private static ReadOnlySpan<char> Normalize(in ReadOnlySpan<char> span) => span.Trim();
+        static ReadOnlySpan<char> Normalize(in ReadOnlySpan<char> span) => span.Trim();
 
         /// <inheritdoc />
         [Pure]
@@ -53,7 +53,7 @@ namespace AD.OpenXml.Markdown
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(MParagraph other) => !(other is null) && Text.Equals(other.Text);
+        public bool Equals([CanBeNull] MParagraph other) => other != null && Text.Equals(other.Text);
 
         /// <inheritdoc />
         [Pure]

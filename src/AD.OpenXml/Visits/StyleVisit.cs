@@ -17,48 +17,48 @@ namespace AD.OpenXml.Visits
     [PublicAPI]
     public static class StyleVisit
     {
-        [NotNull] private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
-        [NotNull] private static readonly XElement DocDefaults;
-        [NotNull] private static readonly XElement Normal;
-        [NotNull] private static readonly XElement Appendix;
-        [NotNull] private static readonly XElement Bibliography;
-        [NotNull] private static readonly XElement Box;
-        [NotNull] private static readonly XElement BoxCaption;
-        [NotNull] private static readonly XElement BoxListBullet;
-        [NotNull] private static readonly XElement BoxSourceNote;
-        [NotNull] private static readonly XElement BoxTable;
-        [NotNull] private static readonly XElement BlueTableBasic;
-        [NotNull] private static readonly XElement CaptionFigure;
-        [NotNull] private static readonly XElement CaptionTable;
-        [NotNull] private static readonly XElement Emphasis;
-        [NotNull] private static readonly XElement ExecutiveSummary1StParagraph;
-        [NotNull] private static readonly XElement ExecutiveSummaryHighlights;
-        [NotNull] private static readonly XElement ExecutiveSummarySidebars;
-        [NotNull] private static readonly XElement FigureTableSourceNote;
-        [NotNull] private static readonly XElement FootnoteReference;
-        [NotNull] private static readonly XElement FootnoteText;
-        [NotNull] private static readonly XElement Heading1;
-        [NotNull] private static readonly XElement Heading2;
-        [NotNull] private static readonly XElement Heading3;
-        [NotNull] private static readonly XElement Heading4;
-        [NotNull] private static readonly XElement Heading5;
-        [NotNull] private static readonly XElement Heading6;
-        [NotNull] private static readonly XElement Heading7;
-        [NotNull] private static readonly XElement Heading8;
-        [NotNull] private static readonly XElement Hyperlink;
-        [NotNull] private static readonly XElement ListBullet;
-        [NotNull] private static readonly XElement PreHeading;
-        [NotNull] private static readonly XElement Strong;
-        [NotNull] private static readonly XElement StyleNotImplemented;
-        [NotNull] private static readonly XElement Subscript;
-        [NotNull] private static readonly XElement Superscript;
-        [NotNull] private static readonly XElement TableOfFigures;
-        [NotNull] private static readonly XElement TOC1;
-        [NotNull] private static readonly XElement TOC2;
-        [NotNull] private static readonly XElement TOC3;
-        [NotNull] private static readonly XElement TOC4;
-        [NotNull] private static readonly XElement TOCHeading;
+        [NotNull] static readonly XElement DocDefaults;
+        [NotNull] static readonly XElement Normal;
+        [NotNull] static readonly XElement Appendix;
+        [NotNull] static readonly XElement Bibliography;
+        [NotNull] static readonly XElement Box;
+        [NotNull] static readonly XElement BoxCaption;
+        [NotNull] static readonly XElement BoxListBullet;
+        [NotNull] static readonly XElement BoxSourceNote;
+        [NotNull] static readonly XElement BoxTable;
+        [NotNull] static readonly XElement BlueTableBasic;
+        [NotNull] static readonly XElement CaptionFigure;
+        [NotNull] static readonly XElement CaptionTable;
+        [NotNull] static readonly XElement Emphasis;
+        [NotNull] static readonly XElement ExecutiveSummary1StParagraph;
+        [NotNull] static readonly XElement ExecutiveSummaryHighlights;
+        [NotNull] static readonly XElement ExecutiveSummarySidebars;
+        [NotNull] static readonly XElement FigureTableSourceNote;
+        [NotNull] static readonly XElement FootnoteReference;
+        [NotNull] static readonly XElement FootnoteText;
+        [NotNull] static readonly XElement Heading1;
+        [NotNull] static readonly XElement Heading2;
+        [NotNull] static readonly XElement Heading3;
+        [NotNull] static readonly XElement Heading4;
+        [NotNull] static readonly XElement Heading5;
+        [NotNull] static readonly XElement Heading6;
+        [NotNull] static readonly XElement Heading7;
+        [NotNull] static readonly XElement Heading8;
+        [NotNull] static readonly XElement Hyperlink;
+        [NotNull] static readonly XElement ListBullet;
+        [NotNull] static readonly XElement PreHeading;
+        [NotNull] static readonly XElement Strong;
+        [NotNull] static readonly XElement StyleNotImplemented;
+        [NotNull] static readonly XElement Subscript;
+        [NotNull] static readonly XElement Superscript;
+        [NotNull] static readonly XElement TableOfFigures;
+        [NotNull] static readonly XElement TOC1;
+        [NotNull] static readonly XElement TOC2;
+        [NotNull] static readonly XElement TOC3;
+        [NotNull] static readonly XElement TOC4;
+        [NotNull] static readonly XElement TOCHeading;
 
         /// <summary>
         ///
@@ -272,6 +272,7 @@ namespace AD.OpenXml.Visits
         ///
         /// </summary>
         /// <param name="subject"></param>
+        [NotNull]
         public static OpenXmlPackageVisitor VisitStyles([NotNull] this OpenXmlPackageVisitor subject)
         {
             if (subject is null)
@@ -284,7 +285,7 @@ namespace AD.OpenXml.Visits
 
         [Pure]
         [NotNull]
-        private static XElement Execute([NotNull] XElement styles)
+        static XElement Execute([NotNull] XElement styles)
         {
             if (styles is null)
                 throw new ArgumentNullException(nameof(styles));

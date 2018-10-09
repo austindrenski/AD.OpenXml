@@ -14,7 +14,7 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public readonly struct ChartInfo : IEquatable<ChartInfo>
     {
-        [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
+        [NotNull] static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
         /// <summary>
         ///
@@ -91,6 +91,7 @@ namespace AD.OpenXml.Structures
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         public override string ToString() => $"(Id: {Id}, TargetUri: {TargetUri})";
 
         /// <inheritdoc />

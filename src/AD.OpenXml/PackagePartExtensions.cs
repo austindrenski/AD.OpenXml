@@ -14,7 +14,7 @@ namespace AD.OpenXml
     [PublicAPI]
     public static class WriteToPart
     {
-        [NotNull] private static readonly XmlWriterSettings XmlWriterSettings =
+        [NotNull] static readonly XmlWriterSettings XmlWriterSettings =
             new XmlWriterSettings
             {
                 Async = false,
@@ -61,6 +61,7 @@ namespace AD.OpenXml
         /// </returns>
         /// <exception cref="ArgumentNullException" />
         [Pure]
+        [NotNull]
         public static XElement ReadXml([NotNull] this PackagePart part)
         {
             if (part is null)

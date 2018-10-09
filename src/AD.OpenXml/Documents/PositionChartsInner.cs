@@ -14,7 +14,7 @@ namespace AD.OpenXml.Documents
     [PublicAPI]
     public static class PositionChartsInnerExtensions
     {
-        [NotNull] private static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
+        [NotNull] static readonly XNamespace C = XNamespaces.OpenXmlDrawingmlChart;
 
         /// <summary>
         ///
@@ -24,6 +24,7 @@ namespace AD.OpenXml.Documents
         ///
         /// </returns>
         /// <exception cref="ArgumentNullException" />
+        [NotNull]
         public static Package PositionChartsInner([NotNull] this Package package)
         {
             if (package is null)

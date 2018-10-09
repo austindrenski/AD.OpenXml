@@ -113,9 +113,7 @@ namespace AD.OpenXml
         #region Constructors
 
         /// <inheritdoc />
-        public ReportVisitor() : base(true)
-        {
-        }
+        public ReportVisitor() : base(true) {}
 
         #endregion
 
@@ -159,6 +157,7 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitHyperlink(XElement hyperlink)
             => new XElement(W + "hyperlink",
                 hyperlink.Attribute(R + "id"),
@@ -178,6 +177,7 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitParagraphProperties(XElement properties)
         {
             XNode[] nodes =
@@ -202,6 +202,7 @@ namespace AD.OpenXml
 
         /// <inheritdoc />
         [Pure]
+        [NotNull]
         protected override XObject VisitSectionProperties(XElement section)
             => new XElement(W + "sectPr",
                 section.Element(W + "cols"),

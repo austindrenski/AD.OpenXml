@@ -1,7 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
 namespace AD.OpenXml.Markdown
 {
     /// <summary>
@@ -17,6 +16,7 @@ namespace AD.OpenXml.Markdown
         /// <returns>
         /// An <see cref="MNode"/> representing the segment.
         /// </returns>
+        [NotNull]
         public MNode Visit(in ReadOnlySpan<char> span)
         {
             if (MHeading.Accept(span))

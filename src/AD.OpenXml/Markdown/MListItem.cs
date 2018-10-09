@@ -89,8 +89,8 @@ namespace AD.OpenXml.Markdown
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(MListItem other)
-            => !(other is null) && Marker == other.Marker && Level == other.Level && Item.Equals(other.Item);
+        public bool Equals([CanBeNull] MListItem other)
+            => other != null && Marker == other.Marker && Level == other.Level && Item.Equals(other.Item);
 
         /// <inheritdoc />
         [Pure]

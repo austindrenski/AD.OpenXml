@@ -7,12 +7,12 @@ using JetBrains.Annotations;
 namespace AD.OpenXml.Elements
 {
     /// <summary>
-    /// Extension methods to replace &lt;vertAling val="superscript" /&gt; elements with &lt;rStyle val="FootnoteReference" /&gt; elements.
+    /// Extension methods to replace &lt;vertAlign val="superscript" /&gt; elements with &lt;rStyle val="FootnoteReference" /&gt; elements.
     /// </summary>
     [PublicAPI]
     public static class ChangeSubscriptToSubscriptExtensions
     {
-        private static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
+        [NotNull] static readonly XNamespace W = XNamespaces.OpenXmlWordprocessingmlMain;
 
         /// <summary>
         /// Replaces &lt;vertAlign val="superscript" /&gt; descendant elements with &lt;rStyle val="FootnoteReference" /&gt; elements.
@@ -22,7 +22,8 @@ namespace AD.OpenXml.Elements
         /// <returns>A reference to the existing <see cref="XElement"/>. This is returned for use with fluent syntax calls.</returns>
         /// <exception cref="System.ArgumentException"/>
         /// <exception cref="System.ArgumentNullException"/>
-        public static XElement ChangeSubscriptToSubscript(this XElement element)
+        [NotNull]
+        public static XElement ChangeSubscriptToSubscript([NotNull] this XElement element)
         {
             IEnumerable<XElement> superscriptItems =
                 element.Descendants(W + "vertAlign")
@@ -33,6 +34,7 @@ namespace AD.OpenXml.Elements
                 item.AddAfterSelf(new XElement(W + "rStyle", new XAttribute(W + "val", "FootnoteReference")));
                 item.Remove();
             }
+
             return element;
         }
     }

@@ -1,24 +1,19 @@
 [
-    {
-        "inputFiles": [
-            "wwwroot/css/site.css"
-        ],
-        "minify": {
-            "enabled": true,
-            "renameLocals": true
-        },
-      "outputFileName": "wwwroot/min/site.min.css",
-      "sourceMap": false
+  {
+    "outputFileName": "wwwroot/min/site.min.css",
+    "inputFiles": [
+      "wwwroot/css/site.css"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/min/site.min.js",
+    "inputFiles": [
+      "wwwroot/js/site.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
     },
-    {
-        "inputFiles": [
-            "wwwroot/js/site.js"
-        ],
-        "minify": {
-            "enabled": true,
-            "renameLocals": true
-        },
-      "outputFileName": "wwwroot/min/site.min.js",
-      "sourceMap": false
-    }
+    "sourceMap": false
+  }
 ]

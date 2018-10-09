@@ -13,9 +13,9 @@ namespace AD.OpenXml.Structures
     [PublicAPI]
     public class Sequence : IEnumerable<string>, IEnumerator<string>
     {
-        [NotNull] private readonly object _lock = new object();
-        [NotNull] private readonly string _template;
-        private uint _counter;
+        [NotNull] readonly object _lock = new object();
+        [NotNull] readonly string _template;
+        uint _counter;
 
         /// <inheritdoc />
         [NotNull]
@@ -56,9 +56,11 @@ namespace AD.OpenXml.Structures
         }
 
         /// <inheritdoc />
+        [NotNull]
         IEnumerator<string> IEnumerable<string>.GetEnumerator() => this;
 
         /// <inheritdoc />
+        [NotNull]
         IEnumerator IEnumerable.GetEnumerator() => this;
 
         /// <inheritdoc />
@@ -68,6 +70,8 @@ namespace AD.OpenXml.Structures
         void IDisposable.Dispose() => _counter = default;
 
         /// <inheritdoc />
+        [Pure]
+        [NotNull]
         public override string ToString() => $"(Current: {Current})";
     }
 }
