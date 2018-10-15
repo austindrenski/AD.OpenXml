@@ -23,7 +23,7 @@
     <RepositoryUrl>https://github.com/austindrenski/AD.OpenXml</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AD.ApiExtensions" Version="2.0.6.31" />
+    <PackageReference Include="AD.ApiExtensions" Version="2.0.6.38" />
     <PackageReference Include="BuildBundlerMinifier" Version="2.8.391" />
     <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
@@ -42,7 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Track these folders for the IDE -->
-    <Folder Include="wwwroot/assets" />
     <Folder Include="wwwroot/css" />
     <Folder Include="wwwroot/js" />
     <Folder Include="wwwroot/min" />

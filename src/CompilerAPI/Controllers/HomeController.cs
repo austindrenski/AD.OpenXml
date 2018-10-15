@@ -44,5 +44,15 @@ namespace CompilerAPI.Controllers
         [HttpGet("[action]")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ViewResult Process() => View();
+
+        /// <summary>
+        /// The endpoint for the guidance on using the Reports API for report production.
+        /// </summary>
+        /// <returns>
+        /// An HTML page describing the Reports API production processes.
+        /// </returns>
+        [HttpGet("[action]")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ViewResult Production() => View();
     }
 }
