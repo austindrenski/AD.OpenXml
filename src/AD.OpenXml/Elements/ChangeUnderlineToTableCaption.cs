@@ -26,7 +26,26 @@ namespace AD.OpenXml.Elements
         /// <exception cref="System.ArgumentNullException"/>
         [NotNull]
         public static XElement ChangeUnderlineToTableCaption([NotNull] this XElement element)
-            => new XElement(element.Name, element.Attributes(), element.Nodes().Select(Triage));
+        {
+            XElement[] paragraphs =
+                element.Descendants(W + "u")
+                       .Select(x => x.Parent)
+                       .Where(x => x?.Name == W + "rPr")
+                       .Select(x => x.Parent)
+                       .Where(x => x?.Name == W + "r")
+                       .Select(x => x.Parent)
+                       .Where(x => x?.Name == W + "p")
+                       .Where(x => x.Next()?.Name == W + "tbl" || (x.Next()?.Value.Contains('{') ?? false))
+                       .Distinct()
+                       .ToArray();
+
+            foreach (XElement item in paragraphs)
+            {
+                item.ReplaceWith(item.AddTableCaption());
+            }
+
+            return element;
+        }
 
         [NotNull]
         static XNode Triage(XNode node)
