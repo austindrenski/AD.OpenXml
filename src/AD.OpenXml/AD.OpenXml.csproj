@@ -8,8 +8,6 @@
     <DocumentationFile>bin/Release/$(TargetFramework)/AD.OpenXml.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyVersion />
-    <FileVersion />
     <Version />
   </PropertyGroup>
   <PropertyGroup>

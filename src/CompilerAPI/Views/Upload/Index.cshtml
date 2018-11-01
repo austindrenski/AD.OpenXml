@@ -1,55 +1,71 @@
-@{
-    ViewData["Title"] = "Upload Reports";
-}
-<br/>
-<form asp-controller="Upload" asp-action="Index" method="post" enctype="multipart/form-data">
+<h1>Upload Reports</h1>
+<form asp-action="Index"
+      asp-controller="Upload"
+      enctype="multipart/form-data"
+      method="post">
     <div class="form-group">
-        <label for="publisher">Report title</label>
-        <input type="text"
+        <label aria-label="Title of the report being created"
+               for="title">
+            Report title
+        </label>
+        <input class="form-control"
+               id="title"
                name="title"
-               class="form-control"
-               aria-label="Title of the report being created"
-               placeholder="Report title">
+               placeholder="Report title"
+               type="text" />
     </div>
     <div class="form-row">
         <div class="form-group col-md">
-            <label for="publisher">Publisher name</label>
-            <input type="text"
+            <label aria-label="Name of the publishing agency"
+                   for="publisher">
+                Publisher name
+            </label>
+            <input class="form-control"
                    id="publisher"
                    name="publisher"
-                   class="form-control"
-                   aria-label="Name of the publishing agency"
-                   placeholder="Publisher name">
+                   placeholder="Publisher name"
+                   type="text" />
         </div>
         <div class="form-group col-md">
-            <label for="website">Publisher website</label>
-            <input type="text"
+            <label aria-label="URL to the publisher's website"
+                   for="website">
+                Publisher website
+            </label>
+            <input class="form-control"
                    id="website"
                    name="website"
-                   class="form-control"
-                   aria-label="URL to the publisher's website"
-                   placeholder="Publisher website">
+                   placeholder="Publisher website"
+                   type="text" />
         </div>
     </div>
-    <div class="form-row" id="stylesheet-row" hidden>
+    <div class="form-row"
+         hidden
+         id="stylesheet-row">
         <div class="form-group col-md">
-            <label for="stylesheetUrl">Stylesheet URL</label>
-            <input type="text"
+            <label aria-label="The URL to a CSS file to apply when HTML is selected"
+                   for="stylesheetUrl">
+                Stylesheet URL
+            </label>
+            <input class="form-control"
                    id="stylesheetUrl"
                    name="stylesheetUrl"
-                   class="form-control"
-                   aria-label="The URL to a CSS file to apply when HTML is selected."
-                   placeholder="Stylesheet URL">
+                   placeholder="Stylesheet URL"
+                   type="text" />
         </div>
         <div class="form-group col-md">
-            <label for="stylesheet">Stylesheet</label>
-            <div class="custom-file">
-                <input id="stylesheet"
-                       name="stylesheet"
-                       type="file"
+            <label aria-label="The stylesheet to apply when HTML is selected"
+                   for="stylesheet-upload-group">
+                Stylesheet
+            </label>
+            <div class="custom-file"
+                 id="stylesheet-upload-group">
+                <input accept=".css"
                        class="custom-file-input"
-                       accept=".css">
-                <label class="custom-file-label"
+                       id="stylesheet"
+                       name="stylesheet"
+                       type="file" />
+                <label aria-label="Inner text of the stylesheet input"
+                       class="custom-file-label"
                        for="stylesheet"
                        placeholder="Choose stylesheet (optional)">
                     Choose stylesheet (optional)
@@ -58,16 +74,21 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="files">Documents</label>
-        <div class="custom-file">
-            <input id="files"
-                   name="files"
-                   type="file"
+        <label aria-label="File input for attaching files to upload"
+               for="files-upload-group">
+            Documents
+        </label>
+        <div class="custom-file"
+             id="files-upload-group">
+            <input accept=".docx,.md"
                    class="custom-file-input"
-                   accept=".docx,.md"
+                   id="files"
                    multiple
-                   required>
-            <label class="custom-file-label"
+                   name="files"
+                   required
+                   type="file" />
+            <label aria-label="Inner text of the file input"
+                   class="custom-file-label"
                    for="files"
                    placeholder="Choose files to upload">
                 Choose files to upload
@@ -75,42 +96,56 @@
         </div>
     </div>
     <div class="form-group">
-        <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-outline-secondary active">
-                <input type="radio"
+        <div class="btn-group btn-group-toggle"
+             data-toggle="buttons"
+             role="group">
+            <label aria-label="Produce Word document result"
+                   class="btn btn-outline-secondary active"
+                   title="Word (.docx)">
+                <input checked
                        id="docx"
                        name="format"
-                       value="docx"
                        onchange="stylesheetRowCheck()"
-                       checked>
-                DOCX
+                       type="radio"
+                       value="docx" />
+                <i class="fas fa-file-word"></i>
             </label>
-            <label class="btn btn-outline-secondary">
-                <input type="radio"
-                       id="xml"
+            <label aria-label="Produce XML result"
+                   class="btn btn-outline-secondary"
+                   title="XML (.xml)">
+                <input id="xml"
                        name="format"
                        onchange="stylesheetRowCheck()"
-                       value="xml">
-                XML
+                       type="radio"
+                       value="xml" />
+                <i class="fas fa-file-code"></i>
             </label>
-            <label class="btn btn-outline-secondary">
-                <input type="radio"
-                       id="html"
+            <label aria-label="Produce HTML result"
+                   class="btn btn-outline-secondary"
+                   title="HTML (.html)">
+                <input id="html"
                        name="format"
                        onchange="stylesheetRowCheck()"
-                       value="html">
-                HTML
+                       type="radio"
+                       value="html" />
+                <i class="fab fa-html5"></i>
             </label>
-            <label class="btn btn-outline-secondary">
-                <input type="radio"
-                       id="md"
+            <label aria-label="Produce Markdown result"
+                   class="btn btn-outline-secondary"
+                   title="Markdown (.md)">
+                <input id="md"
                        name="format"
                        onchange="stylesheetRowCheck()"
-                       value="md">
-                Markdown
+                       type="radio"
+                       value="md" />
+                <i class="fab fa-markdown"></i>
             </label>
         </div>
-        <button class="btn btn-outline-primary float-right" type="submit">Upload</button>
+        <button aria-label="Submit the form and attached documents"
+                class="btn btn-outline-primary float-right"
+                type="submit">
+            Upload
+        </button>
     </div>
 </form>
 

@@ -19,13 +19,13 @@ dotnet_csproj:
 build_script:
 - pwsh: |
     $ErrorActionPreference = "Stop";
-    dotnet build src/AD.OpenXML -c Release
-    dotnet pack src/AD.OpenXML -c Release
+    dotnet build src/AD.OpenXml -c Release
+    dotnet pack src/AD.OpenXml -c Release
 
 test_script:
 - pwsh: |
     $ErrorActionPreference = "Stop";
-    dotnet test test/AD.OpenXML.Tests -c Release
+    dotnet test test/AD.OpenXml.Tests -c Release
 
 artifacts:
 - path: 'src\**\*.nupkg'
