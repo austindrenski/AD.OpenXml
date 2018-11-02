@@ -1,16 +1,49 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
-pool:
-  vmImage: 'Ubuntu 16.04'
-
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+name: 2.1.0-ci.$(Date:yyyyMMdd).$(Rev:r) # equal to $(Build.BuildNumber)
+variables:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+jobs:
+- job: Linux
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'Test'
+    inputs:
+      command: 'test'
+      configuration: 'Release'
+      projects: 'test/**/*.csproj'
+      publishTestResults: true
+- job: Windows
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'Test'
+    inputs:
+      command: 'test'
+      configuration: 'Release'
+      projects: 'test/**/*.csproj'
+      publishTestResults: true
+  - task: DotNetCoreCLI@2
+    displayName: 'Package'
+    inputs:
+      command: 'pack'
+      configuration: 'Release'
+      buildProperties: 'Version=$(Build.BuildNumber)'
+      packagesToPack: 'src/AD.OpenXml/AD.OpenXml.csproj'
+      packDirectory: '$(System.DefaultWorkingDirectory)'
+      verbosityPack: 'normal'
+  # BUG: https://github.com/Microsoft/azure-pipelines-tasks/issues/7160
+  #  - task: DotNetCoreCLI@2
+  - task: NuGetToolInstaller@0
+    inputs:
+      versionSpec: '4.3.0'
+  - task: NuGetCommand@2
+    displayName: 'Publish to MyGet (stable)'
+    inputs:
+      command: 'push'
+      condition: succeeded()
+      nuGetFeedType: 'external'
+      packagesToPush: '**/*.nupkg'
+      publishFeedCredentials: 'myget-stable'

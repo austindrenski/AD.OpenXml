@@ -11,7 +11,7 @@ trim_trailing_whitespace = true
 [{*.rng,*.wadcfgx,*.jhm,*.wsdl,*.xslt,*.myapp,*.csdef,*.fxml,*.ant,*.webref,*.xsl,*.xsd,*.dotsettings,*.disco,*.svcmap,*.jrxml,*.jnlp,*.xml,*.cscfg,*.xul,*.tld}]
 indent_size = 2
 
-[{.babelrc,.stylelintrc,.eslintrc,jest.config,*.uplugin,*.jsb3,*.jsb2,*.bowerrc,*.json}]
+[{.babelrc,.stylelintrc,.eslintrc,*.config,*.uplugin,*.jsb3,*.jsb2,*.bowerrc,*.json,*.yml}]
 indent_size = 2
 
 [*.props]

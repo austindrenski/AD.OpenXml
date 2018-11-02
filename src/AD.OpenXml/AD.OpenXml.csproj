@@ -8,14 +8,10 @@
     <DocumentationFile>bin/Release/$(TargetFramework)/AD.OpenXml.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <Version />
-  </PropertyGroup>
-  <PropertyGroup>
     <Authors>Austin Drenski</Authors>
     <Company>Austin Drenski</Company>
     <Copyright>Copyright (c) 2017 Austin Drenski</Copyright>
     <Description>C# library for OpenXML manipulation.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseUrl>https://github.com/austindrenski/AD.OpenXml/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/austindrenski/AD.OpenXml</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
