@@ -48,17 +48,25 @@ jobs:
       versionSpec: '4.3.0'
   - task: NuGetCommand@2
     displayName: 'Publish to MyGet (unstable)'
+    condition: succeeded()
     inputs:
       command: 'push'
-      condition: succeeded()
       nuGetFeedType: 'external'
       packagesToPush: '**/*.nupkg'
       publishFeedCredentials: 'myget-unstable'
   - task: NuGetCommand@2
     displayName: 'Publish to MyGet (stable)'
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'dev'))
     inputs:
       command: 'push'
-      condition: and(succeeded(), eq($(Build.SourceBranchName), 'dev'))
       nuGetFeedType: 'external'
       packagesToPush: '**/*.nupkg'
       publishFeedCredentials: 'myget-stable'
+  - task: NuGetCommand@2
+    displayName: 'Publish to NuGet'
+    condition: and(succeeded(), or(startsWith(variables['Build.SourceBranchName'], 'release/'), startsWith(variables['Build.SourceBranchName'], 'hotfix/')))
+    inputs:
+      command: 'push'
+      nuGetFeedType: 'external'
+      packagesToPush: '**/*.nupkg'
+      publishFeedCredentials: 'nuget'
