@@ -47,10 +47,18 @@ jobs:
     inputs:
       versionSpec: '4.3.0'
   - task: NuGetCommand@2
-    displayName: 'Publish to MyGet (stable)'
+    displayName: 'Publish to MyGet (unstable)'
     inputs:
       command: 'push'
       condition: succeeded()
+      nuGetFeedType: 'external'
+      packagesToPush: '**/*.nupkg'
+      publishFeedCredentials: 'myget-unstable'
+  - task: NuGetCommand@2
+    displayName: 'Publish to MyGet (stable)'
+    inputs:
+      command: 'push'
+      condition: and(succeeded(), eq($(Build.SourceBranchName), 'dev'))
       nuGetFeedType: 'external'
       packagesToPush: '**/*.nupkg'
       publishFeedCredentials: 'myget-stable'
