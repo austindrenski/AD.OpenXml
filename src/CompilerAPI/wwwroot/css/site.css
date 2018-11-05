@@ -1,3 +1,21 @@
 table caption {
     caption-side: top
 }
+
+div.nav-pills a.nav-link.active {
+    background-color: #6c757d;
+}
+
+a.nav-link {
+    color: black;
+}
+
+div.info-sidebar {
+    font-size: .875rem;
+}
+
+@media (min-width: 768px) {
+    div.info-sidebar {
+        border-left: 1px solid rgba(0, 0, 0, .1);
+    }
+}
