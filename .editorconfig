@@ -13,6 +13,7 @@ indent_size = 2
 
 [{.babelrc,.stylelintrc,.eslintrc,*.config,*.uplugin,*.jsb3,*.jsb2,*.bowerrc,*.json,*.yml}]
 indent_size = 2
+max_line_length = 150
 
 [*.props]
 indent_size = 2
