@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace CompilerAPI
 {
@@ -113,7 +114,7 @@ namespace CompilerAPI
                                 x.FormatterMappings.SetMediaTypeMappingForFormat("html", "text/html");
                                 x.RespectBrowserAcceptHeader = true;
                             })
-                       .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                       .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                        .AddJsonOptions(
                             x =>
                             {

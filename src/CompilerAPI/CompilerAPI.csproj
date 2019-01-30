@@ -3,7 +3,7 @@
     <LangVersion>latest</LangVersion>
     <OutputType>exe</OutputType>
     <RuntimeIdentifiers>win81-x64;win10-x64;ubuntu-x64;fedora-x64;rhel-x64;</RuntimeIdentifiers>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <TrimUnusedDependencies>true</TrimUnusedDependencies>
     <!-- TODO: Required until libs precompile their embedded views -->
@@ -25,14 +25,14 @@
     <RepositoryUrl>https://github.com/austindrenski/AD.OpenXml</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AD.ApiExtensions" Version="2.0.6.40" />
+    <PackageReference Include="AD.ApiExtensions" Version="2.2.2" />
     <PackageReference Include="BuildBundlerMinifier" Version="2.8.391" />
-    <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
+    <PackageReference Include="JetBrains.Annotations" Version="2018.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="3.0.0-beta1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="3.0.0-beta1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="3.0.0" />
     <PackageReference Include="Microsoft.Packaging.Tools.Trimming" Version="1.1.0-preview1-26619-01" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="3.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../AD.OpenXml/AD.OpenXml.csproj" />
