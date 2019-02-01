@@ -11,6 +11,7 @@ namespace CompilerAPI.Controllers
     [PublicAPI]
     [FormatFilter]
     [Route("")]
+    [ApiController]
     [ApiVersion("2.0")]
     [ApiVersion("1.0", Deprecated = true)]
     public class HomeController : Controller

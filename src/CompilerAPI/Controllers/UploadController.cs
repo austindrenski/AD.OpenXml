@@ -23,6 +23,7 @@ namespace CompilerAPI.Controllers
     [PublicAPI]
     [FormatFilter]
     [Route("[controller]")]
+    [ApiController]
     [ApiVersion("2.0")]
     [ApiVersion("1.0", Deprecated = true)]
     public class UploadController : Controller
