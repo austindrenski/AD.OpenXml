@@ -1,9 +1,13 @@
 ﻿bin/
 obj/
+packages/
+client/
 .idea/
 .vscode/
 wwwroot/
-node_modules/
-*.user
-*.Dotsettings
-package-lock.json
+!src/CompilerAPI/wwwroot/css/site.css
+!src/CompilerAPI/wwwroot/js/site.js
+!src/CompilerAPI/wwwroot/docs/swagger-ui/swagger.css
+*.DotSettings.user
+*.pdf
+*.html

@@ -1,23 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <DefineConstants>JETBRAINS_ANNOTATIONS</DefineConstants>
     <DocumentationFile>bin/Release/$(TargetFramework)/AD.OpenXml.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyVersion />
-    <FileVersion />
-    <Version />
-  </PropertyGroup>
-  <PropertyGroup>
     <Authors>Austin Drenski</Authors>
     <Company>Austin Drenski</Company>
     <Copyright>Copyright (c) 2017 Austin Drenski</Copyright>
     <Description>C# library for OpenXML manipulation.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseUrl>https://github.com/austindrenski/AD.OpenXml/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/austindrenski/AD.OpenXml</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
@@ -27,7 +21,7 @@
   <ItemGroup>
     <PackageReference Include="AD.IO" Version="2.0.0.2" PrivateAssets="None" />
     <PackageReference Include="AD.Xml" Version="2.0.0.21" PrivateAssets="None" />
-    <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" PrivateAssets="All" />
+    <PackageReference Include="JetBrains.Annotations" Version="2018.3.0" PrivateAssets="All" />
   </ItemGroup>
   <PropertyGroup>
     <EnableDefaultNoneItems>false</EnableDefaultNoneItems>

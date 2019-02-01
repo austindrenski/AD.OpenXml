@@ -1,0 +1,25 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = false
+trim_trailing_whitespace = true
+
+[{*.rng,*.wadcfgx,*.jhm,*.wsdl,*.xslt,*.myapp,*.csdef,*.fxml,*.ant,*.webref,*.xsl,*.xsd,*.dotsettings,*.disco,*.svcmap,*.jrxml,*.jnlp,*.xml,*.cscfg,*.xul,*.tld}]
+indent_size = 2
+
+[{.babelrc,.stylelintrc,.eslintrc,*.config,*.uplugin,*.jsb3,*.jsb2,*.bowerrc,*.json,*.yml}]
+indent_size = 2
+max_line_length = 150
+
+[*.props]
+indent_size = 2
+
+[{*.csproj,*.androidproj,*.ccproj}]
+indent_size = 2
+
+[{*.sql,*.ddl}]
+indent_size=2

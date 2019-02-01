@@ -40,6 +40,7 @@ namespace AD.OpenXml
         /// <summary>
         /// Represents the 'mc:' prefix seen in the markup for compatibility blocks.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         [NotNull] protected static readonly XNamespace MC = "http://schemas.openxmlformats.org/markup-compatibility/2006";
 
         // TODO: move to AD.Xml

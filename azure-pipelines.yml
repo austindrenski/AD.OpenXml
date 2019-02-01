@@ -1,0 +1,72 @@
+name: 2.1.1-ci.$(Date:yyyyMMdd).$(Rev:r) # equal to $(Build.BuildNumber)
+trigger:
+  branches:
+    include:
+    - dev
+    - master
+    - hotfix/*
+    - release/*
+variables:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+jobs:
+- job: Linux
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'Test'
+    inputs:
+      command: 'test'
+      configuration: 'Release'
+      projects: 'test/**/*.csproj'
+      publishTestResults: true
+- job: Windows
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'Test'
+    inputs:
+      command: 'test'
+      configuration: 'Release'
+      projects: 'test/**/*.csproj'
+      publishTestResults: true
+  - task: DotNetCoreCLI@2
+    displayName: 'Package'
+    inputs:
+      command: 'pack'
+      configuration: 'Release'
+      buildProperties: 'Version=$(Build.BuildNumber)'
+      packagesToPack: 'src/AD.OpenXml/AD.OpenXml.csproj'
+      packDirectory: '$(System.DefaultWorkingDirectory)'
+      verbosityPack: 'normal'
+  # BUG: https://github.com/Microsoft/azure-pipelines-tasks/issues/7160
+  #  - task: DotNetCoreCLI@2
+  - task: NuGetToolInstaller@0
+    inputs:
+      versionSpec: '4.3.0'
+  - task: NuGetCommand@2
+    displayName: 'Publish to MyGet (unstable)'
+    condition: succeeded()
+    inputs:
+      command: 'push'
+      nuGetFeedType: 'external'
+      packagesToPush: '**/*.nupkg'
+      publishFeedCredentials: 'myget-unstable'
+  - task: NuGetCommand@2
+    displayName: 'Publish to MyGet (stable)'
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'dev'))
+    inputs:
+      command: 'push'
+      nuGetFeedType: 'external'
+      packagesToPush: '**/*.nupkg'
+      publishFeedCredentials: 'myget-stable'
+  - task: NuGetCommand@2
+    displayName: 'Publish to NuGet'
+    condition: and(succeeded(), or(startsWith(variables['Build.SourceBranchName'], 'release/'), startsWith(variables['Build.SourceBranchName'], 'hotfix/')))
+    inputs:
+      command: 'push'
+      nuGetFeedType: 'external'
+      packagesToPush: '**/*.nupkg'
+      publishFeedCredentials: 'nuget'

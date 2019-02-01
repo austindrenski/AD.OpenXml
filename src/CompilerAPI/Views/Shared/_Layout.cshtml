@@ -1,61 +1,78 @@
-﻿@{
-    Context.Response.Headers.Remove("referrer-policy");
-    Context.Response.Headers.Remove("x-content-type-options");
-    Context.Response.Headers.Remove("x-frame-options");
-    Context.Response.Headers.Remove("x-xss-protection");
-    Context.Response.Headers.Add("referrer-policy", "no-referrer");
-    Context.Response.Headers.Add("x-content-type-options", "nosniff");
-    Context.Response.Headers.Add("x-frame-options", "deny");
-    Context.Response.Headers.Add("x-xss-protection", "1; mode=block");
-}
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
     <head>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"/>
-        <title>@(ViewData["Title"] ?? "Reports API")</title>
-        <link rel="icon"
-              type="image/x-icon"
-              href="~/assets/favicon.ico"
-              sizes="32x32">
-        <link rel="stylesheet"
+        <meta charset="utf-8" />
+        <meta content="width=device-width,minimum-scale=1,initial-scale=1"
+              name="viewport" />
+        <meta content="Reports API provides services for document normalization"
+              name="description">
+        <title>Reports API</title>
+        <link href="~/assets/favicon.ico"
+              rel="icon"
+              sizes="32x32"
+              type="image/x-icon">
+        <link asp-append-version="true"
+              crossorigin="anonymous"
               href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
               integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+              rel="stylesheet" />
+        <link asp-append-version="true"
               crossorigin="anonymous"
-              asp-append-version="true"/>
-        <link rel="stylesheet"
               href="~/min/site.min.css"
-              crossorigin="anonymous"
-              asp-append-version="true"/>
+              rel="stylesheet" />
+        <script asp-append-version="true"
+                crossorigin="anonymous"
+                defer
+                integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+                src="https://code.jquery.com/jquery-3.3.1.slim.min.js">
+        </script>
+        <script asp-append-version="true"
+                crossorigin="anonymous"
+                defer
+                integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+                src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js">
+        </script>
+        <script asp-append-version="true"
+                crossorigin="anonymous"
+                defer
+                integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+                src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js">
+        </script>
+        <script asp-append-version="true"
+                crossorigin="anonymous"
+                defer
+                integrity="sha384-i1RNpxOOEnRm63Ii3TuV0aM8bJ+6Pv6XHpRSJbN7QlIzZIsl7m36R0GhOTTGN3F9"
+                src="https://use.fontawesome.com/releases/v5.4.2/js/brands.js">
+        </script>
+        <script asp-append-version="true"
+                crossorigin="anonymous"
+                defer
+                integrity="sha384-OQNCj138epg9A13jaL9L/d5vMlK2jyPL4aOgi37KYt07aZARbv/eFGp/wnrCxkW5"
+                src="https://use.fontawesome.com/releases/v5.4.2/js/solid.js">
+        </script>
+        <script asp-append-version="true"
+                crossorigin="anonymous"
+                defer
+                integrity="sha384-n1qPouQQJ9VNZnZeNZWSDiclpIOJwZBS2bkD6rEX+DTmMXTKXBVCZw2cGbU/I17z"
+                src="https://use.fontawesome.com/releases/v5.4.2/js/fontawesome.js">
+        </script>
+        <script asp-append-version="true"
+                crossorigin="anonymous"
+                defer
+                src="~/min/site.min.js">
+        </script>
     </head>
     <body>
         <header>
-            @await Html.PartialAsync("NavigationPartial")
+            <partial name="_Navigation" />
+            <br />
         </header>
-        <div id="container" class="container">
+        <div class="container"
+             id="body">
             @RenderBody()
         </div>
         <footer>
-            <hr/>
+            <hr />
         </footer>
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-                integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
-                crossorigin="anonymous"
-                asp-append-version="true">
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-                integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-                crossorigin="anonymous"
-                asp-append-version="true">
-        </script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-                integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-                crossorigin="anonymous"
-                asp-append-version="true">
-        </script>
-        <script src="~/min/site.min.js"
-                crossorigin="anonymous"
-                asp-append-version="true">
-        </script>
     </body>
 </html>
